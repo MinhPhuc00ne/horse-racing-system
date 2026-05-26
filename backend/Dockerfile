@@ -1,5 +1,5 @@
 # --- Build Stage ---
-FROM maven:3.8.8-eclipse-temurin-17 AS builder
+FROM maven:3.9.16-eclipse-temurin-17 AS builder
 WORKDIR /app
 COPY pom.xml .
 # Download dependencies (cached layer)
