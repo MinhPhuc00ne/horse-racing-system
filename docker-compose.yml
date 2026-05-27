@@ -1,26 +1,29 @@
 services:
   db:
-    image: mysql:9.7.0
+    image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: horse-racing-db
     restart: always
     environment:
-      MYSQL_DATABASE: horseracing
-      MYSQL_ROOT_PASSWORD: root
+      SA_PASSWORD: "123456"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
     ports:
-      - "3306:3306"
+      - "1433:1433"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - mssql-data:/var/opt/mssql
     healthcheck:
       test:
         [
           "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
+          "/opt/mssql-tools/bin/sqlcmd",
+          "-S",
           "localhost",
-          "-u",
-          "root",
-          "-p$$MYSQL_ROOT_PASSWORD",
+          "-U",
+          "sa",
+          "-P",
+          "123456",
+          "-Q",
+          "SELECT 1",
         ]
       interval: 10s
       timeout: 5s
@@ -34,10 +37,10 @@ services:
       - "8080:8080"
     environment:
       DB_HOST: db
-      DB_PORT: 3306
+      DB_PORT: 1433
       DB_NAME: horseracing
-      DB_USER: root
-      DB_PASSWORD: root
+      DB_USER: sa
+      DB_PASSWORD: 123456
     depends_on:
       db:
         condition: service_healthy
@@ -55,4 +58,4 @@ services:
       - backend
 
 volumes:
-  mysql-data:
+  mssql-data:
