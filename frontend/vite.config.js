@@ -7,6 +7,6 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    open: true
+    open: process.env.DOCKER_ENV === 'true' ? false : true
   }
 })
