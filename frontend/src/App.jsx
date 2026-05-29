@@ -2,7 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet} from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext';
 import AuthPage from './pages/AuthPage/AuthPage';
 import Home from './pages/Home/Home'; 
-import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
+import AdminDashboard from './pages/Admin/AdminDashboard';
+import HorseOwnerDashboard from './pages/Horse-Owner/HorseOwnerDashboard';
+import JockeyDashboard from './pages/Jockey/JockeyDashboard';
 import Header from './components/Header/Header'; 
 import Footer from './components/Footer/Footer';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -45,6 +47,22 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/horseowner/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["HORSE-OWNER"]}>
+                <HorseOwnerDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/jockey/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["JOCKEY"]}>
+                <JockeyDashboard />
               </ProtectedRoute>
             }
           />
