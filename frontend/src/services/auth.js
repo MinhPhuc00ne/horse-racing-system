@@ -1,99 +1,68 @@
+import axiosClient from '../api/axiosClient';
+
 /**
- * Mock Authentication Service
+ * Authentication Service connecting to Spring Boot Backend
  */
 
-const MOCK_USERS = [
-  {
-    identifier: 'admin@gmail.com',
-    password: '123456',
-    user: {
-      name: 'Admin Horse Racing',
-      email: 'admin@gmail.com',
-      phone: '0987654321',
-      walletBalance: '$15,000.00',
-      role: 'ADMIN',
-    }
-  },
-  {
-    identifier: '0987654321',
-    password: '123456',
-    user: {
-      name: 'Racer Pro',
-      email: 'racer@gmail.com',
-      phone: '0987654321',
-      walletBalance: '$2,500.00',
-      role: 'SPECTATOR',
-    }
+export async function loginAPI(email, password) {
+  try {
+    const response = await axiosClient.post('/auth/login', {
+      email,
+      password,
+    });
+    return response.data; // { accessToken, refreshToken, user: { ... } }
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Invalid email or password. Please try again.';
+    throw new Error(errMsg);
   }
-];
-
-export function loginAPI(identifier, password) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const trimmedIdentifier = identifier ? identifier.trim() : '';
-      
-      const matchedRecord = MOCK_USERS.find(
-        (u) => u.identifier.toLowerCase() === trimmedIdentifier.toLowerCase() && u.password === password
-      );
-
-      if (matchedRecord) {
-        resolve(matchedRecord.user);
-      } else {
-        reject(new Error('Invalid phone, email or password. Please try again.'));
-      }
-    }, 1500); // 1.5s delay
-  });
 }
 
-export function loginWithGoogleAPI() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        name: 'Google Racer User',
-        email: 'googleuser@gmail.com',
-        phone: 'N/A',
-        walletBalance: '$9,999.00',
-        role: 'SPECTATOR',
-      });
-    }, 1200); // 1.2s delay
-  });
+export async function signupAPI({ username, fullName, email, password, role = 'SPECTATOR' }) {
+  try {
+    const response = await axiosClient.post('/auth/register', {
+      username,
+      fullName,
+      email,
+      password,
+      role,
+    });
+    return response.data; // { accessToken, refreshToken, user: { ... } }
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Registration failed. Please check your details.';
+    throw new Error(errMsg);
+  }
 }
 
-export function signupAPI(name, email, password) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (!name || !email || !password) {
-        reject(new Error('Please fill in all fields.'));
-        return;
-      }
-      
-      const trimmedEmail = email.trim().toLowerCase();
-      const userExists = MOCK_USERS.some(
-        (u) => u.identifier.toLowerCase() === trimmedEmail
-      );
-      
-      if (userExists) {
-        reject(new Error('An account with this email already exists.'));
-        return;
-      }
-      
-      const newUser = {
-        name,
-        email: trimmedEmail,
-        phone: 'N/A',
-        walletBalance: '$0.00',
-        role: 'SPECTATOR',
-      };
-      
-      // Save new user temporarily in MOCK_USERS for active session login
-      MOCK_USERS.push({
-        identifier: trimmedEmail,
-        password,
-        user: newUser
-      });
-
-      resolve(newUser);
-    }, 1500);
-  });
+export async function logoutAPI(refreshToken) {
+  try {
+    const response = await axiosClient.post('/auth/logout', {
+      refreshToken,
+    });
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Logout failed.';
+    throw new Error(errMsg);
+  }
 }
 
+export async function getProfileAPI() {
+  try {
+    const response = await axiosClient.get('/auth/me');
+    return response.data; // UserResponse
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Failed to fetch user profile.';
+    throw new Error(errMsg);
+  }
+}
+
+export async function googleLoginAPI(credential) {
+  try {
+    const response = await axiosClient.post('/auth/google', {
+      credential,
+    });
+    return response.data; // { accessToken, refreshToken, user: { ... } }
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Google Login failed.';
+    throw new Error(errMsg);
+  }
+}

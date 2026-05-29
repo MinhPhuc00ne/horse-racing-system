@@ -24,7 +24,7 @@ export default function LoginForm() {
       <form onSubmit={handleSubmit}>
         <Input
           type="text"
-          placeholder="Please enter your Phone or Email"
+          placeholder="Please enter your Email"
           value={identifier}
           onChange={handleIdentifierChange}
           disabled={loading}
@@ -36,9 +36,7 @@ export default function LoginForm() {
           }
         />
 
-        <div className="form-row-forgot">
-          <a href="#" className="forgot-link">Forgot?</a>
-        </div>
+
         <Input
           type="password"
           placeholder="Please enter your Password"

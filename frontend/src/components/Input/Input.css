@@ -60,3 +60,31 @@
 .input-field.has-icon {
   padding-left: 2.5rem;
 }
+
+.input-field.has-suffix {
+  padding-right: 2.5rem;
+}
+
+.input-suffix-btn {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--color-text-placeholder);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+  transition: color 0.2s ease;
+}
+
+.input-suffix-btn:hover {
+  color: var(--color-text-main);
+}
+
+.input-suffix-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
