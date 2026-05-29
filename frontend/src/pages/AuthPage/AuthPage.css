@@ -118,6 +118,13 @@
   margin-left: 1.25rem;
 }
 
+.google-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
 .google-btn {
   width: 100%;
   background-color: var(--color-bg-light);

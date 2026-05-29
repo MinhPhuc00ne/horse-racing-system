@@ -44,11 +44,67 @@ public class UpgradeRequestService {
             throw new RuntimeException("You already have a pending upgrade request");
         }
 
+        // General validation
+        if (requestDto.getFullName() == null || requestDto.getFullName().trim().isEmpty()) {
+            throw new RuntimeException("Full name is required");
+        }
+        if (requestDto.getDateOfBirth() == null) {
+            throw new RuntimeException("Date of birth is required");
+        }
+        if (requestDto.getPhoneNumber() == null || requestDto.getPhoneNumber().trim().isEmpty()) {
+            throw new RuntimeException("Phone number is required");
+        }
+        if (requestDto.getIdentityNumber() == null || requestDto.getIdentityNumber().trim().isEmpty()) {
+            throw new RuntimeException("Identity card / Passport number is required");
+        }
+
+        // Role-specific validation
+        if (role == Role.JOCKEY) {
+            if (requestDto.getWeight() == null || requestDto.getWeight() < 40 || requestDto.getWeight() > 80) {
+                throw new RuntimeException("Jockey weight must be between 40 and 80 kg");
+            }
+            if (requestDto.getHeight() == null || requestDto.getHeight() <= 0) {
+                throw new RuntimeException("Jockey height must be a positive number");
+            }
+            if (requestDto.getLicenseNumber() == null || requestDto.getLicenseNumber().trim().isEmpty()) {
+                throw new RuntimeException("Jockey license number is required");
+            }
+        } else if (role == Role.HORSE_OWNER) {
+            if (requestDto.getStableName() == null || requestDto.getStableName().trim().isEmpty()) {
+                throw new RuntimeException("Stable name is required");
+            }
+            if (requestDto.getStableAddress() == null || requestDto.getStableAddress().trim().isEmpty()) {
+                throw new RuntimeException("Stable address is required");
+            }
+        } else if (role == Role.RACE_REFEREE) {
+            if (requestDto.getCertificationNumber() == null || requestDto.getCertificationNumber().trim().isEmpty()) {
+                throw new RuntimeException("Referee certification number is required");
+            }
+            if (requestDto.getExperienceYears() == null || requestDto.getExperienceYears() < 0) {
+                throw new RuntimeException("Referee experience years must be a positive number");
+            }
+        }
+
+        java.util.List<String> documentUrls = requestDto.getDocumentUrls() != null ? 
+                requestDto.getDocumentUrls() : new java.util.ArrayList<>();
+
         UpgradeRequest upgradeRequest = UpgradeRequest.builder()
                 .user(user)
                 .requestedRole(role)
                 .notes(requestDto.getNotes())
                 .status(RequestStatus.PENDING)
+                .fullName(requestDto.getFullName())
+                .dateOfBirth(requestDto.getDateOfBirth())
+                .phoneNumber(requestDto.getPhoneNumber())
+                .identityNumber(requestDto.getIdentityNumber())
+                .weight(requestDto.getWeight())
+                .height(requestDto.getHeight())
+                .licenseNumber(requestDto.getLicenseNumber())
+                .stableName(requestDto.getStableName())
+                .stableAddress(requestDto.getStableAddress())
+                .certificationNumber(requestDto.getCertificationNumber())
+                .experienceYears(requestDto.getExperienceYears())
+                .documentUrls(documentUrls)
                 .build();
 
         upgradeRequest = upgradeRequestRepository.save(upgradeRequest);

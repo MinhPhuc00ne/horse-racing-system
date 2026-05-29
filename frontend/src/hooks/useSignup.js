@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
-import { signupAPI } from '../services/auth';
+import { signupAPI, googleLoginAPI } from '../services/auth';
 
 export function useSignup() {
   const { login } = useContext(AuthContext);
@@ -106,8 +106,23 @@ export function useSignup() {
     }
   };
 
-  const handleGoogleSignup = async () => {
-    alert('Google signup not configured in this test layout - please use the sign up form.');
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const authData = await googleLoginAPI(credentialResponse.credential);
+      login(authData);
+      navigate('/spectator'); // Default role is SPECTATOR
+    } catch (err) {
+      setError(err.message || 'Google registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleFailure = () => {
+    setError('Google Sign-In was unsuccessful. Try again later.');
   };
 
   return {
@@ -124,6 +139,7 @@ export function useSignup() {
     handlePasswordChange,
     handleAgreeTermsChange,
     handleSubmit,
-    handleGoogleSignup,
+    handleGoogleSuccess,
+    handleGoogleFailure,
   };
 }

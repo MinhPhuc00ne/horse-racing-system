@@ -104,6 +104,7 @@ public class AuthService {
 
             User user = userRepository.findByEmail(email).orElseGet(() -> {
                 User newUser = User.builder().username(email).email(email)
+                        .password(passwordEncoder.encode(java.util.UUID.randomUUID().toString()))
                         .fullName(name != null ? name : email).role(Role.SPECTATOR)
                         .provider(AuthProvider.GOOGLE).providerId(googleId).enabled(true).build();
                 return userRepository.save(newUser);

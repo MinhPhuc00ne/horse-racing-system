@@ -9,6 +9,7 @@ export default function AdminPage() {
 
   // Upgrade Requests State
   const [requests, setRequests] = useState([]);
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   const syncRequests = async () => {
     try {
@@ -29,10 +30,14 @@ export default function AdminPage() {
   const handleResolveRequest = async (requestId, status) => {
     try {
       if (status === 'APPROVED') {
+        const confirmApprove = window.confirm("Bạn có chắc chắn muốn DUYỆT yêu cầu nâng cấp này?");
+        if (!confirmApprove) return;
         await axiosClient.put(`/admin/upgrade-requests/${requestId}/approve`);
       } else {
+        const reason = prompt("Nhập lý do từ chối yêu cầu:");
+        if (reason === null) return; // User clicked Cancel
         await axiosClient.put(`/admin/upgrade-requests/${requestId}/reject`, {
-          rejectionReason: "Request rejected by Administrator",
+          rejectionReason: reason || "Yêu cầu bị từ chối bởi Quản trị viên",
         });
       }
       syncRequests();
@@ -131,10 +136,10 @@ export default function AdminPage() {
                         alignItems: 'stretch'
                       }}
                     >
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span style={{ fontWeight: '700', fontSize: '16px', color: '#ffffff' }}>
-                            {req.userFullName}
+                            {req.fullName || req.userFullName}
                           </span>
                           <span style={{ fontSize: '12px', color: '#a0aec0' }}>
                             {new Date(req.createdAt).toLocaleString()}
@@ -143,7 +148,8 @@ export default function AdminPage() {
                         <div style={{ fontSize: '14px', color: '#a0aec0' }}>
                           Email: <strong style={{ color: '#ffffff' }}>{req.userEmail}</strong>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
                           <span style={{
                             padding: '3px 8px',
                             background: 'rgba(255, 255, 255, 0.05)',
@@ -153,7 +159,7 @@ export default function AdminPage() {
                             fontWeight: '600',
                             color: '#a0aec0'
                           }}>
-                            {req.currentRole}
+                            SPECTATOR
                           </span>
                           <span style={{ color: '#fcd34d' }}>&rarr;</span>
                           <span style={{
@@ -168,9 +174,81 @@ export default function AdminPage() {
                             {req.requestedRole.replace('_', ' ')}
                           </span>
                         </div>
+
+                        {/* Detailed Applicant Profile Grid */}
+                        <div className="details-grid">
+                          <span className="details-label">Số điện thoại:</span>
+                          <span className="details-value">{req.phoneNumber || 'N/A'}</span>
+
+                          <span className="details-label">Ngày sinh:</span>
+                          <span className="details-value">{req.dateOfBirth || 'N/A'}</span>
+
+                          <span className="details-label">Số CCCD/Hộ chiếu:</span>
+                          <span className="details-value">{req.identityNumber || 'N/A'}</span>
+
+                          {req.requestedRole === 'JOCKEY' && (
+                            <>
+                              <span className="details-label">Cân nặng:</span>
+                              <span className="details-value">{req.weight ? `${req.weight} kg` : 'N/A'}</span>
+
+                              <span className="details-label">Chiều cao:</span>
+                              <span className="details-value">{req.height ? `${req.height} cm` : 'N/A'}</span>
+
+                              <span className="details-label">Số giấy phép:</span>
+                              <span className="details-value">{req.licenseNumber || 'N/A'}</span>
+                            </>
+                          )}
+
+                          {req.requestedRole === 'HORSE_OWNER' && (
+                            <>
+                              <span className="details-label">Tên trang trại:</span>
+                              <span className="details-value">{req.stableName || 'N/A'}</span>
+
+                              <span className="details-label">Địa chỉ trang trại:</span>
+                              <span className="details-value">{req.stableAddress || 'N/A'}</span>
+                            </>
+                          )}
+
+                          {req.requestedRole === 'RACE_REFEREE' && (
+                            <>
+                              <span className="details-label">Số chứng chỉ:</span>
+                              <span className="details-value">{req.certificationNumber || 'N/A'}</span>
+
+                              <span className="details-label">Số năm kinh nghiệm:</span>
+                              <span className="details-value">{req.experienceYears !== null ? `${req.experienceYears} năm` : 'N/A'}</span>
+                            </>
+                          )}
+
+                          {req.notes && (
+                            <>
+                              <span className="details-label" style={{ gridColumn: 'span 2', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '8px', marginTop: '4px' }}>Ghi chú:</span>
+                              <span className="details-value" style={{ gridColumn: 'span 2', textAlign: 'left', color: '#a0aec0', fontStyle: 'italic', fontSize: '13px' }}>
+                                "{req.notes}"
+                              </span>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Certificates & Verification Documents Gallery */}
+                        {req.documentUrls && req.documentUrls.length > 0 && (
+                          <div style={{ marginTop: '10px' }}>
+                            <span className="profile-label" style={{ display: 'block', marginBottom: '6px', fontSize: '11px' }}>Bằng Cấp & Tài Liệu Xác Minh:</span>
+                            <div className="doc-gallery">
+                              {req.documentUrls.map((url, idx) => (
+                                <img 
+                                  key={idx} 
+                                  src={`http://localhost:8080${url}`} 
+                                  alt={`certificate-${idx}`} 
+                                  className="doc-thumbnail"
+                                  onClick={() => setLightboxImage(url)}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      <div style={{ display: 'flex', gap: '10px' }}>
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
                         <button
                           onClick={() => handleResolveRequest(req.id, 'APPROVED')}
                           style={{
@@ -279,6 +357,15 @@ export default function AdminPage() {
 
         </div>
       </div>
+      {lightboxImage && (
+        <div className="lightbox-modal" onClick={() => setLightboxImage(null)}>
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <img src={`http://localhost:8080${lightboxImage}`} alt="Full Certificate" className="lightbox-img" />
+            <button className="lightbox-close" onClick={() => setLightboxImage(null)} style={{ top: '-40px' }}>&times;</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

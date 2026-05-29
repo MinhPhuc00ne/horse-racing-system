@@ -64,19 +64,23 @@ export function useLogin() {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSuccess = async (credentialResponse) => {
     setLoading(true);
     setError(null);
 
     try {
-      // Dummy logic for Google Login, or you can integrate standard Google credential response here
-      // Normally we receive credential from Google Sign-In button, and send to googleLoginAPI
-      alert('Google login not configured in this test layout - please use Email and Password');
+      const authData = await googleLoginAPI(credentialResponse.credential);
+      login(authData);
+      redirectByRole(authData.user.role);
     } catch (err) {
       setError(err.message || 'Google login failed. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleFailure = () => {
+    setError('Google Sign-In was unsuccessful. Try again later.');
   };
 
 
@@ -89,7 +93,8 @@ export function useLogin() {
     handleIdentifierChange,
     handlePasswordChange,
     handleSubmit,
-    handleGoogleLogin,
+    handleGoogleSuccess,
+    handleGoogleFailure,
     redirectByRole,
   };
 }

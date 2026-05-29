@@ -15,6 +15,30 @@ export default function SpectatorPage() {
   const [requestedRole, setRequestedRole] = useState('HORSE_OWNER');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // New Upgrade Form States
+  const [fullName, setFullName] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [identityNumber, setIdentityNumber] = useState('');
+
+  // Jockey specific states
+  const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
+  const [licenseNumber, setLicenseNumber] = useState('');
+
+  // Horse Owner specific states
+  const [stableName, setStableName] = useState('');
+  const [stableAddress, setStableAddress] = useState('');
+
+  // Referee specific states
+  const [certificationNumber, setCertificationNumber] = useState('');
+  const [experienceYears, setExperienceYears] = useState('');
+
+  // Upload state
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [notes, setNotes] = useState('');
+
   // Sync upgrade requests from the real backend API
   const syncRequests = async () => {
     if (user?.email) {
@@ -40,15 +64,63 @@ export default function SpectatorPage() {
     return () => clearInterval(interval);
   }, [user]);
 
+  const handleFileChange = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    if (uploadedImages.length + files.length > 5) {
+      alert("Bạn chỉ có thể tải lên tối đa 5 hình ảnh.");
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append("files", file);
+    });
+
+    try {
+      const response = await axiosClient.post('/files/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setUploadedImages(prev => [...prev, ...response.data]);
+    } catch (err) {
+      console.error("Failed to upload files:", err);
+      alert("Tải lên hình ảnh thất bại. Vui lòng kiểm tra lại định dạng tệp.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    setUploadedImages(prev => prev.filter((_, idx) => idx !== index));
+  };
+
   const handleRequestUpgrade = async (e) => {
     if (e) e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      await axiosClient.post('/upgrade-requests', {
+      const payload = {
         requestedRole: requestedRole,
-        notes: "Requesting role upgrade to " + requestedRole.replace('_', ' '),
-      });
+        notes: notes || ("Yêu cầu nâng cấp lên " + requestedRole.replace('_', ' ')),
+        fullName,
+        dateOfBirth,
+        phoneNumber,
+        identityNumber,
+        weight: weight ? parseFloat(weight) : null,
+        height: height ? parseFloat(height) : null,
+        licenseNumber,
+        stableName,
+        stableAddress,
+        certificationNumber,
+        experienceYears: experienceYears ? parseInt(experienceYears, 10) : null,
+        documentUrls: uploadedImages
+      };
+
+      await axiosClient.post('/upgrade-requests', payload);
       await syncRequests();
     } catch (err) {
       const errMsg = err.response?.data?.message || err.message || "Failed to submit request";
@@ -174,62 +246,311 @@ export default function SpectatorPage() {
                 Upgrade Account Role
               </h2>
 
-              {!myRequest && (
-                <form onSubmit={handleRequestUpgrade} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                  <p className="panel-description" style={{ fontSize: '13.5px', marginBottom: '8px' }}>
-                    Request to upgrade your account to one of the active roles below:
-                  </p>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label className="profile-label">Select Target Role</label>
-                    <select 
-                      value={requestedRole} 
-                      onChange={(e) => setRequestedRole(e.target.value)}
+              {(!myRequest || myRequest.status === 'REJECTED') && (
+                <div>
+                  {myRequest?.status === 'REJECTED' && (
+                    <div style={{
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      color: '#ef4444',
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: 'bold',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      marginBottom: '20px',
+                      textAlign: 'center'
+                    }}>
+                      Yêu cầu trước đó bị từ chối: "{myRequest.rejectionReason || 'Không có lý do cụ thể'}"
+                    </div>
+                  )}
+
+                  <form onSubmit={handleRequestUpgrade} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                    <p className="panel-description" style={{ fontSize: '13.5px', marginBottom: '8px' }}>
+                      Điền đầy đủ hồ sơ dưới đây để nâng cấp tài khoản của bạn lên vai trò cao hơn:
+                    </p>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <label className="profile-label">Chọn vai trò nâng cấp</label>
+                      <select 
+                        value={requestedRole} 
+                        onChange={(e) => setRequestedRole(e.target.value)}
+                        style={{
+                          padding: '12px',
+                          background: 'rgba(0, 0, 0, 0.4)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          borderRadius: '8px',
+                          color: '#ffffff',
+                          fontSize: '14.5px',
+                          cursor: 'pointer',
+                          outline: 'none'
+                        }}
+                      >
+                        <option value="HORSE_OWNER" style={{ background: '#062315' }}>Horse Owner (Chủ ngựa)</option>
+                        <option value="JOCKEY" style={{ background: '#062315' }}>Jockey (Nài ngựa)</option>
+                        <option value="RACE_REFEREE" style={{ background: '#062315' }}>Race Referee (Trọng tài)</option>
+                      </select>
+                    </div>
+
+                    {/* Section 1: Thông tin cá nhân */}
+                    <div className="upgrade-form-section">
+                      <div className="upgrade-section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" style={{ width: '16px', height: '16px', color: '#fcd34d' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5a2.25 2.25 0 002.25 2.25zm.75-12h3.75c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125H5.25a1.125 1.125 0 01-1.125-1.125v-3.75C4.125 8.004 4.629 7.5 5.25 7.5z" />
+                        </svg>
+                        Thông Tin Định Danh
+                      </div>
+                      
+                      <div className="form-row two-cols">
+                        <div className="form-group">
+                          <label className="profile-label">Họ và Tên</label>
+                          <input 
+                            type="text" 
+                            required 
+                            className="form-input" 
+                            placeholder="Nguyễn Văn A" 
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="profile-label">Số Điện Thoại</label>
+                          <input 
+                            type="tel" 
+                            required 
+                            className="form-input" 
+                            placeholder="09xxxxxxxx" 
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-row two-cols">
+                        <div className="form-group">
+                          <label className="profile-label">Ngày Sinh</label>
+                          <input 
+                            type="date" 
+                            required 
+                            className="form-input" 
+                            value={dateOfBirth}
+                            onChange={(e) => setDateOfBirth(e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label className="profile-label">Số CCCD / Hộ Chiếu</label>
+                          <input 
+                            type="text" 
+                            required 
+                            className="form-input" 
+                            placeholder="0350xxxxxxxx" 
+                            value={identityNumber}
+                            onChange={(e) => setIdentityNumber(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 2: Thông tin chuyên môn theo vai trò */}
+                    <div className="upgrade-form-section">
+                      <div className="upgrade-section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" style={{ width: '16px', height: '16px', color: '#fcd34d' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.62 48.62 0 0112 20.9c4.956-1.92 9.499-4.768 13.485-8.381a18.59 18.59 0 01-3.111-3.832v3.743a2.25 2.25 0 01-2.246 2.25H6.507a2.25 2.25 0 01-2.246-2.25v-3.743z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25l-9.155 4.88a2.25 2.25 0 000 3.94l9.155 4.88 9.155-4.88a2.25 2.25 0 000-3.94L12 2.25z" />
+                        </svg>
+                        Thông Tin Chuyên Môn
+                      </div>
+
+                      {requestedRole === 'JOCKEY' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                          <div className="form-row two-cols">
+                            <div className="form-group">
+                              <label className="profile-label">Cân nặng (kg)</label>
+                              <input 
+                                type="number" 
+                                required 
+                                min="40"
+                                max="80"
+                                step="0.1"
+                                className="form-input" 
+                                placeholder="55.5" 
+                                value={weight}
+                                onChange={(e) => setWeight(e.target.value)}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label className="profile-label">Chiều cao (cm)</label>
+                              <input 
+                                type="number" 
+                                required 
+                                min="100"
+                                max="250"
+                                className="form-input" 
+                                placeholder="165" 
+                                value={height}
+                                onChange={(e) => setHeight(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="form-group">
+                            <label className="profile-label">Số Giấy Phép Nài Ngựa (License No.)</label>
+                            <input 
+                              type="text" 
+                              required 
+                              className="form-input" 
+                              placeholder="JC-998877" 
+                              value={licenseNumber}
+                              onChange={(e) => setLicenseNumber(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {requestedRole === 'HORSE_OWNER' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                          <div className="form-group">
+                            <label className="profile-label">Tên Trang Trại (Stable Name)</label>
+                            <input 
+                              type="text" 
+                              required 
+                              className="form-input" 
+                              placeholder="Golden Horse Farm" 
+                              value={stableName}
+                              onChange={(e) => setStableName(e.target.value)}
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label className="profile-label">Địa Chỉ Trang Trại (Stable Address)</label>
+                            <input 
+                              type="text" 
+                              required 
+                              className="form-input" 
+                              placeholder="123 Đường Đua, Quận 9, TP.HCM" 
+                              value={stableAddress}
+                              onChange={(e) => setStableAddress(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {requestedRole === 'RACE_REFEREE' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                          <div className="form-row two-cols">
+                            <div className="form-group">
+                              <label className="profile-label">Số Chứng Chỉ Trọng Tài</label>
+                              <input 
+                                type="text" 
+                                required 
+                                className="form-input" 
+                                placeholder="REF-665544" 
+                                value={certificationNumber}
+                                onChange={(e) => setCertificationNumber(e.target.value)}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label className="profile-label">Số Năm Kinh Nghiệm</label>
+                              <input 
+                                type="number" 
+                                required 
+                                min="0"
+                                max="50"
+                                className="form-input" 
+                                placeholder="5" 
+                                value={experienceYears}
+                                onChange={(e) => setExperienceYears(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Section 3: Tải ảnh bằng cấp/minh chứng */}
+                    <div className="upgrade-form-section">
+                      <div className="upgrade-section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" style={{ width: '16px', height: '16px', color: '#fcd34d' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                        </svg>
+                        Bằng Cấp & Ảnh Chứng Minh (Tối đa 5 ảnh)
+                      </div>
+
+                      <label className="upload-dropzone" style={{ pointerEvents: isUploading ? 'none' : 'auto' }}>
+                        <input 
+                          type="file" 
+                          multiple 
+                          accept="image/*" 
+                          style={{ display: 'none' }}
+                          onChange={handleFileChange}
+                          disabled={isUploading}
+                        />
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="upload-icon">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                        </svg>
+                        <div className="upload-text">
+                          {isUploading ? 'Đang tải tệp lên máy chủ...' : (
+                            <>Nhấp để <strong>Tải ảnh lên</strong> hoặc Kéo & thả</>
+                          )}
+                        </div>
+                        <div className="upload-subtext">Hỗ trợ định dạng PNG, JPG, JPEG (tối đa 5MB mỗi ảnh)</div>
+                      </label>
+
+                      {uploadedImages.length > 0 && (
+                        <div className="preview-grid">
+                          {uploadedImages.map((imgUrl, index) => (
+                            <div className="preview-item" key={index}>
+                              <img src={`http://localhost:8080${imgUrl}`} alt="Preview" className="preview-img" />
+                              <button type="button" className="remove-btn" onClick={() => handleRemoveImage(index)}>&times;</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Section 4: Ghi chú */}
+                    <div className="form-group" style={{ marginTop: '10px' }}>
+                      <label className="profile-label">Ghi Chú Thêm (Tùy chọn)</label>
+                      <textarea 
+                        className="form-input" 
+                        rows="2" 
+                        placeholder="Thông tin giới thiệu bản thân hoặc lưu ý khác..."
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        style={{ resize: 'vertical', fontFamily: 'inherit' }}
+                      />
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      disabled={isSubmitting || isUploading}
                       style={{
-                        padding: '12px',
-                        background: 'rgba(0, 0, 0, 0.4)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: 'linear-gradient(90deg, #fcd34d 0%, #f59e0b 100%)',
+                        color: '#062315',
+                        border: 'none',
+                        padding: '12px 20px',
                         borderRadius: '8px',
-                        color: '#ffffff',
-                        fontSize: '14.5px',
-                        cursor: 'pointer',
-                        outline: 'none'
+                        fontWeight: '700',
+                        cursor: (isSubmitting || isUploading) ? 'not-allowed' : 'pointer',
+                        opacity: (isSubmitting || isUploading) ? 0.6 : 1,
+                        transition: 'all 0.2s ease',
+                        marginTop: '8px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSubmitting && !isUploading) {
+                          e.target.style.transform = 'translateY(-1px)';
+                          e.target.style.boxShadow = '0 4px 12px rgba(252, 211, 77, 0.4)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = 'none';
                       }}
                     >
-                      <option value="HORSE_OWNER" style={{ background: '#062315' }}>Horse Owner</option>
-                      <option value="JOCKEY" style={{ background: '#062315' }}>Jockey</option>
-                      <option value="RACE_REFEREE" style={{ background: '#062315' }}>Race Referee</option>
-                    </select>
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    disabled={isSubmitting}
-                    style={{
-                      background: 'linear-gradient(90deg, #fcd34d 0%, #f59e0b 100%)',
-                      color: '#062315',
-                      border: 'none',
-                      padding: '12px 20px',
-                      borderRadius: '8px',
-                      fontWeight: '700',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      marginTop: '8px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.transform = 'translateY(-1px)';
-                      e.target.style.boxShadow = '0 4px 12px rgba(252, 211, 77, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  >
-                    {isSubmitting ? 'Submitting...' : 'Submit Request'}
-                  </button>
-                </form>
+                      {isSubmitting ? 'Đang gửi...' : 'Gửi yêu cầu nâng cấp'}
+                    </button>
+                  </form>
+                </div>
               )}
 
               {myRequest && myRequest.status === 'PENDING' && (
@@ -302,75 +623,6 @@ export default function SpectatorPage() {
                   </button>
                 </div>
               )}
-
-              {myRequest && myRequest.status === 'REJECTED' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{
-                    alignSelf: 'center',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    color: '#ef4444',
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    fontSize: '13px',
-                    fontWeight: 'bold',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                    textAlign: 'center',
-                    width: 'fit-content'
-                  }}>
-                    Request Rejected
-                  </div>
-                  <p className="panel-description" style={{ fontSize: '13.5px', textAlign: 'center' }}>
-                    Your previous request to upgrade to <strong>{myRequest.requestedRole.replace('_', ' ')}</strong> was rejected.
-                  </p>
-                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px', marginTop: '4px' }}>
-                    <form onSubmit={handleRequestUpgrade} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                      <p className="panel-description" style={{ fontSize: '13px', marginBottom: '4px' }}>
-                        You may select a different role or resubmit below:
-                      </p>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <select 
-                          value={requestedRole} 
-                          onChange={(e) => setRequestedRole(e.target.value)}
-                          style={{
-                            padding: '12px',
-                            background: 'rgba(0, 0, 0, 0.4)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)',
-                            borderRadius: '8px',
-                            color: '#ffffff',
-                            fontSize: '14.5px',
-                            cursor: 'pointer',
-                            outline: 'none'
-                          }}
-                        >
-                          <option value="HORSE_OWNER" style={{ background: '#062315' }}>Horse Owner</option>
-                          <option value="JOCKEY" style={{ background: '#062315' }}>Jockey</option>
-                          <option value="RACE_REFEREE" style={{ background: '#062315' }}>Race Referee</option>
-                        </select>
-                      </div>
-                      <button 
-                        type="submit" 
-                        disabled={isSubmitting}
-                        style={{
-                          background: 'linear-gradient(90deg, #fcd34d 0%, #f59e0b 100%)',
-                          color: '#062315',
-                          border: 'none',
-                          padding: '12px 20px',
-                          borderRadius: '8px',
-                          fontWeight: '700',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em'
-                        }}
-                      >
-                        {isSubmitting ? 'Submitting...' : 'Submit New Request'}
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              )}
-
-
             </div>
 
           </aside>
