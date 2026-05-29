@@ -1,3 +1,6 @@
+import { useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
 import LoginForm from './components/LoginForm';
 import SignupForm from './components/SignupForm';
 import horseImage from '../../assets/horse_racing_statue.png';
@@ -6,6 +9,22 @@ import './AuthPage.css';
 
 export default function AuthPage({ view }) {
   const isLogin = view === 'login';
+  const { isAuthenticated, user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'ADMIN') navigate('/admin');
+      else if (user.role === 'HORSE_OWNER') navigate('/owner');
+      else if (user.role === 'JOCKEY') navigate('/jockey');
+      else if (user.role === 'RACE_REFEREE') navigate('/referee');
+      else navigate('/spectator');
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className={`auth-container ${isLogin ? 'mode-login' : 'mode-signup'}`}>
