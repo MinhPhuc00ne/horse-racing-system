@@ -19,11 +19,11 @@ Sau khi gửi form và được Admin duyệt:
 Quản lý thông tin ngựa.
 Đăng ký ngựa và Jockey  tham gia giải đấu.
 gửi lời mời kết bạn cho cho Jockey
-( khi nào Jockey đồng ý thì mới có thể đăng kí tham gia giải đấu) 
+( khi nào Jockey đồng ý thì mới có thể đăng kí tham gia giải đấu)
 Xác nhận ngựa tham gia trước giờ đua.
 Theo dõi kết quả, bảng xếp hạng, tiền thưởng.
 Quản lý ví tiền.
-3. Jockey 
+3. Jockey
 
 Sau khi gửi hồ sơ và được Admin duyệt:
 
@@ -42,11 +42,22 @@ cho account vi phạm vào Blacklist.
 quản lí tiền
 5. Admin
 Duyệt tài khoản nâng cấp.
-Tạo và quản lý giải đấu.
-Set phần thưởng, thời gian, luật chơi.
+Admin tạo giải đấu, set up phần thưởng ( tiền ) cho
+giải nhất-nhì-ba với đơn vị là VNĐ
+quy định số ngựa tham gia
+có 3 loại
+7 con, 8 con, 12 con
+chọn loại sân có khoảng
+10 sân phân theo tên để admin chọn
+thời gian tổ chức ngày tháng và tư mấy giờ tới mấy giờ và đương nhiên không được trùng lịch
+về việc cá cược
+- khi admin tạo xong giải đấu thì hệ thống tự động đổi trạng thái cuộc đua thành OPEN_FOR_REGISTER   Horse_owner cần phải đăng kí ngựa và Jockey cũng như xét tỷ lệ ăn chia
+(ví dụ jockey 30%, horse_owner là 70%)
+và gửi lên admin sẽ thấy thông tin và duyệt
+- thiết lập số tiền cược tối thiểu của spectator
 Điều hành toàn bộ cuộc đua.
 quản lí tiền ví dụ thua cuộc của spectator
 Quản lý blacklist.
 
 
-hệ thống giả lập 1 cuộc đua ngựa 
+hệ thống giả lập 1 cuộc đua ngựa

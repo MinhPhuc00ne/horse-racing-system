@@ -426,6 +426,3 @@ Các validation này được thực thi thủ công bằng `if` + `throw new Ru
 
 > [!WARNING]
 > **`UpgradeRequestSubmit`** thiếu Bean Validation trên hầu hết các trường. Toàn bộ validation nằm trong Service layer. Nếu Service bị bypass (unit test, mock, v.v.), validation sẽ không chạy. Nên bổ sung annotation để có validation ở cả hai lớp.
-
-> [!TIP]
-> Có thể xem xét tạo **Global Exception Handler** (`@ControllerAdvice`) để thống nhất cách xử lý lỗi thay vì dùng try-catch trong từng controller method.

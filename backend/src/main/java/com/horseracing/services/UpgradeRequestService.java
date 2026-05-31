@@ -5,10 +5,14 @@ import com.horseracing.dto.request.UpgradeRequestSubmit;
 import com.horseracing.dto.response.UpgradeRequestResponse;
 import com.horseracing.entities.UpgradeRequest;
 import com.horseracing.entities.User;
+import com.horseracing.entities.HorseOwnerProfile;
+import com.horseracing.entities.JockeyProfile;
 import com.horseracing.entities.enums.RequestStatus;
 import com.horseracing.entities.enums.Role;
 import com.horseracing.repositories.UpgradeRequestRepository;
 import com.horseracing.repositories.UserRepository;
+import com.horseracing.repositories.HorseOwnerProfileRepository;
+import com.horseracing.repositories.JockeyProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +26,8 @@ public class UpgradeRequestService {
 
     private final UpgradeRequestRepository upgradeRequestRepository;
     private final UserRepository userRepository;
+    private final HorseOwnerProfileRepository horseOwnerProfileRepository;
+    private final JockeyProfileRepository jockeyProfileRepository;
 
     @Transactional
     public UpgradeRequestResponse submitRequest(String email, UpgradeRequestSubmit requestDto) {
@@ -148,6 +154,27 @@ public class UpgradeRequestService {
         user.setRole(request.getRequestedRole());
         
         userRepository.save(user);
+
+        // Auto-create profiles
+        if (request.getRequestedRole() == Role.HORSE_OWNER) {
+            HorseOwnerProfile ownerProfile = HorseOwnerProfile.builder()
+                    .user(user)
+                    .stableName(request.getStableName())
+                    .approvalStatus("APPROVED")
+                    .build();
+            horseOwnerProfileRepository.save(ownerProfile);
+        } else if (request.getRequestedRole() == Role.JOCKEY) {
+            JockeyProfile jockeyProfile = JockeyProfile.builder()
+                    .user(user)
+                    .height(request.getHeight())
+                    .weight(request.getWeight())
+                    .licenseNumber(request.getLicenseNumber())
+                    .experienceYear(request.getExperienceYears())
+                    .approvalStatus("APPROVED")
+                    .build();
+            jockeyProfileRepository.save(jockeyProfile);
+        }
+
         upgradeRequestRepository.save(request);
 
         return UpgradeRequestResponse.fromEntity(request);
