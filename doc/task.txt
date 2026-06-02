@@ -1,12 +1,14 @@
-tuần 4
-tích hợp AI
-hỏi lại về các sân đua/ đường đua
-notifaction
-luồng horse_owner
-luồng jockey
----------------------------
-tuần 5
 
-
+FE
+làm luồng Horse_owner
+- đã có nâng cấp lên tài khoản
++ đăng thông tin về ngựa lên web, chỉnh sữa được profile bản thân
++ có mục lịch sử để xem lịch sử đua nào
++ có 1 nơi để xem toàn bộ jockey và Horse_Owner trên toàn hệ thống và khung tìm kiếm Jockey vs các Horse_Owner khác bằng ID
++ kết bạn, hủy kết bạn với Jockey, Horse_Owner
++ mục bạn bè để xem đã kết bạn với ai
++ nơi để horse_owner có thể đăng kí tham gia giải đấu khi Admin mở giải
++ ví tiền của horse_owner
 notes:
 FE giữ màu của trang admin chỉ thay lại cách bố cục ( tại nó đang đẹp :)
+cứ mock data giả để test và hình dung rồi báo cho BE làm API

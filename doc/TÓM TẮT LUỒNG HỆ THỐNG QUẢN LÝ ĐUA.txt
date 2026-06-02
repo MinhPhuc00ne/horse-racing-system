@@ -20,9 +20,11 @@ Quản lý thông tin ngựa.
 Đăng ký ngựa và Jockey  tham gia giải đấu.
 gửi lời mời kết bạn cho cho Jockey
 ( khi nào Jockey đồng ý thì mới có thể đăng kí tham gia giải đấu)
-Xác nhận ngựa tham gia trước giờ đua.
 Theo dõi kết quả, bảng xếp hạng, tiền thưởng.
 Quản lý ví tiền.
+tìm kiếm Jockey theo ID để kết bạn
+view đc danh sách các Horse Owner,Jockey đã kết bạn, 1 nơi xem đc các Horse Owner, Jockey khác( có thể tìm kiếm theo role)
+
 3. Jockey
 
 Sau khi gửi hồ sơ và được Admin duyệt:
