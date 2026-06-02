@@ -6,3 +6,7 @@ luồng horse_owner
 luồng jockey
 ---------------------------
 tuần 5
+
+
+notes:
+FE giữ màu của trang admin chỉ thay lại cách bố cục ( tại nó đang đẹp :)
