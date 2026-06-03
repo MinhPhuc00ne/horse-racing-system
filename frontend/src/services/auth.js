@@ -62,7 +62,7 @@ export async function loginAPI(email, password) {
     return response.data; // { accessToken, refreshToken, user: { ... } }
   } catch (error) {
     const errMsg = error.response?.data?.message || 'Invalid email or password. Please try again.';
-    throw new Error(errMsg);
+    throw new Error(errMsg, { cause: error });
   }
 }
 
@@ -78,7 +78,7 @@ export async function signupAPI({ username, fullName, email, password, role = 'S
     return response.data; // { accessToken, refreshToken, user: { ... } }
   } catch (error) {
     const errMsg = error.response?.data?.message || 'Registration failed. Please check your details.';
-    throw new Error(errMsg);
+    throw new Error(errMsg, { cause: error });
   }
 }
 
@@ -90,7 +90,7 @@ export async function logoutAPI(refreshToken) {
     return response.data;
   } catch (error) {
     const errMsg = error.response?.data?.message || 'Logout failed.';
-    throw new Error(errMsg);
+    throw new Error(errMsg, { cause: error });
   }
 }
 
@@ -100,7 +100,7 @@ export async function getProfileAPI() {
     return response.data; // UserResponse
   } catch (error) {
     const errMsg = error.response?.data?.message || 'Failed to fetch user profile.';
-    throw new Error(errMsg);
+    throw new Error(errMsg, { cause: error });
   }
 }
 
@@ -112,6 +112,6 @@ export async function googleLoginAPI(credential) {
     return response.data; // { accessToken, refreshToken, user: { ... } }
   } catch (error) {
     const errMsg = error.response?.data?.message || 'Google Login failed.';
-    throw new Error(errMsg);
+    throw new Error(errMsg, { cause: error });
   }
 }

@@ -1,6 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function DashboardContent({ setActiveTab }) {
+export default function DashboardContent() {
+  const navigate = useNavigate();
+
   return (
     <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
       {/* Title & Actions */}
@@ -21,7 +24,7 @@ export default function DashboardContent({ setActiveTab }) {
             Export Report
           </button>
           <button
-            onClick={() => setActiveTab('entries')}
+            onClick={() => navigate('/owner/entries')}
             className="ho-btn ho-btn-gold-solid flex-grow-1 flex-sm-grow-0 d-flex align-items-center justify-content-center gap-2"
           >
             <span className="material-symbols-outlined text-dark" style={{ fontSize: '18px' }}>add</span>
@@ -110,7 +113,7 @@ export default function DashboardContent({ setActiveTab }) {
                 Top Performers
               </h3>
               <button
-                onClick={() => setActiveTab('stable')}
+                onClick={() => navigate('/owner/stable')}
                 className="ho-btn-link text-uppercase tracking-wider small d-flex align-items-center"
               >
                 View All

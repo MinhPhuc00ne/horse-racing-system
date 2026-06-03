@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useHorseOwner } from './HorseOwnerContext';
 
-export default function StableContent({ horses = [], setHorses }) {
+export default function StableContent() {
+  const { horses = [], setHorses } = useHorseOwner();
   const [selectedHorseId, setSelectedHorseId] = useState(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [newHorseData, setNewHorseData] = useState({

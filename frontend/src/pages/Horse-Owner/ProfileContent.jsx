@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useHorseOwner } from './HorseOwnerContext';
 
 const presetAvatars = [
   "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80",
@@ -8,7 +9,8 @@ const presetAvatars = [
   "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"
 ];
 
-export default function ProfileContent({ profile, setProfile, transactions, setTransactions, raceHistory }) {
+export default function ProfileContent() {
+  const { profile, setProfile, transactions, setTransactions, raceHistory } = useHorseOwner();
   const [formData, setFormData] = useState({ ...profile });
   const [depositAmount, setDepositAmount] = useState('');
   const [isDragging, setIsDragging] = useState(false);
