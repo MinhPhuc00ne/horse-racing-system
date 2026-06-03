@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useHorseOwner } from './HorseOwnerContext';
 
-export default function ConnectionsContent({ systemUsers, setSystemUsers }) {
+export default function ConnectionsContent() {
+  const { systemUsers, setSystemUsers } = useHorseOwner();
   const [activeSubTab, setActiveSubTab] = useState('my-friends'); // 'my-friends' | 'find'
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL'); // 'ALL' | 'JOCKEY' | 'HORSE_OWNER'

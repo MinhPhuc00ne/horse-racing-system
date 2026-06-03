@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
 import Input from '../../../components/Input/Input';
 import Button from '../../../components/Button/Button';
 import { useSignup } from '../../../hooks/useSignup';
@@ -21,8 +20,6 @@ export default function SignupForm() {
     handlePasswordChange,
     handleAgreeTermsChange,
     handleSubmit,
-    handleGoogleSuccess,
-    handleGoogleFailure,
   } = useSignup();
 
   return (
@@ -113,18 +110,6 @@ export default function SignupForm() {
           </Button>
         </div>
       </form>
-
-      <div className="divider">OR</div>
-
-      <div className="google-btn-wrapper">
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleFailure}
-          theme="outline"
-          size="large"
-          width="374"
-        />
-      </div>
 
       <div className="signup-login-link-container">
         <span>Already have an account? </span>

@@ -1,10 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import axiosClient from '../../api/axiosClient';
+import DashboardLayout from '../layouts/DashboardLayout';
 import '../Dashboard.css';
 
-export default function SpectatorPage() {
+function SpectatorDashboardContent() {
   const { user, accessToken, refreshToken, login, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -185,19 +186,14 @@ export default function SpectatorPage() {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-wrapper">
-        
-        {/* Header */}
-        <header className="dashboard-header">
-          <div>
-            <span className="role-badge">SPECTATOR ROLE</span>
-            <h1 className="dashboard-title">Spectator Feed Panel</h1>
-          </div>
-          <button className="logout-btn" onClick={logout}>
-            Log Out
-          </button>
-        </header>
+    <div className="dashboard-wrapper p-0">
+      
+      {/* Page Title inside content body */}
+      <div className="mb-4">
+        <span className="role-badge">SPECTATOR ROLE</span>
+        <h2 className="ho-font-epilogue fs-3 fw-bold text-dark mb-1">Spectator Feed Panel</h2>
+        <p className="text-secondary small">Request role upgrades and perform API testing.</p>
+      </div>
 
         {/* Layout Grid */}
         <div className="dashboard-grid">
@@ -684,8 +680,22 @@ export default function SpectatorPage() {
             </div>
           </main>
 
-        </div>
       </div>
     </div>
+  );
+}
+
+const spectatorNavLinks = [
+  { path: '/spectator/dashboard', label: 'Dashboard', icon: 'dashboard' }
+];
+
+export default function SpectatorPage() {
+  return (
+    <DashboardLayout navLinks={spectatorNavLinks}>
+      <Routes>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<SpectatorDashboardContent />} />
+      </Routes>
+    </DashboardLayout>
   );
 }

@@ -1,0 +1,174 @@
+.dashboard-layout-container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.dashboard-layout-header {
+  background-color: var(--ho-primary-dark, #003820) !important;
+  border-bottom: 1px solid var(--ho-accent-gold, rgba(212, 175, 55, 0.3)) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  height: 80px;
+  z-index: 999;
+}
+
+.nav-link-horizontal {
+  font-family: 'Hanken Grotesk', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none !important;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-link-horizontal-active {
+  background-color: var(--ho-accent-gold, #D4AF37);
+  color: #1c1b1b !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link-horizontal-inactive {
+  color: var(--ho-primary-light, #95d4ac) !important;
+}
+
+.nav-link-horizontal-inactive:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff !important;
+}
+
+/* Dark Header text and controls overrides */
+.dashboard-layout-header .text-dark {
+  color: #ffffff !important;
+}
+
+.dashboard-layout-header .text-secondary {
+  color: var(--ho-primary-light, #95d4ac) !important;
+}
+
+.dashboard-layout-header .header-search-input {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.dashboard-layout-header .header-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.dashboard-layout-header .header-search-input:focus {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: var(--ho-accent-gold, #D4AF37) !important;
+  box-shadow: 0 0 0 1px var(--ho-accent-gold, #D4AF37) !important;
+}
+
+.dashboard-layout-header .header-search-icon {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.dashboard-layout-header .ho-btn-light {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dashboard-layout-header .ho-btn-light:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dashboard-layout-header .ho-btn-light span {
+  color: #ffffff !important;
+}
+
+.mobile-nav-link {
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-link:hover {
+  background-color: rgba(0, 56, 32, 0.05);
+}
+
+/* Profile Dropdown Styles */
+.avatar-dropdown-container {
+  position: relative;
+}
+
+.avatar-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 220px;
+  background-color: #ffffff !important;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 12px 0;
+  z-index: 1000;
+  animation: fadeInDown 0.2s ease-out;
+  font-family: 'Hanken Grotesk', 'Inter', sans-serif;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.avatar-dropdown-header {
+  padding: 4px 16px 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #718096 !important;
+  font-family: 'Hanken Grotesk', 'Inter', sans-serif;
+}
+
+.avatar-dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #2d3748 !important;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.avatar-dropdown-item:hover {
+  background-color: #f7fafc !important;
+  color: #1a202c !important;
+  text-decoration: none;
+}
+
+.avatar-dropdown-divider {
+  height: 1px;
+  background-color: #e2e8f0;
+  margin: 8px 0;
+}
+
+.avatar-dropdown-item.logout {
+  color: #dc3545 !important;
+}
+
+.avatar-dropdown-item.logout:hover {
+  background-color: #fff5f5 !important;
+  color: #bd2130 !important;
+}
+
+.avatar-dropdown-icon {
+  margin-right: 10px;
+  font-size: 18px !important;
+  color: inherit !important;
+}
+
