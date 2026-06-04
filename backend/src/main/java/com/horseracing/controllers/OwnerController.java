@@ -2,10 +2,8 @@ package com.horseracing.controllers;
 
 import com.horseracing.dto.request.CreateHorseRequest;
 import com.horseracing.dto.request.RegisterRaceRequest;
-import com.horseracing.dto.response.ErrorResponse;
-import com.horseracing.dto.response.HorseResponse;
-import com.horseracing.dto.response.JockeyAgreementResponse;
-import com.horseracing.dto.response.RaceRegistrationResponse;
+import com.horseracing.dto.request.UpdateOwnerProfileRequest;
+import com.horseracing.dto.response.*;
 import com.horseracing.services.HorseService;
 import com.horseracing.services.JockeyAgreementService;
 import com.horseracing.services.RaceRegistrationService;
@@ -84,6 +82,28 @@ public class OwnerController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             RaceRegistrationResponse response = raceRegistrationService.submitRegistration(userDetails.getUsername(), request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(Authentication authentication) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            OwnerProfileResponse response = horseService.getOwnerProfile(userDetails.getUsername());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody UpdateOwnerProfileRequest request, Authentication authentication) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            OwnerProfileResponse response = horseService.updateOwnerProfile(userDetails.getUsername(), request);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }

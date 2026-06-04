@@ -152,6 +152,7 @@ public class UpgradeRequestService {
         request.setStatus(RequestStatus.APPROVED);
         User user = request.getUser();
         user.setRole(request.getRequestedRole());
+        user.setPhone(request.getPhoneNumber());
         
         userRepository.save(user);
 
@@ -160,6 +161,11 @@ public class UpgradeRequestService {
             HorseOwnerProfile ownerProfile = HorseOwnerProfile.builder()
                     .user(user)
                     .stableName(request.getStableName())
+                    .stableAddress(request.getStableAddress())
+                    .phone(request.getPhoneNumber())
+                    .identityNumber(request.getIdentityNumber())
+                    .dateOfBirth(request.getDateOfBirth())
+                    .reputationStars(5.0)
                     .approvalStatus("APPROVED")
                     .build();
             horseOwnerProfileRepository.save(ownerProfile);

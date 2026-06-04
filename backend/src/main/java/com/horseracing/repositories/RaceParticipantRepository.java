@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface RaceParticipantRepository extends JpaRepository<RaceParticipant, Integer> {
     List<RaceParticipant> findByRaceId(Integer raceId);
+    List<RaceParticipant> findByHorseId(Integer horseId);
     long countByRaceId(Integer raceId);
 }

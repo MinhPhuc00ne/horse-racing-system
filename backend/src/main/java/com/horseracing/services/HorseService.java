@@ -1,13 +1,11 @@
 package com.horseracing.services;
 
 import com.horseracing.dto.request.CreateHorseRequest;
+import com.horseracing.dto.request.UpdateOwnerProfileRequest;
 import com.horseracing.dto.response.HorseResponse;
-import com.horseracing.entities.Horse;
-import com.horseracing.entities.HorseBreed;
-import com.horseracing.entities.HorseOwnerProfile;
-import com.horseracing.repositories.HorseBreedRepository;
-import com.horseracing.repositories.HorseOwnerProfileRepository;
-import com.horseracing.repositories.HorseRepository;
+import com.horseracing.dto.response.OwnerProfileResponse;
+import com.horseracing.entities.*;
+import com.horseracing.repositories.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +20,7 @@ public class HorseService {
     private final HorseRepository horseRepository;
     private final HorseBreedRepository horseBreedRepository;
     private final HorseOwnerProfileRepository horseOwnerProfileRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public HorseResponse createHorse(String ownerEmail, CreateHorseRequest request) {
@@ -53,5 +52,67 @@ public class HorseService {
         return horseRepository.findByOwnerUserEmail(ownerEmail).stream()
                 .map(HorseResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public OwnerProfileResponse getOwnerProfile(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        HorseOwnerProfile owner = horseOwnerProfileRepository.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("Horse owner profile not found"));
+        return OwnerProfileResponse.builder()
+                .id(owner.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .avatarUrl(user.getAvatarUrl())
+                .stableName(owner.getStableName())
+                .stableAddress(owner.getStableAddress())
+                .description(owner.getDescription())
+                .reputationStars(owner.getReputationStars())
+                .bankAccount(owner.getBankAccount())
+                .identityNumber(owner.getIdentityNumber())
+                .dateOfBirth(owner.getDateOfBirth())
+                .build();
+    }
+
+    @Transactional
+    public OwnerProfileResponse updateOwnerProfile(String email, UpdateOwnerProfileRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        HorseOwnerProfile owner = horseOwnerProfileRepository.findByUserEmail(email)
+                .orElseThrow(() -> new RuntimeException("Horse owner profile not found"));
+
+        if (request.getFullName() != null) user.setFullName(request.getFullName());
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+            owner.setPhone(request.getPhone());
+        }
+        if (request.getAvatarUrl() != null) user.setAvatarUrl(request.getAvatarUrl());
+        
+        if (request.getStableName() != null) owner.setStableName(request.getStableName());
+        if (request.getStableAddress() != null) owner.setStableAddress(request.getStableAddress());
+        if (request.getDescription() != null) owner.setDescription(request.getDescription());
+        if (request.getBankAccount() != null) owner.setBankAccount(request.getBankAccount());
+        if (request.getIdentityNumber() != null) owner.setIdentityNumber(request.getIdentityNumber());
+        if (request.getDateOfBirth() != null) owner.setDateOfBirth(request.getDateOfBirth());
+
+        userRepository.save(user);
+        owner = horseOwnerProfileRepository.save(owner);
+
+        return OwnerProfileResponse.builder()
+                .id(owner.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .avatarUrl(user.getAvatarUrl())
+                .stableName(owner.getStableName())
+                .stableAddress(owner.getStableAddress())
+                .description(owner.getDescription())
+                .reputationStars(owner.getReputationStars())
+                .bankAccount(owner.getBankAccount())
+                .identityNumber(owner.getIdentityNumber())
+                .dateOfBirth(owner.getDateOfBirth())
+                .build();
     }
 }

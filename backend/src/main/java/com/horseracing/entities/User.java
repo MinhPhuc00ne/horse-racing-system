@@ -34,6 +34,12 @@ public class User {
     @Column(name = "full_name", nullable = false, length = 255)
     private String fullName;
 
+    @Column(name = "phone", length = 20)
+    private String phone;
+
+    @Column(name = "avatar_url", length = 255)
+    private String avatarUrl;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20, columnDefinition = "varchar(20) default 'SPECTATOR'")
