@@ -4,7 +4,9 @@ import com.horseracing.entities.RefreshToken;
 import com.horseracing.entities.User;
 import com.horseracing.repositories.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +16,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
@@ -23,10 +26,13 @@ public class RefreshTokenService {
 
     /**
      * Create a new refresh token for the user. Revokes any existing non-revoked tokens for the user
-     * first.
+     * first to prevent token accumulation.
      */
     @Transactional
     public RefreshToken createRefreshToken(User user) {
+        // Revoke all existing tokens for this user
+        refreshTokenRepository.revokeAllByUser(user);
+
         RefreshToken refreshToken =
                 RefreshToken.builder().user(user).token(UUID.randomUUID().toString())
                         .expiryDate(Instant.now().plusMillis(refreshTokenExpiration)).revoked(false)
@@ -76,5 +82,17 @@ public class RefreshTokenService {
     @Transactional
     public void deleteByUser(User user) {
         refreshTokenRepository.deleteByUser(user);
+    }
+
+    /**
+     * Scheduled cleanup job: runs every hour to remove expired and revoked refresh tokens.
+     */
+    @Scheduled(fixedRate = 3600000) // Every hour
+    @Transactional
+    public void cleanupExpiredTokens() {
+        int deleted = refreshTokenRepository.deleteExpiredAndRevokedTokens(Instant.now());
+        if (deleted > 0) {
+            log.info("Cleaned up {} expired/revoked refresh tokens", deleted);
+        }
     }
 }
