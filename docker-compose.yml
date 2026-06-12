@@ -90,6 +90,7 @@ services:
       - /app/node_modules
     environment:
       - DOCKER_ENV=true
+      - VITE_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
     depends_on:
       - backend
 

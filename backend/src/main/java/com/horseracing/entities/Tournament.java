@@ -43,7 +43,7 @@ public class Tournament {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "total_prize")
+    @Column(name = "total_prize", precision = 18, scale = 2)
     private BigDecimal totalPrize;
 
     @Builder.Default
@@ -51,16 +51,16 @@ public class Tournament {
     private String tournamentStatus = "Upcoming";
 
     // New Fields requested by user:
-    @Column(name = "prize_first")
+    @Column(name = "prize_first", precision = 38, scale = 2)
     private BigDecimal prizeFirst;
 
-    @Column(name = "prize_second")
+    @Column(name = "prize_second", precision = 38, scale = 2)
     private BigDecimal prizeSecond;
 
-    @Column(name = "prize_third")
+    @Column(name = "prize_third", precision = 38, scale = 2)
     private BigDecimal prizeThird;
 
-    @Column(name = "min_bet_amount")
+    @Column(name = "min_bet_amount", precision = 38, scale = 2)
     private BigDecimal minBetAmount;
 
     @CreationTimestamp
