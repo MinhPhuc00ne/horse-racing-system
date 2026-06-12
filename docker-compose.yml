@@ -5,7 +5,7 @@ services:
     container_name: horse-racing-db
     restart: always
     environment:
-      SA_PASSWORD: "HorseRacing@123"
+      SA_PASSWORD: "${SA_PASSWORD:-HorseRacing@123}"
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Developer"
     ports:
@@ -22,7 +22,7 @@ services:
           "-U",
           "sa",
           "-P",
-          "HorseRacing@123",
+          "${SA_PASSWORD:-HorseRacing@123}",
           "-C",
           "-Q",
           "SELECT 1",
@@ -44,8 +44,8 @@ services:
       - /bin/bash
       - -c
       - |
-        /opt/mssql-tools18/bin/sqlcmd -S db -U sa -P "HorseRacing@123" -C -Q "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'horseracing') CREATE DATABASE [horseracing]"
-        /opt/mssql-tools18/bin/sqlcmd -S db -U sa -P "HorseRacing@123" -C -d horseracing -i /init.sql
+        /opt/mssql-tools18/bin/sqlcmd -S db -U sa -P "${SA_PASSWORD:-HorseRacing@123}" -C -Q "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'HorseRacingDB') CREATE DATABASE [HorseRacingDB]"
+        /opt/mssql-tools18/bin/sqlcmd -S db -U sa -P "${SA_PASSWORD:-HorseRacing@123}" -C -d HorseRacingDB -i /init.sql
 
   backend:
     build: ./backend
@@ -53,12 +53,26 @@ services:
     restart: always
     ports:
       - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads
     environment:
       DB_HOST: db
       DB_PORT: 1433
-      DB_NAME: horseracing
+      DB_NAME: HorseRacingDB
       DB_USER: sa
-      DB_PASSWORD: "HorseRacing@123"
+      DB_PASSWORD: "${SA_PASSWORD:-HorseRacing@123}"
+      JWT_SECRET: "${JWT_SECRET:-dGhpc0lzQVZlcnlMb25nU2VjcmV0S2V5Rm9ySldUU2lnbmluZ1B1cnBvc2VzMTIzNDU2Nzg5MA==}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-your-google-client-id}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-your-google-client-secret}"
+      SPRING_MAIL_HOST: "${SPRING_MAIL_HOST:-smtp.gmail.com}"
+      SPRING_MAIL_PORT: "${SPRING_MAIL_PORT:-587}"
+      SPRING_MAIL_USERNAME: "${SPRING_MAIL_USERNAME:-your-email@gmail.com}"
+      SPRING_MAIL_PASSWORD: "${SPRING_MAIL_PASSWORD:-your-app-password}"
+      APP_ACTIVATION_URL: "${APP_ACTIVATION_URL:-http://localhost:5173/verify-email}"
+      CORS_ALLOWED_ORIGINS: "${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}"
+      DDL_AUTO: "${DDL_AUTO:-update}"
     depends_on:
       db:
         condition: service_healthy
