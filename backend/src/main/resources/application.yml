@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:sqlserver://${DB_HOST:localhost}:${DB_PORT:1433};databaseName=${DB_NAME:HorseRacingDB};encrypt=true;trustServerCertificate=true;
-    username: ${DB_USER:sa}
-    password: ${DB_PASSWORD:HorseRacing@123}
-    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+     url: jdbc:sqlserver://${DB_HOST:localhost}:${DB_PORT:1433};databaseName=${DB_NAME:HorseRacingDB};encrypt=true;trustServerCertificate=true;
+     username: ${DB_USER:sa}
+     password: ${DB_PASSWORD:HorseRacing@123}
+     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
       ddl-auto: update
@@ -37,6 +37,6 @@ app:
   google:
     # Replace with your actual Google OAuth2 Client ID and Secret
     # Get these from: https://console.cloud.google.com/apis/credentials
-  client-id: YOUR_GOOGLE_CLIENT_ID
-  client-secret: YOUR_GOOGLE_CLIENT_SECRET
-  activation-url: ${APP_ACTIVATION_URL:http://localhost:5173/verify-email}
+    client-id: ${GOOGLE_CLIENT_ID:YOUR_GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET:YOUR_GOOGLE_CLIENT_SECRET}
+    activation-url: ${APP_ACTIVATION_URL:http://localhost:5173/verify-email}
