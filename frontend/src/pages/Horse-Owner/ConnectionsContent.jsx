@@ -1,8 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import DataCard from '../../components/DataCard';
 import StatusBadge from '../../components/StatusBadge';
 import { useHorseOwner } from './HorseOwnerContext';
+import {
+  getConnectionsDirectoryAPI,
+  getFriendsAPI,
+  sendConnectionRequestAPI,
+  respondToConnectionRequestAPI,
+  deleteConnectionAPI
+} from '../../services/connections';
 
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80';
 
@@ -10,30 +17,71 @@ export default function ConnectionsContent() {
   const [activeSubTab, setActiveSubTab] = useState('my-friends'); // 'my-friends' | 'find'
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
-  const { systemUsers = [], setSystemUsers } = useHorseOwner();
+  const { refreshData } = useHorseOwner();
   const [showFriendModal, setShowFriendModal] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
+  
+  const [friendsList, setFriendsList] = useState([]);
+  const [directoryList, setDirectoryList] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleUpdateFriendStatus = (userId, newStatus) => {
-    setSystemUsers(prevUsers =>
-      prevUsers.map(user =>
-        user.id === userId ? { ...user, friendStatus: newStatus } : user
-      )
-    );
+  const fetchConnections = async () => {
+    try {
+      setLoading(true);
+      const friends = await getFriendsAPI();
+      setFriendsList(friends);
+
+      const directory = await getConnectionsDirectoryAPI(searchQuery, roleFilter);
+      setDirectoryList(directory);
+    } catch (err) {
+      console.error('Lỗi khi tải kết nối:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Friends are those with friendStatus === 'FRIEND'
-  const friendsList = systemUsers.filter(u => u.friendStatus === 'FRIEND');
-  
-  // Directory is all, but filterable
-  let directoryList = systemUsers;
-  if (roleFilter !== 'ALL') {
-    directoryList = directoryList.filter(u => u.role === roleFilter);
-  }
-  if (searchQuery) {
-    const q = searchQuery.toLowerCase();
-    directoryList = directoryList.filter(u => u.fullName.toLowerCase().includes(q) || u.id.toLowerCase().includes(q));
-  }
+  useEffect(() => {
+    fetchConnections();
+  }, [searchQuery, roleFilter, activeSubTab]);
+
+  const handleAddFriend = async (recipientId) => {
+    try {
+      setLoading(true);
+      await sendConnectionRequestAPI(recipientId);
+      await refreshData();
+      await fetchConnections();
+    } catch (err) {
+      alert('Gửi yêu cầu kết bạn thất bại: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRespondRequest = async (connectionId, action) => {
+    try {
+      setLoading(true);
+      await respondToConnectionRequestAPI(connectionId, action);
+      await refreshData();
+      await fetchConnections();
+    } catch (err) {
+      alert('Trả lời yêu cầu kết bạn thất bại: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteConnection = async (connectionId) => {
+    try {
+      setLoading(true);
+      await deleteConnectionAPI(connectionId);
+      await refreshData();
+      await fetchConnections();
+    } catch (err) {
+      alert('Xóa kết nối thất bại: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
@@ -64,8 +112,15 @@ export default function ConnectionsContent() {
         </button>
       </div>
 
+      {loading && (
+        <div className="text-center py-4 text-success fw-bold">
+          <div className="spinner-border spinner-border-sm me-2" role="status"></div>
+          Đang tải dữ liệu...
+        </div>
+      )}
+
       {/* Tab: My Friends */}
-      {activeSubTab === 'my-friends' && (
+      {activeSubTab === 'my-friends' && !loading && (
         <div className="row g-4">
           {friendsList.length === 0 ? (
             <div className="col-12 text-center py-5 glass-card text-secondary italic">
@@ -74,7 +129,7 @@ export default function ConnectionsContent() {
           ) : (
             friendsList.map((friend) => (
               <div 
-                key={friend.id} 
+                key={friend.userId || friend.id} 
                 className="col-12 col-md-6 col-lg-4 cursor-pointer hover-scale transition-all"
                 onClick={() => {
                   setSelectedFriend(friend);
@@ -95,13 +150,13 @@ export default function ConnectionsContent() {
                         {friend.fullName}
                       </h4>
                       <p className="ho-font-grotesk fw-bold text-uppercase text-secondary m-0 mt-1" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
-                        {friend.role.replace('_', ' ')}
+                        {friend.role ? friend.role.replace('_', ' ') : ''}
                       </p>
                     </div>
                   </div>
                   <div className="mt-3 text-end" onClick={(e) => e.stopPropagation()}>
                     <button 
-                      onClick={() => handleUpdateFriendStatus(friend.id, 'NONE')}
+                      onClick={() => handleDeleteConnection(friend.connectionId)}
                       className="ho-btn ho-btn-outline-danger btn-sm w-100 fw-bold"
                     >
                       Hủy kết bạn
@@ -152,7 +207,7 @@ export default function ConnectionsContent() {
             ) : (
               directoryList.map((user) => (
                 <div 
-                  key={user.id} 
+                  key={user.userId || user.id} 
                   className="col-12 col-md-6 col-lg-4 cursor-pointer hover-scale transition-all"
                   onClick={() => {
                     setSelectedFriend(user);
@@ -173,7 +228,7 @@ export default function ConnectionsContent() {
                           {user.fullName}
                         </h4>
                         <p className="ho-font-grotesk fw-bold text-uppercase text-secondary m-0 mt-1" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
-                          {user.role.replace('_', ' ')}
+                          {user.role ? user.role.replace('_', ' ') : ''}
                         </p>
                       </div>
                     </div>
@@ -185,7 +240,7 @@ export default function ConnectionsContent() {
 
                       {user.friendStatus === 'PENDING_SENT' && (
                         <button 
-                          onClick={() => handleUpdateFriendStatus(user.id, 'NONE')}
+                          onClick={() => handleDeleteConnection(user.connectionId)}
                           className="ho-btn ho-btn-outline-secondary w-100 fw-bold"
                           title="Hủy yêu cầu"
                         >
@@ -196,13 +251,13 @@ export default function ConnectionsContent() {
                       {user.friendStatus === 'PENDING_RECEIVED' && (
                         <div className="d-flex gap-2">
                           <button 
-                            onClick={() => handleUpdateFriendStatus(user.id, 'FRIEND')}
+                            onClick={() => handleRespondRequest(user.connectionId, 'ACCEPT')}
                             className="ho-btn ho-btn-dark-green flex-grow-1 fw-bold"
                           >
                             Đồng ý
                           </button>
                           <button 
-                            onClick={() => handleUpdateFriendStatus(user.id, 'NONE')}
+                            onClick={() => handleRespondRequest(user.connectionId, 'REJECT')}
                             className="ho-btn ho-btn-outline-danger px-3 fw-bold"
                           >
                             &times;
@@ -212,7 +267,7 @@ export default function ConnectionsContent() {
 
                       {user.friendStatus === 'NONE' && (
                         <button 
-                          onClick={() => handleUpdateFriendStatus(user.id, 'PENDING_SENT')}
+                          onClick={() => handleAddFriend(user.userId || user.id)}
                           className="ho-btn ho-btn-gold-solid w-100 fw-bold"
                         >
                           Kết bạn

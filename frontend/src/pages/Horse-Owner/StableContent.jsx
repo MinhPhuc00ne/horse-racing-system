@@ -3,11 +3,13 @@ import { createPortal } from 'react-dom';
 import { useHorseOwner } from './HorseOwnerContext';
 import StatusBadge from '../../components/StatusBadge';
 import MetricBar from '../../components/MetricBar';
+import { createHorseAPI, uploadFilesAPI } from '../../services/owner';
 
 export default function StableContent() {
   const { horses = [], setHorses } = useHorseOwner();
   const [selectedHorseId, setSelectedHorseId] = useState(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [newHorseData, setNewHorseData] = useState({
     name: '',
     breed: '',
@@ -47,25 +49,45 @@ export default function StableContent() {
     setShowEditModal(true);
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewHorseData((prev) => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        setUploading(true);
+        const urls = await uploadFilesAPI([file]);
+        if (urls && urls.length > 0) {
+          let url = urls[0];
+          if (url.startsWith('/')) {
+            url = `http://localhost:8080${url}`;
+          }
+          setNewHorseData((prev) => ({ ...prev, image: url }));
+        }
+      } catch (err) {
+        alert('Tải ảnh lên thất bại: ' + err.message);
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
-  const handleEditImageChange = (e) => {
+  const handleEditImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditHorseData((prev) => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        setUploading(true);
+        const urls = await uploadFilesAPI([file]);
+        if (urls && urls.length > 0) {
+          let url = urls[0];
+          if (url.startsWith('/')) {
+            url = `http://localhost:8080${url}`;
+          }
+          setEditHorseData((prev) => ({ ...prev, image: url }));
+        }
+      } catch (err) {
+        alert('Tải ảnh lên thất bại: ' + err.message);
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
@@ -118,7 +140,7 @@ export default function StableContent() {
     }
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (!newHorseData.name.trim()) {
       alert('Please enter a horse name.');
@@ -134,50 +156,47 @@ export default function StableContent() {
       return;
     }
 
-    const newId = `H${String(horses.length + 1).padStart(3, '0')}`;
-    const newHorse = {
-      id: newId,
-      name: newHorseData.name.trim(),
-      breed: newHorseData.breed.trim(),
-      age: ageNum,
-      gender: newHorseData.gender,
-      sire: 'Unknown',
-      dam: 'Unknown',
-      status: newHorseData.status,
-      matchesPlayed: 0,
-      winRate: 0,
-      image: newHorseData.image || '',
-      top1Rate: 0,
-      top2Rate: 0,
-      top3Rate: 0,
-      metrics: {
-        speed: 50,
-        stamina: 50,
-        gatePerformance: 50,
-      },
-      medicalLogs: [
-        {
-          id: 1,
-          desc: 'Initial Stable Registration',
-          date: new Date().toISOString().split('T')[0],
-          status: 'Cleared'
-        }
-      ]
-    };
+    try {
+      const response = await createHorseAPI({
+        name: newHorseData.name.trim(),
+        breedName: newHorseData.breed.trim(),
+        age: ageNum,
+        gender: newHorseData.gender,
+        imageUrl: newHorseData.image
+      });
 
-    setHorses((prev) => [...prev, newHorse]);
-    setSelectedHorseId(newId);
+      const newHorse = {
+        id: response.id,
+        name: response.name,
+        breed: response.breedName,
+        age: response.age,
+        gender: response.gender,
+        status: response.status || 'READY',
+        matchesPlayed: response.totalRaces || 0,
+        winRate: Math.round(response.top1Rate || 0),
+        image: response.imageUrl || '',
+        top1Rate: Math.round(response.top1Rate || 0),
+        top2Rate: Math.round(response.top2Rate || 0),
+        top3Rate: Math.round(response.top3Rate || 0),
+        metrics: { speed: 85, stamina: 80, gatePerformance: 90 }
+      };
 
-    // Reset and close
-    setNewHorseData({
-      name: '',
-      breed: '',
-      age: '',
-      gender: 'Male',
-      status: 'READY',
-      image: '',
-    });
-    setShowRegisterModal(false);
+      setHorses((prev) => [...prev, newHorse]);
+      setSelectedHorseId(response.id);
+
+      // Reset and close
+      setNewHorseData({
+        name: '',
+        breed: '',
+        age: '',
+        gender: 'Male',
+        status: 'READY',
+        image: '',
+      });
+      setShowRegisterModal(false);
+    } catch (err) {
+      alert('Thêm ngựa mới thất bại: ' + err.message);
+    }
   };
 
   const horseMetrics = selectedHorse
@@ -363,8 +382,8 @@ export default function StableContent() {
                       )}
                     </div>
                     <div className="d-flex align-items-center gap-2">
-                      <label htmlFor="add-horse-image" className="ho-btn ho-btn-gold-solid py-1 px-3 m-0 text-center cursor-pointer" style={{ fontSize: '11px' }}>
-                        Upload Image
+                      <label htmlFor="add-horse-image" className="ho-btn ho-btn-gold-solid py-1 px-3 m-0 text-center cursor-pointer" style={{ fontSize: '11px', opacity: uploading ? 0.6 : 1, pointerEvents: uploading ? 'none' : 'auto' }}>
+                        {uploading ? 'Uploading...' : 'Upload Image'}
                       </label>
                       <input
                         id="add-horse-image"
@@ -505,8 +524,8 @@ export default function StableContent() {
                       )}
                     </div>
                     <div className="d-flex align-items-center gap-2">
-                      <label htmlFor="edit-horse-image" className="ho-btn ho-btn-gold-solid py-1 px-3 m-0 text-center cursor-pointer" style={{ fontSize: '11px' }}>
-                        Upload Image
+                      <label htmlFor="edit-horse-image" className="ho-btn ho-btn-gold-solid py-1 px-3 m-0 text-center cursor-pointer" style={{ fontSize: '11px', opacity: uploading ? 0.6 : 1, pointerEvents: uploading ? 'none' : 'auto' }}>
+                        {uploading ? 'Uploading...' : 'Upload Image'}
                       </label>
                       <input
                         id="edit-horse-image"

@@ -4,13 +4,75 @@ import { NavLink, useNavigate } from 'react-router-dom';
 export default function DashboardHeader({ user, profile, navLinks, logout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [pendingNotifications, setPendingNotifications] = useState([]);
+  
   const dropdownRef = useRef(null);
+  const notificationRef = useRef(null);
   const navigate = useNavigate();
+
+  const loadNotifications = () => {
+    try {
+      if (user?.role === 'JOCKEY') {
+        const invsRaw = localStorage.getItem('jockey_invitations') || '[]';
+        const invs = JSON.parse(invsRaw);
+        
+        const dirRaw = localStorage.getItem('mock_connections_directory') || '[]';
+        const directory = JSON.parse(dirRaw);
+        const activeFriends = directory.filter(u => u.friendStatus === 'FRIEND');
+        
+        // Filter pending invitations from active friends
+        const jockeyNotifications = invs.filter(inv => 
+          inv.status === 'PENDING' && 
+          activeFriends.some(f => f.userId === inv.ownerId || f.id === inv.ownerId)
+        );
+        setPendingNotifications(jockeyNotifications);
+      } else if (user?.role === 'HORSE_OWNER') {
+        const dirRaw = localStorage.getItem('mock_connections_directory') || '[]';
+        const directory = JSON.parse(dirRaw);
+        
+        // Filter pending received friend requests
+        const ownerNotifications = directory
+          .filter(u => u.friendStatus === 'PENDING_RECEIVED')
+          .map(u => ({
+            id: `FRIEND_REQ_${u.userId || u.id}`,
+            ownerName: u.fullName,
+            senderName: u.fullName,
+            userId: u.userId || u.id,
+            type: 'FRIEND_REQUEST'
+          }));
+        setPendingNotifications(ownerNotifications);
+      } else {
+        setPendingNotifications([]);
+      }
+    } catch (e) {
+      setPendingNotifications([]);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+    
+    const handleStorageChange = () => {
+      loadNotifications();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('jockey_invitations_updated', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('jockey_invitations_updated', handleStorageChange);
+    };
+  }, [user, notificationOpen]);
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setNotificationOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -19,11 +81,22 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
     };
   }, []);
 
+  const handleNotificationClick = (noti) => {
+    setNotificationOpen(false);
+    if (user?.role === 'JOCKEY') {
+      navigate('/jockey/invitations', { state: { activeTab: 'race-invitations' } });
+    } else if (user?.role === 'HORSE_OWNER') {
+      navigate('/owner/friends');
+    }
+  };
+
   const handleProfileClick = () => {
     setDropdownOpen(false);
-    // If owner, redirect to profile route, else no-op or alert
+    // Redirect based on role
     if (user?.role === 'HORSE_OWNER') {
       navigate('/owner/profile');
+    } else if (user?.role === 'JOCKEY') {
+      navigate('/jockey/profile');
     } else {
       alert(`${user?.role} profile is under development`);
     }
@@ -83,14 +156,63 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
         {/* Right Controls */}
         <div className="d-flex align-items-center gap-2 gap-sm-3">
           {/* Notifications */}
-          <button
-            className="ho-btn-light position-relative"
-            style={{ width: '36px', height: '36px' }}
-            onClick={() => alert("No new notifications")}
-          >
-            <span className="material-symbols-outlined text-dark" style={{ fontSize: '20px' }}>notifications</span>
-            <span className="position-absolute bg-danger border border-white rounded-circle" style={{ top: '6px', right: '6px', width: '8px', height: '8px' }} />
-          </button>
+          <div className="avatar-dropdown-container" ref={notificationRef}>
+            <button
+              className="ho-btn-light position-relative"
+              style={{ width: '36px', height: '36px', borderRadius: '50%', padding: 0 }}
+              onClick={() => setNotificationOpen(!notificationOpen)}
+            >
+              <span className="material-symbols-outlined text-dark" style={{ fontSize: '20px' }}>notifications</span>
+              {pendingNotifications.length > 0 && (
+                <span className="position-absolute bg-danger border border-white rounded-circle d-flex align-items-center justify-content-center text-white" 
+                      style={{ top: '-4px', right: '-4px', width: '18px', height: '18px', fontSize: '9px', fontWeight: 'bold' }}>
+                  {pendingNotifications.length}
+                </span>
+              )}
+            </button>
+
+            {notificationOpen && (
+              <div className="avatar-dropdown-menu" style={{ width: '320px', right: 0, paddingBottom: 0 }}>
+                <div className="avatar-dropdown-header d-flex justify-content-between align-items-center">
+                  <span>Thông báo ({pendingNotifications.length})</span>
+                </div>
+                <div className="avatar-dropdown-divider" style={{ marginBottom: 0 }} />
+                
+                <div className="no-scrollbar" style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                  {pendingNotifications.length === 0 ? (
+                    <div className="py-4 text-center text-muted small" style={{ fontStyle: 'italic' }}>
+                      Không có thông báo mới
+                    </div>
+                  ) : (
+                    pendingNotifications.map((noti) => (
+                      <button 
+                        key={noti.id} 
+                        className="avatar-dropdown-item d-flex flex-column align-items-start gap-1 py-3 px-3 border-bottom"
+                        style={{ borderBottom: '1px solid #edf2f7', borderTop: 'none', background: 'none', borderRadius: 0 }}
+                        onClick={() => handleNotificationClick(noti)}
+                      >
+                        <div className="d-flex align-items-center gap-2 w-100">
+                          <span className="material-symbols-outlined text-warning" style={{ fontSize: '18px' }}>
+                            {user?.role === 'JOCKEY' ? 'sports_score' : 'person'}
+                          </span>
+                          <span className="fw-bold text-dark text-truncate" style={{ fontSize: '12.5px', maxWidth: '200px' }}>
+                            {noti.ownerName || noti.senderName || 'Lời mời'}
+                          </span>
+                          <span className="badge bg-warning text-dark ms-auto" style={{ fontSize: '8px', padding: '2px 4px' }}>Mới</span>
+                        </div>
+                        <p className="text-secondary small m-0 text-truncate-2" style={{ fontSize: '11.5px', lineHeight: '1.4', textAlign: 'left', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', whiteSpace: 'normal' }}>
+                          {user?.role === 'JOCKEY' 
+                            ? `Mời bạn đua ngựa ${noti.horseName} tại cúp ${noti.tournamentName.split(' - ')[0]}`
+                            : `Gửi yêu cầu kết bạn đến bạn.`
+                          }
+                        </p>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
 
 
