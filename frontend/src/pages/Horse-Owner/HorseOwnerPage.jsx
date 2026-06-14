@@ -22,7 +22,27 @@ const ownerNavLinks = [
 ];
 
 function HorseOwnerRoutesBridge() {
-  const { profile } = useHorseOwner();
+  const { profile, loading } = useHorseOwner();
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '80vh',
+        color: 'var(--ho-primary-dark)',
+        fontFamily: 'sans-serif'
+      }}>
+        <div className="spinner-border text-success mb-3" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <div className="fw-bold fs-5">Đang tải dữ liệu chuồng ngựa...</div>
+      </div>
+    );
+  }
+
   return (
     <DashboardLayout navLinks={ownerNavLinks} profile={profile}>
       <Routes>

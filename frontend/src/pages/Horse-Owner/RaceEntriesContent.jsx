@@ -3,17 +3,21 @@ import { createPortal } from 'react-dom';
 import DataCard from '../../components/DataCard';
 import StatusBadge from '../../components/StatusBadge';
 import { useHorseOwner } from './HorseOwnerContext';
+import { submitRaceRegistrationAPI } from '../../services/owner';
 
 export default function RaceEntriesContent() {
   const { horses = [], systemUsers = [], tournaments = [], setTournaments } = useHorseOwner();
   const [showModal, setShowModal] = useState(false);
   const [selectedRace, setSelectedRace] = useState(null);
   const [formData, setFormData] = useState({
-    horse: '',
-    jockey: '',
+    horseId: '',
+    jockeyId: '',
+    ownerShare: 90,
+    jockeyShare: 10,
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Filter only READY horses
   const readyHorses = horses.filter(h => h.status === 'READY');
@@ -23,30 +27,64 @@ export default function RaceEntriesContent() {
   const handleRegisterClick = (race) => {
     setSelectedRace(race);
     setFormData({
-      horse: readyHorses.length > 0 ? readyHorses[0].name : '',
-      jockey: friendJockeys.length > 0 ? friendJockeys[0].fullName : '',
+      horseId: readyHorses.length > 0 ? readyHorses[0].id : '',
+      jockeyId: friendJockeys.length > 0 ? friendJockeys[0].id : '',
+      ownerShare: 90,
+      jockeyShare: 10,
     });
     setShowModal(true);
   };
 
-  const handleConfirm = () => {
-    if (!formData.horse || !formData.jockey) {
-      alert("Please select both a horse and a jockey.");
+  const handleConfirm = async () => {
+    if (!formData.horseId || !formData.jockeyId) {
+      alert("Vui lòng chọn cả ngựa và nài ngựa.");
       return;
     }
     
-    // Add horse to the registered list for this tournament
-    setTournaments(prevTournaments => 
-      prevTournaments.map(t => 
-        t.id === selectedRace.id 
-          ? { ...t, registeredHorses: [...(t.registeredHorses || []), formData.horse] }
-          : t
-      )
-    );
+    const ownerS = parseFloat(formData.ownerShare);
+    const jockeyS = parseFloat(formData.jockeyShare);
 
-    setSuccessMsg(`Successfully registered ${formData.horse} with Jockey ${formData.jockey} for the ${selectedRace.tournamentName}!`);
-    setShowModal(false);
-    setShowSuccessModal(true);
+    if (isNaN(ownerS) || isNaN(jockeyS) || Math.abs((ownerS + jockeyS) - 100) > 0.001) {
+      alert("Tổng tỷ lệ phần chia lợi nhuận phải bằng 100%.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await submitRaceRegistrationAPI({
+        raceId: selectedRace.id,
+        horseId: parseInt(formData.horseId),
+        jockeyId: parseInt(formData.jockeyId),
+        ownerSharePercent: ownerS,
+        jockeySharePercent: jockeyS,
+      });
+
+      const selectedHorseObj = readyHorses.find(h => h.id === parseInt(formData.horseId));
+      const selectedJockeyObj = friendJockeys.find(j => j.id === parseInt(formData.jockeyId));
+
+      // Add horse to the registered list for this tournament in local state
+      setTournaments(prevTournaments => 
+        prevTournaments.map(t => 
+          t.id === selectedRace.id 
+            ? { ...t, registeredHorses: [...(t.registeredHorses || []), selectedHorseObj.name] }
+            : t
+        )
+      );
+
+      // Save locally to local storage for persistence across reloads
+      const savedLocal = localStorage.getItem('owner_registered_races') || '[]';
+      const localList = JSON.parse(savedLocal);
+      localList.push({ raceId: selectedRace.id, horseName: selectedHorseObj.name });
+      localStorage.setItem('owner_registered_races', JSON.stringify(localList));
+
+      setSuccessMsg(`Đăng ký thành công ngựa ${selectedHorseObj.name} với Nài ngựa ${selectedJockeyObj.fullName} cho vòng đua ${selectedRace.tournamentName}!`);
+      setShowModal(false);
+      setShowSuccessModal(true);
+    } catch (err) {
+      alert("Đăng ký thi đấu thất bại: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,10 +93,10 @@ export default function RaceEntriesContent() {
       <div className="d-flex justify-content-between align-items-end mb-4">
         <div>
           <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
-            Upcoming Tournaments
+            Vòng đua sắp tới
           </h2>
           <p className="text-secondary small m-0">
-            Register your horses for upcoming elite races.
+            Đăng ký các chiến mã của bạn tham gia vào các vòng đua cúp danh giá.
           </p>
         </div>
       </div>
@@ -72,24 +110,24 @@ export default function RaceEntriesContent() {
             <div key={race.id || i} className="col-12 col-md-4">
               <DataCard 
                 title={race.tournamentName} 
-                subtitle={`${race.date} at ${race.time}`}
+                subtitle={`${race.date} lúc ${race.time}`}
                 interactive={true}
               >
                 <div className="d-flex flex-column gap-2 mb-3">
                   <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span className="fw-bold text-dark">Location:</span>
+                    <span className="fw-bold text-dark">Trường đua:</span>
                     <span className="text-end text-truncate ms-2" style={{ maxWidth: '150px' }}>{race.location}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span className="fw-bold text-dark">Track:</span>
+                    <span className="fw-bold text-dark">Đường chạy:</span>
                     <span>{race.trackType}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span className="fw-bold text-dark">Prize Pool:</span>
+                    <span className="fw-bold text-dark">Tiền thưởng giải:</span>
                     <span className="fw-bold" style={{ color: 'var(--ho-primary-medium)' }}>{race.prizePool}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 align-items-center">
-                    <span className="fw-bold text-dark">Status:</span>
+                    <span className="fw-bold text-dark">Trạng thái:</span>
                     <StatusBadge status={isRegistered ? 'READY' : race.status} />
                   </div>
                 </div>
@@ -100,10 +138,10 @@ export default function RaceEntriesContent() {
                   disabled={isRegistered || race.status !== 'OPEN_FOR_REGISTER'}
                 >
                   {isRegistered 
-                    ? `Registered: ${userRegisteredHorses.map(h => h.name).join(', ')}` 
+                    ? `Đã đăng ký: ${userRegisteredHorses.map(h => h.name).join(', ')}` 
                     : race.status === 'OPEN_FOR_REGISTER' 
-                      ? 'Register for Race' 
-                      : 'Registration Closed'}
+                      ? 'Đăng ký thi đấu' 
+                      : 'Đã đóng đăng ký'}
                 </button>
               </DataCard>
             </div>
@@ -113,26 +151,26 @@ export default function RaceEntriesContent() {
 
       {/* Modal Dialog */}
       {showModal && createPortal(
-        <div className="modal-overlay" style={{ zIndex: 1050 }} onClick={() => setShowModal(false)}>
+        <div className="modal-overlay" style={{ zIndex: 1050 }} onClick={() => !loading && setShowModal(false)}>
           <div className="modal-content-custom animate-scale-up" onClick={(e) => e.stopPropagation()}>
             <h3 className="ho-font-epilogue fs-4 fw-bold mb-4" style={{ color: 'var(--ho-primary-dark)' }}>
-              Register for {selectedRace?.tournamentName}
+              Đăng ký cho {selectedRace?.tournamentName}
             </h3>
             
             <div className="d-flex flex-column gap-4 mb-4">
               {/* Select Horse */}
               <div>
                 <label className="ho-input-label ho-font-grotesk">
-                  Select Horse <span className="text-secondary small fw-normal">(Only READY horses)</span>
+                  Chọn ngựa chiến <span className="text-secondary small fw-normal">(Chỉ hiển thị ngựa sẵn sàng)</span>
                 </label>
                 <select
-                  value={formData.horse}
-                  onChange={(e) => setFormData({ ...formData, horse: e.target.value })}
+                  value={formData.horseId}
+                  onChange={(e) => setFormData({ ...formData, horseId: e.target.value })}
                   className="ho-form-input fw-semibold text-dark"
                 >
-                  {readyHorses.length === 0 && <option value="">No ready horses available</option>}
+                  {readyHorses.length === 0 && <option value="">Không có ngựa chiến nào sẵn sàng</option>}
                   {readyHorses.map(h => (
-                    <option key={h.id} value={h.name}>{h.name} ({h.breed})</option>
+                    <option key={h.id} value={h.id}>{h.name} ({h.breed})</option>
                   ))}
                 </select>
               </div>
@@ -140,18 +178,54 @@ export default function RaceEntriesContent() {
               {/* Select Jockey */}
               <div>
                 <label className="ho-input-label ho-font-grotesk">
-                  Select Jockey <span className="text-secondary small fw-normal">(Only Friend Jockeys)</span>
+                  Chọn nài ngựa <span className="text-secondary small fw-normal">(Chỉ hiển thị nài đã kết bạn)</span>
                 </label>
                 <select
-                  value={formData.jockey}
-                  onChange={(e) => setFormData({ ...formData, jockey: e.target.value })}
+                  value={formData.jockeyId}
+                  onChange={(e) => setFormData({ ...formData, jockeyId: e.target.value })}
                   className="ho-form-input fw-semibold text-dark"
                 >
-                  {friendJockeys.length === 0 && <option value="">No friend jockeys available</option>}
+                  {friendJockeys.length === 0 && <option value="">Không có nài ngựa bạn bè nào</option>}
                   {friendJockeys.map(j => (
-                    <option key={j.id} value={j.fullName}>{j.fullName} (Win Rate: {j.winRate}%)</option>
+                    <option key={j.id} value={j.id}>{j.fullName} (Win Rate: {j.winRate}%)</option>
                   ))}
                 </select>
+              </div>
+
+              {/* Profit Sharing */}
+              <div className="row g-3">
+                <div className="col-6">
+                  <label className="ho-input-label ho-font-grotesk">
+                    Horse Owner (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formData.ownerShare}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      setFormData({ ...formData, ownerShare: val, jockeyShare: 100 - val });
+                    }}
+                    className="ho-form-input text-dark fw-bold"
+                  />
+                </div>
+                <div className="col-6">
+                  <label className="ho-input-label ho-font-grotesk">
+                    Jockey (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formData.jockeyShare}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      setFormData({ ...formData, jockeyShare: val, ownerShare: 100 - val });
+                    }}
+                    className="ho-form-input text-dark fw-bold"
+                  />
+                </div>
               </div>
             </div>
 
@@ -161,21 +235,23 @@ export default function RaceEntriesContent() {
                 onClick={() => setShowModal(false)}
                 className="ho-btn-link text-uppercase tracking-wider small fw-bold"
                 style={{ textDecoration: 'none' }}
+                disabled={loading}
               >
-                Cancel
+                Hủy bỏ
               </button>
               <button
                 onClick={handleConfirm}
                 className="ho-btn ho-btn-gold-solid py-2 px-4 fw-bold"
-                disabled={readyHorses.length === 0 || friendJockeys.length === 0}
+                disabled={loading || readyHorses.length === 0 || friendJockeys.length === 0}
               >
-                Confirm Registration
+                {loading ? 'Đang xử lý...' : 'Xác nhận Đăng ký'}
               </button>
             </div>
           </div>
         </div>,
         document.body
       )}
+      
       {/* Registration Success Modal Dialog */}
       {showSuccessModal && createPortal(
         <div className="modal-overlay" style={{ zIndex: 1050 }} onClick={() => setShowSuccessModal(false)}>
@@ -184,7 +260,7 @@ export default function RaceEntriesContent() {
               check_circle
             </span>
             <h3 className="ho-font-epilogue fs-5 fw-bold mb-2" style={{ color: 'var(--ho-primary-dark)' }}>
-              Registration Successful
+              Đăng ký thành công
             </h3>
             <p className="text-secondary small fw-medium mb-4" style={{ lineHeight: '1.5' }}>
               {successMsg}
@@ -197,7 +273,7 @@ export default function RaceEntriesContent() {
                 className="ho-btn ho-btn-gold-solid py-2 px-5 fw-bold text-uppercase"
                 style={{ fontSize: '12px', letterSpacing: '0.5px' }}
               >
-                OK
+                Đồng ý
               </button>
             </div>
           </div>

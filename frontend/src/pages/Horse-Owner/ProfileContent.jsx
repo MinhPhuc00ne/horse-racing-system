@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useHorseOwner } from './HorseOwnerContext';
+import { updateOwnerProfileAPI, uploadFilesAPI } from '../../services/owner';
 
 const presetAvatars = [
   "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80",
@@ -15,11 +16,39 @@ export default function ProfileContent() {
   const [depositAmount, setDepositAmount] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [uploading, setUploading] = useState(false);
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setProfile(formData);
-    alert("Stable profile saved successfully!");
+    try {
+      const response = await updateOwnerProfileAPI({
+        fullName: formData.fullName,
+        phone: formData.phoneNumber,
+        avatarUrl: formData.avatar,
+        stableName: formData.stableName,
+        stableAddress: formData.stableAddress,
+        description: formData.description,
+        bankAccount: formData.bankAccount || '',
+        identityNumber: formData.identityNumber || '',
+        dateOfBirth: formData.dateOfBirth
+      });
+      
+      setProfile({
+        ...profile,
+        fullName: response.fullName,
+        phoneNumber: response.phone,
+        avatar: response.avatarUrl,
+        stableName: response.stableName,
+        stableAddress: response.stableAddress,
+        description: response.description,
+        bankAccount: response.bankAccount,
+        identityNumber: response.identityNumber,
+        dateOfBirth: response.dateOfBirth
+      });
+      alert("Hồ sơ chuồng ngựa đã được lưu thành công!");
+    } catch (err) {
+      alert("Cập nhật hồ sơ thất bại: " + err.message);
+    }
   };
 
   const handleDeposit = () => {
@@ -72,20 +101,30 @@ export default function ProfileContent() {
     alert(`Mock Withdrawal of ${amt.toLocaleString()} VND successful!`);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          avatar: reader.result,
-          avatarZoom: 1,
-          avatarOffsetX: 0,
-          avatarOffsetY: 0
-        }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        setUploading(true);
+        const urls = await uploadFilesAPI([file]);
+        if (urls && urls.length > 0) {
+          let url = urls[0];
+          if (url.startsWith('/')) {
+            url = `http://localhost:8080${url}`;
+          }
+          setFormData(prev => ({
+            ...prev,
+            avatar: url,
+            avatarZoom: 1,
+            avatarOffsetX: 0,
+            avatarOffsetY: 0
+          }));
+        }
+      } catch (err) {
+        alert("Tải ảnh đại diện thất bại: " + err.message);
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
@@ -196,10 +235,11 @@ export default function ProfileContent() {
                       type="button"
                       onClick={() => document.getElementById('avatar-upload').click()}
                       className="ho-btn ho-btn-gold-outline py-1.5 px-3 d-flex align-items-center gap-2"
-                      style={{ fontSize: '11px' }}
+                      style={{ fontSize: '11px', opacity: uploading ? 0.6 : 1, pointerEvents: uploading ? 'none' : 'auto' }}
+                      disabled={uploading}
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>upload</span>
-                      Upload from Computer
+                      <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>{uploading ? 'sync' : 'upload'}</span>
+                      {uploading ? 'Uploading...' : 'Upload from Computer'}
                     </button>
                     <input
                       type="file"
