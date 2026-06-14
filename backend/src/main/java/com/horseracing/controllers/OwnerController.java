@@ -49,7 +49,7 @@ public class OwnerController {
     }
 
     @PutMapping("/horses/{id}")
-    public ResponseEntity<?> updateHorse(@PathVariable Long id, @Valid @RequestBody com.horseracing.dto.request.UpdateHorseRequest request, Authentication authentication) {
+    public ResponseEntity<?> updateHorse(@PathVariable Integer id, @Valid @RequestBody com.horseracing.dto.request.UpdateHorseRequest request, Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             HorseResponse response = horseService.updateHorse(userDetails.getUsername(), id, request);
@@ -60,7 +60,7 @@ public class OwnerController {
     }
 
     @DeleteMapping("/horses/{id}")
-    public ResponseEntity<?> deleteHorse(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<?> deleteHorse(@PathVariable Integer id, Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             horseService.deleteHorse(userDetails.getUsername(), id);

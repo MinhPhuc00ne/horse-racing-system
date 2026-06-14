@@ -61,7 +61,7 @@ public class HorseService {
     }
 
     @Transactional
-    public HorseResponse updateHorse(String ownerEmail, Long horseId, com.horseracing.dto.request.UpdateHorseRequest request) {
+    public HorseResponse updateHorse(String ownerEmail, Integer horseId, com.horseracing.dto.request.UpdateHorseRequest request) {
         HorseOwnerProfile ownerProfile = horseOwnerProfileRepository.findByUserEmail(ownerEmail)
                 .orElseThrow(() -> new RuntimeException("Horse owner profile not found"));
         
@@ -93,7 +93,7 @@ public class HorseService {
     }
 
     @Transactional
-    public void deleteHorse(String ownerEmail, Long horseId) {
+    public void deleteHorse(String ownerEmail, Integer horseId) {
         HorseOwnerProfile ownerProfile = horseOwnerProfileRepository.findByUserEmail(ownerEmail)
                 .orElseThrow(() -> new RuntimeException("Horse owner profile not found"));
         
