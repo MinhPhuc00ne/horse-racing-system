@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/tournaments/**").permitAll()
                         .requestMatchers("/api/races/**").permitAll()
+                        .requestMatchers("/api/payments/payos/webhook").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
