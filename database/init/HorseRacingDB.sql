@@ -484,6 +484,7 @@ CREATE TABLE [dbo].[races](
 	[weather] [nvarchar](50) NULL,
 	[status] [nvarchar](50) NULL,
 	[end_time] [time](7) NULL,
+	[referee_id] [int] NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
@@ -757,6 +758,7 @@ CREATE TABLE [dbo].[wallet_transactions](
 	[status] [nvarchar](20) NULL,
 	[reference_type] [nvarchar](50) NULL,
 	[reference_id] [int] NULL,
+	[payos_order_code] [bigint] NULL,
 	[created_at] [datetime] NULL,
 PRIMARY KEY CLUSTERED 
 (
