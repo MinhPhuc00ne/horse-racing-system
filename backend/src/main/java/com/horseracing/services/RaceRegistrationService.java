@@ -71,7 +71,7 @@ public class RaceRegistrationService {
                 .owner(owner)
                 .ownerSharePercent(request.getOwnerSharePercent())
                 .jockeySharePercent(request.getJockeySharePercent())
-                .status("PENDING")
+                .status("PENDING_JOCKEY")
                 .build();
 
         registration = raceRegistrationRepository.save(registration);

@@ -40,4 +40,56 @@ public class JockeyController {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }
     }
+
+    @GetMapping("/invitations")
+    public ResponseEntity<?> getInvitations(Authentication authentication) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            return ResponseEntity.ok(jockeyService.getInvitations(userDetails.getUsername()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/invitations/{id}/respond")
+    public ResponseEntity<?> respondToInvitation(
+            @PathVariable Integer id,
+            @RequestParam String action,
+            Authentication authentication) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            return ResponseEntity.ok(jockeyService.respondToInvitation(userDetails.getUsername(), id, action));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @GetMapping("/schedule")
+    public ResponseEntity<?> getSchedule(Authentication authentication) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            return ResponseEntity.ok(jockeyService.getSchedule(userDetails.getUsername()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<?> getHistory(Authentication authentication) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            return ResponseEntity.ok(jockeyService.getHistory(userDetails.getUsername()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @GetMapping("/leaderboard")
+    public ResponseEntity<?> getLeaderboard() {
+        try {
+            return ResponseEntity.ok(jockeyService.getLeaderboard());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
 }

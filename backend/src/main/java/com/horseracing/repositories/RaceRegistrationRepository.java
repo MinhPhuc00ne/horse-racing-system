@@ -14,4 +14,6 @@ public interface RaceRegistrationRepository extends JpaRepository<RaceRegistrati
     boolean existsByRaceIdAndHorseIdAndStatusNot(Integer raceId, Integer horseId, String status);
     boolean existsByRaceIdAndJockeyIdAndStatusNot(Integer raceId, Integer jockeyId, String status);
     java.util.Optional<RaceRegistration> findFirstByRaceIdAndHorseId(Integer raceId, Integer horseId);
+
+    List<RaceRegistration> findByJockeyUserEmailAndStatus(String email, String status);
 }

@@ -13,7 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import com.horseracing.dto.response.*;
+import com.horseracing.entities.RaceRegistration;
+import com.horseracing.entities.RaceParticipant;
+import com.horseracing.repositories.RaceRegistrationRepository;
+import com.horseracing.repositories.RaceParticipantRepository;
 @Service
 @RequiredArgsConstructor
 public class JockeyService {
@@ -21,6 +27,8 @@ public class JockeyService {
     private final UserRepository userRepository;
     private final JockeyProfileRepository jockeyProfileRepository;
     private final UpgradeRequestRepository upgradeRequestRepository;
+    private final RaceRegistrationRepository raceRegistrationRepository;
+    private final RaceParticipantRepository raceParticipantRepository;
 
     @Transactional(readOnly = true)
     public JockeyProfileResponse getJockeyProfile(String email) {
@@ -97,5 +105,105 @@ public class JockeyService {
                 .approvalStatus(jockey.getApprovalStatus())
                 .documentUrls(documentUrls)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RaceRegistrationResponse> getInvitations(String email) {
+        return raceRegistrationRepository.findByJockeyUserEmailAndStatus(email, "PENDING_JOCKEY").stream()
+                .map(RaceRegistrationResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public RaceRegistrationResponse respondToInvitation(String email, Integer id, String action) {
+        RaceRegistration registration = raceRegistrationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Registration not found"));
+        
+        if (!registration.getJockey().getUser().getEmail().equals(email)) {
+            throw new RuntimeException("Not authorized to respond to this invitation");
+        }
+
+        if (!"PENDING_JOCKEY".equalsIgnoreCase(registration.getStatus())) {
+            throw new RuntimeException("Invitation is not pending");
+        }
+
+        if ("ACCEPT".equalsIgnoreCase(action)) {
+            registration.setStatus("PENDING");
+        } else if ("REJECT".equalsIgnoreCase(action)) {
+            registration.setStatus("REJECTED_BY_JOCKEY");
+        } else {
+            throw new RuntimeException("Invalid action. Use ACCEPT or REJECT");
+        }
+
+        return RaceRegistrationResponse.fromEntity(raceRegistrationRepository.save(registration));
+    }
+
+    @Transactional(readOnly = true)
+    public List<JockeyScheduleResponse> getSchedule(String email) {
+        return raceParticipantRepository.findByJockeyUserEmailAndStatusNot(email, "FINISHED").stream()
+                .map(rp -> JockeyScheduleResponse.builder()
+                        .participantId(rp.getId())
+                        .raceId(rp.getRace().getId())
+                        .raceName(rp.getRace().getRaceName())
+                        .raceDate(rp.getRace().getRaceDate())
+                        .startTime(rp.getRace().getStartTime())
+                        .horseId(rp.getHorse().getId())
+                        .horseName(rp.getHorse().getName())
+                        .gateNumber(rp.getGateNumber())
+                        .participantStatus(rp.getStatus())
+                        .raceStatus(rp.getRace().getStatus())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<JockeyHistoryResponse> getHistory(String email) {
+        return raceParticipantRepository.findByJockeyUserEmailAndStatus(email, "FINISHED").stream()
+                .map(rp -> {
+                    BigDecimal prize = BigDecimal.ZERO;
+                    if (rp.getFinalRank() != null && rp.getFinalRank() <= 3) {
+                        RaceRegistration reg = raceRegistrationRepository
+                                .findFirstByRaceIdAndHorseId(rp.getRace().getId(), rp.getHorse().getId())
+                                .orElse(null);
+                        
+                        if (reg != null && reg.getJockeySharePercent() != null) {
+                            BigDecimal totalPrize = BigDecimal.ZERO;
+                            if (rp.getFinalRank() == 1) totalPrize = rp.getRace().getTournament().getPrizeFirst();
+                            else if (rp.getFinalRank() == 2) totalPrize = rp.getRace().getTournament().getPrizeSecond();
+                            else if (rp.getFinalRank() == 3) totalPrize = rp.getRace().getTournament().getPrizeThird();
+                            
+                            if (totalPrize != null) {
+                                prize = totalPrize.multiply(BigDecimal.valueOf(reg.getJockeySharePercent() / 100.0));
+                            }
+                        }
+                    }
+                    
+                    return JockeyHistoryResponse.builder()
+                            .participantId(rp.getId())
+                            .raceId(rp.getRace().getId())
+                            .raceName(rp.getRace().getRaceName())
+                            .raceDate(rp.getRace().getRaceDate())
+                            .horseId(rp.getHorse().getId())
+                            .horseName(rp.getHorse().getName())
+                            .finalRank(rp.getFinalRank())
+                            .finishTime(rp.getFinishTime())
+                            .prizeMoney(prize)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<JockeyLeaderboardResponse> getLeaderboard() {
+        return jockeyProfileRepository.findAllByOrderByRankingScoreDescWinRateDesc().stream()
+                .map(jp -> JockeyLeaderboardResponse.builder()
+                        .jockeyId(jp.getId())
+                        .jockeyName(jp.getUser().getFullName())
+                        .rankingScore(jp.getRankingScore())
+                        .winRate(jp.getWinRate())
+                        .experienceYear(jp.getExperienceYear())
+                        .avatarUrl(jp.getUser().getAvatarUrl())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

@@ -11,4 +11,7 @@ public interface RaceParticipantRepository extends JpaRepository<RaceParticipant
     List<RaceParticipant> findByRaceId(Integer raceId);
     List<RaceParticipant> findByHorseId(Integer horseId);
     long countByRaceId(Integer raceId);
+
+    List<RaceParticipant> findByJockeyUserEmailAndStatusNot(String email, String status);
+    List<RaceParticipant> findByJockeyUserEmailAndStatus(String email, String status);
 }
