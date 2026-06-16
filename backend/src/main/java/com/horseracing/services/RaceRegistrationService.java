@@ -92,6 +92,13 @@ public class RaceRegistrationService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<RaceRegistrationResponse> getRegistrationsByOwner(String ownerEmail) {
+        return raceRegistrationRepository.findByOwnerUserEmail(ownerEmail).stream()
+                .map(RaceRegistrationResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public RaceRegistrationResponse approveRegistration(Integer registrationId) {
         RaceRegistration registration = raceRegistrationRepository.findById(registrationId)

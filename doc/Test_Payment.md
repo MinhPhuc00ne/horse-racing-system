@@ -28,15 +28,8 @@ Tài liệu này giải thích chi tiết mục đích của các công cụ (Pa
   ssh -o StrictHostKeyChecking=no -R 80:localhost:8080 nokey@localhost.run
   ```
 
+ /api/payments/payos/webhook
 
-**Bước 2: Cài đặt Webhook lên PayOS**
-- Đăng nhập vào [my.payos.vn](https://my.payos.vn).
-- Bấm vào mục **Kênh thanh toán** (bên menu trái) -> Chọn kênh thanh toán của dự án.
-- Cuộn xuống phần **Cấu hình Webhook**, dán link vừa copy vào và **thêm đuôi API của bạn vào**.
-- Link hoàn chỉnh phải là: `https://<link-cua-ban>.lhr.life/api/payments/payos/webhook`
-- Bấm **Lưu**. PayOS sẽ bắn một tín hiệu test, nếu báo Lưu thành công màu xanh là mọi thứ đã sẵn sàng.
-
----
 
 
 http://localhost:8080/api/auth/login
@@ -72,15 +65,7 @@ http://localhost:8080/api/auth/login
   ```
 - **Kết quả:** Code sẽ trả về một object có chứa `checkoutUrl`.
 
-**Bước 3: Thanh toán thực tế**
-- Bạn copy cái link `checkoutUrl` vừa nhận được, dán lên trình duyệt web.
-- Nó sẽ hiện ra trang quét mã QR của PayOS. Bạn có thể dùng App Ngân hàng quét để chuyển tiền thật (chuyển xong có thể hủy trên web PayOS để lấy lại tiền sau).
-- Ngay khi bạn chuyển thành công, màn hình PayOS sẽ báo "Thành công". Đồng thời dưới Terminal code Spring Boot của bạn sẽ nảy log báo: `Received valid webhook... Successfully updated wallet balance`.
 
-**Bước 4: Kiểm tra lại số dư**
-- Lặp lại Bước 1, bạn sẽ thấy tiền đã tự động được cộng thêm `50000`!
-
----
 
 ## 4. LUỒNG TEST: RÚT TIỀN (WITHDRAW) BẰNG POSTMAN
 

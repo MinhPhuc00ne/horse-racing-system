@@ -81,6 +81,17 @@ public class OwnerController {
         }
     }
 
+    @GetMapping("/race-registrations")
+    public ResponseEntity<?> getMyRegistrations(Authentication authentication) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            List<RaceRegistrationResponse> response = raceRegistrationService.getRegistrationsByOwner(userDetails.getUsername());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Authentication authentication) {
         try {
