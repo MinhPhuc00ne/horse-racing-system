@@ -40,9 +40,6 @@ public class AiChatService {
     @Value("${app.gemini.api-key:}")
     private String geminiApiKey;
 
-    @Value("${app.gemini.model:gemini-3.5-flash}")
-    private String geminiModel;
-
     private final ResourceLoader resourceLoader;
     private final AiChatHistoryRepository aiChatHistoryRepository;
     private final WalletRepository walletRepository;
@@ -96,7 +93,7 @@ public class AiChatService {
             }
         }
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel + ":generateContent?key=" + geminiApiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
 
         try {
             ObjectNode rootNode = objectMapper.createObjectNode();
@@ -104,8 +101,8 @@ public class AiChatService {
             // 2. Customize System Instruction based on user role and data
             String rolePrompt = "";
             if (user == null) {
-                rolePrompt = "\nVai trò người dùng: GUEST (Khách vãng lai - chưa đăng nhập).\n"
-                        + "Gợi ý điều hướng: Nếu người dùng hỏi tổng quan về hệ thống hoặc có ý định muốn thực hiện các thao tác cần đăng nhập (như xem giải đấu chi tiết, đặt cược, nạp tiền), hãy trả về chuỗi JSON chứa hành động NAVIGATE đến '/login' hoặc '/signup' để hướng dẫn họ đăng ký/đăng nhập.";
+                rolePrompt = "\nVai trò người dùng hiện tại: GUEST (Khách vãng lai - chưa đăng nhập).\n"
+                        + "Hướng dẫn: Khuyên họ đăng nhập hoặc đăng ký tài khoản nếu họ muốn sử dụng đầy đủ các tính năng như xem giải đấu chi tiết, đặt cược, hoặc quản lý thông tin.";
             } else {
                 Role role = user.getRole();
                 String balanceInfo = "";
@@ -114,49 +111,27 @@ public class AiChatService {
                     BigDecimal balance = walletOpt.map(Wallet::getBalance).orElse(BigDecimal.ZERO);
                     balanceInfo = " (Số dư ví hiện tại: " + balance + " VND)";
                 }
-                rolePrompt = "\nVai trò người dùng: " + role.name() + " (Đã đăng nhập).\n"
+                rolePrompt = "\nVai trò người dùng hiện tại: " + role.name() + " (Đã đăng nhập).\n"
                         + "Thông tin tài khoản: Tên: " + user.getFullName() + ", Email: " + user.getEmail() + balanceInfo + ".\n";
 
                 if (role == Role.SPECTATOR) {
-                    rolePrompt += "Hướng dẫn nghiệp vụ: Tập trung hỗ trợ người xem đặt cược, nạp/rút tiền qua PayOS, xem lịch sử đặt cược. "
-                            + "\n- Nếu họ muốn đặt cược hoặc hỏi xem nên đặt cược vào chú ngựa nào: Hãy hướng dẫn họ xem thông tin lịch sử thi đấu để phân tích, tự động chuyển hướng màn hình bằng cách trả về hành động NAVIGATE đến '/spectator/results'."
-                            + "\n- Nếu họ muốn xuất file báo cáo (PDF hoặc Excel) về lịch sử cược/tiền nạp, hãy đề xuất trả về hành động DOWNLOAD_FILE với url '/api/v1/reports/pdf/wallet-transactions' hoặc '/api/v1/reports/excel/wallet-transactions'.";
+                    rolePrompt += "Hướng dẫn nghiệp vụ cho Spectator: Giải đáp và hướng dẫn họ cách đặt cược, nạp/rút tiền qua PayOS, xem lịch sử đặt cược và lịch sử giao dịch trực tiếp trên giao diện cá nhân.";
                 } else if (role == Role.HORSE_OWNER) {
-                    rolePrompt += "Hướng dẫn nghiệp vụ: Tập trung hỗ trợ chủ ngựa quản lý ngựa của mình, đăng ký giải đấu cho ngựa, thương thảo với Jockey (Nài ngựa). "
-                            + "\n- Nếu họ muốn quản lý ngựa hoặc đăng ký đua, hãy chuyển hướng họ bằng hành động NAVIGATE đến '/owner/horses'.";
+                    rolePrompt += "Hướng dẫn nghiệp vụ cho Horse Owner: Hướng dẫn họ cách quản lý ngựa, đăng ký ngựa tham gia giải đấu, và thỏa thuận hợp tác với Jockey (Nài ngựa).";
                 } else if (role == Role.JOCKEY) {
-                    rolePrompt += "Hướng dẫn nghiệp vụ: Tập trung hỗ trợ nài ngựa xem lịch đua và hợp đồng thỏa thuận với chủ ngựa. "
-                            + "\n- Nếu họ hỏi về lịch đua hoặc thỏa thuận hợp đồng, chuyển hướng bằng hành động NAVIGATE đến '/jockey/schedule'.";
+                    rolePrompt += "Hướng dẫn nghiệp vụ cho Jockey: Hướng dẫn họ xem lịch đua cá nhân và các hợp đồng thỏa thuận với chủ ngựa.";
                 } else if (role == Role.RACE_REFEREE) {
-                    rolePrompt += "Hướng dẫn nghiệp vụ: Tập trung hỗ trợ trọng tài ghi nhận vi phạm, xem lịch bắt giải đấu. "
-                            + "\n- Giao diện làm việc của trọng tài ở đường dẫn '/referee/schedule'.";
+                    rolePrompt += "Hướng dẫn nghiệp vụ cho Referee: Hướng dẫn họ cách xem lịch bắt giải đấu và cập nhật kết quả các vòng đua được phân công.";
                 } else if (role == Role.ADMIN) {
-                    rolePrompt += "Hướng dẫn nghiệp vụ: Tập trung hỗ trợ quản trị viên duyệt yêu cầu nâng cấp vai trò, quản lý người dùng, thiết lập giải đấu. "
-                            + "\n- Giao diện duyệt nâng cấp ở '/admin/upgrades'.";
+                    rolePrompt += "Hướng dẫn nghiệp vụ cho Admin: Hướng dẫn họ cách duyệt yêu cầu nâng cấp vai trò của người dùng, quản lý thành viên và thiết lập giải đấu mới.";
                 }
             }
 
             String finalSystemInstruction = this.systemPrompt + "\n" + rolePrompt + "\n"
-                    + "QUY TẮC ĐỊNH DẠNG PHẢN HỒI (QUAN TRỌNG NHẤT):\n"
-                    + "Bạn có hai cách phản hồi:\n"
-                    + "1. Trả về văn bản nói chuyện thông thường bằng tiếng Việt.\n"
-                    + "2. Khi người dùng muốn xem biểu đồ, tải báo cáo hoặc chuyển hướng màn hình, hãy trả về chuỗi JSON chuẩn (không chứa bất kỳ chữ hay dấu ```json ở đầu/cuối, chỉ trả về chuỗi JSON thô có dấu { và }), cấu trúc JSON:\n"
-                    + "{\n"
-                    + "  \"text\": \"Thông điệp phản hồi chính gửi người dùng bằng tiếng Việt...\",\n"
-                    + "  \"actions\": [\n"
-                    + "    { \"type\": \"NAVIGATE\", \"payload\": \"/đường_dẫn\" },\n"
-                    + "    { \"type\": \"DOWNLOAD_FILE\", \"payload\": { \"url\": \"/đường_dẫn_api\", \"label\": \"Nút tải xuống\" } }\n"
-                    + "  ],\n"
-                    + "  \"chart\": {\n"
-                    + "    \"type\": \"BAR\", // hoặc PIE, LINE\n"
-                    + "    \"title\": \"Tiêu đề biểu đồ\",\n"
-                    + "    \"data\": [\n"
-                    + "      { \"label\": \"Nhãn 1\", \"value\": 100 },\n"
-                    + "      { \"label\": \"Nhãn 2\", \"value\": 150 }\n"
-                    + "    ]\n"
-                    + "  }\n"
-                    + "}\n"
-                    + "Hãy tự động phân tích câu hỏi để trả về hành động chuyển hướng màn hình hoặc biểu đồ phù hợp nhất.";
+                    + "LƯU Ý QUAN TRỌNG VỀ ĐẦU RA:\n"
+                    + "- Chỉ được trả về câu trả lời bằng văn bản tiếng Việt hoặc định dạng Markdown thông thường.\n"
+                    + "- TUYỆT ĐỐI KHÔNG tự động trả về bất kỳ chuỗi JSON cấu trúc nào chứa actions (NAVIGATE, DOWNLOAD_FILE) hay chart.\n"
+                    + "- Chỉ tư vấn và giải đáp các vấn đề nghiệp vụ của Hệ thống Quản lý Đua Ngựa. Lịch sự từ chối các câu hỏi ngoài lề.";
 
             ObjectNode systemInstruction = objectMapper.createObjectNode();
             ArrayNode sysParts = objectMapper.createArrayNode();
@@ -234,32 +209,7 @@ public class AiChatService {
                 }
             }
 
-            // 5. Structure and validate response for the client (JSON Wrapping)
-            String trimmedReply = replyText.trim();
-            // Remove markdown format if AI wrapped it in ```json ... ```
-            if (trimmedReply.startsWith("```json")) {
-                trimmedReply = trimmedReply.substring(7);
-                if (trimmedReply.endsWith("```")) {
-                    trimmedReply = trimmedReply.substring(0, trimmedReply.length() - 3);
-                }
-                trimmedReply = trimmedReply.trim();
-            } else if (trimmedReply.startsWith("```")) {
-                trimmedReply = trimmedReply.substring(3);
-                if (trimmedReply.endsWith("```")) {
-                    trimmedReply = trimmedReply.substring(0, trimmedReply.length() - 3);
-                }
-                trimmedReply = trimmedReply.trim();
-            }
-
-            try {
-                JsonNode parsedNode = objectMapper.readTree(trimmedReply);
-                if (parsedNode.isObject() && parsedNode.has("text")) {
-                    return trimmedReply; // It's already valid custom JSON
-                }
-            } catch (Exception e) {
-                // Not valid JSON, wrap it
-            }
-
+            // 5. Structure response for the client (JSON Wrapping)
             ObjectNode wrappedResponse = objectMapper.createObjectNode();
             wrappedResponse.put("text", replyText);
             return wrappedResponse.toString();
