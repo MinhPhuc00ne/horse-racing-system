@@ -40,6 +40,9 @@ public class AiChatService {
     @Value("${app.gemini.api-key:}")
     private String geminiApiKey;
 
+    @Value("${app.gemini.model:gemini-3.5-flash}")
+    private String geminiModel;
+
     private final ResourceLoader resourceLoader;
     private final AiChatHistoryRepository aiChatHistoryRepository;
     private final WalletRepository walletRepository;
@@ -93,7 +96,7 @@ public class AiChatService {
             }
         }
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" + geminiApiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel + ":generateContent?key=" + geminiApiKey;
 
         try {
             ObjectNode rootNode = objectMapper.createObjectNode();
@@ -261,10 +264,23 @@ public class AiChatService {
             wrappedResponse.put("text", replyText);
             return wrappedResponse.toString();
 
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+            log.error("HTTP error calling Gemini API: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            ObjectNode errorNode = objectMapper.createObjectNode();
+            String userFriendlyMessage;
+            if (e.getStatusCode().value() == 429) {
+                userFriendlyMessage = "Hệ thống AI đang nhận được quá nhiều yêu cầu cùng lúc. Vui lòng thử lại sau ít phút.";
+            } else if (e.getStatusCode().value() == 503) {
+                userFriendlyMessage = "Dịch vụ AI đang bận hoặc tạm thời không khả dụng. Vui lòng thử lại sau giây lát.";
+            } else {
+                userFriendlyMessage = "Đã xảy ra lỗi hệ thống khi kết nối với AI (Mã lỗi: " + e.getStatusCode().value() + "). Vui lòng thử lại sau.";
+            }
+            errorNode.put("text", userFriendlyMessage);
+            return errorNode.toString();
         } catch (Exception e) {
             log.error("Error calling Gemini API", e);
             ObjectNode errorNode = objectMapper.createObjectNode();
-            errorNode.put("text", "Đã xảy ra lỗi khi kết nối với AI: " + e.getMessage());
+            errorNode.put("text", "Đã xảy ra lỗi khi kết nối với AI. Vui lòng thử lại sau.");
             return errorNode.toString();
         }
     }
