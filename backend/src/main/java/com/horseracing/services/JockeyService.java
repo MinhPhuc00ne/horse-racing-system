@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import com.horseracing.dto.response.*;
 import com.horseracing.entities.RaceRegistration;
-import com.horseracing.entities.RaceParticipant;
 import com.horseracing.repositories.RaceRegistrationRepository;
 import com.horseracing.repositories.RaceParticipantRepository;
 @Service
@@ -167,10 +166,12 @@ public class JockeyService {
                                 .orElse(null);
                         
                         if (reg != null && reg.getJockeySharePercent() != null) {
-                            BigDecimal totalPrize = BigDecimal.ZERO;
-                            if (rp.getFinalRank() == 1) totalPrize = rp.getRace().getTournament().getPrizeFirst();
-                            else if (rp.getFinalRank() == 2) totalPrize = rp.getRace().getTournament().getPrizeSecond();
-                            else if (rp.getFinalRank() == 3) totalPrize = rp.getRace().getTournament().getPrizeThird();
+                            BigDecimal totalPrize = switch (rp.getFinalRank()) {
+                                case 1 -> rp.getRace().getTournament().getPrizeFirst();
+                                case 2 -> rp.getRace().getTournament().getPrizeSecond();
+                                case 3 -> rp.getRace().getTournament().getPrizeThird();
+                                default -> BigDecimal.ZERO;
+                            };
                             
                             if (totalPrize != null) {
                                 prize = totalPrize.multiply(BigDecimal.valueOf(reg.getJockeySharePercent() / 100.0));

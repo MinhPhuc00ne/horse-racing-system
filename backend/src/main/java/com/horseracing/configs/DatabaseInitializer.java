@@ -43,6 +43,21 @@ public class DatabaseInitializer implements CommandLineRunner {
             log.info("Created default administrator account: admin@gmail.com / Admin@12345");
         }
 
+        // Create an initial referee user if not exists
+        if (!userRepository.existsByEmail("referee@gmail.com")) {
+            User referee = User.builder()
+                    .username("referee")
+                    .email("referee@gmail.com")
+                    .password(passwordEncoder.encode("Referee@12345"))
+                    .fullName("Default Referee")
+                    .role(Role.RACE_REFEREE)
+                    .provider(AuthProvider.LOCAL)
+                    .enabled(true)
+                    .build();
+            userRepository.save(referee);
+            log.info("Created default referee account: referee@gmail.com / Referee@12345");
+        }
+
         // Initialize Race Tracks
         if (raceTrackRepository.count() == 0) {
             List<RaceTrack> tracks = List.of(

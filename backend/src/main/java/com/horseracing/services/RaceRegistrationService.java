@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,8 @@ public class RaceRegistrationService {
     private final JockeyProfileRepository jockeyProfileRepository;
     private final HorseOwnerProfileRepository horseOwnerProfileRepository;
     private final RaceParticipantRepository raceParticipantRepository;
+    private final WalletRepository walletRepository;
+    private final WalletTransactionRepository walletTransactionRepository;
 
     @Transactional
     public RaceRegistrationResponse submitRegistration(String ownerEmail, RegisterRaceRequest request) {
@@ -43,6 +47,44 @@ public class RaceRegistrationService {
         Horse horse = horseRepository.findById(request.getHorseId())
                 .orElseThrow(() -> new RuntimeException("Horse not found"));
 
+        // Check registration window
+        LocalDateTime now = LocalDateTime.now();
+        Tournament tournament = race.getTournament();
+        if (tournament.getRegistrationOpeningTime() != null && now.isBefore(tournament.getRegistrationOpeningTime())) {
+            throw new RuntimeException("Registration has not opened yet");
+        }
+        if (tournament.getRegistrationDeadline() != null && now.isAfter(tournament.getRegistrationDeadline())) {
+            throw new RuntimeException("Registration deadline has passed");
+        }
+
+        // Validate horse constraints
+        if (tournament.getAllowedClasses() != null && !tournament.getAllowedClasses().isBlank()) {
+            String horseBreed = horse.getBreed().getBreedName();
+            boolean breedMatch = java.util.Arrays.stream(tournament.getAllowedClasses().split(","))
+                    .map(String::trim)
+                    .anyMatch(b -> b.equalsIgnoreCase(horseBreed));
+            if (!breedMatch) {
+                throw new RuntimeException("Horse breed '" + horseBreed + "' is not allowed in this tournament (Allowed: " + tournament.getAllowedClasses() + ")");
+            }
+        }
+        if (tournament.getAllowedGenders() != null && !tournament.getAllowedGenders().isBlank()) {
+            String horseGender = horse.getGender();
+            if (horseGender == null) {
+                throw new RuntimeException("Horse gender is not specified");
+            }
+            boolean genderMatch = java.util.Arrays.stream(tournament.getAllowedGenders().split(","))
+                    .map(String::trim)
+                    .anyMatch(g -> g.equalsIgnoreCase(horseGender));
+            if (!genderMatch) {
+                throw new RuntimeException("Horse gender '" + horseGender + "' is not allowed in this tournament (Allowed: " + tournament.getAllowedGenders() + ")");
+            }
+        }
+        if (tournament.getAllowedAges() != null && !tournament.getAllowedAges().isBlank()) {
+            if (!isAgeAllowed(horse.getAge(), tournament.getAllowedAges())) {
+                throw new RuntimeException("Horse age " + horse.getAge() + " is not allowed in this tournament (Allowed: " + tournament.getAllowedAges() + ")");
+            }
+        }
+
         // Verify horse belongs to owner
         if (!horse.getOwner().getId().equals(owner.getId())) {
             throw new RuntimeException("This horse does not belong to you");
@@ -64,6 +106,25 @@ public class RaceRegistrationService {
             throw new RuntimeException("This jockey is already registered for this race");
         }
 
+        BigDecimal entryFee = race.getTournament().getEntryFee();
+        if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+            Wallet wallet = walletRepository.findByUserId(owner.getUser().getId())
+                    .orElseGet(() -> {
+                        Wallet newWallet = Wallet.builder()
+                                .user(owner.getUser())
+                                .balance(BigDecimal.ZERO)
+                                .build();
+                        return walletRepository.save(newWallet);
+                    });
+
+            if (wallet.getBalance().compareTo(entryFee) < 0) {
+                throw new RuntimeException("Insufficient wallet balance to pay entry fee");
+            }
+
+            wallet.setBalance(wallet.getBalance().subtract(entryFee));
+            walletRepository.save(wallet);
+        }
+
         RaceRegistration registration = RaceRegistration.builder()
                 .race(race)
                 .horse(horse)
@@ -75,6 +136,21 @@ public class RaceRegistrationService {
                 .build();
 
         registration = raceRegistrationRepository.save(registration);
+
+        if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+            Wallet wallet = walletRepository.findByUserId(owner.getUser().getId())
+                    .orElseThrow(() -> new RuntimeException("Wallet not found"));
+            WalletTransaction transaction = WalletTransaction.builder()
+                    .wallet(wallet)
+                    .transactionType("ENTRY_FEE")
+                    .amount(entryFee)
+                    .status("SUCCESS")
+                    .referenceType("RACE_REGISTRATION")
+                    .referenceId(registration.getId())
+                    .build();
+            walletTransactionRepository.save(transaction);
+        }
+
         return RaceRegistrationResponse.fromEntity(registration);
     }
 
@@ -145,6 +221,300 @@ public class RaceRegistrationService {
         registration.setStatus("REJECTED");
         registration = raceRegistrationRepository.save(registration);
 
+        BigDecimal entryFee = registration.getRace().getTournament().getEntryFee();
+        if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+            Wallet wallet = walletRepository.findByUserId(registration.getOwner().getUser().getId())
+                    .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+            wallet.setBalance(wallet.getBalance().add(entryFee));
+            walletRepository.save(wallet);
+
+            WalletTransaction transaction = WalletTransaction.builder()
+                    .wallet(wallet)
+                    .transactionType("REFUND")
+                    .amount(entryFee)
+                    .status("SUCCESS")
+                    .referenceType("RACE_REGISTRATION")
+                    .referenceId(registration.getId())
+                    .build();
+            walletTransactionRepository.save(transaction);
+        }
+
         return RaceRegistrationResponse.fromEntity(registration);
+    }
+
+    @Transactional
+    public RaceRegistrationResponse cancelRegistration(String ownerEmail, Integer registrationId) {
+        RaceRegistration registration = raceRegistrationRepository.findById(registrationId)
+                .orElseThrow(() -> new RuntimeException("Race registration not found"));
+
+        if (!registration.getOwner().getUser().getEmail().equalsIgnoreCase(ownerEmail)) {
+            throw new RuntimeException("Not authorized to cancel this registration");
+        }
+
+        if (!"OPEN_FOR_REGISTER".equalsIgnoreCase(registration.getRace().getStatus())) {
+            throw new RuntimeException("Cannot cancel registration because the race is not open for registration");
+        }
+
+        if (!"PENDING".equalsIgnoreCase(registration.getStatus()) && !"PENDING_JOCKEY".equalsIgnoreCase(registration.getStatus())) {
+            throw new RuntimeException("Only pending registrations can be cancelled");
+        }
+
+        registration.setStatus("CANCELLED");
+        registration = raceRegistrationRepository.save(registration);
+
+        BigDecimal entryFee = registration.getRace().getTournament().getEntryFee();
+        if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+            Wallet wallet = walletRepository.findByUserId(registration.getOwner().getUser().getId())
+                    .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+            wallet.setBalance(wallet.getBalance().add(entryFee));
+            walletRepository.save(wallet);
+
+            WalletTransaction transaction = WalletTransaction.builder()
+                    .wallet(wallet)
+                    .transactionType("REFUND")
+                    .amount(entryFee)
+                    .status("SUCCESS")
+                    .referenceType("RACE_REGISTRATION")
+                    .referenceId(registration.getId())
+                    .build();
+            walletTransactionRepository.save(transaction);
+        }
+
+        return RaceRegistrationResponse.fromEntity(registration);
+    }
+
+    @Transactional
+    public RaceRegistrationResponse updateRegistration(String ownerEmail, Integer registrationId, RegisterRaceRequest request) {
+        if (Math.abs((request.getOwnerSharePercent() + request.getJockeySharePercent()) - 100.0) > 0.001) {
+            throw new RuntimeException("Total profit sharing percentage must equal 100%");
+        }
+
+        RaceRegistration registration = raceRegistrationRepository.findById(registrationId)
+                .orElseThrow(() -> new RuntimeException("Race registration not found"));
+
+        if (!registration.getOwner().getUser().getEmail().equalsIgnoreCase(ownerEmail)) {
+            throw new RuntimeException("Not authorized to update this registration");
+        }
+
+        if (!"OPEN_FOR_REGISTER".equalsIgnoreCase(registration.getRace().getStatus())) {
+            throw new RuntimeException("Cannot update registration because the race is not open for registration");
+        }
+
+        // Check registration window
+        LocalDateTime now = LocalDateTime.now();
+        Tournament tournament = registration.getRace().getTournament();
+        if (tournament.getRegistrationOpeningTime() != null && now.isBefore(tournament.getRegistrationOpeningTime())) {
+            throw new RuntimeException("Registration has not opened yet");
+        }
+        if (tournament.getRegistrationDeadline() != null && now.isAfter(tournament.getRegistrationDeadline())) {
+            throw new RuntimeException("Registration deadline has passed");
+        }
+
+        if (!"PENDING".equalsIgnoreCase(registration.getStatus()) && !"PENDING_JOCKEY".equalsIgnoreCase(registration.getStatus())) {
+            throw new RuntimeException("Only pending registrations can be updated");
+        }
+
+        Horse horse = horseRepository.findById(request.getHorseId())
+                .orElseThrow(() -> new RuntimeException("Horse not found"));
+        if (!horse.getOwner().getId().equals(registration.getOwner().getId())) {
+            throw new RuntimeException("This horse does not belong to you");
+        }
+
+        JockeyProfile jockey = jockeyProfileRepository.findById(request.getJockeyId())
+                .orElseThrow(() -> new RuntimeException("Jockey profile not found"));
+
+        if (!horse.getId().equals(registration.getHorse().getId())) {
+            boolean horseRegistered = raceRegistrationRepository.existsByRaceIdAndHorseIdAndStatusNot(
+                    registration.getRace().getId(), horse.getId(), "REJECTED");
+            if (horseRegistered) {
+                throw new RuntimeException("This horse is already registered for this race");
+            }
+            
+            // Validate horse constraints
+            if (tournament.getAllowedClasses() != null && !tournament.getAllowedClasses().isBlank()) {
+                String horseBreed = horse.getBreed().getBreedName();
+                boolean breedMatch = java.util.Arrays.stream(tournament.getAllowedClasses().split(","))
+                        .map(String::trim)
+                        .anyMatch(b -> b.equalsIgnoreCase(horseBreed));
+                if (!breedMatch) {
+                    throw new RuntimeException("Horse breed '" + horseBreed + "' is not allowed in this tournament (Allowed: " + tournament.getAllowedClasses() + ")");
+                }
+            }
+            if (tournament.getAllowedGenders() != null && !tournament.getAllowedGenders().isBlank()) {
+                String horseGender = horse.getGender();
+                if (horseGender == null) {
+                    throw new RuntimeException("Horse gender is not specified");
+                }
+                boolean genderMatch = java.util.Arrays.stream(tournament.getAllowedGenders().split(","))
+                        .map(String::trim)
+                        .anyMatch(g -> g.equalsIgnoreCase(horseGender));
+                if (!genderMatch) {
+                    throw new RuntimeException("Horse gender '" + horseGender + "' is not allowed in this tournament (Allowed: " + tournament.getAllowedGenders() + ")");
+                }
+            }
+            if (tournament.getAllowedAges() != null && !tournament.getAllowedAges().isBlank()) {
+                if (!isAgeAllowed(horse.getAge(), tournament.getAllowedAges())) {
+                    throw new RuntimeException("Horse age " + horse.getAge() + " is not allowed in this tournament (Allowed: " + tournament.getAllowedAges() + ")");
+                }
+            }
+
+            registration.setHorse(horse);
+        }
+
+        if (!jockey.getId().equals(registration.getJockey().getId())) {
+            boolean jockeyRegistered = raceRegistrationRepository.existsByRaceIdAndJockeyIdAndStatusNot(
+                    registration.getRace().getId(), jockey.getId(), "REJECTED");
+            if (jockeyRegistered) {
+                throw new RuntimeException("This jockey is already registered for this race");
+            }
+            registration.setJockey(jockey);
+        }
+
+        registration.setOwnerSharePercent(request.getOwnerSharePercent());
+        registration.setJockeySharePercent(request.getJockeySharePercent());
+        registration.setCreatedAt(LocalDateTime.now());
+        registration.setStatus("PENDING_JOCKEY");
+
+        registration = raceRegistrationRepository.save(registration);
+        return RaceRegistrationResponse.fromEntity(registration);
+    }
+
+    @Transactional
+    public void confirmRegistration(Integer raceId) {
+        Race race = raceRepository.findById(raceId)
+                .orElseThrow(() -> new RuntimeException("Race not found"));
+
+        if (!"OPEN_FOR_REGISTER".equalsIgnoreCase(race.getStatus())) {
+            throw new RuntimeException("Race is not open for registration");
+        }
+
+        List<RaceRegistration> eligibleRegs = raceRegistrationRepository.findByRaceId(raceId).stream()
+                .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus()) || "APPROVED".equalsIgnoreCase(r.getStatus()))
+                .collect(Collectors.toList());
+
+        Integer minSlotsVal = race.getTournament().getMinSlots();
+        int minSlots = minSlotsVal != null ? minSlotsVal : 0;
+        if (eligibleRegs.size() < minSlots) {
+            throw new RuntimeException("Cannot confirm registration. The number of eligible registrations (" + eligibleRegs.size() + ") is less than the minimum slots required (" + minSlots + ").");
+        }
+
+        List<RaceRegistration> approvedRegs = eligibleRegs.stream()
+                .filter(r -> "APPROVED".equalsIgnoreCase(r.getStatus()))
+                .collect(Collectors.toList());
+        List<RaceRegistration> pendingRegs = eligibleRegs.stream()
+                .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus()))
+                .sorted(java.util.Comparator.comparing(RaceRegistration::getCreatedAt))
+                .collect(Collectors.toList());
+
+        List<RaceRegistration> registrations = new java.util.ArrayList<>();
+        registrations.addAll(approvedRegs);
+        registrations.addAll(pendingRegs);
+
+        int maxSlots = race.getMaxHorses();
+        BigDecimal entryFee = race.getTournament().getEntryFee();
+
+        for (int i = 0; i < registrations.size(); i++) {
+            RaceRegistration reg = registrations.get(i);
+            if (i < maxSlots) {
+                if (!"APPROVED".equalsIgnoreCase(reg.getStatus())) {
+                    reg.setStatus("APPROVED");
+                    raceRegistrationRepository.save(reg);
+
+                    RaceParticipant participant = RaceParticipant.builder()
+                            .race(race)
+                            .horse(reg.getHorse())
+                            .jockey(reg.getJockey())
+                            .gateNumber(i + 1)
+                            .status("READY")
+                            .build();
+                    raceParticipantRepository.save(participant);
+                }
+            } else {
+                reg.setStatus("REJECTED");
+                raceRegistrationRepository.save(reg);
+
+                if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+                    Wallet wallet = walletRepository.findByUserId(reg.getOwner().getUser().getId())
+                            .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+                    wallet.setBalance(wallet.getBalance().add(entryFee));
+                    walletRepository.save(wallet);
+
+                    WalletTransaction transaction = WalletTransaction.builder()
+                            .wallet(wallet)
+                            .transactionType("REFUND")
+                            .amount(entryFee)
+                            .status("SUCCESS")
+                            .referenceType("RACE_REGISTRATION")
+                            .referenceId(reg.getId())
+                            .build();
+                    walletTransactionRepository.save(transaction);
+                }
+            }
+        }
+
+        race.setStatus("CLOSED_FOR_REGISTER");
+        raceRepository.save(race);
+    }
+
+    private boolean isAgeAllowed(Integer age, String allowedAges) {
+        if (age == null) return false;
+        if (allowedAges == null || allowedAges.isBlank()) return true;
+        
+        String[] parts = allowedAges.split(",");
+        for (String part : parts) {
+            String clean = part.trim().toLowerCase();
+            if (clean.isBlank()) continue;
+            
+            if (clean.contains("-")) {
+                String[] range = clean.split("-");
+                if (range.length == 2) {
+                    try {
+                        int min = Integer.parseInt(range[0].trim());
+                        int max = Integer.parseInt(range[1].trim());
+                        if (age >= min && age <= max) {
+                            return true;
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+                continue;
+            }
+            
+            if (clean.startsWith("trên") || clean.startsWith("above") || clean.startsWith(">")) {
+                String numStr = clean.replaceAll("[^0-9]", "");
+                if (!numStr.isEmpty()) {
+                    try {
+                        int val = Integer.parseInt(numStr);
+                        if (age > val) {
+                            return true;
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+                continue;
+            }
+            
+            if (clean.startsWith("dưới") || clean.startsWith("below") || clean.startsWith("<")) {
+                String numStr = clean.replaceAll("[^0-9]", "");
+                if (!numStr.isEmpty()) {
+                    try {
+                        int val = Integer.parseInt(numStr);
+                        if (age < val) {
+                            return true;
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+                continue;
+            }
+            
+            try {
+                int val = Integer.parseInt(clean);
+                if (age == val) {
+                    return true;
+                }
+            } catch (NumberFormatException ignored) {}
+        }
+        return false;
     }
 }

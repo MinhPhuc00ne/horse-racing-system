@@ -1,8 +1,6 @@
 package com.horseracing.configs;
 
-import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,12 +48,14 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         String clientIp = getClientIp(request);
         Bucket bucket = null;
 
-        if (path.equals("/api/auth/login") || path.equals("/api/auth/google")) {
-            bucket = loginBuckets.computeIfAbsent(clientIp, k -> createBucket(10, 1));
-        } else if (path.equals("/api/auth/verify-reset-otp") || path.equals("/api/auth/reset-password")) {
-            bucket = otpBuckets.computeIfAbsent(clientIp, k -> createBucket(5, 1));
-        } else if (path.equals("/api/auth/forgot-password")) {
-            bucket = forgotPasswordBuckets.computeIfAbsent(clientIp, k -> createBucket(3, 1));
+        switch (path) {
+            case "/api/auth/login", "/api/auth/google" ->
+                bucket = loginBuckets.computeIfAbsent(clientIp, k -> createBucket(10, 1));
+            case "/api/auth/verify-reset-otp", "/api/auth/reset-password" ->
+                bucket = otpBuckets.computeIfAbsent(clientIp, k -> createBucket(5, 1));
+            case "/api/auth/forgot-password" ->
+                bucket = forgotPasswordBuckets.computeIfAbsent(clientIp, k -> createBucket(3, 1));
+            default -> {}
         }
 
         if (bucket != null && !bucket.tryConsume(1)) {
@@ -75,8 +75,9 @@ public class RateLimitingFilter extends OncePerRequestFilter {
      * @param minutes  refill period in minutes
      */
     private Bucket createBucket(int tokens, int minutes) {
-        Bandwidth limit = Bandwidth.classic(tokens, Refill.greedy(tokens, Duration.ofMinutes(minutes)));
-        return Bucket.builder().addLimit(limit).build();
+        return Bucket.builder()
+                .addLimit(limit -> limit.capacity(tokens).refillGreedy(tokens, Duration.ofMinutes(minutes)))
+                .build();
     }
 
     private String getClientIp(HttpServletRequest request) {

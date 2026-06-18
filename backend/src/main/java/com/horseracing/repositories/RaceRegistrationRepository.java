@@ -2,11 +2,9 @@ package com.horseracing.repositories;
 
 import com.horseracing.entities.RaceRegistration;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface RaceRegistrationRepository extends JpaRepository<RaceRegistration, Integer> {
     List<RaceRegistration> findByRaceId(Integer raceId);
     List<RaceRegistration> findByOwnerUserEmail(String email);

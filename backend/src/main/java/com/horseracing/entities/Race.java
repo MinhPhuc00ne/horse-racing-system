@@ -57,4 +57,8 @@ public class Race {
 
     @Column(length = 50)
     private String status; // e.g. OPEN_FOR_REGISTER, CLOSED_FOR_REGISTER, RUNNING, FINISHED
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "referee_id")
+    private User referee;
 }

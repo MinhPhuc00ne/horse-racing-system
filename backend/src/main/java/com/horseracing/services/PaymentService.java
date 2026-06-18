@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.payos.PayOS;
+import vn.payos.exception.PayOSException;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 import vn.payos.model.v2.paymentRequests.PaymentLinkItem;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkRequest;
@@ -19,7 +20,6 @@ import vn.payos.model.webhooks.Webhook;
 import vn.payos.model.webhooks.WebhookData;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -105,7 +105,7 @@ public class PaymentService {
             response.putNull("data");
             return response;
             
-        } catch (Exception e) {
+        } catch (PayOSException | IllegalArgumentException e) {
             log.error("Webhook processing error: {}", e.getMessage());
             // PayOS requires { "error": 0, "message": "Ok" } even when setting up the webhook URL 
             // where the signature might be invalid or a dummy payload is sent.

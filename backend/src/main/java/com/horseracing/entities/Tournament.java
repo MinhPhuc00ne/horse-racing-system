@@ -61,6 +61,24 @@ public class Tournament {
     @Column(name = "entry_fee", precision = 38, scale = 2)
     private BigDecimal entryFee;
 
+    @Column(name = "min_slots")
+    private Integer minSlots;
+
+    @Column(name = "allowed_classes", length = 255)
+    private String allowedClasses;
+
+    @Column(name = "allowed_ages", length = 255)
+    private String allowedAges;
+
+    @Column(name = "allowed_genders", length = 255)
+    private String allowedGenders;
+
+    @Column(name = "registration_opening_time")
+    private LocalDateTime registrationOpeningTime;
+
+    @Column(name = "official_race_time")
+    private LocalDateTime officialRaceTime;
+
     @Column(name = "prize_first", precision = 38, scale = 2)
     private BigDecimal prizeFirst;
 

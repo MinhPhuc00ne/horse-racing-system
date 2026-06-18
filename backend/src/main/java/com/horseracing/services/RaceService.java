@@ -1,19 +1,24 @@
 package com.horseracing.services;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.horseracing.dto.request.CreateRaceRequest;
 import com.horseracing.dto.response.RaceResponse;
 import com.horseracing.entities.Race;
 import com.horseracing.entities.RaceTrack;
 import com.horseracing.entities.Tournament;
+import com.horseracing.entities.User;
+import com.horseracing.entities.enums.Role;
 import com.horseracing.repositories.RaceRepository;
 import com.horseracing.repositories.RaceTrackRepository;
 import com.horseracing.repositories.TournamentRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.horseracing.repositories.UserRepository;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +27,7 @@ public class RaceService {
     private final RaceRepository raceRepository;
     private final TournamentRepository tournamentRepository;
     private final RaceTrackRepository raceTrackRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public RaceResponse createRace(CreateRaceRequest request) {
@@ -71,6 +77,14 @@ public class RaceService {
             }
         }
 
+        User referee = null;
+        if (request.getRefereeId() != null) {
+            referee = userRepository.findById(request.getRefereeId()).orElse(null);
+        }
+        if (referee == null || referee.getRole() != Role.RACE_REFEREE) {
+            referee = userRepository.findByRole(Role.RACE_REFEREE).stream().findFirst().orElse(null);
+        }
+
         Race race = Race.builder()
                 .raceName(request.getRaceName())
                 .tournament(tournament)
@@ -84,6 +98,7 @@ public class RaceService {
                 .surfaceType(request.getSurfaceType())
                 .weather(request.getWeather())
                 .status("OPEN_FOR_REGISTER") // Set to open automatically
+                .referee(referee)
                 .build();
 
         race = raceRepository.save(race);

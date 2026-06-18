@@ -40,6 +40,8 @@ public class RaceServiceTest {
     private RaceRegistrationRepository raceRegistrationRepository;
     @Mock
     private RaceParticipantRepository raceParticipantRepository;
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private RaceService raceService;
@@ -51,9 +53,13 @@ public class RaceServiceTest {
     private RaceTrack track;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         tournament = Tournament.builder().id(1).tournamentName("Test Tournament").build();
         track = RaceTrack.builder().id(1).name("Test Track").build();
+        assertNotNull(userRepository);
+        assertNotNull(horseRepository);
+        assertNotNull(jockeyProfileRepository);
+        assertNotNull(horseOwnerProfileRepository);
     }
 
     @Test

@@ -92,6 +92,28 @@ public class OwnerController {
         }
     }
 
+    @PutMapping("/race-registrations/{id}/cancel")
+    public ResponseEntity<?> cancelRegistration(@PathVariable Integer id, Authentication authentication) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            RaceRegistrationResponse response = raceRegistrationService.cancelRegistration(userDetails.getUsername(), id);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/race-registrations/{id}")
+    public ResponseEntity<?> updateRegistration(@PathVariable Integer id, @Valid @RequestBody RegisterRaceRequest request, Authentication authentication) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            RaceRegistrationResponse response = raceRegistrationService.updateRegistration(userDetails.getUsername(), id, request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Authentication authentication) {
         try {
