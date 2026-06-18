@@ -26,22 +26,39 @@ import {
 const JockeyContext = createContext();
 
 export function JockeyProvider({ children }) {
-  const [profile, setProfile] = useState(initialJockeyProfile);
+  const [profile, setProfile] = useState({
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    identityNumber: '',
+    dateOfBirth: '',
+    licenseNumber: '',
+    height: 165,
+    weight: 54,
+    experienceYears: 0,
+    matchesPlayed: 0,
+    bankAccount: '',
+    description: '',
+    walletBalance: 0,
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80'
+  });
   const [friends, setFriends] = useState([]);
   const [invitations, setInvitations] = useState([]);
   const [tournaments, setTournaments] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [raceHistory, setRaceHistory] = useState([]);
-  const [leaderboard, setLeaderboard] = useState(initialJockeysLeaderboard);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchJockeyData = async () => {
+  const fetchJockeyData = async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent) {
+        setLoading(true);
+      }
 
       // 1. Load Profile & Wallet Balance via APIs
-      let jockeyProfile = initialJockeyProfile;
+      let jockeyProfile = null;
       try {
         jockeyProfile = await getJockeyProfileAPI();
       } catch (err) {
@@ -56,20 +73,28 @@ export function JockeyProvider({ children }) {
         console.error('Failed to load jockey wallet balance:', err);
       }
 
-      const mergedProfile = {
-        ...initialJockeyProfile,
-        ...jockeyProfile,
-        fullName: jockeyProfile.fullName || jockeyProfile.user?.fullName || initialJockeyProfile.fullName,
-        email: jockeyProfile.email || jockeyProfile.user?.email || initialJockeyProfile.email,
-        phoneNumber: jockeyProfile.phone || jockeyProfile.phoneNumber || jockeyProfile.user?.phone || initialJockeyProfile.phoneNumber,
-        experienceYears: jockeyProfile.experienceYear || jockeyProfile.experienceYears || initialJockeyProfile.experienceYears,
-        walletBalance: walletBalance,
-        avatar: jockeyProfile.avatarUrl || jockeyProfile.user?.avatarUrl || initialJockeyProfile.avatar
-      };
+      if (jockeyProfile) {
+        const mergedProfile = {
+          fullName: jockeyProfile.fullName || jockeyProfile.user?.fullName || '',
+          email: jockeyProfile.email || jockeyProfile.user?.email || '',
+          phoneNumber: jockeyProfile.phone || jockeyProfile.phoneNumber || jockeyProfile.user?.phone || '',
+          identityNumber: jockeyProfile.identityNumber || '',
+          dateOfBirth: jockeyProfile.dateOfBirth || '',
+          licenseNumber: jockeyProfile.licenseNumber || '',
+          height: jockeyProfile.height || 165,
+          weight: jockeyProfile.weight || 54,
+          experienceYears: jockeyProfile.experienceYear || jockeyProfile.experienceYears || 0,
+          matchesPlayed: jockeyProfile.matchesPlayed || 0,
+          bankAccount: jockeyProfile.bankAccount || '',
+          description: jockeyProfile.description || '',
+          walletBalance: walletBalance,
+          avatar: jockeyProfile.avatarUrl || jockeyProfile.user?.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80'
+        };
 
-      setProfile(mergedProfile);
-      localStorage.setItem('jockey_profile', JSON.stringify(mergedProfile));
-      localStorage.setItem('jockey_wallet_balance', walletBalance.toString());
+        setProfile(mergedProfile);
+        localStorage.setItem('jockey_profile', JSON.stringify(mergedProfile));
+        localStorage.setItem('jockey_wallet_balance', walletBalance.toString());
+      }
 
       // 2. Load Friends (via existing connections API)
       try {
@@ -276,7 +301,7 @@ export function JockeyProvider({ children }) {
     setRaceHistory: updateRaceHistory,
     leaderboard,
     loading,
-    refreshData: fetchJockeyData,
+    refreshData: () => fetchJockeyData(true),
     respondToInvitation: handleRespondToInvitation,
     schedule: schedule
   };

@@ -2,11 +2,7 @@ import axiosClient from '../api/axiosClient';
 import { initialJockeyProfile, initialJockeyInvitations } from '../pages/Jockey/mockData';
 
 const isMockMode = () => {
-  const override = localStorage.getItem('use_mock_api');
-  if (override !== null) {
-    return override === 'true';
-  }
-  return localStorage.getItem('backend_online') !== 'true';
+  return false;
 };
 
 export async function getJockeyProfileAPI() {

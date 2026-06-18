@@ -1,8 +1,13 @@
 package com.horseracing.services;
 
+import com.horseracing.dto.response.WithdrawalResponse;
+import com.horseracing.entities.HorseOwnerProfile;
+import com.horseracing.entities.JockeyProfile;
 import com.horseracing.entities.User;
 import com.horseracing.entities.Wallet;
 import com.horseracing.entities.WalletTransaction;
+import com.horseracing.repositories.HorseOwnerProfileRepository;
+import com.horseracing.repositories.JockeyProfileRepository;
 import com.horseracing.repositories.WalletRepository;
 import com.horseracing.repositories.WalletTransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +24,8 @@ public class WalletService {
 
     private final WalletRepository walletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
+    private final JockeyProfileRepository jockeyProfileRepository;
+    private final HorseOwnerProfileRepository horseOwnerProfileRepository;
 
     public Wallet getOrCreateWallet(User user) {
         return walletRepository.findByUserId(user.getId())
@@ -102,5 +110,36 @@ public class WalletService {
     public List<WalletTransaction> getTransactionHistory(User user) {
         Wallet wallet = getOrCreateWallet(user);
         return walletTransactionRepository.findByWalletIdOrderByCreatedAtDesc(wallet.getId());
+    }
+
+    public String getBankAccountForUser(User user) {
+        if (user.getRole() == com.horseracing.entities.enums.Role.JOCKEY) {
+            return jockeyProfileRepository.findByUser(user)
+                    .map(JockeyProfile::getBankAccount)
+                    .orElse("");
+        } else if (user.getRole() == com.horseracing.entities.enums.Role.HORSE_OWNER) {
+            return horseOwnerProfileRepository.findByUser(user)
+                    .map(HorseOwnerProfile::getBankAccount)
+                    .orElse("");
+        }
+        return "";
+    }
+
+    public List<WithdrawalResponse> getAllWithdrawals() {
+        List<WalletTransaction> txs = walletTransactionRepository.findByTransactionTypeOrderByCreatedAtDesc("WITHDRAW");
+        return txs.stream().map(tx -> {
+            User user = tx.getWallet().getUser();
+            String bankAccount = getBankAccountForUser(user);
+            return WithdrawalResponse.builder()
+                    .id(tx.getId())
+                    .walletId(tx.getWallet().getId())
+                    .userFullName(user.getFullName())
+                    .userEmail(user.getEmail())
+                    .amount(tx.getAmount())
+                    .status(tx.getStatus())
+                    .createdAt(tx.getCreatedAt())
+                    .bankAccount(bankAccount)
+                    .build();
+        }).collect(Collectors.toList());
     }
 }

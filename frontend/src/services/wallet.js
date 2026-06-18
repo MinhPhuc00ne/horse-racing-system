@@ -3,11 +3,7 @@ import { initialJockeyTransactions } from '../pages/Jockey/mockData';
 import { initialTransactions } from '../pages/Horse-Owner/mockData';
 
 const isMockMode = () => {
-  const override = localStorage.getItem('use_mock_api');
-  if (override !== null) {
-    return override === 'true';
-  }
-  return localStorage.getItem('backend_online') !== 'true';
+  return false;
 };
 
 const getUserRole = () => {
@@ -132,18 +128,58 @@ export async function getTransactionHistoryAPI() {
 
   try {
     const response = await axiosClient.get('/wallets/transactions');
-    // Map dữ liệu của backend thành định dạng hiển thị của FE nếu cần
-    return response.data.map(tx => ({
-      id: tx.id.toString(),
-      date: tx.createdAt ? tx.createdAt.replace('T', ' ').slice(0, 19) : '',
-      type: tx.transactionType, // DEPOSIT or WITHDRAW
-      event: tx.transactionType === 'DEPOSIT' 
-        ? 'Nạp tiền vào ví' 
-        : `Rút tiền về ngân hàng (${tx.status})`,
-      amount: tx.transactionType === 'DEPOSIT' ? tx.amount : -tx.amount
-    }));
+    return response.data.map(tx => {
+      const isPositive = ['DEPOSIT', 'PRIZE', 'REFUND', 'WINNINGS'].includes(tx.transactionType);
+      const mappedAmount = isPositive ? tx.amount : -tx.amount;
+      
+      let eventLabel = '';
+      if (tx.transactionType === 'DEPOSIT') {
+        eventLabel = 'Nạp tiền vào ví';
+      } else if (tx.transactionType === 'WITHDRAW') {
+        eventLabel = 'Rút tiền về ngân hàng';
+      } else if (tx.transactionType === 'PRIZE' || tx.transactionType === 'WINNINGS') {
+        eventLabel = 'Tiền thưởng thắng cuộc';
+      } else if (tx.transactionType === 'ENTRY_FEE') {
+        eventLabel = 'Lệ phí tham gia cuộc đua';
+      } else if (tx.transactionType === 'REFUND') {
+        eventLabel = 'Hoàn trả tiền';
+      } else {
+        eventLabel = `Giao dịch khác (${tx.transactionType})`;
+      }
+
+      if (tx.status === 'PENDING') {
+        eventLabel += ' (Chờ thanh toán)';
+      } else if (tx.status === 'FAILED') {
+        eventLabel += ' (Thất bại)';
+      } else if (tx.status === 'CANCELLED') {
+        eventLabel += ' (Đã hủy)';
+      }
+
+      return {
+        id: tx.id.toString(),
+        date: tx.createdAt ? tx.createdAt.replace('T', ' ').slice(0, 19) : '',
+        type: tx.transactionType, // Keep type for filtering calculations
+        event: eventLabel,
+        amount: mappedAmount,
+        status: tx.status
+      };
+    });
   } catch (error) {
     const errMsg = error.response?.data?.message || 'Không thể lấy lịch sử giao dịch.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function checkDepositStatusAPI(orderCode) {
+  if (isMockMode()) {
+    return { orderCode, status: 'SUCCESS' };
+  }
+
+  try {
+    const response = await axiosClient.get(`/wallets/deposit/status/${orderCode}`);
+    return response.data; // { orderCode, status }
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể kiểm tra trạng thái giao dịch.';
     throw new Error(errMsg, { cause: error });
   }
 }

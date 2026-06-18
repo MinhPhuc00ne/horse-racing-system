@@ -27,8 +27,7 @@ Tài liệu này giải thích chi tiết mục đích của các công cụ (Pa
   ```bash
   ssh -o StrictHostKeyChecking=no -R 80:localhost:8080 nokey@localhost.run
   ```
-
- /api/payments/payos/webhook
+/api/payments/payos/webhook
 
 
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHorseOwner } from './HorseOwnerContext';
 import { updateOwnerProfileAPI, uploadFilesAPI } from '../../services/owner';
@@ -14,9 +14,34 @@ const presetAvatars = [
 
 export default function ProfileContent() {
   const navigate = useNavigate();
-  const { profile, setProfile, transactions, setTransactions, raceHistory } = useHorseOwner();
+  const { profile, setProfile, transactions, setTransactions, raceHistory, refreshData } = useHorseOwner();
   const [formData, setFormData] = useState({ ...profile });
   const [depositAmount, setDepositAmount] = useState('');
+
+  useEffect(() => {
+    if (refreshData) {
+      refreshData();
+    }
+
+    const handleRefresh = () => {
+      if (refreshData) {
+        refreshData();
+      }
+    };
+
+    window.addEventListener('focus', handleRefresh);
+    document.addEventListener('visibilitychange', handleRefresh);
+
+    return () => {
+      window.removeEventListener('focus', handleRefresh);
+      document.removeEventListener('visibilitychange', handleRefresh);
+    };
+  }, [refreshData]);
+
+  const formatInputWithCommas = (val) => {
+    const clean = val.replace(/\D/g, '');
+    return clean.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [uploading, setUploading] = useState(false);
@@ -54,20 +79,33 @@ export default function ProfileContent() {
     }
   };
 
-  const handleDeposit = () => {
-    const amt = parseFloat(depositAmount);
+  const handleDeposit = async () => {
+    const amt = parseFloat(depositAmount.replace(/,/g, ''));
     if (isNaN(amt) || amt <= 0) {
       alert('Please enter a valid positive deposit amount.');
       return;
     }
 
-    // Chuyển hướng sang trang nạp tiền QR
-    navigate('/payment-qr', { state: { amount: amt, returnUrl: '/owner/profile' } });
-    setDepositAmount('');
+    try {
+      const res = await depositAPI(amt);
+      navigate('/payment-qr', {
+        state: {
+          amount: amt,
+          qrCode: res.qrCode || '',
+          orderCode: res.orderCode || null,
+          checkoutUrl: res.checkoutUrl || '',
+          returnUrl: '/owner/profile',
+          bankAccount: profile.bankAccount || '',
+        },
+      });
+      setDepositAmount('');
+    } catch (err) {
+      alert('Không thể tạo liên kết thanh toán: ' + err.message);
+    }
   };
 
   const handleWithdraw = async () => {
-    const amt = parseFloat(depositAmount);
+    const amt = parseFloat(depositAmount.replace(/,/g, ''));
     if (isNaN(amt) || amt <= 0) {
       alert('Please enter a valid positive withdrawal amount.');
       return;
@@ -439,10 +477,10 @@ export default function ProfileContent() {
 
             <div className="d-flex flex-column gap-3">
               <input
-                type="number"
+                type="text"
                 placeholder="Enter amount (VND)..."
                 value={depositAmount}
-                onChange={(e) => setDepositAmount(e.target.value)}
+                onChange={(e) => setDepositAmount(formatInputWithCommas(e.target.value))}
                 className="ho-form-input fw-bold"
               />
               <div className="d-flex gap-2 w-100">

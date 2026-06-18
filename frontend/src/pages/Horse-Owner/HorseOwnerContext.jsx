@@ -22,17 +22,33 @@ import {
 const HorseOwnerContext = createContext();
 
 export function HorseOwnerProvider({ children }) {
-  const [profile, setProfile] = useState(initialOwnerProfile);
-  const [horses, setHorses] = useState(initialHorses);
-  const [systemUsers, setSystemUsers] = useState(initialSystemUsers);
-  const [tournaments, setTournaments] = useState(initialTournaments);
+  const [profile, setProfile] = useState({
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    identityNumber: '',
+    dateOfBirth: '',
+    stableName: '',
+    stableAddress: '',
+    description: '',
+    walletBalance: 0,
+    avatar: '',
+    avatarZoom: 1,
+    avatarOffsetX: 0,
+    avatarOffsetY: 0
+  });
+  const [horses, setHorses] = useState([]);
+  const [systemUsers, setSystemUsers] = useState([]);
+  const [tournaments, setTournaments] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [raceHistory, setRaceHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchOwnerData = async () => {
+  const fetchOwnerData = async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent) {
+        setLoading(true);
+      }
 
       // 1. Fetch Profile & Wallet Balance
       let profileData = null;
@@ -49,7 +65,7 @@ export function HorseOwnerProvider({ children }) {
       } catch (err) {
         console.error('Failed to load wallet balance:', err);
         const savedBalance = localStorage.getItem('owner_wallet_balance');
-        walletBalance = savedBalance ? parseFloat(savedBalance) : 1250000000;
+        walletBalance = savedBalance ? parseFloat(savedBalance) : 0;
       }
 
       if (profileData) {
@@ -184,23 +200,11 @@ export function HorseOwnerProvider({ children }) {
         setTransactions(txs);
       } catch (err) {
         console.error('Failed to load transaction history:', err);
-        const savedTx = localStorage.getItem('owner_transactions');
-        if (savedTx) {
-          setTransactions(JSON.parse(savedTx));
-        } else {
-          setTransactions(initialTransactions);
-          localStorage.setItem('owner_transactions', JSON.stringify(initialTransactions));
-        }
+        setTransactions([]);
       }
 
       // Load Race History
-      const savedRH = localStorage.getItem('owner_race_history');
-      if (savedRH) {
-        setRaceHistory(JSON.parse(savedRH));
-      } else {
-        setRaceHistory(initialRaceHistory);
-        localStorage.setItem('owner_race_history', JSON.stringify(initialRaceHistory));
-      }
+      setRaceHistory([]);
     } catch (error) {
       console.error('Lỗi khi tải dữ liệu chủ ngựa:', error);
     } finally {
@@ -249,7 +253,7 @@ export function HorseOwnerProvider({ children }) {
     raceHistory,
     setRaceHistory: updateRaceHistoryState,
     loading,
-    refreshData: fetchOwnerData,
+    refreshData: () => fetchOwnerData(true),
   };
 
   return <HorseOwnerContext.Provider value={value}>{children}</HorseOwnerContext.Provider>;

@@ -39,60 +39,20 @@ export async function rejectUpgradeRequestAPI(requestId, rejectionReason) {
 export async function getRefereesAPI() {
   try {
     const response = await axiosClient.get('/admin/referees');
-    const backendReferees = response.data || [];
-    
-    // Add pre-defined mock referees
-    const mockReferees = [
-      { id: 901, fullName: 'Trọng tài Nguyễn Văn An', email: 'referee.an@horseracing.com', username: 'referee_an', enabled: true },
-      { id: 902, fullName: 'Trọng tài Trần Minh Đức', email: 'referee.duc@horseracing.com', username: 'referee_duc', enabled: true },
-      { id: 903, fullName: 'Trọng tài Lê Hoàng Nam', email: 'referee.nam@horseracing.com', username: 'referee_nam', enabled: true }
-    ];
-    
-    // Merge backend referees
-    const combined = [...backendReferees];
-    mockReferees.forEach(mock => {
-      if (!combined.some(r => r.email === mock.email || r.id === mock.id)) {
-        combined.push(mock);
-      }
-    });
-    return combined;
+    return response.data || [];
   } catch (error) {
-    console.warn('Backend referees API failed. Returning mock data.', error.message);
-    return [
-      { id: 901, fullName: 'Trọng tài Nguyễn Văn An', email: 'referee.an@horseracing.com', username: 'referee_an', enabled: true },
-      { id: 902, fullName: 'Trọng tài Trần Minh Đức', email: 'referee.duc@horseracing.com', username: 'referee_duc', enabled: true },
-      { id: 903, fullName: 'Trọng tài Lê Hoàng Nam', email: 'referee.nam@horseracing.com', username: 'referee_nam', enabled: true }
-    ];
+    const errMsg = error.response?.data?.message || 'Failed to fetch referees.';
+    throw new Error(errMsg, { cause: error });
   }
 }
 
 export async function getTracksAPI() {
   try {
     const response = await axiosClient.get('/admin/tracks');
-    const backendTracks = response.data || [];
-    
-    // Add pre-defined mock tracks
-    const mockTracks = [
-      { id: 801, name: 'Trường đua Phú Thọ', location: 'Quận 11, TP. Hồ Chí Minh' },
-      { id: 802, name: 'Trường đua Đại Nam', location: 'Thủ Dầu Một, Bình Dương' },
-      { id: 803, name: 'Trường đua Sóc Sơn', location: 'Hà Nội' }
-    ];
-    
-    // Merge backend tracks
-    const combined = [...backendTracks];
-    mockTracks.forEach(mock => {
-      if (!combined.some(t => t.name === mock.name || t.id === mock.id)) {
-        combined.push(mock);
-      }
-    });
-    return combined;
+    return response.data || [];
   } catch (error) {
-    console.warn('Backend tracks API failed. Returning mock data.', error.message);
-    return [
-      { id: 801, name: 'Trường đua Phú Thọ', location: 'Quận 11, TP. Hồ Chí Minh' },
-      { id: 802, name: 'Trường đua Đại Nam', location: 'Thủ Dầu Một, Bình Dương' },
-      { id: 803, name: 'Trường đua Sóc Sơn', location: 'Hà Nội' }
-    ];
+    const errMsg = error.response?.data?.message || 'Failed to fetch tracks.';
+    throw new Error(errMsg, { cause: error });
   }
 }
 
@@ -182,6 +142,16 @@ export async function confirmRaceRegistrationsAPI(raceId) {
     return response.data;
   } catch (error) {
     const errMsg = error.response?.data?.message || 'Không thể chốt danh sách đăng ký đua.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function getWithdrawalsAPI() {
+  try {
+    const response = await axiosClient.get('/admin/wallets/withdrawals');
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách yêu cầu rút tiền.';
     throw new Error(errMsg, { cause: error });
   }
 }

@@ -1,11 +1,7 @@
 import axiosClient from '../api/axiosClient';
 
 const isMockMode = () => {
-  const override = localStorage.getItem('use_mock_api');
-  if (override !== null) {
-    return override === 'true';
-  }
-  return localStorage.getItem('backend_online') !== 'true';
+  return false;
 };
 
 // LocalStorage Helper Keys

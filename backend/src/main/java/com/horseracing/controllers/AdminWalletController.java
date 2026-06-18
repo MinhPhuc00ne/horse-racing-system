@@ -1,10 +1,13 @@
 package com.horseracing.controllers;
 
+import com.horseracing.dto.response.WithdrawalResponse;
 import com.horseracing.services.WalletService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/wallets")
@@ -12,6 +15,12 @@ import org.springframework.web.bind.annotation.*;
 public class AdminWalletController {
 
     private final WalletService walletService;
+
+    @GetMapping("/withdrawals")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<WithdrawalResponse>> getAllWithdrawals() {
+        return ResponseEntity.ok(walletService.getAllWithdrawals());
+    }
 
     @PutMapping("/transactions/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
