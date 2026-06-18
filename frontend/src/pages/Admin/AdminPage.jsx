@@ -7,6 +7,7 @@ import '../Horse-Owner/HorseOwner.css'; // Reuses HorseOwner premium CSS variabl
 // Import Admin content panels
 import AdminDashboardContent from './components/AdminDashboardContent';
 import UserManagementContent from './components/UserManagementContent';
+import UpgradeUserRoleContent from './components/UpgradeUserRoleContent';
 import TournamentsPanel from './components/TournamentsPanel';
 import RacesPanel from './components/RacesPanel';
 import WithdrawalsPanel from './components/WithdrawalsPanel';
@@ -14,6 +15,7 @@ import WithdrawalsPanel from './components/WithdrawalsPanel';
 const adminNavLinks = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { path: '/admin/usermanagement', label: 'User Management', icon: 'group' },
+  { path: '/admin/upgradeuserrole', label: 'Upgrade User Role', icon: 'manage_accounts' },
   { path: '/admin/tournamentmanagement', label: 'Tournament Management', icon: 'emoji_events' },
   { path: '/admin/racemanagement', label: 'Race Management', icon: 'flag' },
   { path: '/admin/withdrawals', label: 'Withdrawals', icon: 'account_balance_wallet' }
@@ -33,6 +35,7 @@ export default function AdminPage() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboardContent />} />
         <Route path="usermanagement" element={<UserManagementContent />} />
+        <Route path="upgradeuserrole" element={<UpgradeUserRoleContent />} />
         <Route path="tournamentmanagement" element={<TournamentsPanel />} />
         <Route path="racemanagement" element={<RacesPanel />} />
         <Route path="withdrawals" element={<WithdrawalsPanel />} />
