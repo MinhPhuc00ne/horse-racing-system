@@ -16,6 +16,7 @@ import com.horseracing.entities.enums.Role;
 import com.horseracing.repositories.PasswordResetTokenRepository;
 import com.horseracing.repositories.UserRepository;
 import com.horseracing.repositories.VerificationTokenRepository;
+import com.horseracing.repositories.BlacklistRepository;
 import com.horseracing.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +44,7 @@ public class AuthService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
+    private final BlacklistRepository blacklistRepository;
 
     @Value("${app.google.client-id}")
     private String googleClientId;
@@ -127,6 +129,10 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE").isPresent()) {
+            throw new RuntimeException("Tài khoản của bạn đã bị khóa/cấm do vi phạm điều khoản.");
+        }
+
         // Explicit check: account must be verified via email
         if (!user.isEnabled()) {
             throw new RuntimeException("Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email để xác thực.");
@@ -166,6 +172,10 @@ public class AuthService {
                 User user = existingUserOpt.get();
                 if (user.getProvider() != AuthProvider.GOOGLE) {
                     throw new RuntimeException("Email này đã được đăng ký bằng tài khoản thường. Vui lòng đăng nhập bằng mật khẩu.");
+                }
+
+                if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE").isPresent()) {
+                    throw new RuntimeException("Tài khoản của bạn đã bị khóa/cấm do vi phạm điều khoản.");
                 }
 
                 String accessToken = jwtUtils.generateAccessToken(user);
@@ -230,6 +240,10 @@ public class AuthService {
         refreshTokenService.verifyExpiration(refreshToken);
 
         User user = refreshToken.getUser();
+        if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE").isPresent()) {
+            throw new RuntimeException("Tài khoản của bạn đã bị khóa/cấm do vi phạm điều khoản.");
+        }
+        
         String newAccessToken = jwtUtils.generateAccessToken(user);
 
         // Create new refresh token (token rotation for security)

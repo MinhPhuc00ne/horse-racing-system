@@ -221,25 +221,6 @@ public class RaceRegistrationService {
         registration.setStatus("REJECTED");
         registration = raceRegistrationRepository.save(registration);
 
-        BigDecimal entryFee = registration.getRace().getTournament().getEntryFee();
-        if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
-            Wallet wallet = walletRepository.findByUserId(registration.getOwner().getUser().getId())
-                    .orElseThrow(() -> new RuntimeException("Wallet not found"));
-
-            wallet.setBalance(wallet.getBalance().add(entryFee));
-            walletRepository.save(wallet);
-
-            WalletTransaction transaction = WalletTransaction.builder()
-                    .wallet(wallet)
-                    .transactionType("REFUND")
-                    .amount(entryFee)
-                    .status("SUCCESS")
-                    .referenceType("RACE_REGISTRATION")
-                    .referenceId(registration.getId())
-                    .build();
-            walletTransactionRepository.save(transaction);
-        }
-
         return RaceRegistrationResponse.fromEntity(registration);
     }
 
@@ -398,61 +379,6 @@ public class RaceRegistrationService {
         int minSlots = minSlotsVal != null ? minSlotsVal : 0;
         if (eligibleRegs.size() < minSlots) {
             throw new RuntimeException("Cannot confirm registration. The number of eligible registrations (" + eligibleRegs.size() + ") is less than the minimum slots required (" + minSlots + ").");
-        }
-
-        List<RaceRegistration> approvedRegs = eligibleRegs.stream()
-                .filter(r -> "APPROVED".equalsIgnoreCase(r.getStatus()))
-                .collect(Collectors.toList());
-        List<RaceRegistration> pendingRegs = eligibleRegs.stream()
-                .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus()))
-                .sorted(java.util.Comparator.comparing(RaceRegistration::getCreatedAt))
-                .collect(Collectors.toList());
-
-        List<RaceRegistration> registrations = new java.util.ArrayList<>();
-        registrations.addAll(approvedRegs);
-        registrations.addAll(pendingRegs);
-
-        int maxSlots = race.getMaxHorses();
-        BigDecimal entryFee = race.getTournament().getEntryFee();
-
-        for (int i = 0; i < registrations.size(); i++) {
-            RaceRegistration reg = registrations.get(i);
-            if (i < maxSlots) {
-                if (!"APPROVED".equalsIgnoreCase(reg.getStatus())) {
-                    reg.setStatus("APPROVED");
-                    raceRegistrationRepository.save(reg);
-
-                    RaceParticipant participant = RaceParticipant.builder()
-                            .race(race)
-                            .horse(reg.getHorse())
-                            .jockey(reg.getJockey())
-                            .gateNumber(i + 1)
-                            .status("READY")
-                            .build();
-                    raceParticipantRepository.save(participant);
-                }
-            } else {
-                reg.setStatus("REJECTED");
-                raceRegistrationRepository.save(reg);
-
-                if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
-                    Wallet wallet = walletRepository.findByUserId(reg.getOwner().getUser().getId())
-                            .orElseThrow(() -> new RuntimeException("Wallet not found"));
-
-                    wallet.setBalance(wallet.getBalance().add(entryFee));
-                    walletRepository.save(wallet);
-
-                    WalletTransaction transaction = WalletTransaction.builder()
-                            .wallet(wallet)
-                            .transactionType("REFUND")
-                            .amount(entryFee)
-                            .status("SUCCESS")
-                            .referenceType("RACE_REGISTRATION")
-                            .referenceId(reg.getId())
-                            .build();
-                    walletTransactionRepository.save(transaction);
-                }
-            }
         }
 
         race.setStatus("CLOSED_FOR_REGISTER");

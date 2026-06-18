@@ -199,6 +199,33 @@ public class RefereeService {
             raceRepository.save(race); // save via cascade or directly
         }
 
+        // Reject and refund any remaining PENDING or PENDING_JOCKEY registrations
+        List<RaceRegistration> remainingRegs = raceRegistrationRepository.findByRaceId(raceId).stream()
+                .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus()) || "PENDING_JOCKEY".equalsIgnoreCase(r.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+        BigDecimal entryFee = tournament.getEntryFee();
+        for (RaceRegistration reg : remainingRegs) {
+            reg.setStatus("REJECTED");
+            raceRegistrationRepository.save(reg);
+
+            if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+                Wallet wallet = walletRepository.findByUserId(reg.getOwner().getUser().getId())
+                        .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                wallet.setBalance(wallet.getBalance().add(entryFee));
+                walletRepository.save(wallet);
+
+                WalletTransaction transaction = WalletTransaction.builder()
+                        .wallet(wallet)
+                        .transactionType("REFUND")
+                        .amount(entryFee)
+                        .status("SUCCESS")
+                        .referenceType("RACE_REGISTRATION")
+                        .referenceId(reg.getId())
+                        .build();
+                walletTransactionRepository.save(transaction);
+            }
+        }
+
         RaceSimulation simulation = RaceSimulation.builder()
                 .race(race)
                 .startTime(LocalDateTime.now())
