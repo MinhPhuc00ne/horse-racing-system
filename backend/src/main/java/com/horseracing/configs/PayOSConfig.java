@@ -8,13 +8,13 @@ import vn.payos.PayOS;
 @Configuration
 public class PayOSConfig {
 
-    @Value("${PAYOS_CLIENT_ID}")
+    @Value("${PAYOS_CLIENT_ID:dummy-client-id}")
     private String clientId;
 
-    @Value("${PAYOS_API_KEY}")
+    @Value("${PAYOS_API_KEY:dummy-api-key}")
     private String apiKey;
 
-    @Value("${PAYOS_CHECKSUM_KEY}")
+    @Value("${PAYOS_CHECKSUM_KEY:dummy-checksum-key}")
     private String checksumKey;
 
     @Bean

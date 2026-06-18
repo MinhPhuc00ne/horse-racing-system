@@ -48,4 +48,23 @@ public class CreateTournamentRequest {
     @NotNull(message = "Minimum bet amount is required")
     @PositiveOrZero(message = "Minimum bet amount must be positive or zero")
     private BigDecimal minBetAmount;
+
+    private String imageUrl;
+
+    private Integer refereeId;
+
+    @PositiveOrZero(message = "Entry fee must be positive or zero")
+    private BigDecimal entryFee;
+
+    private Integer minSlots;
+
+    private String allowedClasses;
+
+    private String allowedAges;
+
+    private String allowedGenders;
+
+    private LocalDateTime registrationOpeningTime;
+
+    private LocalDateTime officialRaceTime;
 }

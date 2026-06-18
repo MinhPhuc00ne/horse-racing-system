@@ -30,6 +30,17 @@ public class TournamentResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    private String imageUrl;
+    private Integer refereeId;
+    private String refereeName;
+    private BigDecimal entryFee;
+    private Integer minSlots;
+    private String allowedClasses;
+    private String allowedAges;
+    private String allowedGenders;
+    private LocalDateTime registrationOpeningTime;
+    private LocalDateTime officialRaceTime;
+
     public static TournamentResponse fromEntity(Tournament t) {
         if (t == null) return null;
         return TournamentResponse.builder()
@@ -47,6 +58,16 @@ public class TournamentResponse {
                 .prizeSecond(t.getPrizeSecond())
                 .prizeThird(t.getPrizeThird())
                 .minBetAmount(t.getMinBetAmount())
+                .imageUrl(t.getImageUrl())
+                .refereeId(t.getReferee() != null ? t.getReferee().getId() : null)
+                .refereeName(t.getReferee() != null ? t.getReferee().getFullName() : null)
+                .entryFee(t.getEntryFee())
+                .minSlots(t.getMinSlots())
+                .allowedClasses(t.getAllowedClasses())
+                .allowedAges(t.getAllowedAges())
+                .allowedGenders(t.getAllowedGenders())
+                .registrationOpeningTime(t.getRegistrationOpeningTime())
+                .officialRaceTime(t.getOfficialRaceTime())
                 .createdAt(t.getCreatedAt())
                 .updatedAt(t.getUpdatedAt())
                 .build();

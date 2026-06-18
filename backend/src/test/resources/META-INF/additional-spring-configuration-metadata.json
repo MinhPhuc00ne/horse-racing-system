@@ -1,0 +1,61 @@
+{
+  "groups": [
+    {
+      "name": "app",
+      "type": "java.lang.Object",
+      "description": "Custom application configurations"
+    },
+    {
+      "name": "app.jwt",
+      "type": "java.lang.Object",
+      "description": "JWT authentication settings"
+    },
+    {
+      "name": "app.google",
+      "type": "java.lang.Object",
+      "description": "Google OAuth2 settings"
+    },
+    {
+      "name": "app.cors",
+      "type": "java.lang.Object",
+      "description": "CORS settings"
+    }
+  ],
+  "properties": [
+    {
+      "name": "app.jwt.secret",
+      "type": "java.lang.String",
+      "description": "JWT Secret Key"
+    },
+    {
+      "name": "app.jwt.access-token-expiration",
+      "type": "java.lang.Long",
+      "description": "JWT Access Token Expiration in Milliseconds"
+    },
+    {
+      "name": "app.jwt.refresh-token-expiration",
+      "type": "java.lang.Long",
+      "description": "JWT Refresh Token Expiration in Milliseconds"
+    },
+    {
+      "name": "app.google.client-id",
+      "type": "java.lang.String",
+      "description": "Google Client ID"
+    },
+    {
+      "name": "app.google.client-secret",
+      "type": "java.lang.String",
+      "description": "Google Client Secret"
+    },
+    {
+      "name": "app.activation-url",
+      "type": "java.lang.String",
+      "description": "Activation URL"
+    },
+    {
+      "name": "app.cors.allowed-origins",
+      "type": "java.lang.String",
+      "description": "CORS Allowed Origins"
+    }
+  ]
+}

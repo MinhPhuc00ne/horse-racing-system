@@ -46,4 +46,6 @@ public class CreateRaceRequest {
 
     private String surfaceType;
     private String weather;
+
+    private Integer refereeId;
 }

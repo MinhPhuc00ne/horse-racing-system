@@ -12,6 +12,18 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:your-email@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 
 server:
   port: 8080
@@ -26,3 +38,6 @@ app:
     client-id: ${GOOGLE_CLIENT_ID:test-google-client-id}
     client-secret: ${GOOGLE_CLIENT_SECRET:test-google-client-secret}
   activation-url: ${APP_ACTIVATION_URL:http://localhost:5173/verify-email}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+

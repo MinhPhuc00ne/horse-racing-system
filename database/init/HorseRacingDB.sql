@@ -614,6 +614,12 @@ CREATE TABLE [dbo].[tournaments](
 	[image_url] [nvarchar](1000) NULL,
 	[referee_id] [int] NULL,
 	[entry_fee] [numeric](38, 2) NULL,
+	[min_slots] [int] NULL,
+	[allowed_classes] [nvarchar](255) NULL,
+	[allowed_ages] [nvarchar](255) NULL,
+	[allowed_genders] [nvarchar](255) NULL,
+	[registration_opening_time] [datetime] NULL,
+	[official_race_time] [datetime] NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
@@ -1254,6 +1260,11 @@ ALTER TABLE [dbo].[tournaments]  WITH CHECK ADD  CONSTRAINT [FK_tournaments_refe
 REFERENCES [dbo].[users] ([id])
 GO
 ALTER TABLE [dbo].[tournaments] CHECK CONSTRAINT [FK_tournaments_referee]
+GO
+ALTER TABLE [dbo].[races]  WITH CHECK ADD  CONSTRAINT [FK_races_referee] FOREIGN KEY([referee_id])
+REFERENCES [dbo].[users] ([id])
+GO
+ALTER TABLE [dbo].[races] CHECK CONSTRAINT [FK_races_referee]
 GO
 ALTER TABLE [dbo].[upgrade_requests]  WITH CHECK ADD CHECK  (([requested_role]='ADMIN' OR [requested_role]='RACE_REFEREE' OR [requested_role]='JOCKEY' OR [requested_role]='HORSE_OWNER' OR [requested_role]='SPECTATOR'))
 GO

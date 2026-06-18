@@ -28,6 +28,9 @@ public class RaceResponse {
     private String weather;
     private String status;
 
+    private Integer refereeId;
+    private String refereeName;
+
     public static RaceResponse fromEntity(Race r) {
         if (r == null) return null;
         return RaceResponse.builder()
@@ -46,6 +49,8 @@ public class RaceResponse {
                 .surfaceType(r.getSurfaceType())
                 .weather(r.getWeather())
                 .status(r.getStatus())
+                .refereeId(r.getReferee() != null ? r.getReferee().getId() : null)
+                .refereeName(r.getReferee() != null ? r.getReferee().getFullName() : null)
                 .build();
     }
 }

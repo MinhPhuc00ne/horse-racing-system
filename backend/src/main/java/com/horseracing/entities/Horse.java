@@ -41,6 +41,18 @@ public class Horse {
     @Column(length = 20)
     private String status; // E.g., ACTIVE, INACTIVE, INJURED
 
+    @Column(name = "speed_rating")
+    private Double speedRating;
+
+    @Column(name = "stamina_rating")
+    private Integer staminaRating;
+
+    @Column(name = "gate_performance_rating")
+    private Integer gatePerformanceRating;
+
+    @Column(length = 50)
+    private String color;
+
     @Column(name = "image_url", length = 1000)
     private String imageUrl;
 }
