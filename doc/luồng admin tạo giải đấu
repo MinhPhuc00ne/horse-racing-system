@@ -1,0 +1,76 @@
+# LUỒNG ADMIN TẠO GIẢI ĐẤU (ADMIN TOURNAMENT CREATION FLOW)
+
+Tài liệu này đặc tả luồng nghiệp vụ, giao diện, cấu hình và quản lý giải đấu dành cho vai trò **Admin**, đã được đồng bộ hóa với Backend (BE), Cơ sở dữ liệu (DB), và luồng Trọng tài điều khiển trận đấu.
+
+---
+
+## PHẦN A: FORM TẠO GIẢI ĐẤU (ADMIN CONFIGURATION)
+
+### 1. Cụm thông tin cơ bản (General Information)
+* **Tên giải đấu**: Nhập text (`tournamentName`).
+* **Mô tả giải đấu**: Nhập mô tả chi tiết (`description`).
+* **Hình ảnh đại diện**: Upload file ảnh (`imageUrl`).
+
+### 2. Cụm Địa điểm & Nhân sự (Location & Personnel)
+* **Khu vực tổ chức (Region)** & **Sân thi đấu (Venue)**: Chọn dạng bậc thang (Cascading Dropdown). Hệ thống load danh sách các sân (`race_tracks`) theo khu vực.
+  * *Ví dụ*: Chọn khu vực "TP.HCM" -> Hiển thị các sân như "Sân Phú Thọ" (`location` và `name`).
+  * Hệ thống tự động hiển thị thông số mặt sân và điều kiện mặt sân (`surfaceCondition` hoặc `surfaceCondition` trong `race_tracks`) dạng Read-only (chỉ đọc).
+* **Loại mặt sân (Track Type / Surface Type)**: Chọn loại mặt sân cho phép (Cỏ - Grass, Đất bùn - Muddy, Nhân tạo...).
+* **Trọng tài điều khiển (Referee)**: Dropdown chọn Trọng tài (`refereeId`). Hệ thống hiển thị danh sách người dùng có vai trò `RACE_REFEREE`. Admin bắt buộc phải chọn 1 trọng tài phụ trách giải đấu/vòng đua.
+
+### 3. Cụm cấu hình thời gian (Timeline)
+* **Thời gian mở đăng ký (Registration Opening Time)**:
+  * Tất cả Horse Owner đăng ký đều nằm trong một danh sách chờ mà chỉ Admin mới nhìn thấy.
+  * Phí tham gia giải đấu (`entryFee`) sẽ được chuyển vào ví tạm giữ. Nếu Horse Owner hủy đăng ký (`Cancel`) trong giai đoạn này, hệ thống sẽ hoàn trả 100% phí đăng ký vào ví.
+  * Trong thời gian đăng ký, nếu một Horse Owner cập nhật thông tin đăng ký (ví dụ đổi ngựa hoặc Jockey), lượt đăng ký đó sẽ bị đẩy xuống cuối danh sách duyệt.
+* **Thời gian đóng đăng ký (Registration Deadline)**:
+  * Dựa trên số lượng vị trí tối đa (`maxSlots`) do Admin thiết lập (Ví dụ: 8), hệ thống sẽ lấy 8 ngựa đứng đầu danh sách đăng ký đưa lên danh sách duyệt.
+  * Admin duyệt thủ công danh sách này. Nếu phát hiện ngựa hoặc nài ngựa vi phạm điều lệ, Admin có quyền từ chối (`Reject`). Khi đó, hệ thống tự động đẩy lượt đăng ký tiếp theo từ danh sách chờ lên.
+  * Khi Admin xác nhận hoàn tất duyệt danh sách, danh sách chính thức sẽ được công khai (Public) để Spectator bắt đầu đặt cược, đồng thời giải tán danh sách chờ và hoàn trả 100% phí đăng ký cho những người không được chọn.
+* **Thời gian thi đấu chính thức (Ongoing / Active)**:
+  * Trước giờ đua, Trọng tài sẽ tiến hành kiểm tra checklist lần cuối (cân nặng Jockey, tình trạng thời tiết/sân đua thực tế).
+  * Nếu phát hiện vi phạm, Trọng tài có quyền loại bỏ (`Reject/Disqualify`) cặp đua vi phạm.
+    * **Xử lý tài chính**: Chủ ngựa bị loại sẽ **bị mất 100% phí tham gia** (không hoàn lại). Hệ thống tự động **hoàn trả 100% tiền đặt cược** (tiền cọc cược) cho các Spectator đã đặt cược vào con ngựa bị loại đó.
+  * Khi tới giờ chạy chính thức, giao diện Trọng tài hiển thị nút **"Bắt đầu" (Start Race)**. Khi bấm nút này:
+    * Trạng thái giải đấu đổi thành **`Active`** (hoặc `ONGOING`). Trạng thái vòng đua đổi thành **`RUNNING`**.
+    * Khóa tính năng hủy/chỉnh sửa của các Horse Owner.
+    * Chốt sổ, đóng hoàn toàn cổng cá cược của vòng đua này.
+    * Hệ thống kích hoạt Live Simulation thời gian thực.
+    * **Lưu ý**: Trong quá trình giả lập diễn ra, hệ thống chạy liên tục từ lúc **Bắt đầu** cho đến khi **Kết thúc**, **không hỗ trợ tạm dừng (Pause) hay hủy trận đấu giữa chừng**.
+
+### 4. Cụm ràng buộc tham gia (Participation Constraints)
+* **Số lượng chính thức tối thiểu/tối đa (Min/Max Slots)**: Giới hạn số lượng ngựa thi đấu chính thức (Số lượng tối đa maxSlots nhập tay từ 12 trở xuống, số lượng tối thiểu minSlots nhập tay từ 2 trở lên và không được lớn hơn maxSlots).
+* **Giống ngựa cho phép (Allowed Breeds / Classes)**: Có thể chọn giống A hoặc giống B hoặc chọn cả hai (ngăn cách bởi dấu phẩy, lưu dạng chuỗi), ngoài ra Admin có thể thêm giống ngựa bằng cách nhập tay.
+* **Giới hạn tuổi (Allowed Ages)**: Chọn khoảng tuổi cho phép thi đấu (Ví dụ: "2-3, 4-6, trên 7").
+* **Giới tính ngựa (Allowed Genders)**: Chọn giới tính (Ví dụ: "Male, Female" hoặc cả hai).
+
+### 5. Cụm kinh tế & Giải thưởng (Economy & Prize Pool)
+* **Phí đăng ký (Entry Fee)**: Số tiền các Horse Owner phải nộp để đăng ký tham gia (Lưu ở trường `entryFee`).
+* **Định mức giải thưởng**: Nhập số tiền cụ thể (VNĐ) cho giải Nhất (`prizeFirst`), Nhì (`prizeSecond`), và Ba (`prizeThird`). Hệ thống sẽ tự động cộng dồn thành **Tổng giải thưởng (Total Prize)** của giải đấu.
+* **Mức cược tối thiểu (Minimum Bet Amount)**: Số tiền cược tối thiểu mà Spectator được phép đặt cho mỗi lượt cược (`minBetAmount`).
+
+### 6. Cụm tùy chọn & Thể thức (Rules & Advanced)
+* **Quy tắc Vòng đua (Race Rule)**: **Một giải đấu tương ứng với đúng một Vòng đua (Race) duy nhất**. Khi Admin tạo giải đấu thành công, hệ thống sẽ tự động khởi tạo ngầm vòng đua chính này. Admin không cần và không được phép tạo thêm vòng đua thủ công nào khác. Chủ ngựa đăng ký tham gia trực tiếp giải đấu này.
+* **Cho phép cá cược (Betting Settings)**: Luôn bật mặc định cho mọi giải đấu. Spectator đặt cược dựa trên định mức cược tối thiểu đã cấu hình. Không cần nút bật/tắt cá cược thủ công từ phía Admin.
+
+---
+
+## PHẦN B: QUẢN LÝ GIẢI ĐẤU (ADMIN MANAGEMENT)
+
+### 1. Cập nhật thông tin Giải đấu (Update Tournament)
+* **Phạm vi áp dụng**: Chỉ cho phép chỉnh sửa khi giải đấu ở trạng thái `"Upcoming"` (Chưa diễn ra).
+* **Đặc điểm**: Khi cập nhật thông tin giải đấu, hệ thống sẽ tự động đồng bộ hóa các thay đổi (Tên, ngày, số ngựa tối đa, trọng tài...) xuống vòng đua mặc định đi kèm.
+* **Hạn chế**: Hệ thống chặn hoàn toàn cập nhật đối với giải đấu đã sang trạng thái `"Active"`, `"Finished"`, hoặc `"Cancelled"`.
+* **Ràng buộc ngày**: Ngày bắt đầu (`startDate`) và ngày kết thúc (`endDate`) mới phải từ hôm nay trở đi (không cho sửa lùi ngày về quá khứ).
+
+### 2. Thay đổi trạng thái Giải đấu nhanh (Update Status)
+* Hỗ trợ Admin chuyển đổi trực tiếp trạng thái giải đấu qua API `/api/admin/tournaments/{id}/status`.
+* Các trạng thái hợp lệ trong hệ thống: **`Upcoming`**, **`Active`**, **`Finished`**, **`Cancelled`**.
+
+### 3. Xóa Giải đấu (Delete Tournament)
+* **Đặc điểm**: Khi xóa giải đấu, hệ thống sẽ tự động xóa vòng đua (Race) mặc định đi kèm.
+* **Điều kiện xóa**: Chỉ cho phép xóa giải đấu khi **chưa có bất kỳ chủ ngựa hay nài ngựa nào đăng ký** tham gia.
+* **Trường hợp đã có đăng ký**: Hệ thống từ chối xóa và yêu cầu Admin chuyển trạng thái giải đấu sang `"Cancelled"` thay vì xóa để bảo toàn dữ liệu lịch sử và tiền cọc tham gia.
+
+### 4. Luồng lấy danh sách nhân sự Trọng tài
+* Hệ thống cung cấp API riêng để lọc danh sách người dùng có vai trò `RACE_REFEREE` (`GET /api/admin/referees`), phục vụ dropdown lựa chọn nhân sự của Admin.

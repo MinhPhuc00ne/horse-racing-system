@@ -2,6 +2,7 @@ package com.horseracing.services;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -13,7 +14,12 @@ import com.horseracing.dto.response.TournamentResponse;
 import com.horseracing.entities.Tournament;
 import com.horseracing.entities.User;
 import com.horseracing.entities.enums.Role;
+import com.horseracing.entities.Race;
+import com.horseracing.entities.RaceTrack;
+import com.horseracing.repositories.RaceParticipantRepository;
+import com.horseracing.repositories.RaceRegistrationRepository;
 import com.horseracing.repositories.RaceRepository;
+import com.horseracing.repositories.RaceTrackRepository;
 import com.horseracing.repositories.TournamentRepository;
 import com.horseracing.repositories.UserRepository;
 
@@ -26,6 +32,9 @@ public class TournamentService {
     private final TournamentRepository tournamentRepository;
     private final UserRepository userRepository;
     private final RaceRepository raceRepository;
+    private final RaceTrackRepository raceTrackRepository;
+    private final RaceRegistrationRepository raceRegistrationRepository;
+    private final RaceParticipantRepository raceParticipantRepository;
 
     @Transactional
     public TournamentResponse createTournament(CreateTournamentRequest request) {
@@ -37,11 +46,11 @@ public class TournamentService {
         if (request.getMinBetAmount().compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Minimum bet amount must be positive or zero");
         }
-        if (request.getMaxSlots() == null || request.getMaxSlots() <= 0) {
-            throw new RuntimeException("Maximum slots must be a positive number");
+        if (request.getMaxSlots() == null || request.getMaxSlots() < 2 || request.getMaxSlots() > 12) {
+            throw new RuntimeException("Maximum slots must be between 2 and 12");
         }
-        if (request.getMinSlots() != null && request.getMinSlots() <= 0) {
-            throw new RuntimeException("Minimum slots must be a positive number");
+        if (request.getMinSlots() != null && (request.getMinSlots() < 2 || request.getMinSlots() > 12)) {
+            throw new RuntimeException("Minimum slots must be between 2 and 12");
         }
         if (request.getMinSlots() != null && request.getMaxSlots() != null && request.getMinSlots() > request.getMaxSlots()) {
             throw new RuntimeException("Minimum slots cannot be greater than maximum slots");
@@ -71,17 +80,41 @@ public class TournamentService {
                 && request.getRegistrationDeadline().isAfter(request.getOfficialRaceTime())) {
             throw new RuntimeException("Registration deadline must be before official race time");
         }
-        if (request.getOfficialRaceTime() != null && request.getStartDate() != null
-                && request.getOfficialRaceTime().toLocalDate().isBefore(request.getStartDate())) {
-            throw new RuntimeException("Official race time cannot be before tournament start date");
+
+        if (request.getRegistrationDeadline() != null && request.getRegistrationDeadline().isBefore(java.time.LocalDateTime.now())) {
+            throw new RuntimeException("Registration deadline cannot be in the past");
         }
 
-        User referee = null;
-        if (request.getRefereeId() != null) {
-            referee = userRepository.findById(request.getRefereeId()).orElse(null);
+        if (request.getRefereeId() == null) {
+            throw new RuntimeException("Referee ID is required");
         }
-        if (referee == null || referee.getRole() != Role.RACE_REFEREE) {
-            referee = userRepository.findByRole(Role.RACE_REFEREE).stream().findFirst().orElse(null);
+        User referee = userRepository.findById(request.getRefereeId())
+                .orElseThrow(() -> new RuntimeException("Referee not found"));
+        if (referee.getRole() != Role.RACE_REFEREE) {
+            throw new RuntimeException("User must have RACE_REFEREE role");
+        }
+
+        if (request.getLocation() == null || request.getLocation().isBlank()) {
+            throw new RuntimeException("Location (venue name or region) is required");
+        }
+        RaceTrack track = raceTrackRepository.findByName(request.getLocation()).orElse(null);
+        if (track == null) {
+            track = raceTrackRepository.findAll().stream()
+                    .filter(t -> request.getLocation().equalsIgnoreCase(t.getLocation()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Race track not found: " + request.getLocation()));
+        }
+
+        java.time.LocalDate raceDate = request.getStartDate() != null ? request.getStartDate() : java.time.LocalDate.now();
+        java.time.LocalTime startTime = request.getOfficialRaceTime() != null ? request.getOfficialRaceTime().toLocalTime() : java.time.LocalTime.of(9, 0);
+        java.time.LocalTime endTime = startTime.plusHours(1);
+
+        // Check for timing overlaps on the same track on the same date
+        List<Race> existingRaces = raceRepository.findByRaceTrackIdAndRaceDate(track.getId(), raceDate);
+        for (Race existing : existingRaces) {
+            if (startTime.isBefore(existing.getEndTime()) && endTime.isAfter(existing.getStartTime())) {
+                throw new RuntimeException("Race timing overlaps with another race on the same track");
+            }
         }
 
         BigDecimal totalPrize = request.getPrizeFirst()
@@ -90,7 +123,7 @@ public class TournamentService {
 
         Tournament tournament = Tournament.builder()
                 .tournamentName(request.getTournamentName())
-                .location(request.getLocation())
+                .location(track.getName())
                 .description(request.getDescription())
                 .registrationDeadline(request.getRegistrationDeadline())
                 .maxSlots(request.getMaxSlots())
@@ -114,6 +147,24 @@ public class TournamentService {
                 .build();
 
         tournament = tournamentRepository.save(tournament);
+
+        Race race = Race.builder()
+                .raceName(tournament.getTournamentName())
+                .tournament(tournament)
+                .raceTrack(track)
+                .raceDate(raceDate)
+                .startTime(startTime)
+                .endTime(endTime)
+                .raceRound(1)
+                .maxHorses(Optional.ofNullable(tournament.getMaxSlots()).orElse(8))
+                .distance(1200.0)
+                .surfaceType(request.getSurfaceType() != null ? request.getSurfaceType() : "Grass")
+                .weather("Sunny")
+                .status("OPEN_FOR_REGISTER")
+                .referee(referee)
+                .build();
+        raceRepository.save(race);
+
         return TournamentResponse.fromEntity(tournament);
     }
 
@@ -149,11 +200,11 @@ public class TournamentService {
         if (request.getMinBetAmount().compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Minimum bet amount must be positive or zero");
         }
-        if (request.getMaxSlots() == null || request.getMaxSlots() <= 0) {
-            throw new RuntimeException("Maximum slots must be a positive number");
+        if (request.getMaxSlots() == null || request.getMaxSlots() < 2 || request.getMaxSlots() > 12) {
+            throw new RuntimeException("Maximum slots must be between 2 and 12");
         }
-        if (request.getMinSlots() != null && request.getMinSlots() <= 0) {
-            throw new RuntimeException("Minimum slots must be a positive number");
+        if (request.getMinSlots() != null && (request.getMinSlots() < 2 || request.getMinSlots() > 12)) {
+            throw new RuntimeException("Minimum slots must be between 2 and 12");
         }
         if (request.getMinSlots() != null && request.getMaxSlots() != null && request.getMinSlots() > request.getMaxSlots()) {
             throw new RuntimeException("Minimum slots cannot be greater than maximum slots");
@@ -187,17 +238,44 @@ public class TournamentService {
                 && request.getRegistrationDeadline().isAfter(request.getOfficialRaceTime())) {
             throw new RuntimeException("Registration deadline must be before official race time");
         }
-        if (request.getOfficialRaceTime() != null && request.getStartDate() != null
-                && request.getOfficialRaceTime().toLocalDate().isBefore(request.getStartDate())) {
-            throw new RuntimeException("Official race time cannot be before tournament start date");
+
+        if (request.getRegistrationDeadline() != null && !request.getRegistrationDeadline().equals(tournament.getRegistrationDeadline())
+                && request.getRegistrationDeadline().isBefore(java.time.LocalDateTime.now())) {
+            throw new RuntimeException("Registration deadline cannot be in the past");
         }
 
-        User referee = null;
-        if (request.getRefereeId() != null) {
-            referee = userRepository.findById(request.getRefereeId()).orElse(null);
+        if (request.getRefereeId() == null) {
+            throw new RuntimeException("Referee ID is required");
         }
-        if (referee == null || referee.getRole() != Role.RACE_REFEREE) {
-            referee = userRepository.findByRole(Role.RACE_REFEREE).stream().findFirst().orElse(null);
+        User referee = userRepository.findById(request.getRefereeId())
+                .orElseThrow(() -> new RuntimeException("Referee not found"));
+        if (referee.getRole() != Role.RACE_REFEREE) {
+            throw new RuntimeException("User must have RACE_REFEREE role");
+        }
+
+        if (request.getLocation() == null || request.getLocation().isBlank()) {
+            throw new RuntimeException("Location (venue name or region) is required");
+        }
+        RaceTrack track = raceTrackRepository.findByName(request.getLocation()).orElse(null);
+        if (track == null) {
+            track = raceTrackRepository.findAll().stream()
+                    .filter(t -> request.getLocation().equalsIgnoreCase(t.getLocation()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Race track not found: " + request.getLocation()));
+        }
+
+        java.time.LocalDate raceDate = request.getStartDate() != null ? request.getStartDate() : java.time.LocalDate.now();
+        java.time.LocalTime startTime = request.getOfficialRaceTime() != null ? request.getOfficialRaceTime().toLocalTime() : java.time.LocalTime.of(9, 0);
+        java.time.LocalTime endTime = startTime.plusHours(1);
+
+        // Check for timing overlaps on the same track on the same date
+        List<Race> existingRaces = raceRepository.findByRaceTrackIdAndRaceDate(track.getId(), raceDate);
+        for (Race existing : existingRaces) {
+            if (!existing.getTournament().getId().equals(tournament.getId())) {
+                if (startTime.isBefore(existing.getEndTime()) && endTime.isAfter(existing.getStartTime())) {
+                    throw new RuntimeException("Race timing overlaps with another race on the same track");
+                }
+            }
         }
 
         BigDecimal totalPrize = request.getPrizeFirst()
@@ -205,7 +283,7 @@ public class TournamentService {
                 .add(request.getPrizeThird());
 
         tournament.setTournamentName(request.getTournamentName());
-        tournament.setLocation(request.getLocation());
+        tournament.setLocation(track.getName());
         tournament.setDescription(request.getDescription());
         tournament.setRegistrationDeadline(request.getRegistrationDeadline());
         tournament.setMaxSlots(request.getMaxSlots());
@@ -227,6 +305,22 @@ public class TournamentService {
         tournament.setOfficialRaceTime(request.getOfficialRaceTime());
 
         tournament = tournamentRepository.save(tournament);
+
+        // Auto-update associated default race
+        List<Race> races = raceRepository.findByTournamentId(tournament.getId());
+        if (!races.isEmpty()) {
+            Race race = races.get(0);
+            race.setRaceName(tournament.getTournamentName());
+            race.setRaceDate(raceDate);
+            race.setStartTime(startTime);
+            race.setEndTime(endTime);
+            race.setMaxHorses(Optional.ofNullable(tournament.getMaxSlots()).orElse(8));
+            race.setReferee(referee);
+            race.setRaceTrack(track);
+            race.setSurfaceType(request.getSurfaceType() != null ? request.getSurfaceType() : "Grass");
+            raceRepository.save(race);
+        }
+
         return TournamentResponse.fromEntity(tournament);
     }
 
@@ -253,8 +347,18 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tournament not found"));
 
-        if (!raceRepository.findByTournamentId(id).isEmpty()) {
-            throw new RuntimeException("Cannot delete a tournament that already has races. Please cancel it instead");
+        List<Race> races = raceRepository.findByTournamentId(id);
+        for (Race race : races) {
+            boolean hasRegistrations = !raceRegistrationRepository.findByRaceId(race.getId()).isEmpty();
+            boolean hasParticipants = raceParticipantRepository.countByRaceId(race.getId()) > 0;
+            if (hasRegistrations || hasParticipants) {
+                throw new RuntimeException("Cannot delete tournament because it already has registered participants. Please cancel it instead.");
+            }
+        }
+
+        // Safe to delete, delete default races first
+        for (Race race : races) {
+            raceRepository.delete(race);
         }
 
         tournamentRepository.delete(tournament);

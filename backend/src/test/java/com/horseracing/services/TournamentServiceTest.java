@@ -35,6 +35,12 @@ public class TournamentServiceTest {
     private HorseRepository horseRepository;
     @Mock
     private HorseOwnerProfileRepository horseOwnerProfileRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private RaceTrackRepository raceTrackRepository;
+    @Mock
+    private RaceParticipantRepository raceParticipantRepository;
 
     @InjectMocks
     private TournamentService tournamentService;
@@ -266,5 +272,247 @@ public class TournamentServiceTest {
 
         Exception ex = assertThrows(RuntimeException.class, () -> raceRegistrationService.confirmRegistration(5));
         assertTrue(ex.getMessage().contains("is less than the minimum slots required"));
+    }
+
+    @Test
+    void testCreateTournament_InvalidMaxSlots() {
+        CreateTournamentRequest request = CreateTournamentRequest.builder()
+                .tournamentName("Test Tournament")
+                .startDate(LocalDate.now().plusDays(5))
+                .endDate(LocalDate.now().plusDays(10))
+                .prizeFirst(BigDecimal.valueOf(100.0))
+                .prizeSecond(BigDecimal.valueOf(50.0))
+                .prizeThird(BigDecimal.valueOf(25.0))
+                .minBetAmount(BigDecimal.valueOf(10.0))
+                .maxSlots(13) // Invalid slots (must be 2 to 12)
+                .build();
+
+        Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
+        assertEquals("Maximum slots must be between 2 and 12", ex.getMessage());
+    }
+
+    @Test
+    void testCreateTournament_InvalidMinSlots() {
+        CreateTournamentRequest request = CreateTournamentRequest.builder()
+                .tournamentName("Test Tournament")
+                .startDate(LocalDate.now().plusDays(5))
+                .endDate(LocalDate.now().plusDays(10))
+                .prizeFirst(BigDecimal.valueOf(100.0))
+                .prizeSecond(BigDecimal.valueOf(50.0))
+                .prizeThird(BigDecimal.valueOf(25.0))
+                .minBetAmount(BigDecimal.valueOf(10.0))
+                .maxSlots(8)
+                .minSlots(1) // Invalid min slots (must be 2 to 12)
+                .build();
+
+        Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
+        assertEquals("Minimum slots must be between 2 and 12", ex.getMessage());
+    }
+
+    @Test
+    void testCreateTournament_RegistrationDeadlineInPast() {
+        CreateTournamentRequest request = CreateTournamentRequest.builder()
+                .tournamentName("Test Tournament")
+                .startDate(LocalDate.now().plusDays(5))
+                .endDate(LocalDate.now().plusDays(10))
+                .prizeFirst(BigDecimal.valueOf(100.0))
+                .prizeSecond(BigDecimal.valueOf(50.0))
+                .prizeThird(BigDecimal.valueOf(25.0))
+                .minBetAmount(BigDecimal.valueOf(10.0))
+                .maxSlots(8)
+                .registrationDeadline(LocalDateTime.now().minusMinutes(5)) // Deadline in the past
+                .build();
+
+        Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
+        assertEquals("Registration deadline cannot be in the past", ex.getMessage());
+    }
+
+    @Test
+    void testCreateTournament_RefereeRequired() {
+        CreateTournamentRequest request = CreateTournamentRequest.builder()
+                .tournamentName("Test Tournament")
+                .startDate(LocalDate.now().plusDays(5))
+                .endDate(LocalDate.now().plusDays(10))
+                .prizeFirst(BigDecimal.valueOf(100.0))
+                .prizeSecond(BigDecimal.valueOf(50.0))
+                .prizeThird(BigDecimal.valueOf(25.0))
+                .minBetAmount(BigDecimal.valueOf(10.0))
+                .maxSlots(8)
+                .registrationDeadline(LocalDateTime.now().plusDays(1))
+                .build();
+
+        Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
+        assertEquals("Referee ID is required", ex.getMessage());
+    }
+
+    @Test
+    void testCreateTournament_RefereeNotFound() {
+        CreateTournamentRequest request = CreateTournamentRequest.builder()
+                .tournamentName("Test Tournament")
+                .startDate(LocalDate.now().plusDays(5))
+                .endDate(LocalDate.now().plusDays(10))
+                .prizeFirst(BigDecimal.valueOf(100.0))
+                .prizeSecond(BigDecimal.valueOf(50.0))
+                .prizeThird(BigDecimal.valueOf(25.0))
+                .minBetAmount(BigDecimal.valueOf(10.0))
+                .maxSlots(8)
+                .registrationDeadline(LocalDateTime.now().plusDays(1))
+                .refereeId(999)
+                .build();
+
+        when(userRepository.findById(999)).thenReturn(Optional.empty());
+
+        Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
+        assertEquals("Referee not found", ex.getMessage());
+    }
+
+    @Test
+    void testCreateTournament_InvalidRefereeRole() {
+        CreateTournamentRequest request = CreateTournamentRequest.builder()
+                .tournamentName("Test Tournament")
+                .startDate(LocalDate.now().plusDays(5))
+                .endDate(LocalDate.now().plusDays(10))
+                .prizeFirst(BigDecimal.valueOf(100.0))
+                .prizeSecond(BigDecimal.valueOf(50.0))
+                .prizeThird(BigDecimal.valueOf(25.0))
+                .minBetAmount(BigDecimal.valueOf(10.0))
+                .maxSlots(8)
+                .registrationDeadline(LocalDateTime.now().plusDays(1))
+                .refereeId(3)
+                .build();
+
+        User nonReferee = User.builder().id(3).fullName("Not a Referee").role(com.horseracing.entities.enums.Role.SPECTATOR).build();
+        when(userRepository.findById(3)).thenReturn(Optional.of(nonReferee));
+
+        Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
+        assertEquals("User must have RACE_REFEREE role", ex.getMessage());
+    }
+
+    @Test
+    void testCreateTournament_LocationRequired() {
+        CreateTournamentRequest request = CreateTournamentRequest.builder()
+                .tournamentName("Test Tournament")
+                .startDate(LocalDate.now().plusDays(5))
+                .endDate(LocalDate.now().plusDays(10))
+                .prizeFirst(BigDecimal.valueOf(100.0))
+                .prizeSecond(BigDecimal.valueOf(50.0))
+                .prizeThird(BigDecimal.valueOf(25.0))
+                .minBetAmount(BigDecimal.valueOf(10.0))
+                .maxSlots(8)
+                .registrationDeadline(LocalDateTime.now().plusDays(1))
+                .refereeId(3)
+                .build();
+
+        User ref = User.builder().id(3).fullName("Referee").role(com.horseracing.entities.enums.Role.RACE_REFEREE).build();
+        when(userRepository.findById(3)).thenReturn(Optional.of(ref));
+
+        Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
+        assertEquals("Location (venue name or region) is required", ex.getMessage());
+    }
+
+    @Test
+    void testCreateTournament_TrackNotFound() {
+        CreateTournamentRequest request = CreateTournamentRequest.builder()
+                .tournamentName("Test Tournament")
+                .location("Unknown Track")
+                .startDate(LocalDate.now().plusDays(5))
+                .endDate(LocalDate.now().plusDays(10))
+                .prizeFirst(BigDecimal.valueOf(100.0))
+                .prizeSecond(BigDecimal.valueOf(50.0))
+                .prizeThird(BigDecimal.valueOf(25.0))
+                .minBetAmount(BigDecimal.valueOf(10.0))
+                .maxSlots(8)
+                .registrationDeadline(LocalDateTime.now().plusDays(1))
+                .refereeId(3)
+                .build();
+
+        User ref = User.builder().id(3).fullName("Referee").role(com.horseracing.entities.enums.Role.RACE_REFEREE).build();
+        when(userRepository.findById(3)).thenReturn(Optional.of(ref));
+        when(raceTrackRepository.findByName("Unknown Track")).thenReturn(Optional.empty());
+        when(raceTrackRepository.findAll()).thenReturn(new ArrayList<>());
+
+        Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
+        assertEquals("Race track not found: Unknown Track", ex.getMessage());
+    }
+
+    @Test
+    void testCreateTournament_ScheduleOverlap() {
+        CreateTournamentRequest request = CreateTournamentRequest.builder()
+                .tournamentName("Test Tournament")
+                .location("Phu Tho")
+                .startDate(LocalDate.now().plusDays(5))
+                .endDate(LocalDate.now().plusDays(10))
+                .prizeFirst(BigDecimal.valueOf(100.0))
+                .prizeSecond(BigDecimal.valueOf(50.0))
+                .prizeThird(BigDecimal.valueOf(25.0))
+                .minBetAmount(BigDecimal.valueOf(10.0))
+                .maxSlots(8)
+                .registrationDeadline(LocalDateTime.now().plusDays(1))
+                .officialRaceTime(LocalDateTime.now().plusDays(5).withHour(9).withMinute(0))
+                .refereeId(3)
+                .build();
+
+        User ref = User.builder().id(3).fullName("Referee").role(com.horseracing.entities.enums.Role.RACE_REFEREE).build();
+        when(userRepository.findById(3)).thenReturn(Optional.of(ref));
+
+        RaceTrack track = RaceTrack.builder().id(10).name("Phu Tho").location("TPHCM").build();
+        when(raceTrackRepository.findByName("Phu Tho")).thenReturn(Optional.of(track));
+
+        Race existingRace = Race.builder()
+                .id(1)
+                .startTime(java.time.LocalTime.of(8, 30))
+                .endTime(java.time.LocalTime.of(9, 30)) // overlaps with 9:00 - 10:00
+                .tournament(tournament)
+                .build();
+
+        when(raceRepository.findByRaceTrackIdAndRaceDate(10, request.getStartDate())).thenReturn(List.of(existingRace));
+
+        Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
+        assertEquals("Race timing overlaps with another race on the same track", ex.getMessage());
+    }
+
+    @Test
+    void testCreateTournament_Success() {
+        CreateTournamentRequest request = CreateTournamentRequest.builder()
+                .tournamentName("Test Tournament")
+                .location("Phu Tho")
+                .startDate(LocalDate.now().plusDays(5))
+                .endDate(LocalDate.now().plusDays(10))
+                .prizeFirst(BigDecimal.valueOf(100.0))
+                .prizeSecond(BigDecimal.valueOf(50.0))
+                .prizeThird(BigDecimal.valueOf(25.0))
+                .minBetAmount(BigDecimal.valueOf(10.0))
+                .maxSlots(8)
+                .registrationDeadline(LocalDateTime.now().plusDays(1))
+                .officialRaceTime(LocalDateTime.now().plusDays(5).withHour(10).withMinute(0))
+                .refereeId(3)
+                .surfaceType("Grass")
+                .build();
+
+        User ref = User.builder().id(3).fullName("Referee").role(com.horseracing.entities.enums.Role.RACE_REFEREE).build();
+        when(userRepository.findById(3)).thenReturn(Optional.of(ref));
+
+        RaceTrack track = RaceTrack.builder().id(10).name("Phu Tho").location("TPHCM").build();
+        when(raceTrackRepository.findByName("Phu Tho")).thenReturn(Optional.of(track));
+        when(raceRepository.findByRaceTrackIdAndRaceDate(10, request.getStartDate())).thenReturn(new ArrayList<>());
+        
+        Tournament savedTournament = Tournament.builder()
+                .id(100)
+                .tournamentName(request.getTournamentName())
+                .location(track.getName())
+                .maxSlots(request.getMaxSlots())
+                .startDate(request.getStartDate())
+                .totalPrize(BigDecimal.valueOf(175.0))
+                .referee(ref)
+                .build();
+
+        when(tournamentRepository.save(any(Tournament.class))).thenReturn(savedTournament);
+
+        com.horseracing.dto.response.TournamentResponse response = tournamentService.createTournament(request);
+
+        assertNotNull(response);
+        assertEquals(100, response.getId());
+        assertEquals("Phu Tho", response.getLocation());
+        verify(raceRepository, times(1)).save(any(Race.class));
     }
 }
