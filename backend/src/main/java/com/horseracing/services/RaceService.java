@@ -33,8 +33,8 @@ public class RaceService {
     public RaceResponse createRace(CreateRaceRequest request) {
         // Validate max horses
         int maxHorses = request.getMaxHorses();
-        if (maxHorses != 7 && maxHorses != 8 && maxHorses != 12) {
-            throw new RuntimeException("Maximum participating horses must be either 7, 8, or 12");
+        if (maxHorses < 2 || maxHorses > 12) {
+            throw new RuntimeException("Maximum participating horses must be between 2 and 12");
         }
 
         // Validate time sequence
@@ -44,6 +44,12 @@ public class RaceService {
 
         Tournament tournament = tournamentRepository.findById(request.getTournamentId())
                 .orElseThrow(() -> new RuntimeException("Tournament not found"));
+
+        // Validate only 1 race per tournament is allowed
+        List<Race> existingTournamentRaces = raceRepository.findByTournamentId(request.getTournamentId());
+        if (!existingTournamentRaces.isEmpty()) {
+            throw new RuntimeException("This tournament already has a race. Only 1 race is allowed per tournament.");
+        }
 
         // Validate tournament is not already finished
         if ("Finished".equalsIgnoreCase(tournament.getTournamentStatus()) 

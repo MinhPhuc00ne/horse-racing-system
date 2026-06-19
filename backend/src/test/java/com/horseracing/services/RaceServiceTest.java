@@ -69,12 +69,12 @@ public class RaceServiceTest {
     void testCreateRace_MaxHorsesInvalid() {
         CreateRaceRequest request = CreateRaceRequest.builder().raceName("Race 1").tournamentId(1)
                 .raceTrackId(1).raceDate(LocalDate.now()).startTime(LocalTime.of(9, 0))
-                .endTime(LocalTime.of(10, 0)).raceRound(1).maxHorses(5) // Invalid, must be 7, 8, 12
+                .endTime(LocalTime.of(10, 0)).raceRound(1).maxHorses(13) // Invalid, must be 2 to 12
                 .distance(1200.0).build();
 
         Exception exception =
                 assertThrows(RuntimeException.class, () -> raceService.createRace(request));
-        assertEquals("Maximum participating horses must be either 7, 8, or 12",
+        assertEquals("Maximum participating horses must be between 2 and 12",
                 exception.getMessage());
     }
 

@@ -49,7 +49,7 @@ public class NotificationService {
                     emitter.send(SseEmitter.event()
                             .name("NOTIFICATION")
                             .data(payload));
-                } catch (Exception e) {
+                } catch (java.io.IOException | IllegalStateException e) {
                     deadEmitters.add(emitter);
                 }
             }
@@ -84,7 +84,7 @@ public class NotificationService {
             emitter.send(SseEmitter.event()
                     .name("CONNECT")
                     .data("Connected successfully"));
-        } catch (Exception e) {
+        } catch (java.io.IOException | IllegalStateException e) {
             userEmitters.remove(emitter);
         }
 

@@ -67,4 +67,6 @@ public class CreateTournamentRequest {
     private LocalDateTime registrationOpeningTime;
 
     private LocalDateTime officialRaceTime;
+
+    private String surfaceType;
 }
