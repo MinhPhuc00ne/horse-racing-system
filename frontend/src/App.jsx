@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 import Header from './components/Header/Header'; 
 import Footer from './components/Footer/Footer';
@@ -41,7 +42,8 @@ function App() {
 
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <NotificationProvider>
+        <BrowserRouter>
         <Suspense fallback={
           <div style={{
             display: 'flex',
@@ -151,6 +153,7 @@ function App() {
 
         <FloatingAiChat />
       </BrowserRouter>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

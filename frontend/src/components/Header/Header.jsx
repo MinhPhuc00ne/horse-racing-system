@@ -1,13 +1,42 @@
 import { useContext } from 'react';
-import { Navbar, Nav, Container, Badge, NavDropdown } from 'react-bootstrap';
-import { FiBell, FiSettings, FiLogOut } from 'react-icons/fi';
+import { Navbar, Nav, Container, Badge, NavDropdown, Dropdown } from 'react-bootstrap';
+import { FiBell, FiSettings, FiLogOut, FiCheckSquare, FiAlertCircle, FiInfo, FiPlusCircle, FiTrendingUp, FiCreditCard } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
+import { NotificationContext } from '../../contexts/NotificationContext';
 
 const Header = () => {
   const { user, logout } = useContext(AuthContext);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useContext(NotificationContext);
   const navigate = useNavigate();
   const username = user?.fullName || user?.name || user?.username || user?.email || '';
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'ROLE_UPGRADE': return <FiTrendingUp className="text-info" />;
+      case 'CONNECTION': return <FiPlusCircle className="text-success" />;
+      case 'REGISTRATION': return <FiCheckSquare className="text-warning" />;
+      case 'RACE_STATUS': return <FiInfo style={{ color: '#fd7e14' }} />;
+      case 'WALLET': return <FiCreditCard className="text-success" />;
+      case 'SYSTEM_ALERT': return <FiAlertCircle className="text-danger" />;
+      default: return <FiInfo className="text-secondary" />;
+    }
+  };
+
+  const formatTime = (timeStr) => {
+    if (!timeStr) return '';
+    const date = new Date(timeStr);
+    const diffMs = Date.now() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
 
   // Logic xử lý Avatar: Lấy chữ cái đầu của tên
   // Nếu là "Admin" -> "A", nếu là "Nguyễn Văn An" -> "N"
@@ -49,17 +78,97 @@ const Header = () => {
             {user ? (
               <>
                 {/* Chuông thông báo */}
-                <div className="position-relative cursor-pointer">
-                  <FiBell size={20} className="text-white-50 hover-white" />
-                  <Badge 
-                    bg="warning" 
-                    pill 
-                    className="position-absolute rounded-circle" 
-                    style={{ top: '-2px', right: '-2px', width: '8px', height: '8px', padding: 0 }}
+                <Dropdown align="end" className="notification-dropdown">
+                  <Dropdown.Toggle as="div" className="position-relative cursor-pointer hover-white d-flex align-items-center">
+                    <FiBell size={20} className="text-white-50 hover-white" />
+                    {unreadCount > 0 && (
+                      <Badge 
+                        bg="danger" 
+                        pill 
+                        className="position-absolute d-flex align-items-center justify-content-center" 
+                        style={{ 
+                          top: '-8px', 
+                          right: '-8px', 
+                          fontSize: '0.65rem',
+                          minWidth: '16px',
+                          height: '16px',
+                          padding: '2px',
+                          fontWeight: 'bold',
+                          border: '2px solid #112211'
+                        }}
+                      >
+                        {unreadCount}
+                      </Badge>
+                    )}
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu 
+                    className="p-0 shadow-lg border-0" 
+                    style={{ 
+                      width: '340px', 
+                      backgroundColor: '#1c2e24', 
+                      color: '#fff',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      zIndex: 1060
+                    }}
                   >
-                    &nbsp;
-                  </Badge>
-                </div>
+                    <div className="d-flex justify-content-between align-items-center p-3 border-bottom border-secondary" style={{ backgroundColor: '#112211' }}>
+                      <h6 className="m-0 fw-bold text-white">Notifications</h6>
+                      {unreadCount > 0 && (
+                        <button 
+                          onClick={markAllAsRead} 
+                          className="btn btn-link text-warning text-decoration-none p-0 fw-semibold"
+                          style={{ fontSize: '0.75rem' }}
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
+                      {notifications.length === 0 ? (
+                        <div className="text-center py-4 text-white-50" style={{ fontSize: '0.85rem' }}>
+                          No notifications yet.
+                        </div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div 
+                            key={notif.id}
+                            onClick={() => !notif.isRead && markAsRead(notif.id)}
+                            className={`d-flex gap-3 p-3 border-bottom border-secondary-subtle cursor-pointer notif-item ${
+                              !notif.isRead ? 'bg-secondary bg-opacity-25' : ''
+                            }`}
+                            style={{ 
+                              transition: 'background-color 0.2s',
+                              fontSize: '0.85rem',
+                              borderLeft: !notif.isRead ? '3px solid #ffc107' : '3px solid transparent'
+                            }}
+                          >
+                            <div className="fs-5 mt-1">{getNotificationIcon(notif.type)}</div>
+                            <div className="flex-grow-1">
+                              <div className={`text-white ${!notif.isRead ? 'fw-bold' : ''}`}>
+                                {notif.title}
+                              </div>
+                              <div className="text-white-50 mt-1" style={{ fontSize: '0.8rem', lineHeight: '1.2' }}>
+                                {notif.content}
+                              </div>
+                              <div className="text-muted mt-2" style={{ fontSize: '0.7rem' }}>
+                                {formatTime(notif.createdAt)}
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    <div className="text-center p-2 border-top border-secondary" style={{ backgroundColor: '#112211' }}>
+                      <span className="text-white-50" style={{ fontSize: '0.75rem' }}>
+                        Real-time alerts enabled
+                      </span>
+                    </div>
+                  </Dropdown.Menu>
+                </Dropdown>
 
                 {/* Cài đặt */}
                 <FiSettings size={20} className="text-white-50 cursor-pointer hover-white" />
@@ -138,6 +247,10 @@ const Header = () => {
         .hover-white:hover { color: #fff !important; transition: 0.3s; }
         .no-caret .dropdown-toggle::after { display: none; }
         .dropdown-menu { background-color: #fff; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .notification-dropdown .dropdown-toggle::after { display: none !important; }
+        .notification-dropdown .dropdown-menu { border: 1px solid rgba(255,255,255,0.1) !important; }
+        .notif-item { border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
+        .notif-item:hover { background-color: rgba(255, 255, 255, 0.08) !important; }
       `}</style>
     </Navbar>
   );
