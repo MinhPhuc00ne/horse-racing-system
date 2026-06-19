@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useHorseOwner } from './HorseOwnerContext';
 import { updateOwnerProfileAPI, uploadFilesAPI } from '../../services/owner';
+import { depositAPI, withdrawAPI } from '../../services/wallet';
 
 const presetAvatars = [
   'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80',
@@ -11,9 +13,35 @@ const presetAvatars = [
 ];
 
 export default function ProfileContent() {
-  const { profile, setProfile, transactions, setTransactions, raceHistory } = useHorseOwner();
+  const navigate = useNavigate();
+  const { profile, setProfile, transactions, setTransactions, raceHistory, refreshData } = useHorseOwner();
   const [formData, setFormData] = useState({ ...profile });
   const [depositAmount, setDepositAmount] = useState('');
+
+  useEffect(() => {
+    if (refreshData) {
+      refreshData();
+    }
+
+    const handleRefresh = () => {
+      if (refreshData) {
+        refreshData();
+      }
+    };
+
+    window.addEventListener('focus', handleRefresh);
+    document.addEventListener('visibilitychange', handleRefresh);
+
+    return () => {
+      window.removeEventListener('focus', handleRefresh);
+      document.removeEventListener('visibilitychange', handleRefresh);
+    };
+  }, [refreshData]);
+
+  const formatInputWithCommas = (val) => {
+    const clean = val.replace(/\D/g, '');
+    return clean.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [uploading, setUploading] = useState(false);
@@ -51,31 +79,33 @@ export default function ProfileContent() {
     }
   };
 
-  const handleDeposit = () => {
-    const amt = parseFloat(depositAmount);
+  const handleDeposit = async () => {
+    const amt = parseFloat(depositAmount.replace(/,/g, ''));
     if (isNaN(amt) || amt <= 0) {
       alert('Please enter a valid positive deposit amount.');
       return;
     }
-    // Update balance
-    const updatedBalance = profile.walletBalance + amt;
-    setProfile((prev) => ({ ...prev, walletBalance: updatedBalance }));
 
-    // Add to transaction history
-    const newTx = {
-      id: `TX00${transactions.length + 1}`,
-      date: new Date().toISOString().replace('T', ' ').slice(0, 19),
-      type: 'DEPOSIT',
-      event: 'Deposit from linked bank account (Mock)',
-      amount: amt,
-    };
-    setTransactions((prev) => [newTx, ...prev]);
-    setDepositAmount('');
-    alert(`Mock Deposit of ${amt.toLocaleString()} VND successful!`);
+    try {
+      const res = await depositAPI(amt);
+      navigate('/payment-qr', {
+        state: {
+          amount: amt,
+          qrCode: res.qrCode || '',
+          orderCode: res.orderCode || null,
+          checkoutUrl: res.checkoutUrl || '',
+          returnUrl: '/owner/profile',
+          bankAccount: profile.bankAccount || '',
+        },
+      });
+      setDepositAmount('');
+    } catch (err) {
+      alert('Không thể tạo liên kết thanh toán: ' + err.message);
+    }
   };
 
-  const handleWithdraw = () => {
-    const amt = parseFloat(depositAmount);
+  const handleWithdraw = async () => {
+    const amt = parseFloat(depositAmount.replace(/,/g, ''));
     if (isNaN(amt) || amt <= 0) {
       alert('Please enter a valid positive withdrawal amount.');
       return;
@@ -84,21 +114,27 @@ export default function ProfileContent() {
       alert('Insufficient funds for withdrawal.');
       return;
     }
-    // Update balance
-    const updatedBalance = profile.walletBalance - amt;
-    setProfile((prev) => ({ ...prev, walletBalance: updatedBalance }));
 
-    // Add to transaction history
-    const newTx = {
-      id: `TX00${transactions.length + 1}`,
-      date: new Date().toISOString().replace('T', ' ').slice(0, 19),
-      type: 'WITHDRAWAL',
-      event: 'Withdrawal to linked bank account (Mock)',
-      amount: -amt,
-    };
-    setTransactions((prev) => [newTx, ...prev]);
-    setDepositAmount('');
-    alert(`Mock Withdrawal of ${amt.toLocaleString()} VND successful!`);
+    try {
+      await withdrawAPI(amt);
+      
+      // Fallback update for mock/real display
+      const updatedBalance = profile.walletBalance - amt;
+      setProfile((prev) => ({ ...prev, walletBalance: updatedBalance }));
+
+      const newTx = {
+        id: `TX00${Date.now()}`,
+        date: new Date().toISOString().replace('T', ' ').slice(0, 19),
+        type: 'WITHDRAWAL',
+        event: 'Yêu cầu rút tiền về tài khoản ngân hàng liên kết',
+        amount: -amt,
+      };
+      setTransactions((prev) => [newTx, ...prev]);
+      setDepositAmount('');
+      alert('Gửi yêu cầu rút tiền thành công, vui lòng chờ Admin duyệt!');
+    } catch (err) {
+      alert('Yêu cầu rút tiền thất bại: ' + err.message);
+    }
   };
 
   const handleFileChange = async (e) => {
@@ -441,10 +477,10 @@ export default function ProfileContent() {
 
             <div className="d-flex flex-column gap-3">
               <input
-                type="number"
+                type="text"
                 placeholder="Enter amount (VND)..."
                 value={depositAmount}
-                onChange={(e) => setDepositAmount(e.target.value)}
+                onChange={(e) => setDepositAmount(formatInputWithCommas(e.target.value))}
                 className="ho-form-input fw-bold"
               />
               <div className="d-flex gap-2 w-100">

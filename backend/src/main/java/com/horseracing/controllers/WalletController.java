@@ -49,6 +49,12 @@ public class WalletController {
         return ResponseEntity.ok(res);
     }
 
+    @GetMapping("/deposit/status/{orderCode}")
+    public ResponseEntity<Map<String, Object>> getDepositStatus(@PathVariable long orderCode) {
+        String status = paymentService.checkDepositStatus(orderCode);
+        return ResponseEntity.ok(Map.of("orderCode", orderCode, "status", status));
+    }
+
     @PostMapping("/withdraw")
     public ResponseEntity<WalletTransaction> withdraw(@RequestBody Map<String, Object> request, Authentication authentication) {
         User user = getAuthenticatedUser(authentication);

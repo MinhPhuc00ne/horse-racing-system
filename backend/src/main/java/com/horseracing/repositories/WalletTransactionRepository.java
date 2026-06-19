@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface WalletTransactionRepository extends JpaRepository<WalletTransaction, Integer> {
     List<WalletTransaction> findByWalletIdOrderByCreatedAtDesc(Integer walletId);
     Optional<WalletTransaction> findByPayosOrderCode(Long payosOrderCode);
+    List<WalletTransaction> findByTransactionTypeOrderByCreatedAtDesc(String transactionType);
 }

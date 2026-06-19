@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useJockey } from './JockeyContext';
 import DataTable from '../../components/DataTable';
 import StatusBadge from '../../components/StatusBadge';
@@ -6,7 +7,28 @@ import { updateJockeyProfileAPI } from '../../services/jockey';
 import { depositAPI, withdrawAPI } from '../../services/wallet';
 
 export default function JockeyProfileContent() {
-  const { profile, setProfile, transactions, setTransactions } = useJockey();
+  const navigate = useNavigate();
+  const { profile, setProfile, transactions, setTransactions, refreshData } = useJockey();
+  
+  useEffect(() => {
+    if (refreshData) {
+      refreshData();
+    }
+
+    const handleRefresh = () => {
+      if (refreshData) {
+        refreshData();
+      }
+    };
+
+    window.addEventListener('focus', handleRefresh);
+    document.addEventListener('visibilitychange', handleRefresh);
+
+    return () => {
+      window.removeEventListener('focus', handleRefresh);
+      document.removeEventListener('visibilitychange', handleRefresh);
+    };
+  }, [refreshData]);
   const [activeSubTab, setActiveSubTab] = useState('edit-profile'); // 'edit-profile' | 'wallet'
   
   // Profile form state
@@ -32,6 +54,11 @@ export default function JockeyProfileContent() {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
   };
 
+  const formatInputWithCommas = (val) => {
+    const clean = val.replace(/\D/g, '');
+    return clean.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     if (!formData.fullName.trim()) {
@@ -54,7 +81,7 @@ export default function JockeyProfileContent() {
   };
 
   const handleWalletAction = async (actionType) => {
-    const numericAmt = parseFloat(amount);
+    const numericAmt = parseFloat(amount.replace(/,/g, ''));
     if (isNaN(numericAmt) || numericAmt <= 0) {
       alert("Vui lòng nhập số tiền hợp lệ.");
       return;
@@ -68,24 +95,16 @@ export default function JockeyProfileContent() {
     try {
       if (actionType === 'DEPOSIT') {
         const res = await depositAPI(numericAmt);
-        if (res.checkoutUrl) {
-          // Chuyển hướng đến cổng thanh toán PayOS thực tế
-          window.location.href = res.checkoutUrl;
-        } else {
-          setProfile(prev => ({
-            ...prev,
-            walletBalance: prev.walletBalance + numericAmt
-          }));
-          const newTx = {
-            id: `TXJ_${Date.now()}`,
-            date: new Date().toISOString().replace('T', ' ').slice(0, 19),
-            type: 'DEPOSIT',
-            event: 'Nạp tiền vào ví từ tài khoản liên kết (Giả lập)',
-            amount: numericAmt
-          };
-          setTransactions(prev => [newTx, ...prev]);
-          alert('Nạp tiền giả lập thành công!');
-        }
+        navigate('/payment-qr', {
+          state: {
+            amount: numericAmt,
+            qrCode: res.qrCode || '',
+            orderCode: res.orderCode || null,
+            checkoutUrl: res.checkoutUrl || '',
+            returnUrl: '/jockey/profile',
+            bankAccount: profile.bankAccount || '',
+          },
+        });
       } else {
         await withdrawAPI(numericAmt);
         setProfile(prev => ({
@@ -130,9 +149,22 @@ export default function JockeyProfileContent() {
       align: 'right',
       render: (item) => {
         const isPos = item.amount >= 0;
+        const isPending = item.status === 'PENDING';
+        const isFailed = item.status === 'FAILED' || item.status === 'CANCELLED';
+        
+        let colorClass = isPos ? 'text-success' : 'text-danger';
+        let decorationStyle = {};
+        
+        if (isPending) {
+          colorClass = 'text-warning';
+        } else if (isFailed) {
+          colorClass = 'text-muted';
+          decorationStyle = { textDecoration: 'line-through' };
+        }
+        
         return (
-          <span className={`fw-bold ${isPos ? 'text-success' : 'text-danger'}`} style={{ fontSize: '13px' }}>
-            {isPos ? '+' : ''}{formatVND(item.amount)}
+          <span className={`fw-bold ${colorClass}`} style={{ fontSize: '13px', ...decorationStyle }}>
+            {isPos && !isPending && !isFailed ? '+' : ''}{formatVND(item.amount)}
           </span>
         );
       }
@@ -352,11 +384,11 @@ export default function JockeyProfileContent() {
                     <label className="ho-input-label ho-font-grotesk">Nhập số tiền giao dịch (VND)</label>
                     <div className="d-flex gap-2">
                       <input
-                        type="number"
+                        type="text"
                         placeholder="Ví dụ: 10,000,000"
                         className="ho-form-input text-dark fw-bold"
                         value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
+                        onChange={(e) => setAmount(formatInputWithCommas(e.target.value))}
                       />
                       <button
                         onClick={() => handleWalletAction('DEPOSIT')}

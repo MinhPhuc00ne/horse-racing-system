@@ -18,6 +18,7 @@ import vn.payos.model.v2.paymentRequests.PaymentLinkItem;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkRequest;
 import vn.payos.model.webhooks.Webhook;
 import vn.payos.model.webhooks.WebhookData;
+import vn.payos.model.v2.paymentRequests.PaymentLink;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -115,5 +116,38 @@ public class PaymentService {
             response.putNull("data");
             return response;
         }
+    }
+
+    @Transactional
+    public String checkDepositStatus(long orderCode) {
+        Optional<WalletTransaction> optTx = walletTransactionRepository.findByPayosOrderCode(orderCode);
+        if (optTx.isPresent()) {
+            WalletTransaction tx = optTx.get();
+            if ("SUCCESS".equals(tx.getStatus())) {
+                return "SUCCESS";
+            }
+            
+            // Query PayOS directly
+            try {
+                PaymentLink paymentLinkData = payOS.paymentRequests().get(orderCode);
+                if (vn.payos.model.v2.paymentRequests.PaymentLinkStatus.PAID.equals(paymentLinkData.getStatus())) {
+                    if ("PENDING".equals(tx.getStatus())) {
+                        tx.setStatus("SUCCESS");
+                        walletTransactionRepository.save(tx);
+
+                        Wallet wallet = tx.getWallet();
+                        wallet.setBalance(wallet.getBalance().add(tx.getAmount()));
+                        walletRepository.save(wallet);
+                        log.info("Successfully updated wallet balance via manual check for user: {}", wallet.getUser().getUsername());
+                    }
+                    return "SUCCESS";
+                }
+                return paymentLinkData.getStatus().name(); // PENDING, CANCELLED, etc.
+            } catch (Exception e) {
+                log.error("Error checking payment status from PayOS: {}", e.getMessage());
+            }
+            return tx.getStatus();
+        }
+        return "NOT_FOUND";
     }
 }

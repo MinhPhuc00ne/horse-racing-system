@@ -35,3 +35,143 @@ export async function rejectUpgradeRequestAPI(requestId, rejectionReason) {
     throw new Error(errMsg, { cause: error });
   }
 }
+
+export async function getRefereesAPI() {
+  try {
+    const response = await axiosClient.get('/admin/referees');
+    return response.data || [];
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Failed to fetch referees.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function getTracksAPI() {
+  try {
+    const response = await axiosClient.get('/admin/tracks');
+    return response.data || [];
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Failed to fetch tracks.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function createTournamentAPI(data) {
+  try {
+    const response = await axiosClient.post('/admin/tournaments', data);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể tạo giải đấu.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function updateTournamentAPI(id, data) {
+  try {
+    const response = await axiosClient.put(`/admin/tournaments/${id}`, data);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể cập nhật giải đấu.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function updateTournamentStatusAPI(id, status) {
+  try {
+    const response = await axiosClient.put(`/admin/tournaments/${id}/status`, { status });
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể cập nhật trạng thái giải đấu.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function deleteTournamentAPI(id) {
+  try {
+    const response = await axiosClient.delete(`/admin/tournaments/${id}`);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể xóa giải đấu.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function createRaceAPI(data) {
+  try {
+    const response = await axiosClient.post('/admin/races', data);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể tạo vòng đua.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function getRaceRegistrationsAPI() {
+  try {
+    const response = await axiosClient.get('/admin/race-registrations');
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách đăng ký đua.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function approveRaceRegistrationAPI(id) {
+  try {
+    const response = await axiosClient.put(`/admin/race-registrations/${id}/approve`);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể duyệt đơn đăng ký đua.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function rejectRaceRegistrationAPI(id) {
+  try {
+    const response = await axiosClient.put(`/admin/race-registrations/${id}/reject`);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể từ chối đơn đăng ký đua.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function confirmRaceRegistrationsAPI(raceId) {
+  try {
+    const response = await axiosClient.post(`/admin/races/${raceId}/confirm-registration`);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể chốt danh sách đăng ký đua.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function getWithdrawalsAPI() {
+  try {
+    const response = await axiosClient.get('/admin/wallets/withdrawals');
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách yêu cầu rút tiền.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function approveWithdrawalAPI(id) {
+  try {
+    const response = await axiosClient.put(`/admin/wallets/transactions/${id}/approve`);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể duyệt giao dịch rút tiền.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function rejectWithdrawalAPI(id) {
+  try {
+    const response = await axiosClient.put(`/admin/wallets/transactions/${id}/reject`);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể từ chối giao dịch rút tiền.';
+    throw new Error(errMsg, { cause: error });
+  }
+}

@@ -1,0 +1,289 @@
+/* LiveSimulation.css */
+
+.sim-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+@media (min-width: 1200px) {
+  .sim-container {
+    grid-template-columns: 1fr 380px;
+  }
+}
+
+/* Light Glassmorphism main card (matching EquineElitePro cream/gold theme) */
+.glass-sim-card {
+  background: #ffffff;
+  border: 1px solid rgba(11, 79, 50, 0.12);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 56, 32, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Canvas Wrapper with deep green border (simulating camera monitor frame) */
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #010604;
+  border: 2px solid #003820;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  aspect-ratio: 16 / 9;
+}
+
+.canvas-wrapper canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Light glass panel for Leaderboard */
+.glass-hud-panel {
+  background: #ffffff;
+  border: 1px solid rgba(11, 79, 50, 0.12);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 56, 32, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 540px;
+}
+
+/* Live Badge with Pulse Dot */
+.live-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #ef4444;
+  animation: pulse-glow 1.5s infinite;
+}
+
+@keyframes pulse-glow {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+  }
+  70% {
+    transform: scale(1.1);
+    opacity: 1;
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.6;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+/* Stat pills - deep green details */
+.stat-pill {
+  background: rgba(11, 79, 50, 0.05);
+  border: 1px solid rgba(11, 79, 50, 0.12);
+  color: #0b4f32;
+  padding: 5px 12px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.stat-pill strong {
+  color: #cca028;
+}
+
+/* Leaderboard List styling */
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  flex-grow: 1;
+  padding-right: 4px;
+}
+
+.leaderboard-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leaderboard-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 3px;
+}
+
+.leaderboard-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 3px;
+}
+
+.leaderboard-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Ranks item style with left border accent */
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(11, 79, 50, 0.02);
+  border: 1px solid rgba(11, 79, 50, 0.06);
+  border-left: 4px solid #718096;
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.leaderboard-item:hover {
+  background: rgba(212, 175, 55, 0.08);
+  border-color: rgba(212, 175, 55, 0.25);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 56, 32, 0.05);
+}
+
+.leaderboard-rank {
+  font-weight: 800;
+  font-size: 15px;
+  min-width: 32px;
+  color: #718096;
+}
+
+.rank-1 {
+  background: rgba(212, 175, 55, 0.04);
+  border-color: rgba(212, 175, 55, 0.15);
+}
+.rank-1 .leaderboard-rank {
+  color: #b88d1d;
+}
+
+.rank-2 {
+  background: rgba(113, 128, 150, 0.02);
+  border-color: rgba(113, 128, 150, 0.08);
+}
+.rank-2 .leaderboard-rank {
+  color: #4a5568;
+}
+
+.rank-3 {
+  background: rgba(180, 83, 9, 0.02);
+  border-color: rgba(180, 83, 9, 0.08);
+}
+.rank-3 .leaderboard-rank {
+  color: #9a3412;
+}
+
+.leaderboard-horse-info {
+  flex-grow: 1;
+  margin-left: 12px;
+}
+
+.leaderboard-horse-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: #003820;
+  margin-bottom: 2px;
+}
+
+.leaderboard-jockey-name {
+  font-size: 11px;
+  color: #718096;
+  font-weight: 500;
+}
+
+.leaderboard-metrics {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.leaderboard-progress {
+  font-weight: 800;
+  font-size: 13.5px;
+  color: #b88d1d;
+  min-width: 42px;
+  text-align: right;
+}
+
+.btn-flag-action {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.btn-flag-action:hover {
+  background: #ef4444;
+  color: #ffffff;
+  transform: scale(1.08);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+  border-color: #ef4444;
+}
+
+/* Modals styles overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.modal-content-custom {
+  background-color: #ffffff;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  width: 95%;
+  max-width: 450px;
+  padding: 32px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+  color: #1c1b1b;
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -6,7 +6,7 @@ import { initialJockeyDirectory } from '../pages/Jockey/mockData';
  */
 
 const isMockMode = () => {
-  return false; // Force mock mode for offline testing
+  return false;
 };
 
 const getMockDirectory = () => {

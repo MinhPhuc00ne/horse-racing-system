@@ -1,9 +1,30 @@
+import { useEffect } from 'react';
 import { useHorseOwner } from './HorseOwnerContext';
 import DataTable from '../../components/DataTable';
 import StatusBadge from '../../components/StatusBadge';
 
 export default function FinancialsContent() {
-  const { profile = {}, transactions = [] } = useHorseOwner();
+  const { profile = {}, transactions = [], refreshData } = useHorseOwner();
+
+  useEffect(() => {
+    if (refreshData) {
+      refreshData();
+    }
+
+    const handleRefresh = () => {
+      if (refreshData) {
+        refreshData();
+      }
+    };
+
+    window.addEventListener('focus', handleRefresh);
+    document.addEventListener('visibilitychange', handleRefresh);
+
+    return () => {
+      window.removeEventListener('focus', handleRefresh);
+      document.removeEventListener('visibilitychange', handleRefresh);
+    };
+  }, [refreshData]);
 
   // Format currency to VND
   const formatVND = (value) => {
@@ -12,11 +33,11 @@ export default function FinancialsContent() {
 
   // Calculate dynamic stats
   const totalWinnings = transactions
-    .filter(t => t.type === 'WINNINGS')
+    .filter(t => ['WINNINGS', 'PRIZE'].includes(t.type) && (!t.status || t.status === 'SUCCESS'))
     .reduce((sum, t) => sum + (t.amount || 0), 0);
 
   const totalEntryFees = transactions
-    .filter(t => t.amount < 0)
+    .filter(t => t.type === 'ENTRY_FEE' && (!t.status || t.status === 'SUCCESS'))
     .reduce((sum, t) => sum + (t.amount || 0), 0);
 
   const netEarnings = totalWinnings + totalEntryFees;
@@ -52,10 +73,23 @@ export default function FinancialsContent() {
       label: 'Amount',
       align: 'right',
       render: (item) => {
-        const isPositive = item.amount >= 0;
+        const isPos = item.amount >= 0;
+        const isPending = item.status === 'PENDING';
+        const isFailed = item.status === 'FAILED' || item.status === 'CANCELLED';
+        
+        let colorClass = isPos ? 'text-success' : 'text-danger';
+        let decorationStyle = {};
+        
+        if (isPending) {
+          colorClass = 'text-warning';
+        } else if (isFailed) {
+          colorClass = 'text-muted';
+          decorationStyle = { textDecoration: 'line-through' };
+        }
+        
         return (
-          <span className={`fw-bold ${isPositive ? 'text-success' : 'text-danger'}`}>
-            {isPositive ? '+' : ''}{formatVND(item.amount)}
+          <span className={`fw-bold ${colorClass}`} style={{ fontSize: '13px', ...decorationStyle }}>
+            {isPos && !isPending && !isFailed ? '+' : ''}{formatVND(item.amount)}
           </span>
         );
       }

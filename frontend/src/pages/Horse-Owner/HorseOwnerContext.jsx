@@ -1,11 +1,15 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getOwnerProfileAPI, getMyHorsesAPI } from '../../services/owner';
+import { getOwnerProfileAPI, getMyHorsesAPI, getMyRaceRegistrationsAPI } from '../../services/owner';
 import { getFriendsAPI } from '../../services/connections';
 import {
   getTournamentsAPI,
   getTournamentRacesAPI,
   getRaceParticipantsAPI,
 } from '../../services/races';
+import {
+  getWalletBalanceAPI,
+  getTransactionHistoryAPI
+} from '../../services/wallet';
 import {
   initialOwnerProfile,
   initialHorses,
@@ -18,19 +22,35 @@ import {
 const HorseOwnerContext = createContext();
 
 export function HorseOwnerProvider({ children }) {
-  const [profile, setProfile] = useState(initialOwnerProfile);
-  const [horses, setHorses] = useState(initialHorses);
-  const [systemUsers, setSystemUsers] = useState(initialSystemUsers);
-  const [tournaments, setTournaments] = useState(initialTournaments);
+  const [profile, setProfile] = useState({
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    identityNumber: '',
+    dateOfBirth: '',
+    stableName: '',
+    stableAddress: '',
+    description: '',
+    walletBalance: 0,
+    avatar: '',
+    avatarZoom: 1,
+    avatarOffsetX: 0,
+    avatarOffsetY: 0
+  });
+  const [horses, setHorses] = useState([]);
+  const [systemUsers, setSystemUsers] = useState([]);
+  const [tournaments, setTournaments] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [raceHistory, setRaceHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchOwnerData = async () => {
+  const fetchOwnerData = async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent) {
+        setLoading(true);
+      }
 
-      // 1. Fetch Profile
+      // 1. Fetch Profile & Wallet Balance
       let profileData = null;
       try {
         profileData = await getOwnerProfileAPI();
@@ -38,8 +58,15 @@ export function HorseOwnerProvider({ children }) {
         console.error(err);
       }
 
-      const savedBalance = localStorage.getItem('owner_wallet_balance');
-      const walletBalance = savedBalance ? parseFloat(savedBalance) : 1250000000;
+      let walletBalance = 0;
+      try {
+        const balanceData = await getWalletBalanceAPI();
+        walletBalance = balanceData.balance;
+      } catch (err) {
+        console.error('Failed to load wallet balance:', err);
+        const savedBalance = localStorage.getItem('owner_wallet_balance');
+        walletBalance = savedBalance ? parseFloat(savedBalance) : 0;
+      }
 
       if (profileData) {
         setProfile({
@@ -58,6 +85,7 @@ export function HorseOwnerProvider({ children }) {
           avatarOffsetX: 0,
           avatarOffsetY: 0,
         });
+        localStorage.setItem('owner_wallet_balance', walletBalance.toString());
       }
 
       // 2. Fetch Horses
@@ -109,6 +137,13 @@ export function HorseOwnerProvider({ children }) {
 
       // 4. Fetch Tournaments and Races
       try {
+        let registrationsData = [];
+        try {
+          registrationsData = await getMyRaceRegistrationsAPI();
+        } catch (err) {
+          console.error('Không thể lấy danh sách đăng ký thi đấu từ API:', err);
+        }
+
         const tournamentsData = await getTournamentsAPI();
         const allRaces = [];
         for (const t of tournamentsData) {
@@ -125,13 +160,21 @@ export function HorseOwnerProvider({ children }) {
               .filter((p) => horsesData.some((myH) => myH.id === p.horseId))
               .map((p) => p.horseName);
 
+            const apiRegistered = registrationsData
+              .filter((reg) => (reg.raceId === r.id || reg.tournamentId === r.id) && reg.status !== 'REJECTED')
+              .map((reg) => reg.horseName);
+
             const savedLocal = localStorage.getItem('owner_registered_races') || '[]';
             const localList = JSON.parse(savedLocal);
             const localRegistered = localList
               .filter((l) => l.raceId === r.id)
               .map((l) => l.horseName);
 
-            const registeredHorsesSet = new Set([...registeredHorsesList, ...localRegistered]);
+            const registeredHorsesSet = new Set([
+              ...registeredHorsesList,
+              ...apiRegistered,
+              ...localRegistered,
+            ]);
 
             allRaces.push({
               id: r.id,
@@ -152,22 +195,16 @@ export function HorseOwnerProvider({ children }) {
       }
 
       // Load Transactions
-      const savedTx = localStorage.getItem('owner_transactions');
-      if (savedTx) {
-        setTransactions(JSON.parse(savedTx));
-      } else {
-        setTransactions(initialTransactions);
-        localStorage.setItem('owner_transactions', JSON.stringify(initialTransactions));
+      try {
+        const txs = await getTransactionHistoryAPI();
+        setTransactions(txs);
+      } catch (err) {
+        console.error('Failed to load transaction history:', err);
+        setTransactions([]);
       }
 
       // Load Race History
-      const savedRH = localStorage.getItem('owner_race_history');
-      if (savedRH) {
-        setRaceHistory(JSON.parse(savedRH));
-      } else {
-        setRaceHistory(initialRaceHistory);
-        localStorage.setItem('owner_race_history', JSON.stringify(initialRaceHistory));
-      }
+      setRaceHistory([]);
     } catch (error) {
       console.error('Lỗi khi tải dữ liệu chủ ngựa:', error);
     } finally {
@@ -216,7 +253,7 @@ export function HorseOwnerProvider({ children }) {
     raceHistory,
     setRaceHistory: updateRaceHistoryState,
     loading,
-    refreshData: fetchOwnerData,
+    refreshData: () => fetchOwnerData(true),
   };
 
   return <HorseOwnerContext.Provider value={value}>{children}</HorseOwnerContext.Provider>;

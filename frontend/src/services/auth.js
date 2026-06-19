@@ -5,7 +5,7 @@ import axiosClient from '../api/axiosClient';
  */
 
 const isMockMode = () => {
-  return false; // Force mock mode for offline testing
+  return false;
 };
 
 export async function loginAPI(email, password) {

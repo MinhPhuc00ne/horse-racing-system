@@ -1,4 +1,8 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
   datasource:
     url: jdbc:sqlserver://${DB_HOST:localhost}:${DB_PORT:1433};databaseName=${DB_NAME:HorseRacingDB};encrypt=true;trustServerCertificate=true
     username: ${DB_USER:sa}

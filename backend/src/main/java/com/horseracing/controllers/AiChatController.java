@@ -28,11 +28,14 @@ public class AiChatController {
     private final AiChatHistoryRepository aiChatHistoryRepository;
 
     @PostMapping
-    public ResponseEntity<?> chat(@RequestBody Map<String, String> payload, Authentication authentication) {
-        String message = payload.get("message");
+    public ResponseEntity<?> chat(@RequestBody Map<String, Object> payload, Authentication authentication) {
+        String message = (String) payload.get("message");
         if (message == null || message.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Message cannot be empty"));
         }
+
+        @SuppressWarnings("unchecked")
+        Map<String, String> image = (Map<String, String>) payload.get("image");
 
         User user = null;
         if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails) {
@@ -40,7 +43,7 @@ public class AiChatController {
             user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
         }
 
-        String reply = aiChatService.chat(message, user);
+        String reply = aiChatService.chat(message, image, user);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(reply);
