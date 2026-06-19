@@ -46,61 +46,88 @@ const Header = () => {
 
           {/* CỤM TÍNH NĂNG BÊN PHẢI */}
           <div className="d-flex align-items-center gap-3">
-            {/* Chuông thông báo */}
-            <div className="position-relative cursor-pointer">
-              <FiBell size={20} className="text-white-50 hover-white" />
-              <Badge 
-                bg="warning" 
-                pill 
-                className="position-absolute rounded-circle" 
-                style={{ top: '-2px', right: '-2px', width: '8px', height: '8px', padding: 0 }}
-              >
-                &nbsp;
-              </Badge>
-            </div>
-
-            {/* Cài đặt */}
-            <FiSettings size={20} className="text-white-50 cursor-pointer hover-white" />
-
-            {/* PHẦN USER: HIỂN THỊ ĐỘNG TÊN TỪ DATABASE/GOOGLE */}
-            <div className="d-flex align-items-center gap-2 ms-2 ps-3 border-start border-secondary">
-              <div className="text-end d-none d-sm-block">
-                <div className="text-white-50" style={{ fontSize: '0.7rem' }}>Welcome back,</div>
-                <div className="text-white fw-bold" style={{ fontSize: '0.85rem' }}>
-                  {username || 'Guest User'}
-                </div>
-              </div>
-
-              {/* Avatar hình tròn chứa chữ cái đầu */}
-              <NavDropdown
-                title={
-                  <div 
-                    className="d-flex align-items-center justify-content-center rounded-circle fw-bold shadow-sm"
-                    style={{ 
-                      width: '38px', 
-                      height: '38px', 
-                      background: 'linear-gradient(135deg, #198754 0%, #ffc107 100%)',
-                      color: '#fff',
-                      fontSize: '1rem',
-                      border: '2px solid rgba(255,255,255,0.1)'
-                    }}
+            {user ? (
+              <>
+                {/* Chuông thông báo */}
+                <div className="position-relative cursor-pointer">
+                  <FiBell size={20} className="text-white-50 hover-white" />
+                  <Badge 
+                    bg="warning" 
+                    pill 
+                    className="position-absolute rounded-circle" 
+                    style={{ top: '-2px', right: '-2px', width: '8px', height: '8px', padding: 0 }}
                   >
-                    {getAvatarLetter(username || 'G')}
+                    &nbsp;
+                  </Badge>
+                </div>
+
+                {/* Cài đặt */}
+                <FiSettings size={20} className="text-white-50 cursor-pointer hover-white" />
+
+                {/* PHẦN USER: HIỂN THỊ ĐỘNG TÊN TỪ DATABASE/GOOGLE */}
+                <div className="d-flex align-items-center gap-2 ms-2 ps-3 border-start border-secondary">
+                  <div className="text-end d-none d-sm-block">
+                    <div className="text-white-50" style={{ fontSize: '0.7rem' }}>Welcome back,</div>
+                    <div className="text-white fw-bold" style={{ fontSize: '0.85rem' }}>
+                      {username}
+                    </div>
                   </div>
-                }
-                id="user-dropdown"
-                align="end"
-                className="no-caret"
-              >
-                <NavDropdown.Header>Account Actions</NavDropdown.Header>
-                <NavDropdown.Item href="#profile">My Profile</NavDropdown.Item>
-                <NavDropdown.Item href="#settings">Settings</NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item onClick={handleLogout} className="text-danger d-flex align-items-center gap-2">
-                  <FiLogOut /> Logout
-                </NavDropdown.Item>
-              </NavDropdown>
-            </div>
+
+                  {/* Avatar hình tròn chứa chữ cái đầu */}
+                  <NavDropdown
+                    title={
+                      <div 
+                        className="d-flex align-items-center justify-content-center rounded-circle fw-bold shadow-sm"
+                        style={{ 
+                          width: '38px', 
+                          height: '38px', 
+                          background: 'linear-gradient(135deg, #198754 0%, #ffc107 100%)',
+                          color: '#fff',
+                          fontSize: '1rem',
+                          border: '2px solid rgba(255,255,255,0.1)'
+                        }}
+                      >
+                        {getAvatarLetter(username || 'G')}
+                      </div>
+                    }
+                    id="user-dropdown"
+                    align="end"
+                    className="no-caret"
+                  >
+                    <NavDropdown.Header>Account Actions</NavDropdown.Header>
+                    <NavDropdown.Item href="#profile">My Profile</NavDropdown.Item>
+                    <NavDropdown.Item href="#settings">Settings</NavDropdown.Item>
+                    <NavDropdown.Divider />
+                    <NavDropdown.Item onClick={handleLogout} className="text-danger d-flex align-items-center gap-2">
+                      <FiLogOut /> Logout
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                </div>
+              </>
+            ) : (
+              <div className="d-flex align-items-center gap-2 ms-2">
+                <button 
+                  onClick={() => navigate('/login')}
+                  className="btn btn-link text-white-50 text-decoration-none hover-white px-3 fw-semibold"
+                  style={{ fontSize: '0.85rem' }}
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={() => navigate('/signup')}
+                  className="btn btn-warning fw-bold px-3 shadow-sm"
+                  style={{ 
+                    fontSize: '0.85rem',
+                    background: 'linear-gradient(135deg, #ffc107 0%, #e2b740 100%)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    color: '#112211'
+                  }}
+                >
+                  Sign up
+                </button>
+              </div>
+            )}
           </div>
         </Navbar.Collapse>
       </Container>

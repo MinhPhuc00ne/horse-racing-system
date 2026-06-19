@@ -125,17 +125,10 @@ function App() {
               }
             />
 
-            {/* Protected Routes enclosed in MainLayout */}
+            {/* Public and Protected Routes enclosed in MainLayout */}
             <Route element={<MainLayout />}>
               {/* Landing Dashboard */}
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute allowedRoles={["SPECTATOR", "ADMIN", "HORSE_OWNER", "JOCKEY", "RACE_REFEREE"]}>
-                    <Home />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/" element={<Home />} />
               <Route path="/home" element={<Navigate to="/" replace />} />
             </Route>
 

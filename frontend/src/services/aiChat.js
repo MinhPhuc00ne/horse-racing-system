@@ -8,7 +8,7 @@ const isMockMode = () => {
   return false;
 };
 
-export async function sendChatMessageAPI(message) {
+export async function sendChatMessageAPI(message, image = null) {
   if (isMockMode()) {
     // Mock response with slight delay
     return new Promise((resolve) => {
@@ -19,7 +19,7 @@ export async function sendChatMessageAPI(message) {
   }
 
   try {
-    const response = await axiosClient.post('/chat', { message });
+    const response = await axiosClient.post('/v1/chat', { message, image });
     // Dựa vào AiChatController, có thể trả về plain string hoặc object
     return response.data;
   } catch (error) {
@@ -36,7 +36,7 @@ export async function getChatHistoryAPI() {
   }
 
   try {
-    const response = await axiosClient.get('/chat/history');
+    const response = await axiosClient.get('/v1/chat/history');
     return response.data;
   } catch (error) {
     console.error('Lỗi khi lấy lịch sử chat:', error);
@@ -54,7 +54,7 @@ export async function clearChatHistoryAPI() {
   }
 
   try {
-    const response = await axiosClient.delete('/chat/history');
+    const response = await axiosClient.delete('/v1/chat/history');
     return response.data;
   } catch (error) {
     console.error('Lỗi khi xóa lịch sử chat:', error);

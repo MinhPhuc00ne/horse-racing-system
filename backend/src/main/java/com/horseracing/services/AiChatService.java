@@ -74,10 +74,14 @@ public class AiChatService {
     }
 
     public String chat(String userMessage) {
-        return chat(userMessage, null);
+        return chat(userMessage, null, null);
     }
 
     public String chat(String userMessage, User user) {
+        return chat(userMessage, null, user);
+    }
+
+    public String chat(String userMessage, java.util.Map<String, String> image, User user) {
         if (geminiApiKey == null || geminiApiKey.isEmpty() || geminiApiKey.contains("your-gemini-api-key")) {
             return "{\"text\": \"Lỗi: Chưa cấu hình Gemini API Key. Vui lòng thêm GEMINI_API_KEY vào biến môi trường.\" }";
         }
@@ -85,10 +89,14 @@ public class AiChatService {
         // 1. Save user's message to database if authenticated
         if (user != null) {
             try {
+                String messageToSave = userMessage;
+                if (image != null && image.get("data") != null) {
+                    messageToSave += " [Gửi kèm hình ảnh]";
+                }
                 AiChatHistory userMsg = AiChatHistory.builder()
                         .user(user)
                         .sender("USER")
-                        .message(userMessage)
+                        .message(messageToSave)
                         .build();
                 aiChatHistoryRepository.save(userMsg);
             } catch (Exception e) {
@@ -150,15 +158,61 @@ public class AiChatService {
                 List<AiChatHistory> history = aiChatHistoryRepository.findTop50ByUserIdOrderByCreatedAtDesc(user.getId());
                 Collections.reverse(history); // chronological order
 
-                for (AiChatHistory h : history) {
-                    ObjectNode contentObj = objectMapper.createObjectNode();
-                    contentObj.put("role", h.getSender().equalsIgnoreCase("USER") ? "user" : "model");
-                    ArrayNode partsArray = objectMapper.createArrayNode();
-                    ObjectNode textPart = objectMapper.createObjectNode();
-                    textPart.put("text", h.getMessage());
-                    partsArray.add(textPart);
-                    contentObj.set("parts", partsArray);
-                    contentsArray.add(contentObj);
+                String lastRole = null;
+                ObjectNode lastContentObj = null;
+                ArrayNode lastPartsArray = null;
+
+                for (int i = 0; i < history.size(); i++) {
+                    AiChatHistory h = history.get(i);
+                    String role = h.getSender().equalsIgnoreCase("USER") ? "user" : "model";
+                    String rawMessage = h.getMessage();
+                    String cleanMessage = rawMessage;
+                    if (rawMessage != null && rawMessage.trim().startsWith("{") && rawMessage.trim().endsWith("}")) {
+                        try {
+                            JsonNode parsed = objectMapper.readTree(rawMessage);
+                            if (parsed.has("text")) {
+                                cleanMessage = parsed.get("text").asText();
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    if (role.equals(lastRole)) {
+                        // Merge text into the previous content object's parts to ensure strict alternation
+                        if (lastPartsArray != null && lastPartsArray.size() > 0) {
+                            ObjectNode textPart = (ObjectNode) lastPartsArray.get(0);
+                            String existingText = textPart.path("text").asText("");
+                            textPart.put("text", existingText + "\n" + cleanMessage);
+                        }
+                    } else {
+                        // Create a new content object
+                        lastRole = role;
+                        lastContentObj = objectMapper.createObjectNode();
+                        lastContentObj.put("role", role);
+                        lastPartsArray = objectMapper.createArrayNode();
+                        ObjectNode textPart = objectMapper.createObjectNode();
+                        textPart.put("text", cleanMessage);
+                        lastPartsArray.add(textPart);
+                        lastContentObj.set("parts", lastPartsArray);
+                        contentsArray.add(lastContentObj);
+                    }
+
+                    // Attach image to the current user's message (which is at the end of the history list)
+                    if (i == history.size() - 1 && role.equals("user") && image != null && image.get("data") != null) {
+                        if (lastPartsArray != null) {
+                            ObjectNode imagePart = objectMapper.createObjectNode();
+                            ObjectNode inlineData = objectMapper.createObjectNode();
+                            inlineData.put("mime_type", image.get("mimeType"));
+                            inlineData.put("data", image.get("data"));
+                            imagePart.set("inline_data", inlineData);
+                            lastPartsArray.add(imagePart);
+                        }
+                    }
+                }
+
+                // Remove leading "model" messages to ensure the conversation starts with "user"
+                while (contentsArray.size() > 0 && "model".equals(contentsArray.get(0).path("role").asText())) {
+                    contentsArray.remove(0);
                 }
             } else {
                 // For Guest: just current message
@@ -168,6 +222,17 @@ public class AiChatService {
                 ObjectNode textPart = objectMapper.createObjectNode();
                 textPart.put("text", userMessage);
                 partsArray.add(textPart);
+
+                // Add image part if provided for Guest
+                if (image != null && image.get("data") != null) {
+                    ObjectNode imagePart = objectMapper.createObjectNode();
+                    ObjectNode inlineData = objectMapper.createObjectNode();
+                    inlineData.put("mime_type", image.get("mimeType"));
+                    inlineData.put("data", image.get("data"));
+                    imagePart.set("inline_data", inlineData);
+                    partsArray.add(imagePart);
+                }
+
                 contentObj.set("parts", partsArray);
                 contentsArray.add(contentObj);
             }
