@@ -27,6 +27,7 @@ export default function RefereePage() {
         <Route path="dashboard" element={<RefereeDashboardContent />} />
         <Route path="pre-race-check" element={<PreRaceCheck />} />
         <Route path="live-simulation" element={<LiveSimulation />} />
+        <Route path="live simulation" element={<LiveSimulation />} />
         <Route path="confirm-results" element={<ConfirmResults />} />
         <Route path="violations" element={<Violations />} />
       </Routes>
