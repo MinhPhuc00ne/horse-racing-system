@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FaRobot, FaTimes, FaTrashAlt, FaPaperPlane, FaPlus, FaHistory, FaCommentAlt, FaImage } from 'react-icons/fa';
 import { BsChatDotsFill } from 'react-icons/bs';
 import { sendChatMessageAPI, getChatHistoryAPI } from '../../services/aiChat';
@@ -21,6 +21,7 @@ export default function FloatingAiChat() {
   
   const { user } = React.useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Scroll to bottom when messages update
   useEffect(() => {
@@ -275,6 +276,10 @@ export default function FloatingAiChat() {
     setIsOpen(false);
     navigate('/login');
   };
+
+  if (['/login', '/signup', '/verify-account', '/verify-email'].includes(location.pathname)) {
+    return null;
+  }
 
   return (
     <div className="floating-chat-container">

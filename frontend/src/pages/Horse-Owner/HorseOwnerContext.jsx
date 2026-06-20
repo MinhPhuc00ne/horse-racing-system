@@ -99,7 +99,8 @@ export function HorseOwnerProvider({ children }) {
             breed: h.breedName,
             age: h.age,
             gender: h.gender,
-            status: h.status || 'READY',
+            status: (h.status === 'ACTIVE' || h.status === 'Active' ? 'READY' : h.status) || 'READY',
+            owner: profileData ? profileData.fullName : 'Owner',
             matchesPlayed: h.totalRaces || 0,
             winRate: Math.round(h.top1Rate || 0),
             image: h.imageUrl || '',
@@ -147,45 +148,73 @@ export function HorseOwnerProvider({ children }) {
         const tournamentsData = await getTournamentsAPI();
         const allRaces = [];
         for (const t of tournamentsData) {
-          const races = await getTournamentRacesAPI(t.id);
-          for (const r of races) {
-            let participants = [];
-            try {
-              participants = await getRaceParticipantsAPI(r.id);
-            } catch (e) {
-              console.error(e);
+          let races = [];
+          try {
+            races = await getTournamentRacesAPI(t.id);
+          } catch (e) {
+            console.error('Lỗi khi tải vòng đua:', e);
+          }
+
+          if (races && races.length > 0) {
+            for (const r of races) {
+              let participants = [];
+              try {
+                participants = await getRaceParticipantsAPI(r.id);
+              } catch (e) {
+                console.error(e);
+              }
+
+              const registeredHorsesList = participants
+                .filter((p) => horsesData.some((myH) => myH.id === p.horseId))
+                .map((p) => p.horseName);
+
+              const apiRegistered = registrationsData
+                .filter((reg) => (reg.raceId === r.id || reg.tournamentId === r.id) && reg.status !== 'REJECTED')
+                .map((reg) => reg.horseName);
+
+              const savedLocal = localStorage.getItem('owner_registered_races') || '[]';
+              const localList = JSON.parse(savedLocal);
+              const localRegistered = localList
+                .filter((l) => l.raceId === r.id)
+                .map((l) => l.horseName);
+
+              const registeredHorsesSet = new Set([
+                ...registeredHorsesList,
+                ...apiRegistered,
+                ...localRegistered,
+              ]);
+
+              // Determine status: if tournament status is not Active, owner cannot register
+              let displayStatus = t.tournamentStatus || 'Upcoming';
+
+              allRaces.push({
+                id: r.id,
+                tournamentId: t.id,
+                tournamentName: t.tournamentName,
+                location: r.raceTrackName || t.location,
+                date: r.raceDate || t.startDate,
+                time: r.startTime || (t.officialRaceTime ? t.officialRaceTime.substring(11, 16) : '09:00'),
+                trackType: `${r.surfaceType || t.surfaceType || 'Grass'} • Dist: ${r.distance || 1200}m`,
+                prizePool: `${t.totalPrize ? t.totalPrize.toLocaleString() : '1,000,000'} VND`,
+                status: displayStatus, // Use tournament status for displaying to Owner
+                allowedClasses: t.allowedClasses,
+                registeredHorses: Array.from(registeredHorsesSet),
+              });
             }
-
-            const registeredHorsesList = participants
-              .filter((p) => horsesData.some((myH) => myH.id === p.horseId))
-              .map((p) => p.horseName);
-
-            const apiRegistered = registrationsData
-              .filter((reg) => (reg.raceId === r.id || reg.tournamentId === r.id) && reg.status !== 'REJECTED')
-              .map((reg) => reg.horseName);
-
-            const savedLocal = localStorage.getItem('owner_registered_races') || '[]';
-            const localList = JSON.parse(savedLocal);
-            const localRegistered = localList
-              .filter((l) => l.raceId === r.id)
-              .map((l) => l.horseName);
-
-            const registeredHorsesSet = new Set([
-              ...registeredHorsesList,
-              ...apiRegistered,
-              ...localRegistered,
-            ]);
-
+          } else {
+            // No races found, create a fallback race representation
             allRaces.push({
-              id: r.id,
-              tournamentName: `${t.tournamentName} - ${r.raceName}`,
-              location: r.raceTrackName || t.location,
-              date: r.raceDate,
-              time: r.startTime,
-              trackType: `${r.surfaceType || 'Dirt'} • Dist: ${r.distance || 1200}m`,
+              id: null,
+              tournamentId: t.id,
+              tournamentName: t.tournamentName,
+              location: t.location || 'Chưa xác định',
+              date: t.startDate || 'Chưa xác định',
+              time: t.officialRaceTime ? t.officialRaceTime.substring(11, 16) : '09:00',
+              trackType: `${t.surfaceType || 'Grass'} • Dist: 1200m`,
               prizePool: `${t.totalPrize ? t.totalPrize.toLocaleString() : '1,000,000'} VND`,
-              status: r.status || 'OPEN_FOR_REGISTER',
-              registeredHorses: Array.from(registeredHorsesSet),
+              status: t.tournamentStatus || 'Upcoming',
+              allowedClasses: t.allowedClasses,
+              registeredHorses: [],
             });
           }
         }

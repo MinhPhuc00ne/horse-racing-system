@@ -135,7 +135,7 @@ public class TournamentServiceTest {
         Horse horse = Horse.builder().id(4).name("Lightning").owner(owner).breed(breed).age(5).gender("Male").build(); // Age 5 is not in "2-3, trên 7"
 
         RegisterRaceRequest request = RegisterRaceRequest.builder()
-                .raceId(5)
+                .tournamentId(5)
                 .horseId(4)
                 .jockeyId(2)
                 .ownerSharePercent(70.0)
@@ -162,7 +162,7 @@ public class TournamentServiceTest {
         Horse horse = Horse.builder().id(4).name("Lightning").owner(owner).breed(breed).age(3).gender("Male").build();
 
         RegisterRaceRequest request = RegisterRaceRequest.builder()
-                .raceId(5)
+                .tournamentId(5)
                 .horseId(4)
                 .jockeyId(2)
                 .ownerSharePercent(70.0)
@@ -189,7 +189,7 @@ public class TournamentServiceTest {
         Horse horse = Horse.builder().id(4).name("Lightning").owner(owner).breed(breed).age(3).gender("Male").build(); // Male is not allowed
 
         RegisterRaceRequest request = RegisterRaceRequest.builder()
-                .raceId(5)
+                .tournamentId(5)
                 .horseId(4)
                 .jockeyId(2)
                 .ownerSharePercent(70.0)
@@ -216,7 +216,7 @@ public class TournamentServiceTest {
         Horse horse = Horse.builder().id(4).name("Lightning").owner(owner).breed(breed).age(3).gender("Male").build();
 
         RegisterRaceRequest request = RegisterRaceRequest.builder()
-                .raceId(5)
+                .tournamentId(5)
                 .horseId(4)
                 .jockeyId(2)
                 .ownerSharePercent(70.0)
@@ -243,7 +243,7 @@ public class TournamentServiceTest {
         Horse horse = Horse.builder().id(4).name("Lightning").owner(owner).breed(breed).age(3).gender("Male").build();
 
         RegisterRaceRequest request = RegisterRaceRequest.builder()
-                .raceId(5)
+                .tournamentId(5)
                 .horseId(4)
                 .jockeyId(2)
                 .ownerSharePercent(70.0)

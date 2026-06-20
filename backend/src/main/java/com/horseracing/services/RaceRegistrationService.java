@@ -38,8 +38,11 @@ public class RaceRegistrationService {
         HorseOwnerProfile owner = horseOwnerProfileRepository.findByUserEmail(ownerEmail)
                 .orElseThrow(() -> new RuntimeException("Horse owner profile not found"));
 
-        Race race = raceRepository.findById(request.getRaceId())
-                .orElseThrow(() -> new RuntimeException("Race not found"));
+        List<Race> races = raceRepository.findByTournamentId(request.getTournamentId());
+        if (races.isEmpty()) {
+            throw new RuntimeException("Tournament has no associated race");
+        }
+        Race race = races.get(0);
 
         // Check race status
         if (!"OPEN_FOR_REGISTER".equalsIgnoreCase(race.getStatus())) {
@@ -164,8 +167,12 @@ public class RaceRegistrationService {
     }
 
     @Transactional(readOnly = true)
-    public List<RaceRegistrationResponse> getRegistrationsByRace(Integer raceId) {
-        return raceRegistrationRepository.findByRaceId(raceId).stream()
+    public List<RaceRegistrationResponse> getRegistrationsByTournament(Integer tournamentId) {
+        List<Race> races = raceRepository.findByTournamentId(tournamentId);
+        if (races.isEmpty()) {
+            return List.of();
+        }
+        return raceRegistrationRepository.findByRaceId(races.get(0).getId()).stream()
                 .map(RaceRegistrationResponse::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -413,15 +420,18 @@ public class RaceRegistrationService {
     }
 
     @Transactional
-    public void confirmRegistration(Integer raceId) {
-        Race race = raceRepository.findById(raceId)
-                .orElseThrow(() -> new RuntimeException("Race not found"));
+    public void confirmRegistration(Integer tournamentId) {
+        List<Race> races = raceRepository.findByTournamentId(tournamentId);
+        if (races.isEmpty()) {
+            throw new RuntimeException("Tournament has no associated race");
+        }
+        Race race = races.get(0);
 
         if (!"OPEN_FOR_REGISTER".equalsIgnoreCase(race.getStatus())) {
             throw new RuntimeException("Race is not open for registration");
         }
 
-        List<RaceRegistration> eligibleRegs = raceRegistrationRepository.findByRaceId(raceId).stream()
+        List<RaceRegistration> eligibleRegs = raceRegistrationRepository.findByRaceId(race.getId()).stream()
                 .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus()) || "APPROVED".equalsIgnoreCase(r.getStatus()))
                 .collect(Collectors.toList());
 

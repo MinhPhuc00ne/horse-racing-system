@@ -40,6 +40,8 @@ public class TournamentResponse {
     private String allowedGenders;
     private LocalDateTime registrationOpeningTime;
     private LocalDateTime officialRaceTime;
+    private String surfaceType;
+
 
     public static TournamentResponse fromEntity(Tournament t) {
         if (t == null) return null;
@@ -68,7 +70,9 @@ public class TournamentResponse {
                 .allowedGenders(t.getAllowedGenders())
                 .registrationOpeningTime(t.getRegistrationOpeningTime())
                 .officialRaceTime(t.getOfficialRaceTime())
+                .surfaceType(t.getSurfaceType())
                 .createdAt(t.getCreatedAt())
+
                 .updatedAt(t.getUpdatedAt())
                 .build();
     }

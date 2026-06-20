@@ -144,10 +144,10 @@ public class AdminRaceController {
         }
     }
 
-    @PostMapping("/races/{raceId}/confirm-registration")
-    public ResponseEntity<?> confirmRegistration(@PathVariable Integer raceId) {
+    @PostMapping("/tournaments/{tournamentId}/confirm-registration")
+    public ResponseEntity<?> confirmRegistration(@PathVariable Integer tournamentId) {
         try {
-            raceRegistrationService.confirmRegistration(raceId);
+            raceRegistrationService.confirmRegistration(tournamentId);
             return ResponseEntity.ok().body(new MessageResponse("Registrations confirmed successfully. Waiting list cleared and refunded."));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));

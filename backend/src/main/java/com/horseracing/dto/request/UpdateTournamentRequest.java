@@ -69,4 +69,10 @@ public class UpdateTournamentRequest {
     private LocalDateTime officialRaceTime;
 
     private String surfaceType;
+
+    @NotNull(message = "Race track is required")
+    private Integer raceTrackId;
+
+    @NotNull(message = "Distance is required")
+    private Double distance;
 }

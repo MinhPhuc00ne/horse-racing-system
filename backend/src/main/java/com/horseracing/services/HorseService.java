@@ -43,9 +43,9 @@ public class HorseService {
                 .name(request.getName())
                 .age(request.getAge())
                 .gender(request.getGender())
-                .trainingStatus("ACTIVE")
+                .trainingStatus("READY")
                 .healthStatus("EXCELLENT")
-                .status("ACTIVE")
+                .status("READY")
                 .imageUrl(request.getImageUrl())
                 .build();
 
@@ -87,6 +87,7 @@ public class HorseService {
         if (request.getAge() != null) horse.setAge(request.getAge());
         if (request.getGender() != null) horse.setGender(request.getGender());
         if (request.getImageUrl() != null) horse.setImageUrl(request.getImageUrl());
+        if (request.getStatus() != null) horse.setStatus(request.getStatus());
 
         horse = horseRepository.save(horse);
         return toHorseResponse(horse);

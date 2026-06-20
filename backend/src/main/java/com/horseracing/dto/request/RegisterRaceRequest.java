@@ -11,8 +11,8 @@ import lombok.*;
 @Builder
 public class RegisterRaceRequest {
 
-    @NotNull(message = "Race ID is required")
-    private Integer raceId;
+    @NotNull(message = "Tournament ID is required")
+    private Integer tournamentId;
 
     @NotNull(message = "Horse ID is required")
     private Integer horseId;

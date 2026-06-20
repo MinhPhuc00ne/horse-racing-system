@@ -79,6 +79,9 @@ public class Tournament {
     @Column(name = "official_race_time")
     private LocalDateTime officialRaceTime;
 
+    @Column(name = "surface_type", length = 50)
+    private String surfaceType;
+
     @Column(name = "prize_first", precision = 38, scale = 2)
     private BigDecimal prizeFirst;
 

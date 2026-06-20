@@ -29,7 +29,16 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        String dbName = jdbcTemplate.queryForObject("SELECT DB_NAME()", String.class);
+        String dbName = "Unknown";
+        try {
+            dbName = jdbcTemplate.queryForObject("SELECT DB_NAME()", String.class);
+        } catch (Exception e) {
+            try (java.sql.Connection conn = jdbcTemplate.getDataSource().getConnection()) {
+                dbName = conn.getCatalog();
+            } catch (Exception ex) {
+                // Ignore fallback failure
+            }
+        }
         log.info("=== BACKEND IS CONNECTED TO DATABASE: {} ===", dbName);
         // Create an initial admin user if not exists
         if (!userRepository.existsByEmail("admin@gmail.com")) {

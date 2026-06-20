@@ -18,4 +18,8 @@ public class HorseBreed {
 
     @Column(name = "breed_name", nullable = false, unique = true, length = 100)
     private String breedName;
+
+    @Builder.Default
+    @Column(name = "is_official", columnDefinition = "bit default 0 not null")
+    private Boolean isOfficial = false;
 }

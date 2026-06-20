@@ -94,15 +94,15 @@ public class TournamentService {
             throw new RuntimeException("User must have RACE_REFEREE role");
         }
 
-        if (request.getLocation() == null || request.getLocation().isBlank()) {
-            throw new RuntimeException("Location (venue name or region) is required");
+        if (request.getRaceTrackId() == null) {
+            throw new RuntimeException("Race track ID is required");
         }
-        RaceTrack track = raceTrackRepository.findByName(request.getLocation()).orElse(null);
-        if (track == null) {
-            track = raceTrackRepository.findAll().stream()
-                    .filter(t -> request.getLocation().equalsIgnoreCase(t.getLocation()))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Race track not found: " + request.getLocation()));
+        RaceTrack track = raceTrackRepository.findById(request.getRaceTrackId())
+                .orElseThrow(() -> new RuntimeException("Race track not found"));
+        
+        // Ensure location is updated based on track
+        if (request.getLocation() == null || request.getLocation().isBlank()) {
+            request.setLocation(track.getName());
         }
 
         java.time.LocalDate raceDate = request.getStartDate() != null ? request.getStartDate() : java.time.LocalDate.now();
@@ -144,7 +144,9 @@ public class TournamentService {
                 .allowedGenders(request.getAllowedGenders())
                 .registrationOpeningTime(request.getRegistrationOpeningTime())
                 .officialRaceTime(request.getOfficialRaceTime())
+                .surfaceType(request.getSurfaceType())
                 .build();
+
 
         tournament = tournamentRepository.save(tournament);
 
@@ -157,7 +159,7 @@ public class TournamentService {
                 .endTime(endTime)
                 .raceRound(1)
                 .maxHorses(Optional.ofNullable(tournament.getMaxSlots()).orElse(8))
-                .distance(1200.0)
+                .distance(request.getDistance() != null ? request.getDistance() : 1200.0)
                 .surfaceType(request.getSurfaceType() != null ? request.getSurfaceType() : "Grass")
                 .weather("Sunny")
                 .status("OPEN_FOR_REGISTER")
@@ -253,15 +255,15 @@ public class TournamentService {
             throw new RuntimeException("User must have RACE_REFEREE role");
         }
 
-        if (request.getLocation() == null || request.getLocation().isBlank()) {
-            throw new RuntimeException("Location (venue name or region) is required");
+        if (request.getRaceTrackId() == null) {
+            throw new RuntimeException("Race track ID is required");
         }
-        RaceTrack track = raceTrackRepository.findByName(request.getLocation()).orElse(null);
-        if (track == null) {
-            track = raceTrackRepository.findAll().stream()
-                    .filter(t -> request.getLocation().equalsIgnoreCase(t.getLocation()))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Race track not found: " + request.getLocation()));
+        RaceTrack track = raceTrackRepository.findById(request.getRaceTrackId())
+                .orElseThrow(() -> new RuntimeException("Race track not found"));
+        
+        // Ensure location is updated based on track
+        if (request.getLocation() == null || request.getLocation().isBlank()) {
+            request.setLocation(track.getName());
         }
 
         java.time.LocalDate raceDate = request.getStartDate() != null ? request.getStartDate() : java.time.LocalDate.now();
@@ -303,8 +305,10 @@ public class TournamentService {
         tournament.setAllowedGenders(request.getAllowedGenders());
         tournament.setRegistrationOpeningTime(request.getRegistrationOpeningTime());
         tournament.setOfficialRaceTime(request.getOfficialRaceTime());
+        tournament.setSurfaceType(request.getSurfaceType());
 
         tournament = tournamentRepository.save(tournament);
+
 
         // Auto-update associated default race
         List<Race> races = raceRepository.findByTournamentId(tournament.getId());
@@ -317,6 +321,7 @@ public class TournamentService {
             race.setMaxHorses(Optional.ofNullable(tournament.getMaxSlots()).orElse(8));
             race.setReferee(referee);
             race.setRaceTrack(track);
+            race.setDistance(request.getDistance() != null ? request.getDistance() : 1200.0);
             race.setSurfaceType(request.getSurfaceType() != null ? request.getSurfaceType() : "Grass");
             raceRepository.save(race);
         }

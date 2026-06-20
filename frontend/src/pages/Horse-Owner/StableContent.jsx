@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useHorseOwner } from './HorseOwnerContext';
 import StatusBadge from '../../components/StatusBadge';
 import MetricBar from '../../components/MetricBar';
 import { createHorseAPI, uploadFilesAPI, updateHorseAPI, deleteHorseAPI } from '../../services/owner';
+import axiosClient from '../../api/axiosClient';
 
 export default function StableContent() {
   const { horses = [], setHorses } = useHorseOwner();
@@ -32,6 +33,19 @@ export default function StableContent() {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [horseToDelete, setHorseToDelete] = useState(null);
+  const [breeds, setBreeds] = useState([]);
+
+  useEffect(() => {
+    const fetchBreeds = async () => {
+      try {
+        const response = await axiosClient.get('/breeds');
+        setBreeds(response.data);
+      } catch (err) {
+        console.error('Failed to load breeds', err);
+      }
+    };
+    fetchBreeds();
+  }, []);
 
   const activeHorseId = selectedHorseId || horses[0]?.id;
   const selectedHorse = horses.find((h) => h.id === activeHorseId) || horses[0];
@@ -600,7 +614,13 @@ export default function StableContent() {
                         }
                         className="ho-form-input text-dark"
                         placeholder="e.g. Thoroughbred"
+                        list="breeds-list"
                       />
+                      <datalist id="breeds-list">
+                        {breeds.map((b) => (
+                          <option key={b.id} value={b.breedName} />
+                        ))}
+                      </datalist>
                     </div>
                     <div className="col-6">
                       <label className="ho-input-label ho-font-grotesk">Age (Years)</label>
@@ -796,7 +816,13 @@ export default function StableContent() {
                         }
                         className="ho-form-input text-dark"
                         placeholder="e.g. Thoroughbred"
+                        list="breeds-list"
                       />
+                      <datalist id="breeds-list">
+                        {breeds.map((b) => (
+                          <option key={b.id} value={b.breedName} />
+                        ))}
+                      </datalist>
                     </div>
                     <div className="col-6">
                       <label className="ho-input-label ho-font-grotesk">Age (Years)</label>

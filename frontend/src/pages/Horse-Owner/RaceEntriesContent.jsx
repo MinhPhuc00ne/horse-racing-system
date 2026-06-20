@@ -19,15 +19,23 @@ export default function RaceEntriesContent() {
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Filter only READY horses
-  const readyHorses = horses.filter(h => h.status === 'READY');
+  // Filter only READY horses (case-insensitive)
+  const readyHorses = horses.filter(h => h.status && h.status.toUpperCase() === 'READY');
   // Filter only jockeys who are friends
   const friendJockeys = systemUsers.filter(u => u.role === 'JOCKEY' && u.friendStatus === 'FRIEND');
 
   const handleRegisterClick = (race) => {
     setSelectedRace(race);
+    
+    // Filter eligible horses by race allowedClasses
+    const allowed = race.allowedClasses ? race.allowedClasses.split(',').map(s => s.trim().toUpperCase()) : [];
+    const eligibleHorses = readyHorses.filter(h => {
+      if (allowed.length === 0) return true; // if no restriction, allow all
+      return h.breed && allowed.includes(h.breed.trim().toUpperCase());
+    });
+
     setFormData({
-      horseId: readyHorses.length > 0 ? readyHorses[0].id : '',
+      horseId: eligibleHorses.length > 0 ? eligibleHorses[0].id : '',
       jockeyId: friendJockeys.length > 0 ? friendJockeys[0].id : '',
       ownerShare: 90,
       jockeyShare: 10,
@@ -52,7 +60,7 @@ export default function RaceEntriesContent() {
     try {
       setLoading(true);
       await submitRaceRegistrationAPI({
-        raceId: selectedRace.id,
+        tournamentId: selectedRace.tournamentId,
         horseId: parseInt(formData.horseId),
         jockeyId: parseInt(formData.jockeyId),
         ownerSharePercent: ownerS,
@@ -83,7 +91,7 @@ export default function RaceEntriesContent() {
         console.error(e);
       }
 
-      setSuccessMsg(`Đăng ký thành công ngựa ${selectedHorseObj.name} với Nài ngựa ${selectedJockeyObj.fullName} cho vòng đua ${selectedRace.tournamentName}!`);
+      setSuccessMsg(`Đăng ký thành công ngựa ${selectedHorseObj.name} với Nài ngựa ${selectedJockeyObj.fullName} cho giải đấu ${selectedRace.tournamentName}!`);
       setShowModal(false);
       setShowSuccessModal(true);
     } catch (err) {
@@ -99,10 +107,10 @@ export default function RaceEntriesContent() {
       <div className="d-flex justify-content-between align-items-end mb-4">
         <div>
           <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
-            Vòng đua sắp tới
+            Giải đấu sắp tới
           </h2>
           <p className="text-secondary small m-0">
-            Đăng ký các chiến mã của bạn tham gia vào các vòng đua cúp danh giá.
+            Đăng ký các chiến mã của bạn tham gia vào các giải đấu cúp danh giá.
           </p>
         </div>
       </div>
@@ -119,6 +127,11 @@ export default function RaceEntriesContent() {
                 subtitle={`${race.date} lúc ${race.time}`}
                 interactive={true}
               >
+                {race.imageUrl && (
+                  <div style={{ width: '100%', height: '120px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--ho-border-gold)', marginBottom: '10px' }}>
+                    <img src={race.imageUrl.startsWith('/') ? `http://localhost:8080${race.imageUrl}` : race.imageUrl} alt={race.tournamentName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                )}
                 <div className="d-flex flex-column gap-2 mb-3">
                   <div className="d-flex justify-content-between py-1 border-bottom border-light">
                     <span className="fw-bold text-dark">Trường đua:</span>
@@ -132,22 +145,36 @@ export default function RaceEntriesContent() {
                     <span className="fw-bold text-dark">Tiền thưởng giải:</span>
                     <span className="fw-bold" style={{ color: 'var(--ho-primary-medium)' }}>{race.prizePool}</span>
                   </div>
-                  <div className="d-flex justify-content-between py-1 align-items-center">
+                  <div className="d-flex justify-content-between py-1 align-items-center mb-2">
                     <span className="fw-bold text-dark">Trạng thái:</span>
                     <StatusBadge status={isRegistered ? 'READY' : race.status} />
+                  </div>
+                  <div className="p-2 rounded mt-1" style={{ background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.3)' }}>
+                    <div className="d-flex align-items-center gap-2 mb-1">
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--ho-accent-gold-text)' }}>info</span>
+                      <span className="fw-bold" style={{ color: 'var(--ho-primary-dark)', fontSize: '13px' }}>Giống ngựa cho phép tham gia:</span>
+                    </div>
+                    <div className="fw-semibold ms-4" style={{ color: 'var(--ho-accent-gold-text)', fontSize: '14px' }}>
+                      {race.allowedClasses ? race.allowedClasses.split(',').map(c => c.trim()).map((c, idx) => (
+                        <span key={idx} className="badge bg-light text-dark border me-1 mb-1">{c}</span>
+                      )) : <span className="badge bg-light text-dark border">Tất cả giống loài</span>}
+                    </div>
                   </div>
                 </div>
 
                 <button
                   onClick={() => handleRegisterClick(race)}
-                  className={`ho-btn ${isRegistered ? 'ho-btn-dark-green' : 'ho-btn-gold-solid'} w-100 py-2 fw-bold`}
-                  disabled={isRegistered || race.status !== 'OPEN_FOR_REGISTER'}
+                  className={`ho-btn ${isRegistered ? 'ho-btn-dark-green' : (race.status === 'Active' || race.status === 'OPEN_FOR_REGISTER') ? 'ho-btn-gold-solid' : 'btn-secondary'} w-100 py-2 fw-bold`}
+                  disabled={isRegistered || (race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER')}
+                  style={(!isRegistered && race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER') ? { backgroundColor: '#cccccc', color: '#666666', border: '1px solid #bbbbbb', cursor: 'not-allowed' } : {}}
                 >
                   {isRegistered 
                     ? `Đã đăng ký: ${userRegisteredHorses.map(h => h.name).join(', ')}` 
-                    : race.status === 'OPEN_FOR_REGISTER' 
+                    : (race.status === 'Active' || race.status === 'OPEN_FOR_REGISTER')
                       ? 'Đăng ký thi đấu' 
-                      : 'Đã đóng đăng ký'}
+                      : race.status === 'Upcoming'
+                        ? 'Đăng ký chưa mở'
+                        : 'Đã đóng đăng ký'}
                 </button>
               </DataCard>
             </div>
@@ -167,17 +194,27 @@ export default function RaceEntriesContent() {
               {/* Select Horse */}
               <div>
                 <label className="ho-input-label ho-font-grotesk">
-                  Chọn ngựa chiến <span className="text-secondary small fw-normal">(Chỉ hiển thị ngựa sẵn sàng)</span>
+                  Chọn ngựa chiến <span className="text-secondary small fw-normal">(Chỉ hiển thị ngựa phù hợp giống & sẵn sàng)</span>
                 </label>
                 <select
                   value={formData.horseId}
                   onChange={(e) => setFormData({ ...formData, horseId: e.target.value })}
                   className="ho-form-input fw-semibold text-dark"
                 >
-                  {readyHorses.length === 0 && <option value="">Không có ngựa chiến nào sẵn sàng</option>}
-                  {readyHorses.map(h => (
-                    <option key={h.id} value={h.id}>{h.name} ({h.breed})</option>
-                  ))}
+                  {(() => {
+                    const allowed = selectedRace?.allowedClasses ? selectedRace.allowedClasses.split(',').map(s => s.trim().toUpperCase()) : [];
+                    const eligibleHorses = readyHorses.filter(h => {
+                      if (allowed.length === 0) return true;
+                      return h.breed && allowed.includes(h.breed.trim().toUpperCase());
+                    });
+                    
+                    if (eligibleHorses.length === 0) {
+                      return <option value="">Không có ngựa chiến nào phù hợp (Ngựa phải ở trạng thái Ready và thuộc giống {selectedRace?.allowedClasses})</option>;
+                    }
+                    return eligibleHorses.map(h => (
+                      <option key={h.id} value={h.id}>{h.name} ({h.breed})</option>
+                    ));
+                  })()}
                 </select>
               </div>
 

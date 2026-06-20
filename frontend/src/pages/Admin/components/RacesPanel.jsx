@@ -228,16 +228,6 @@ export default function RacesPanel() {
             Duyệt Đăng Ký Đua
           </button>
         </div>
-
-        {activeSubTab === 'racesList' && (
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className={`btn ${showForm ? 'btn-outline-danger' : 'btn-success'} d-flex align-items-center gap-2 fw-bold`}
-            style={{ fontSize: '13px', padding: '8px 14px' }}
-          >
-            {showForm ? 'Đóng Form' : <><FaPlus /> Thêm Vòng Đua</>}
-          </button>
-        )}
       </div>
 
       {/* Message alerts */}

@@ -19,4 +19,5 @@ public class UpdateHorseRequest {
 
     private String gender;
     private String imageUrl;
+    private String status;
 }
