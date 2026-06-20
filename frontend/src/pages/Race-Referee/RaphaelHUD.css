@@ -1,0 +1,474 @@
+.raphael-hud-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+}
+
+@property --angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
+
+/* OVERLAY VÀ CHỮ */
+.raphael-hud-overlay .dark-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(2, 5, 10, 0.95);
+    z-index: 100;
+}
+
+.raphael-hud-overlay .system-text {
+    position: absolute;
+    bottom: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 20, 40, 0.9);
+    border: 1px solid rgba(0, 204, 255, 0.5);
+    border-left: 8px solid #ff8800;
+    padding: 15px 40px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffffff;
+    z-index: 120;
+    transition: opacity 0.2s;
+    text-align: center;
+    border-radius: 4px;
+    text-shadow: 0 0 10px #00ccff;
+    min-width: 400px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
+    font-family: 'Courier New', Courier, monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    pointer-events: none;
+}
+
+.raphael-hud-overlay .flash-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* KHỞI ĐỘNG (NOTICE) */
+.raphael-hud-overlay .notice-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 105;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.raphael-hud-overlay .notice-diamond {
+    width: 250px;
+    height: 250px;
+    border: 8px solid rgba(0, 204, 255, 0.9);
+    transform: rotate(45deg);
+    box-shadow: 0 0 40px rgba(0, 204, 255, 0.6), inset 0 0 40px rgba(0, 204, 255, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 30, 60, 0.8);
+}
+
+.raphael-hud-overlay .notice-text {
+    transform: rotate(-45deg);
+    font-size: 100px;
+    color: #ff8800;
+    font-family: 'Arial Black', sans-serif;
+    font-weight: bold;
+    text-shadow: 0 0 20px #ff8800, 0 0 40px #ffcc00;
+}
+
+@keyframes appearNotice {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(-1080deg);
+        opacity: 0;
+        filter: blur(20px);
+    }
+
+    15% {
+        transform: translate(-50%, -50%) scale(1.1) rotate(10deg);
+        opacity: 1;
+        filter: blur(0px);
+    }
+
+    20% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+
+    85% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 1;
+        filter: blur(0px);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(2) rotate(180deg);
+        opacity: 0;
+        filter: blur(10px);
+    }
+}
+
+/* SCENE PHÂN TÍCH SPORTS HUD */
+.raphael-hud-overlay .analysis-scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 102;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Lưới Sân cỏ điện tử */
+.raphael-hud-overlay .grid-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: 60px 60px;
+    background-image:
+        linear-gradient(to right, rgba(0, 204, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 204, 255, 0.1) 1px, transparent 1px);
+    z-index: 0;
+    transform: perspective(800px) rotateX(70deg) translateY(-100px) translateZ(-200px);
+    animation: gridMove 3s linear infinite;
+    opacity: 0.6;
+}
+
+@keyframes gridMove {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 0 60px;
+    }
+}
+
+.raphael-hud-overlay .mc-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 170vh;
+    height: 170vh;
+    z-index: 1;
+    opacity: 0;
+    -webkit-mask-image: conic-gradient(black 0deg, black var(--angle), transparent var(--angle), transparent 360deg);
+    mask-image: conic-gradient(black 0deg, black var(--angle), transparent var(--angle), transparent 360deg);
+}
+
+.raphael-hud-overlay .mc-wrapper.drawn {
+    -webkit-mask-image: none;
+    mask-image: none;
+    opacity: 1;
+}
+
+.raphael-hud-overlay .blue-glow-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(0, 150, 255, 0.1) 0%, rgba(0, 20, 40, 0.5) 40%, transparent 70%);
+    z-index: 0;
+    animation: pulseGlow 3s infinite alternate ease-in-out;
+}
+
+@keyframes pulseGlow {
+    0% {
+        opacity: 0.6;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.raphael-hud-overlay .runes-svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    filter: drop-shadow(0 0 8px rgba(0, 204, 255, 0.4));
+}
+
+@keyframes spinSvg {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes revUp {
+    0% {
+        stroke-dashoffset: 2000;
+    }
+
+    100% {
+        stroke-dashoffset: 600;
+    }
+}
+
+/* HOLOGRAM HORSE */
+.raphael-hud-overlay .core-horse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12vh;
+    height: 12vh;
+    margin-top: -6vh;
+    margin-left: -6vh;
+    z-index: 15;
+    animation: spin3D 4s linear infinite;
+    filter: drop-shadow(0 0 10px #ff8800);
+}
+
+@keyframes spin3D {
+    0% {
+        transform: perspective(600px) rotateY(0deg);
+    }
+
+    100% {
+        transform: perspective(600px) rotateY(360deg);
+    }
+}
+
+.raphael-hud-overlay .fg-horse {
+    --horse-color: #00ccff;
+    --horse-fill: rgba(0, 204, 255, 0.6);
+    position: absolute;
+    top: 50%;
+    left: 25%;
+    transform: translate(-50%, -50%);
+    width: 50vh;
+    height: 50vh;
+    z-index: 20;
+    opacity: 0;
+    filter: drop-shadow(0 0 20px var(--horse-color));
+    transition: opacity 0.5s ease-in;
+}
+
+.raphael-hud-overlay .horse-name-tag {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 40px;
+    font-weight: bold;
+    color: var(--horse-color);
+    text-shadow: 0 0 10px var(--horse-color), 0 0 20px #fff;
+    letter-spacing: 5px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-family: 'Arial Black', sans-serif;
+    text-transform: uppercase;
+}
+
+.raphael-hud-overlay .fg-horse.show-horse .horse-name-tag {
+    opacity: 1;
+    animation: slideDown 0.5s forwards;
+}
+
+@keyframes slideDown {
+    from {
+        top: -80px;
+    }
+
+    to {
+        top: -50px;
+    }
+}
+
+.raphael-hud-overlay .custom-horse-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.raphael-hud-overlay .custom-horse-svg path {
+    fill: transparent;
+    stroke: var(--horse-color);
+    stroke-width: 6;
+    stroke-dasharray: 4000;
+    stroke-dashoffset: 4000;
+    stroke-linejoin: round;
+}
+
+.raphael-hud-overlay .fg-horse.show-horse .custom-horse-svg path {
+    animation: drawHorseLine 1.5s ease-in-out forwards, pulseHorseFill 1.5s 1.5s infinite alternate;
+}
+
+.raphael-hud-overlay .core-horse .custom-horse-svg path {
+    stroke-dashoffset: 0;
+    fill: rgba(255, 136, 0, 0.4);
+    stroke-width: 15;
+    stroke: #ff8800;
+}
+
+@keyframes drawHorseLine {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes pulseHorseFill {
+    0% {
+        fill: transparent;
+        stroke: var(--horse-color);
+    }
+
+    100% {
+        fill: var(--horse-fill);
+        stroke: #ffffff;
+    }
+}
+
+/* THÔNG TIN PHẢI */
+.raphael-hud-overlay .info-container {
+    position: absolute;
+    top: 50%;
+    right: 5%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 20;
+}
+
+.raphael-hud-overlay .info-panel {
+    background: linear-gradient(90deg, rgba(0, 30, 60, 0.95) 0%, rgba(0, 10, 20, 0.8) 100%);
+    border: 2px solid #00ccff;
+    border-left: 8px solid #00ccff;
+    border-radius: 4px;
+    padding: 20px 30px;
+    color: #ffffff;
+    opacity: 0;
+    box-shadow: 0 5px 25px rgba(0, 204, 255, 0.3);
+    transform: translateX(100px);
+    width: 380px;
+}
+
+.raphael-hud-overlay .panel-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff8800;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.raphael-hud-overlay .panel-data {
+    font-size: 18px;
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed rgba(0, 204, 255, 0.3);
+    padding-bottom: 5px;
+}
+
+.raphael-hud-overlay .highlight {
+    color: #00ccff;
+    font-weight: bold;
+    font-size: 22px;
+    text-shadow: 0 0 8px rgba(0, 204, 255, 0.6);
+    font-family: monospace;
+}
+
+.raphael-hud-overlay .progress-bar {
+    width: 120px;
+    height: 8px;
+    background: #002244;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-left: 10px;
+}
+
+.raphael-hud-overlay .progress-fill {
+    height: 100%;
+    background: #00ccff;
+    box-shadow: 0 0 10px #00ccff;
+}
+
+.raphael-hud-overlay .panel-3 {
+    border-left: 8px solid #ffaa00;
+    border-color: #ffaa00;
+    box-shadow: 0 5px 25px rgba(255, 170, 0, 0.3);
+}
+
+.raphael-hud-overlay .panel-3 .panel-title {
+    color: #ffffff;
+}
+
+.raphael-hud-overlay .highlight-supreme {
+    color: #ffaa00;
+    font-weight: bold;
+    font-size: 32px;
+    text-shadow: 0 0 15px #ffaa00;
+    font-family: 'Arial Black', sans-serif;
+}
+
+@keyframes drawCircle {
+    0% {
+        --angle: 0deg;
+        opacity: 1;
+    }
+
+    100% {
+        --angle: 360deg;
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes flashAnim {
+    0% {
+        opacity: 0;
+    }
+
+    15% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}

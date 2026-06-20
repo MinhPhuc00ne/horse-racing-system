@@ -139,7 +139,7 @@ export async function submitRaceRegistrationAPI(registrationData) {
         stableName: ownerProfile.stableName || 'Royal Stable',
         horseName: horse ? horse.name : 'Unknown Horse',
         horseBreed: horse ? horse.breedName : 'Thoroughbred',
-        tournamentId: registrationData.raceId,
+        tournamentId: registrationData.tournamentId || registrationData.raceId,
         tournamentName: tName,
         raceDate: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0],
         raceTime: '15:00',
@@ -170,7 +170,7 @@ export async function submitRaceRegistrationAPI(registrationData) {
 
   try {
     const response = await axiosClient.post('/owner/race-registrations', {
-      raceId: registrationData.raceId,
+      tournamentId: registrationData.tournamentId || registrationData.raceId,
       horseId: registrationData.horseId,
       jockeyId: registrationData.jockeyId,
       ownerSharePercent: registrationData.ownerSharePercent,

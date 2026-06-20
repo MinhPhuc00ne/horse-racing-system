@@ -130,7 +130,7 @@ public class PaymentService {
             // Query PayOS directly
             try {
                 PaymentLink paymentLinkData = payOS.paymentRequests().get(orderCode);
-                if (vn.payos.model.v2.paymentRequests.PaymentLinkStatus.PAID.equals(paymentLinkData.getStatus())) {
+                if ("PAID".equals(String.valueOf(paymentLinkData.getStatus()))) {
                     if ("PENDING".equals(tx.getStatus())) {
                         tx.setStatus("SUCCESS");
                         walletTransactionRepository.save(tx);

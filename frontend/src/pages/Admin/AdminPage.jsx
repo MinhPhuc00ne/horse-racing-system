@@ -11,6 +11,7 @@ import UpgradeUserRoleContent from './components/UpgradeUserRoleContent';
 import TournamentsPanel from './components/TournamentsPanel';
 import BreedsPanel from './components/BreedsPanel';
 import WithdrawalsPanel from './components/WithdrawalsPanel';
+import RacesPanel from './components/RacesPanel';
 
 const adminNavLinks = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -37,8 +38,9 @@ export default function AdminPage() {
         <Route path="upgradeuserrole" element={<UpgradeUserRoleContent />} />
         <Route path="tournamentmanagement" element={<TournamentsPanel />} />
         <Route path="withdrawals" element={<WithdrawalsPanel />} />
+        <Route path="racemanagement" element={<RacesPanel />} />
         {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to="dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
       </Routes>
     </DashboardLayout>
   );

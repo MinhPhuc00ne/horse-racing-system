@@ -1,29 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCompletedRacesAPI, reportViolationAPI, saveSimulatedRaceAPI } from '../../services/referee';
+import { getAssignedRacesAPI, getRacePreCheckAPI, getCompletedRacesAPI, reportViolationAPI, saveSimulatedRaceAPI, startRaceAPI } from '../../services/referee';
+import RaphaelHUD from './RaphaelHUD';
 import './LiveSimulation.css';
 
 export default function LiveSimulation() {
   const navigate = useNavigate();
-  const numLanes = 4;
 
-  // Using dummy horses for simulation since API isn't fully returning ongoing participants yet
-  const initialHorses = [
-    { id: 1, name: 'Lightning Bolt', progress: 0, color: '#00f2fe', flaggedPositions: [] },
-    { id: 2, name: 'Desert Wind', progress: 0, color: '#10b981', flaggedPositions: [] },
-    { id: 3, name: 'Midnight Star', progress: 0, color: '#ef4444', flaggedPositions: [] },
-    { id: 4, name: 'Stormbreaker', progress: 0, color: '#d4af37', flaggedPositions: [] },
-  ];
-
-  const [horses, setHorses] = useState(initialHorses);
-  const [isRunning, setIsRunning] = useState(false);
-  const [finished, setFinished] = useState(false);
+  const [horses, setHorses] = useState([]);
+  const numLanes = Math.max(1, horses.length);
+  const [racePhase, setRacePhase] = useState('IDLE'); // IDLE, RAPHAEL, PRE_RACE, RUNNING, FINISHED
+  const [spawnedCount, setSpawnedCount] = useState(0);
+  const [countdown, setCountdown] = useState(null);
   const [resultsSaved, setResultsSaved] = useState(false);
-  
+
   // Custom Modals State
   const [showResultsSummary, setShowResultsSummary] = useState(false);
   const [finalPodium, setFinalPodium] = useState([]);
-  const [simulatedRaceName, setSimulatedRaceName] = useState('');
+  const [simulatedRaceName, setSimulatedRaceName] = useState('Simulated Race');
+  const [actualRaceId, setActualRaceId] = useState(null);
 
   const [selectedHorseForFlag, setSelectedHorseForFlag] = useState(null);
   const [flagReason, setFlagReason] = useState('');
@@ -33,7 +28,7 @@ export default function LiveSimulation() {
 
   const canvasRef = useRef(null);
   const horsesRef = useRef(horses);
-  const visualHorses = useRef(initialHorses.map(h => ({ ...h, visualProgress: 0, trail: [] })));
+  const visualHorses = useRef([]);
 
   // Sync state to ref for rendering frame rate decoupling
   useEffect(() => {
@@ -43,55 +38,129 @@ export default function LiveSimulation() {
   // Handle simulation timer
   useEffect(() => {
     let interval;
-    if (isRunning && !finished) {
+    if (racePhase === 'RUNNING') {
       interval = setInterval(() => {
         setHorses(prev => {
           let allFinished = true;
           const nextHorses = prev.map(h => {
+            if (h.isDisqualified) return h;
             if (h.progress < 100) {
-              // High variability: advance random amount between 0.5% and 8%
-              const advance = 0.5 + Math.random() * 7.5;
+              // Adjust advance to make the race last ~30s (average 1.25% per 400ms)
+              const advance = 0.5 + Math.random() * 1.5;
               const newProgress = Math.min(100, h.progress + advance);
               if (newProgress < 100) allFinished = false;
-              
+
               let finishedTime = h.finishedTime;
               if (newProgress === 100 && !h.finishedTime) {
-                finishedTime = Date.now();
+                const penalty = (h.flaggedPositions?.length || 0) * 4000;
+                finishedTime = Date.now() + penalty;
               }
               return { ...h, progress: newProgress, finishedTime };
             }
             return h;
           });
+
+          allFinished = nextHorses.length > 0 && nextHorses.every(h => h.progress >= 100 || h.isDisqualified);
           if (allFinished) {
-            setIsRunning(false);
-            setFinished(true);
+            setRacePhase('FINISHED');
           }
           return nextHorses;
         });
       }, 400);
     }
     return () => clearInterval(interval);
-  }, [isRunning, finished]);
+  }, [racePhase]);
 
-  // Pre-generate initial race name on mount
+  // Pre-Race Sequence
   useEffect(() => {
-    const newRaceId = Date.now();
-    setSimulatedRaceName(`Simulated Race #${Math.floor(newRaceId / 1000) % 1000}`);
+    if (racePhase === 'PRE_RACE') {
+      let isCancelled = false;
+      const runPreRace = async () => {
+        for (let i = 1; i <= numLanes; i++) {
+          await new Promise(r => setTimeout(r, 600));
+          if (isCancelled) return;
+          setSpawnedCount(i);
+        }
+        await new Promise(r => setTimeout(r, 600));
+        for (let i = 5; i > 0; i--) {
+          if (isCancelled) return;
+          setCountdown(i.toString());
+          await new Promise(r => setTimeout(r, 1000));
+        }
+        if (isCancelled) return;
+        setCountdown('GO!');
+        await new Promise(r => setTimeout(r, 600));
+        if (isCancelled) return;
+        setCountdown(null);
+        setRacePhase('RUNNING');
+      };
+      runPreRace();
+      return () => { isCancelled = true; };
+    }
+  }, [racePhase, numLanes]);
+
+  // Fetch real upcoming race and participants
+  useEffect(() => {
+    const fetchUpcomingRace = async () => {
+      try {
+        let races = await getAssignedRacesAPI('upcoming');
+        if (!races || races.length === 0) {
+          races = await getAssignedRacesAPI('running');
+        }
+        if (races && races.length > 0) {
+          const race = races[0];
+          const rId = race.raceId || race.id;
+          setActualRaceId(rId);
+          setSimulatedRaceName(race.raceName);
+
+          const preCheck = await getRacePreCheckAPI(rId);
+          if (preCheck && preCheck.participants && preCheck.participants.length > 0) {
+            const fetchedHorses = preCheck.participants.map((p, idx) => ({
+              id: p.participantId,
+              horseId: p.horseId,
+              name: p.horseName,
+              jockeyName: p.jockeyName,
+              ownerName: p.ownerName || 'Tập đoàn ' + ['Alpha', 'Vanguard', 'Omega', 'Titan', 'Apex'][idx % 5],
+              weight: p.actualWeight || (450 + Math.random() * 50).toFixed(1),
+              progress: 0,
+              color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
+              flaggedPositions: []
+            }));
+            setHorses(fetchedHorses);
+            visualHorses.current = fetchedHorses.map(h => ({ ...h, visualProgress: 0, trail: [] }));
+          }
+        } else {
+          setSimulatedRaceName('Chưa có vòng đua nào');
+        }
+      } catch (err) {
+        console.error("Failed to fetch real race data for simulation", err);
+        setSimulatedRaceName('Lỗi tải dữ liệu');
+      }
+    };
+    fetchUpcomingRace();
   }, []);
 
   // Handle saving race results to localStorage when finished
   useEffect(() => {
-    if (finished && !resultsSaved) {
+    if (racePhase === 'FINISHED' && !resultsSaved) {
       // Sort horses to calculate ranks
-      const sorted = [...horses].sort((a, b) => (a.finishedTime || 0) - (b.finishedTime || 0));
-      const results = sorted.map((h, index) => ({
-        rank: index + 1,
-        horseName: h.name,
-        jockeyName: 'Jockey ' + h.id,
-        time: `1m ${15 + index * 2}s`
-      }));
-      
-      const newRaceId = Date.now();
+      const sorted = [...horses].sort((a, b) => {
+        if (a.isDisqualified && b.isDisqualified) return 0;
+        if (a.isDisqualified) return 1;
+        if (b.isDisqualified) return -1;
+        return (a.finishedTime || 0) - (b.finishedTime || 0);
+      });
+      const results = sorted.map((h, index) => {
+        const flagPenalties = h.flaggedPositions?.length || 0;
+        return {
+          rank: h.isDisqualified ? 'DSQ' : index + 1,
+          horseName: h.name,
+          jockeyName: h.jockeyName || ('Jockey ' + h.id),
+          time: h.isDisqualified ? 'Disqualified' : `1m ${15 + index * 2 + flagPenalties * 4}s`
+        };
+      });
+
+      const newRaceId = actualRaceId || Date.now();
       const newRace = {
         id: newRaceId,
         raceName: simulatedRaceName,
@@ -99,7 +168,7 @@ export default function LiveSimulation() {
         time: new Date().toTimeString().split(' ')[0].substring(0, 5),
         status: 'FINISHED'
       };
-      
+
       saveSimulatedRaceAPI(newRace, results).then(() => {
         setResultsSaved(true);
         setFinalPodium(results);
@@ -108,7 +177,7 @@ export default function LiveSimulation() {
         console.error('Failed to save simulated race', err);
       });
     }
-  }, [finished, horses, resultsSaved, simulatedRaceName]);
+  }, [racePhase, horses, resultsSaved, simulatedRaceName]);
 
   // Canvas drawing loop
   useEffect(() => {
@@ -117,7 +186,7 @@ export default function LiveSimulation() {
     const ctx = canvas.getContext('2d');
     let animationFrameId;
     let speedOffset = 0;
-    
+
     // Pre-generate clouds for a realistic sky
     const clouds = [
       { x: canvas.width * 0.1, y: canvas.height * 0.08, w: 90, h: 25, speed: 0.1 },
@@ -134,6 +203,18 @@ export default function LiveSimulation() {
         r: Math.random() * 2 + 0.5,
         speedY: Math.random() * 1.2 + 0.6,
         speedX: Math.random() * 0.5 - 0.25
+      });
+    }
+
+    // Pre-generate rain drops
+    const rainDrops = [];
+    for (let i = 0; i < 150; i++) {
+      rainDrops.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        l: Math.random() * 15 + 10,
+        speedY: Math.random() * 6 + 10,
+        speedX: Math.random() * 1.5 + 0.5
       });
     }
 
@@ -194,11 +275,23 @@ export default function LiveSimulation() {
           gridColor: 'rgba(71, 85, 105, 0.08)',
           dustColor: 'rgba(255, 255, 255, 0.5)',
           postColor: '#78350f'
+        },
+        rain: {
+          skyColors: ['#2b323a', '#44515c', '#606c76'],
+          sunColor: 'rgba(255, 255, 255, 0)',
+          sunRadius: 0,
+          grassColor: '#123524',
+          trackColor: '#3d2b1f',
+          fenceColor: '#a0aec0',
+          laneLineColor: 'rgba(255, 255, 255, 0.3)',
+          gridColor: 'rgba(0, 0, 0, 0.25)',
+          dustColor: 'rgba(60, 40, 30, 0.4)',
+          postColor: '#e2e8f0'
         }
       };
 
       const config = themeConfigs[environment] || themeConfigs.sunset;
-      
+
       // 1. Draw Sky Gradient
       const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
       skyGrad.addColorStop(0, config.skyColors[0]);
@@ -221,7 +314,7 @@ export default function LiveSimulation() {
       if (environment !== 'cyber') {
         ctx.fillStyle = environment === 'snow' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.22)';
         clouds.forEach(c => {
-          if (isRunning) {
+          if (racePhase === 'RUNNING') {
             c.x += c.speed;
             if (c.x > W) c.x = -c.w;
           }
@@ -241,12 +334,12 @@ export default function LiveSimulation() {
           ctx.save();
           const angle = Math.sin(timeSec + angleOffset) * 0.15 - Math.PI / 2;
           const beamLength = H * 0.75;
-          
+
           const grad = ctx.createRadialGradient(x, y, 0, x, y, beamLength);
           grad.addColorStop(0, color);
           grad.addColorStop(0.4, 'rgba(0, 242, 254, 0.03)');
           grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-          
+
           ctx.fillStyle = grad;
           ctx.beginPath();
           ctx.moveTo(x, y);
@@ -344,7 +437,7 @@ export default function LiveSimulation() {
       }
 
       // 6. Draw Horizontal dirt speed texture
-      if (isRunning) {
+      if (racePhase === 'RUNNING') {
         speedOffset += 0.05;
         if (speedOffset > 1) speedOffset -= 1;
       }
@@ -356,7 +449,7 @@ export default function LiveSimulation() {
         const lineY = horizonY + (H - horizonY) * t;
         const leftLimitX = Vx - 18 + (startX - (Vx - 18)) * t;
         const rightLimitX = Vx + 18 + (endX - (Vx + 18)) * t;
-        
+
         ctx.beginPath();
         ctx.moveTo(leftLimitX, lineY);
         ctx.lineTo(rightLimitX, lineY);
@@ -376,7 +469,7 @@ export default function LiveSimulation() {
       ctx.moveTo(finishLeftX, finishY);
       ctx.lineTo(finishRightX, finishY);
       ctx.stroke();
-      
+
       ctx.strokeStyle = '#000000';
       ctx.setLineDash([8, 8]);
       ctx.lineWidth = 6;
@@ -389,7 +482,7 @@ export default function LiveSimulation() {
       // Draw Finish Posts
       const finishPostH = 65;
       ctx.fillStyle = '#b91c1c';
-      
+
       ctx.fillRect(finishLeftX - 4, finishY - finishPostH, 8, finishPostH);
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(finishLeftX - 4, finishY - finishPostH + 15, 8, 12);
@@ -409,10 +502,10 @@ export default function LiveSimulation() {
       const bannerH = 18;
       const bannerX = finishLeftX + 20;
       const bannerY = finishY - finishPostH + 5;
-      
+
       ctx.fillRect(bannerX, bannerY, bannerW, bannerH);
       ctx.strokeRect(bannerX, bannerY, bannerW, bannerH);
-      
+
       ctx.fillStyle = '#d4af37';
       ctx.font = "bold 9px 'Inter', sans-serif";
       ctx.textAlign = 'center';
@@ -426,7 +519,7 @@ export default function LiveSimulation() {
             const y = horizonY + (H - horizonY) * (posT * posT);
             const laneStartX = startX + (laneIndex + 0.5) * (endX - startX) / numLanes;
             const x = Vx + (laneStartX - Vx) * posT;
-            
+
             const flagScale = posT;
             const flagHeight = 40 * flagScale;
 
@@ -435,12 +528,12 @@ export default function LiveSimulation() {
             ctx.shadowColor = '#ef4444';
             ctx.strokeStyle = '#ef4444';
             ctx.lineWidth = 3 * flagScale;
-            
+
             ctx.beginPath();
             ctx.moveTo(x, y);
             ctx.lineTo(x, y - flagHeight);
             ctx.stroke();
-            
+
             ctx.fillStyle = '#ef4444';
             ctx.beginPath();
             ctx.moveTo(x, y - flagHeight);
@@ -453,128 +546,156 @@ export default function LiveSimulation() {
         }
       });
 
+      // Pre-Race Overlay
+      if (racePhase === 'PRE_RACE') {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillRect(0, 0, W, H);
+      }
+
       // 9. Draw Horses
-      visualHorses.current.forEach((vHorse, laneIndex) => {
-        const stateHorse = horsesRef.current.find(h => h.id === vHorse.id);
-        const targetProgress = stateHorse ? stateHorse.progress : 0;
-        
-        vHorse.visualProgress += (targetProgress - vHorse.visualProgress) * 0.08;
-        if (Math.abs(targetProgress - vHorse.visualProgress) < 0.01) {
-          vHorse.visualProgress = targetProgress;
-        }
+      if (racePhase === 'PRE_RACE' || racePhase === 'RUNNING' || racePhase === 'FINISHED') {
+        visualHorses.current.forEach((vHorse, laneIndex) => {
+          if (racePhase === 'PRE_RACE' && laneIndex >= spawnedCount) return;
+          const stateHorse = horsesRef.current.find(h => h.id === vHorse.id);
+          const targetProgress = stateHorse ? stateHorse.progress : 0;
 
-        const t = vHorse.visualProgress / 100;
-        const laneStartX = startX + (laneIndex + 0.5) * (endX - startX) / numLanes;
-        const horseX = Vx + (laneStartX - Vx) * t;
-        const baseHorseY = horizonY + (H - horizonY) * (t * t);
-
-        const gallopFreq = 0.02 + 0.03 * (laneIndex % 3);
-        const bobY = isRunning && vHorse.visualProgress < 100
-          ? Math.sin(Date.now() * gallopFreq) * 5 * t
-          : 0;
-        const horseY = baseHorseY + bobY;
-        const size = 16 + 42 * t;
-
-        let horseColor = '#00f2fe';
-        if (vHorse.id === 2) horseColor = '#10b981';
-        if (vHorse.id === 3) horseColor = '#ef4444';
-        if (vHorse.id === 4) horseColor = '#d4af37';
-
-        if (!vHorse.trail) vHorse.trail = [];
-        if (isRunning && vHorse.visualProgress < 100) {
-          vHorse.trail.push({ x: horseX, y: horseY, size, alpha: 0.5 });
-          if (vHorse.trail.length > 10) vHorse.trail.shift();
-        } else {
-          if (vHorse.trail.length > 0) vHorse.trail.shift();
-        }
-
-        // Elliptical ground shadow
-        ctx.fillStyle = `rgba(0, 0, 0, ${0.45 * t})`;
-        ctx.beginPath();
-        ctx.ellipse(horseX, baseHorseY + 2 * t, size * 0.45, size * 0.16, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Trail ribbon
-        vHorse.trail.forEach((p, idx) => {
-          const alpha = (idx / vHorse.trail.length) * p.alpha;
-          ctx.save();
-          ctx.globalAlpha = alpha;
-          ctx.shadowBlur = 5;
-          ctx.shadowColor = horseColor;
-          ctx.fillStyle = horseColor;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * 0.35, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        });
-
-        // Dust clouds
-        if (isRunning && vHorse.visualProgress > 0 && vHorse.visualProgress < 100) {
-          ctx.fillStyle = config.dustColor;
-          for (let p = 0; p < 2; p++) {
-            ctx.beginPath();
-            ctx.arc(
-              horseX - (size * 0.45) + (Math.random() - 0.5) * 8,
-              baseHorseY + 2 * t + (Math.random() - 0.5) * 4,
-              (1.5 + Math.random() * 3.5) * t,
-              0,
-              Math.PI * 2
-            );
-            ctx.fill();
+          vHorse.visualProgress += (targetProgress - vHorse.visualProgress) * 0.08;
+          if (Math.abs(targetProgress - vHorse.visualProgress) < 0.01) {
+            vHorse.visualProgress = targetProgress;
           }
-        }
 
-        // Holographic Ring
-        ctx.save();
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = horseColor;
-        ctx.strokeStyle = horseColor;
-        ctx.lineWidth = 2.5;
-        
-        ctx.beginPath();
-        ctx.arc(horseX, horseY, size * 0.5, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
+          const t = vHorse.visualProgress / 100;
+          const laneStartX = startX + (laneIndex + 0.5) * (endX - startX) / numLanes;
+          const horseX = Vx + (laneStartX - Vx) * t;
+          const baseHorseY = horizonY + (H - horizonY) * (t * t);
 
-        // Inner fill
-        ctx.fillStyle = '#1e293b';
-        ctx.beginPath();
-        ctx.arc(horseX, horseY, size * 0.48, 0, Math.PI * 2);
-        ctx.fill();
+          const gallopFreq = 0.02 + 0.03 * (laneIndex % 3);
+          const bobY = (racePhase === 'RUNNING') && vHorse.visualProgress < 100
+            ? Math.sin(Date.now() * gallopFreq) * 5 * t
+            : 0;
+          const horseY = baseHorseY + bobY;
+          const size = 16 + 42 * t;
 
-        // Emoji
-        ctx.fillStyle = '#ffffff';
-        ctx.font = `${Math.round(size * 0.55)}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('🏇', horseX, horseY);
+          let horseColor = '#00f2fe';
+          if (vHorse.id === 2) horseColor = '#10b981';
+          if (vHorse.id === 3) horseColor = '#ef4444';
+          if (vHorse.id === 4) horseColor = '#d4af37';
 
-        // Nametag
-        if (size > 22) {
+          if (!vHorse.trail) vHorse.trail = [];
+          if (racePhase === 'RUNNING' && vHorse.visualProgress < 100) {
+            vHorse.trail.push({ x: horseX, y: horseY, size, alpha: 0.5 });
+            if (vHorse.trail.length > 10) vHorse.trail.shift();
+          } else {
+            if (vHorse.trail.length > 0) vHorse.trail.shift();
+          }
+
+          // Elliptical ground shadow
+          ctx.fillStyle = `rgba(0, 0, 0, ${0.45 * t})`;
+          ctx.beginPath();
+          ctx.ellipse(horseX, baseHorseY + 2 * t, size * 0.45, size * 0.16, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Trail ribbon
+          vHorse.trail.forEach((p, idx) => {
+            const alpha = (idx / vHorse.trail.length) * p.alpha;
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = horseColor;
+            ctx.fillStyle = horseColor;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * 0.35, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          });
+
+          // Dust clouds
+          if (racePhase === 'RUNNING' && vHorse.visualProgress > 0 && vHorse.visualProgress < 100) {
+            ctx.fillStyle = config.dustColor;
+            for (let p = 0; p < 2; p++) {
+              ctx.beginPath();
+              ctx.arc(
+                horseX - (size * 0.45) + (Math.random() - 0.5) * 8,
+                baseHorseY + 2 * t + (Math.random() - 0.5) * 4,
+                (1.5 + Math.random() * 3.5) * t,
+                0,
+                Math.PI * 2
+              );
+              ctx.fill();
+            }
+          }
+
+          // Holographic Ring
           ctx.save();
-          ctx.fillStyle = 'rgba(15, 30, 24, 0.85)';
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = horseColor;
           ctx.strokeStyle = horseColor;
-          ctx.lineWidth = 1;
-          const labelW = size * 1.5;
-          const labelH = size * 0.4;
-          const lx = horseX - labelW * 0.5;
-          const ly = horseY - size * 0.65 - labelH;
-          
-          ctx.fillRect(lx, ly, labelW, labelH);
-          ctx.strokeRect(lx, ly, labelW, labelH);
-          
-          ctx.fillStyle = '#ffffff';
-          ctx.font = `bold ${Math.max(9, Math.round(size * 0.22))}px 'Inter', sans-serif`;
-          ctx.fillText(`H${vHorse.id}: ${vHorse.name.split(' ')[0]}`, horseX, ly + labelH * 0.55);
+          ctx.lineWidth = 2.5;
+
+          ctx.beginPath();
+          ctx.arc(horseX, horseY, size * 0.5, 0, Math.PI * 2);
+          ctx.stroke();
           ctx.restore();
-        }
-      });
+
+          // Inner fill
+          ctx.fillStyle = '#1e293b';
+          ctx.beginPath();
+          ctx.arc(horseX, horseY, size * 0.48, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Emoji
+          ctx.fillStyle = '#ffffff';
+          ctx.font = `${Math.round(size * 0.55)}px Arial`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('🏇', horseX, horseY);
+
+          // Nametag
+          if (size > 22) {
+            ctx.save();
+            ctx.fillStyle = 'rgba(15, 30, 24, 0.85)';
+            ctx.strokeStyle = horseColor;
+            ctx.lineWidth = 1;
+            const labelW = size * 1.5;
+            const labelH = size * 0.4;
+            const lx = horseX - labelW * 0.5;
+            const ly = horseY - size * 0.65 - labelH;
+
+            ctx.fillRect(lx, ly, labelW, labelH);
+            ctx.strokeRect(lx, ly, labelW, labelH);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${Math.max(9, Math.round(size * 0.22))}px 'Inter', sans-serif`;
+            ctx.fillText(`H${vHorse.id}: ${vHorse.name.split(' ')[0]}`, horseX, ly + labelH * 0.55);
+            ctx.restore();
+          }
+
+          // Draw Flags
+          if (stateHorse && stateHorse.flaggedPositions && stateHorse.flaggedPositions.length > 0) {
+            stateHorse.flaggedPositions.forEach(flagProg => {
+              const ft = flagProg / 100;
+              const flagX = Vx + (laneStartX - Vx) * ft;
+              const flagY = horizonY + (H - horizonY) * (ft * ft);
+
+              ctx.save();
+              ctx.fillStyle = '#ef4444';
+              ctx.font = `${Math.max(14, Math.round(35 * ft))}px Arial`;
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'bottom';
+              ctx.shadowColor = '#000';
+              ctx.shadowBlur = 4;
+              ctx.fillText('🚩', flagX, flagY - 5);
+              ctx.restore();
+            });
+          }
+        });
+      }
 
       // Falling Snow Particles (Snow Theme)
       if (environment === 'snow') {
         ctx.fillStyle = '#ffffff';
         snowFlakes.forEach(flake => {
-          if (isRunning) {
+          if (racePhase === 'RUNNING' || racePhase === 'PRE_RACE') {
             flake.y += flake.speedY;
             flake.x += flake.speedX;
             if (flake.y > H) {
@@ -588,31 +709,99 @@ export default function LiveSimulation() {
         });
       }
 
+      // Falling Rain Particles (Rain Theme)
+      if (environment === 'rain') {
+        ctx.strokeStyle = 'rgba(174, 194, 224, 0.6)';
+        ctx.lineWidth = 1.5;
+        rainDrops.forEach(drop => {
+          if (racePhase === 'RUNNING' || racePhase === 'PRE_RACE') {
+            drop.y += drop.speedY;
+            drop.x -= drop.speedX;
+            if (drop.y > H) {
+              drop.y = -drop.l;
+              drop.x = Math.random() * W + 100;
+            }
+          }
+          ctx.beginPath();
+          ctx.moveTo(drop.x, drop.y);
+          ctx.lineTo(drop.x - drop.speedX, drop.y + drop.l);
+          ctx.stroke();
+        });
+      }
+
+      // Draw Countdown Text
+      if (countdown) {
+        ctx.save();
+        ctx.fillStyle = countdown === 'GO!' ? '#10b981' : '#ff8800';
+        ctx.font = `bold 120px 'Arial Black', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 20;
+        const pulse = 1 + Math.sin(Date.now() * 0.01) * 0.05;
+        ctx.translate(W / 2, H / 2);
+        ctx.scale(pulse, pulse);
+        ctx.fillText(countdown, 0, 0);
+        ctx.restore();
+      }
+
       animationFrameId = requestAnimationFrame(render);
     };
 
     render();
     return () => cancelAnimationFrame(animationFrameId);
-  }, [isRunning, environment]);
+  }, [racePhase, environment, countdown, spawnedCount]);
 
-  const handleStart = () => {
-    if (finished) {
-      // Reset
-      setHorses(initialHorses);
-      setFinished(false);
+  const handleStart = async () => {
+    if (racePhase === 'FINISHED') {
+      // Refresh real data if any
+      if (actualRaceId) {
+        try {
+          const preCheck = await getRacePreCheckAPI(actualRaceId);
+          if (preCheck && preCheck.participants && preCheck.participants.length > 0) {
+            const fetchedHorses = preCheck.participants.map((p, idx) => ({
+              id: p.participantId,
+              horseId: p.horseId,
+              name: p.horseName,
+              jockeyName: p.jockeyName,
+              ownerName: p.ownerName || 'Tập đoàn ' + ['Alpha', 'Vanguard', 'Omega', 'Titan', 'Apex'][idx % 5],
+              weight: p.actualWeight || (450 + Math.random() * 50).toFixed(1),
+              progress: 0,
+              color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
+              flaggedPositions: []
+            }));
+            setHorses(fetchedHorses);
+            visualHorses.current = fetchedHorses.map(h => ({ ...h, visualProgress: 0, trail: [] }));
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      } else {
+        setHorses([]);
+        visualHorses.current = [];
+      }
       setResultsSaved(false);
-      
-      const newRaceId = Date.now();
-      setSimulatedRaceName(`Simulated Race #${Math.floor(newRaceId / 1000) % 1000}`);
-      
-      // Reset visual models
-      visualHorses.current = initialHorses.map(h => ({ ...h, visualProgress: 0, trail: [] }));
+      setSpawnedCount(0);
+      setCountdown(null);
     }
-    setIsRunning(true);
+
+    // Call start API if real race
+    if (actualRaceId && racePhase !== 'FINISHED') {
+      try {
+        await startRaceAPI(actualRaceId);
+      } catch (err) {
+        console.error("Could not start race API", err);
+      }
+    }
+    setRacePhase('RAPHAEL');
+  };
+
+  const handleRaphaelComplete = () => {
+    setRacePhase('PRE_RACE');
   };
 
   const handleStop = () => {
-    setIsRunning(false);
+    if (racePhase === 'RUNNING') setRacePhase('IDLE');
   };
 
   const handleFlagClick = (horse) => {
@@ -624,40 +813,40 @@ export default function LiveSimulation() {
   const handleCanvasClick = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     const clickX = (e.clientX - rect.left) * scaleX;
     const clickY = (e.clientY - rect.top) * scaleY;
-    
+
     const H = canvas.height;
     const W = canvas.width;
     const horizonY = H * 0.32;
     const startX = W * 0.06;
     const endX = W * 0.94;
     const Vx = W / 2;
-    
+
     if (clickY > horizonY) {
       const t = Math.sqrt((clickY - horizonY) / (H - horizonY));
       const progressPercent = t * 100;
       let clickedLane = -1;
-      
+
       for (let i = 0; i < numLanes; i++) {
         const leftTopX = Vx - 18 + i * 36 / numLanes;
         const leftBottomX = startX + i * (endX - startX) / numLanes;
         const rightTopX = Vx - 18 + (i + 1) * 36 / numLanes;
         const rightBottomX = startX + (i + 1) * (endX - startX) / numLanes;
-        
+
         const leftX = leftTopX + (leftBottomX - leftTopX) * t;
         const rightX = rightTopX + (rightBottomX - rightTopX) * t;
-        
+
         if (clickX >= leftX && clickX <= rightX) {
           clickedLane = i;
           break;
         }
       }
-      
+
       if (clickedLane !== -1) {
         const horse = horses.find(h => h.id === clickedLane + 1);
         if (horse) {
@@ -673,19 +862,23 @@ export default function LiveSimulation() {
     if (!flagReason) return;
     try {
       const position = clickedProgress !== null ? clickedProgress : Math.round(selectedHorseForFlag.progress);
-      await reportViolationAPI({
-        raceName: simulatedRaceName,
-        horseName: selectedHorseForFlag.name,
-        jockeyName: 'Unknown',
+
+      const newFlags = [...(selectedHorseForFlag.flaggedPositions || []), position];
+      const isBlacklisted = newFlags.length >= 3;
+
+      await reportViolationAPI(actualRaceId, {
+        horseId: selectedHorseForFlag.horseId,
         violationType: `${flagReason} (at ${position}%)`,
-        isBlacklist: false
+        description: `Flagged at ${position}%`
       });
-      
+
       setHorses(prev => prev.map(h => {
         if (h.id === selectedHorseForFlag.id) {
           return {
             ...h,
-            flaggedPositions: [...(h.flaggedPositions || []), position]
+            flaggedPositions: newFlags,
+            isDisqualified: isBlacklisted,
+            finishedTime: isBlacklisted ? null : h.finishedTime
           };
         }
         return h;
@@ -725,13 +918,17 @@ export default function LiveSimulation() {
             </div>
           </div>
           <div className="d-flex gap-2">
-            {!isRunning ? (
+            {racePhase === 'IDLE' || racePhase === 'FINISHED' ? (
               <button className="ho-btn ho-btn-gold-solid py-2 px-4" onClick={handleStart}>
-                {finished ? 'Restart Simulation' : 'Start Simulation'}
+                {racePhase === 'FINISHED' ? 'Restart Simulation' : 'Start Simulation'}
               </button>
-            ) : (
+            ) : racePhase === 'RUNNING' ? (
               <button className="ho-btn ho-btn-outline-danger py-2 px-4" onClick={handleStop}>
                 Pause Simulation
+              </button>
+            ) : (
+              <button className="ho-btn ho-btn-outline-secondary py-2 px-4" disabled>
+                System Active...
               </button>
             )}
           </div>
@@ -748,8 +945,8 @@ export default function LiveSimulation() {
               <div className="d-flex flex-wrap align-items-center gap-2">
                 <div className="d-flex align-items-center gap-1 small text-secondary me-2">
                   <span>Theme:</span>
-                  <select 
-                    className="form-select form-select-sm bg-white border-secondary text-dark" 
+                  <select
+                    className="form-select form-select-sm bg-white border-secondary text-dark"
                     style={{ fontSize: '11px', borderRadius: '20px', padding: '2px 24px 2px 8px', width: 'auto', minWidth: '120px' }}
                     value={environment}
                     onChange={(e) => setEnvironment(e.target.value)}
@@ -758,22 +955,23 @@ export default function LiveSimulation() {
                     <option value="cyber">🛸 Cyber Neon</option>
                     <option value="sunny">☀️ Sunny Turf</option>
                     <option value="snow">❄️ Snowy Winter</option>
+                    <option value="rain">🌧️ Rainy Storm</option>
                   </select>
                 </div>
                 <span className="stat-pill">Dist: <strong>2300m</strong></span>
-                <span className="stat-pill">Track: <strong className="text-success">{environment === 'snow' ? 'SNOW' : 'TURF'}</strong></span>
-                <span className="stat-pill">Weather: <strong className={environment === 'snow' ? 'text-info' : environment === 'sunny' ? 'text-warning' : 'text-success'}>
-                  {environment === 'snow' ? 'SNOWING' : environment === 'sunny' ? 'SUNNY' : 'CLEAR'}
+                <span className="stat-pill">Track: <strong className="text-success">{environment === 'snow' ? 'SNOW' : environment === 'rain' ? 'MUD' : 'TURF'}</strong></span>
+                <span className="stat-pill">Weather: <strong className={environment === 'snow' ? 'text-info' : environment === 'rain' ? 'text-primary' : environment === 'sunny' ? 'text-warning' : 'text-success'}>
+                  {environment === 'snow' ? 'SNOWING' : environment === 'rain' ? 'RAINING' : environment === 'sunny' ? 'SUNNY' : 'CLEAR'}
                 </strong></span>
-                <span className="stat-pill">Temp: <strong>{environment === 'snow' ? '-2°C' : environment === 'sunny' ? '28°C' : '24°C'}</strong></span>
+                <span className="stat-pill">Temp: <strong>{environment === 'snow' ? '-2°C' : environment === 'rain' ? '18°C' : environment === 'sunny' ? '28°C' : '24°C'}</strong></span>
               </div>
             </div>
 
             <div className="canvas-wrapper">
-              <canvas 
-                ref={canvasRef} 
-                width={880} 
-                height={495} 
+              <canvas
+                ref={canvasRef}
+                width={880}
+                height={495}
                 onClick={handleCanvasClick}
                 style={{ cursor: 'crosshair' }}
               />
@@ -789,32 +987,32 @@ export default function LiveSimulation() {
               <span className="material-symbols-outlined text-warning">emoji_events</span>
               Leaderboard
             </h4>
-            
+
             <div className="leaderboard-list">
               {sortedLeaderboard.map((horse, idx) => {
                 const rank = idx + 1;
                 return (
-                  <div 
-                    key={horse.id} 
+                  <div
+                    key={horse.id}
                     className={`leaderboard-item rank-${rank}`}
                     style={{ borderLeftColor: horse.color }}
                   >
                     <div className="leaderboard-rank">
                       {rank === 1 ? '1st' : rank === 2 ? '2nd' : rank === 3 ? '3rd' : `${rank}th`}
                     </div>
-                    
+
                     <div className="leaderboard-horse-info">
                       <div className="leaderboard-horse-name d-flex align-items-center gap-2">
                         <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: horse.color }}></span>
                         {horse.name}
                       </div>
-                      <div className="leaderboard-jockey-name">Jockey {horse.id}</div>
+                      <div className="leaderboard-jockey-name">{horse.jockeyName}</div>
                     </div>
-                    
+
                     <div className="leaderboard-metrics">
                       <div className="leaderboard-progress">{Math.round(horse.progress)}%</div>
-                      <button 
-                        className="btn-flag-action" 
+                      <button
+                        className="btn-flag-action"
                         onClick={() => handleFlagClick(horse)}
                         title="Flag violation"
                       >
@@ -840,9 +1038,9 @@ export default function LiveSimulation() {
             <p className="mb-3 text-secondary small">Flag Position: <strong className="text-primary-medium">{clickedProgress}%</strong> along the track</p>
             <div className="mb-4">
               <label className="ho-input-label mb-2">Reason for Flagging</label>
-              <select 
-                className="ho-form-input" 
-                value={flagReason} 
+              <select
+                className="ho-form-input"
+                value={flagReason}
                 onChange={(e) => setFlagReason(e.target.value)}
               >
                 <option value="">Select a reason...</option>
@@ -871,10 +1069,10 @@ export default function LiveSimulation() {
             {/* Podium List */}
             <div className="d-flex flex-column gap-2 mb-4 text-start">
               {finalPodium.slice(0, 3).map((item) => (
-                <div 
-                  key={item.rank} 
+                <div
+                  key={item.rank}
                   className="d-flex align-items-center justify-content-between p-3 rounded"
-                  style={{ 
+                  style={{
                     backgroundColor: item.rank === 1 ? 'rgba(212, 175, 55, 0.08)' : '#f8f9fa',
                     border: item.rank === 1 ? '1px solid var(--ho-accent-gold)' : '1px solid #e9ecef'
                   }}
@@ -894,14 +1092,14 @@ export default function LiveSimulation() {
             </div>
 
             <div className="d-flex gap-2">
-              <button 
-                className="ho-btn ho-btn-outline-secondary flex-grow-1" 
+              <button
+                className="ho-btn ho-btn-outline-secondary flex-grow-1"
                 onClick={() => setShowResultsSummary(false)}
               >
                 Close
               </button>
-              <button 
-                className="ho-btn ho-btn-gold-solid flex-grow-1 py-2" 
+              <button
+                className="ho-btn ho-btn-gold-solid flex-grow-1 py-2"
                 onClick={() => {
                   setShowResultsSummary(false);
                   navigate('/referee/confirm-results');
@@ -912,6 +1110,14 @@ export default function LiveSimulation() {
             </div>
           </div>
         </div>
+      )}
+
+      {racePhase === 'RAPHAEL' && (
+        <RaphaelHUD
+          horses={horses}
+          environment={environment}
+          onComplete={handleRaphaelComplete}
+        />
       )}
     </>
   );

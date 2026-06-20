@@ -123,15 +123,13 @@ export default function JockeyInvitationsContent() {
     }
   };
 
-  // Pending ride invitations (only show if owner is in friendsList)
+  // Pending ride invitations
   const pendingInvitations = invitations.filter(inv => 
-    inv.status === 'PENDING' && 
-    friendsList.some(f => f.userId === inv.ownerId || f.id === inv.ownerId)
+    inv.status === 'PENDING'
   );
-  // Processed ride invitations (only show if owner is in friendsList)
+  // Processed ride invitations
   const processedInvitations = invitations.filter(inv => 
-    inv.status !== 'PENDING' && 
-    friendsList.some(f => f.userId === inv.ownerId || f.id === inv.ownerId)
+    inv.status !== 'PENDING'
   );
 
   const incomingRequests = directoryList.filter(user => user.friendStatus === 'PENDING_RECEIVED');

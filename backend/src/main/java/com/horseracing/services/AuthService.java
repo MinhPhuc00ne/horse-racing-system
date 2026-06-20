@@ -123,11 +123,19 @@ public class AuthService {
      * Authenticate a user with email and password.
      */
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại hoặc sai mật khẩu."));
+
+        if (user.getProvider() == AuthProvider.GOOGLE) {
+            throw new RuntimeException("Tài khoản này được đăng ký qua Google. Vui lòng sử dụng nút 'Đăng nhập bằng Google'.");
+        }
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        } catch (org.springframework.security.authentication.BadCredentialsException e) {
+            throw new RuntimeException("Email không tồn tại hoặc sai mật khẩu.");
+        }
 
         if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE").isPresent()) {
             throw new RuntimeException("Tài khoản của bạn đã bị khóa/cấm do vi phạm điều khoản.");

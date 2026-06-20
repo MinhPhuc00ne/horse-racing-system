@@ -149,19 +149,19 @@ export default function RacesPanel() {
     }
   };
 
-  // Confirm registrations for a race
-  const handleConfirmRegistrations = async (raceId) => {
-    if (!window.confirm('Bạn có chắc chắn muốn chốt danh sách đua cho vòng này? Tất cả đăng ký ở trạng thái PENDING sẽ bị loại và hoàn trả lệ phí.')) {
+  // Confirm registrations for a tournament
+  const handleConfirmRegistrations = async (tournamentId) => {
+    if (!window.confirm('Bạn có chắc chắn muốn chốt danh sách thi đấu cho giải này? Tất cả đăng ký ở trạng thái PENDING sẽ bị loại và hoàn trả lệ phí.')) {
       return;
     }
     setError('');
     setSuccess('');
     try {
-      await confirmRaceRegistrationsAPI(raceId);
-      setSuccess('Đã chốt danh sách đua thành công và hoàn trả lệ phí cho danh sách chờ!');
-      fetchRaces();
+      await confirmRaceRegistrationsAPI(tournamentId);
+      setSuccess('Đã chốt danh sách thi đấu thành công và hoàn trả lệ phí cho danh sách chờ!');
+      fetchRegistrations();
     } catch (err) {
-      setError(err.message || 'Lỗi khi chốt danh sách đua.');
+      setError(err.message || 'Lỗi khi chốt danh sách thi đấu.');
     }
   };
 
@@ -225,7 +225,7 @@ export default function RacesPanel() {
               borderRadius: '8px'
             }}
           >
-            Duyệt Đăng Ký Đua
+            Duyệt Đăng Ký Thi Đấu
           </button>
         </div>
       </div>
@@ -496,11 +496,11 @@ export default function RacesPanel() {
                     <div>
                       {r.status === 'Upcoming' || r.status === 'OPEN_FOR_REGISTER' ? (
                         <button
-                          onClick={() => handleConfirmRegistrations(r.id)}
+                          onClick={() => handleConfirmRegistrations(selectedTournamentId)}
                           className="btn btn-warning btn-sm d-flex align-items-center gap-2 fw-bold"
                           style={{ color: '#02140b', padding: '10px 16px', borderRadius: '8px' }}
                         >
-                          <FaCheckCircle /> Chốt Lượt Đua
+                          <FaCheckCircle /> Chốt Danh Sách Thi Đấu
                         </button>
                       ) : (
                         <span style={{ fontSize: '13px', color: 'var(--ho-text-muted)', fontStyle: 'italic' }}>Đã đóng / Đang chạy</span>
@@ -520,7 +520,7 @@ export default function RacesPanel() {
       {activeSubTab === 'registrations' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: 'var(--ho-primary-dark)', margin: 0 }}>
-            Danh Sách Đơn Đăng Ký Lượt Đua Đang Chờ Duyệt
+            Danh Sách Đơn Đăng Ký Thi Đấu Đang Chờ Duyệt
           </h3>
 
           {loadingReg ? (
@@ -535,7 +535,7 @@ export default function RacesPanel() {
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--ho-border-gold)', background: 'rgba(0,56,32,0.04)' }}>
                     <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Mã đơn</th>
-                    <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Vòng đua (ID)</th>
+                    <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Giải đấu (Vòng đua)</th>
                     <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Ngựa đua</th>
                     <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Nài ngựa</th>
                     <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Lợi nhuận chia (Jockey / Owner)</th>

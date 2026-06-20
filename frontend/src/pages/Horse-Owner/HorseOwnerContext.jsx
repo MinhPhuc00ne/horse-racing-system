@@ -199,6 +199,8 @@ export function HorseOwnerProvider({ children }) {
                 status: displayStatus, // Use tournament status for displaying to Owner
                 allowedClasses: t.allowedClasses,
                 registeredHorses: Array.from(registeredHorsesSet),
+                entryFee: t.entryFee,
+                refereeName: t.refereeName || 'Chưa phân công',
               });
             }
           } else {
@@ -215,6 +217,8 @@ export function HorseOwnerProvider({ children }) {
               status: t.tournamentStatus || 'Upcoming',
               allowedClasses: t.allowedClasses,
               registeredHorses: [],
+              entryFee: t.entryFee,
+              refereeName: t.refereeName || 'Chưa phân công',
             });
           }
         }

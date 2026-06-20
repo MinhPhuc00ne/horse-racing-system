@@ -67,6 +67,21 @@ export async function getRefereeDashboardStatsAPI() {
   return response.data;
 }
 
+export async function getAssignedRacesAPI(status = '') {
+  const response = await axiosClient.get(`/referee/races?status=${status}`);
+  return response.data;
+}
+
+export async function getRacePreCheckAPI(raceId) {
+  const response = await axiosClient.get(`/referee/races/${raceId}/pre-check`);
+  return response.data;
+}
+
+export async function startRaceAPI(raceId) {
+  const response = await axiosClient.post(`/referee/races/${raceId}/start`);
+  return response.data;
+}
+
 export async function getHorsesToInspectAPI() {
   if (isMockMode()) {
     seedInitialData();
@@ -93,8 +108,13 @@ export async function getCompletedRacesAPI() {
     seedInitialData();
     return JSON.parse(localStorage.getItem(COMPLETED_RACES_KEY)) || [];
   }
-  const response = await axiosClient.get('/referee/races/completed');
-  return response.data;
+  const response = await axiosClient.get('/referee/races?status=running');
+  return response.data.map(race => ({
+    ...race,
+    id: race.raceId,
+    date: race.raceDate,
+    time: race.startTime
+  }));
 }
 
 export async function getRaceResultsAPI(raceId) {
@@ -127,7 +147,7 @@ export async function getViolationsAPI() {
   return response.data;
 }
 
-export async function reportViolationAPI(data) {
+export async function reportViolationAPI(raceId, data) {
   if (isMockMode()) {
     seedInitialData();
     const violations = JSON.parse(localStorage.getItem(VIOLATIONS_KEY)) || [];
@@ -141,7 +161,7 @@ export async function reportViolationAPI(data) {
     localStorage.setItem(VIOLATIONS_KEY, JSON.stringify(violations));
     return newViolation;
   }
-  const response = await axiosClient.post('/referee/violations', data);
+  const response = await axiosClient.post(`/referee/races/${raceId}/flags`, data);
   return response.data;
 }
 

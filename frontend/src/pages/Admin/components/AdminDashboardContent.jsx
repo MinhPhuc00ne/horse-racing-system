@@ -153,7 +153,7 @@ export default function AdminDashboardContent() {
                   <span className="material-symbols-outlined" style={{ fontSize: '40px', color: 'var(--ho-accent-gold-text)' }}>flag</span>
                 </div>
                 <h3 className="ho-font-grotesk text-uppercase fw-bold text-secondary mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
-                  Đăng Ký Vòng Đua
+                  Đăng Ký Thi Đấu
                 </h3>
                 <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: 'var(--ho-primary-dark)' }}>
                   {stats.racesCount}
@@ -247,8 +247,8 @@ export default function AdminDashboardContent() {
 
                     <div className="d-flex justify-content-between align-items-center p-3 rounded" style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.04)' }}>
                       <div>
-                        <span className="fw-bold d-block text-dark small">Tạo vòng đua mới & Duyệt ngựa</span>
-                        <span className="text-muted small" style={{ fontSize: '11px' }}>Tạo lượt chạy, quản lý danh sách đăng ký và chốt danh sách đua</span>
+                        <span className="fw-bold d-block text-dark small">Quản lý vòng đua & Duyệt đăng ký thi đấu</span>
+                        <span className="text-muted small" style={{ fontSize: '11px' }}>Quản lý lượt chạy, danh sách đăng ký và chốt danh sách thi đấu</span>
                       </div>
                       <button onClick={() => navigate('/admin/racemanagement')} className="btn btn-outline-success btn-sm fw-bold">Đi tới</button>
                     </div>

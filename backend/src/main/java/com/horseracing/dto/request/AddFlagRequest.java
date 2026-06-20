@@ -14,7 +14,6 @@ public class AddFlagRequest {
     @NotNull(message = "Horse ID is required")
     private Integer horseId;
 
-    @NotNull(message = "Simulation ID is required")
     private Integer simulationId;
 
     @NotBlank(message = "Violation type is required")

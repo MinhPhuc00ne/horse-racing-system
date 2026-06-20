@@ -69,7 +69,6 @@ public class RefereeService {
                 matches = true;
             } else if ("upcoming".equalsIgnoreCase(status) || "preparation".equalsIgnoreCase(status)) {
                 matches = "Upcoming".equalsIgnoreCase(r.getStatus()) 
-                        || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) 
                         || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus());
             } else if ("running".equalsIgnoreCase(status) || "ongoing".equalsIgnoreCase(status)) {
                 matches = "RUNNING".equalsIgnoreCase(r.getStatus());
@@ -82,6 +81,117 @@ public class RefereeService {
             }
         }
         return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getHorsesToInspect(String refereeEmail) {
+        User referee = userRepository.findByEmail(refereeEmail)
+                .orElseThrow(() -> new RuntimeException("Referee not found"));
+
+        List<Race> races = raceRepository.findByRefereeId(referee.getId());
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Race r : races) {
+            if ("CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus())) {
+                List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(r.getId());
+                for (RaceParticipant p : participants) {
+                    if ("PENDING_INSPECTION".equalsIgnoreCase(p.getStatus())) {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("id", p.getId());
+                        map.put("horseName", p.getHorse().getName());
+                        map.put("breed", p.getHorse().getBreed() != null ? p.getHorse().getBreed().getBreedName() : "Unknown");
+                        map.put("jockeyName", p.getJockey().getUser().getFullName());
+                        map.put("weight", p.getJockey().getWeight());
+                        map.put("status", p.getStatus());
+                        map.put("raceName", r.getRaceName());
+                        result.add(map);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Transactional
+    public void updateInspectionStatus(Integer participantId, String status, String reason, String refereeEmail) {
+        User referee = userRepository.findByEmail(refereeEmail)
+                .orElseThrow(() -> new RuntimeException("Referee not found"));
+
+        RaceParticipant participant = raceParticipantRepository.findById(participantId)
+                .orElseThrow(() -> new RuntimeException("Participant not found"));
+
+        if (!participant.getRace().getReferee().getId().equals(referee.getId())) {
+            throw new RuntimeException("You are not assigned to this race");
+        }
+
+        participant.setStatus(status);
+        raceParticipantRepository.save(participant);
+
+        if ("REJECTED".equalsIgnoreCase(status)) {
+            // Also notify owner and jockey, refund them
+            RaceRegistration reg = raceRegistrationRepository
+                    .findFirstByRaceIdAndHorseId(participant.getRace().getId(), participant.getHorse().getId())
+                    .orElse(null);
+
+            if (reg != null) {
+                reg.setStatus("REJECTED");
+                raceRegistrationRepository.save(reg);
+
+                BigDecimal entryFee = participant.getRace().getTournament().getEntryFee();
+                if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+                    Wallet wallet = walletRepository.findByUserId(reg.getOwner().getUser().getId())
+                            .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                    wallet.setBalance(wallet.getBalance().add(entryFee));
+                    walletRepository.save(wallet);
+
+                    WalletTransaction transaction = WalletTransaction.builder()
+                            .wallet(wallet)
+                            .transactionType("REFUND")
+                            .amount(entryFee)
+                            .status("SUCCESS")
+                            .referenceType("RACE_REGISTRATION")
+                            .referenceId(reg.getId())
+                            .build();
+                    walletTransactionRepository.save(transaction);
+                }
+
+                notificationService.sendNotification(
+                        reg.getOwner().getUser(),
+                        "Ngựa không vượt qua vòng kiểm tra trước trận",
+                        "Ngựa " + participant.getHorse().getName() + " đã bị từ chối tham gia vòng đua " + participant.getRace().getRaceName() + " bởi Trọng tài. Lý do: " + reason + ". Lệ phí tham gia đã được hoàn lại.",
+                        NotificationType.RACE_STATUS
+                );
+            }
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getDashboardStats(String refereeEmail) {
+        User referee = userRepository.findByEmail(refereeEmail)
+                .orElseThrow(() -> new RuntimeException("Referee not found"));
+
+        List<Race> races = raceRepository.findByRefereeId(referee.getId());
+        long upcomingRaces = races.stream()
+                .filter(r -> "Upcoming".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()))
+                .count();
+
+        long horsesToInspect = 0;
+        for (Race r : races) {
+            if ("CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus())) {
+                horsesToInspect += raceParticipantRepository.findByRaceId(r.getId()).stream()
+                        .filter(p -> "PENDING_INSPECTION".equalsIgnoreCase(p.getStatus()))
+                        .count();
+            }
+        }
+
+        long violationsIssued = refereeFlagRepository.count(); // Could filter by referee
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("upcomingRaces", upcomingRaces);
+        stats.put("horsesToInspect", horsesToInspect);
+        stats.put("violationsIssued", violationsIssued);
+
+        return stats;
     }
 
     @Transactional(readOnly = true)
@@ -417,8 +527,20 @@ public class RefereeService {
         Horse horse = horseRepository.findById(request.getHorseId())
                 .orElseThrow(() -> new RuntimeException("Horse not found"));
 
-        RaceSimulation simulation = raceSimulationRepository.findById(request.getSimulationId())
-                .orElseThrow(() -> new RuntimeException("Simulation not found"));
+        RaceSimulation simulation;
+        if (request.getSimulationId() != null) {
+            simulation = raceSimulationRepository.findById(request.getSimulationId())
+                    .orElseThrow(() -> new RuntimeException("Simulation not found"));
+        } else {
+            simulation = raceSimulationRepository.findFirstByRaceIdAndStatus(raceId, "RUNNING")
+                    .orElseGet(() -> {
+                        List<RaceSimulation> sims = raceSimulationRepository.findByRaceId(raceId);
+                        if (sims.isEmpty()) {
+                            throw new RuntimeException("No simulation found for this race");
+                        }
+                        return sims.get(sims.size() - 1);
+                    });
+        }
 
         RefereeFlag flag = RefereeFlag.builder()
                 .referee(referee)
@@ -531,6 +653,22 @@ public class RefereeService {
                     NotificationType.SYSTEM_ALERT
             );
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getRaceResults(Integer raceId) {
+        List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (RaceParticipant p : participants) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("rank", p.getFinalRank());
+            map.put("horseName", p.getHorse().getName());
+            map.put("jockeyName", p.getJockey().getUser().getFullName());
+            map.put("time", p.getFinishTime() != null ? p.getFinishTime() + "s" : "N/A");
+            result.add(map);
+        }
+        result.sort(Comparator.comparing(m -> (Integer) m.getOrDefault("rank", 999)));
+        return result;
     }
 
     @Transactional

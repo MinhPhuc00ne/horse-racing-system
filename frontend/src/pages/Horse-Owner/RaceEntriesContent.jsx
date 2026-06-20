@@ -145,6 +145,14 @@ export default function RaceEntriesContent() {
                     <span className="fw-bold text-dark">Tiền thưởng giải:</span>
                     <span className="fw-bold" style={{ color: 'var(--ho-primary-medium)' }}>{race.prizePool}</span>
                   </div>
+                  <div className="d-flex justify-content-between py-1 border-bottom border-light">
+                    <span className="fw-bold text-dark">Trọng tài:</span>
+                    <span>{race.refereeName || 'Chưa phân công'}</span>
+                  </div>
+                  <div className="d-flex justify-content-between py-1 border-bottom border-light">
+                    <span className="fw-bold text-dark">Phí đăng ký:</span>
+                    <span>{race.entryFee ? `${race.entryFee.toLocaleString()} VND` : 'Miễn phí'}</span>
+                  </div>
                   <div className="d-flex justify-content-between py-1 align-items-center mb-2">
                     <span className="fw-bold text-dark">Trạng thái:</span>
                     <StatusBadge status={isRegistered ? 'READY' : race.status} />

@@ -87,11 +87,13 @@
     opacity: 0.6;
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
   }
+
   70% {
     transform: scale(1.1);
     opacity: 1;
     box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
   }
+
   100% {
     transform: scale(0.9);
     opacity: 0.6;
@@ -173,6 +175,7 @@
   background: rgba(212, 175, 55, 0.04);
   border-color: rgba(212, 175, 55, 0.15);
 }
+
 .rank-1 .leaderboard-rank {
   color: #b88d1d;
 }
@@ -181,6 +184,7 @@
   background: rgba(113, 128, 150, 0.02);
   border-color: rgba(113, 128, 150, 0.08);
 }
+
 .rank-2 .leaderboard-rank {
   color: #4a5568;
 }
@@ -189,6 +193,7 @@
   background: rgba(180, 83, 9, 0.02);
   border-color: rgba(180, 83, 9, 0.08);
 }
+
 .rank-3 .leaderboard-rank {
   color: #9a3412;
 }
@@ -282,6 +287,7 @@
     opacity: 0;
     transform: scale(0.94);
   }
+
   to {
     opacity: 1;
     transform: scale(1);

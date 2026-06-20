@@ -33,6 +33,30 @@ public class RefereeController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/inspect/horses")
+    public ResponseEntity<List<Map<String, Object>>> getHorsesToInspect(Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return ResponseEntity.ok(refereeService.getHorsesToInspect(userDetails.getUsername()));
+    }
+
+    @PutMapping("/inspect/horses/{participantId}")
+    public ResponseEntity<?> updateInspectionStatus(
+            @PathVariable Integer participantId,
+            @RequestBody Map<String, String> body,
+            Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String status = body.get("status");
+        String reason = body.getOrDefault("reason", "");
+        refereeService.updateInspectionStatus(participantId, status, reason, userDetails.getUsername());
+        return ResponseEntity.ok(Map.of("success", true));
+    }
+
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<Map<String, Object>> getDashboardStats(Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return ResponseEntity.ok(refereeService.getDashboardStats(userDetails.getUsername()));
+    }
+
     @GetMapping("/races/{raceId}/pre-check")
     public ResponseEntity<PreCheckResponse> getPreCheck(@PathVariable Integer raceId) {
         PreCheckResponse response = refereeService.getPreCheck(raceId);
@@ -93,6 +117,11 @@ public class RefereeController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         refereeService.addBlacklist(request, userDetails.getUsername());
         return ResponseEntity.ok(new MessageResponse("Target has been added to blacklist and banned successfully."));
+    }
+
+    @GetMapping("/races/{raceId}/results")
+    public ResponseEntity<List<Map<String, Object>>> getRaceResults(@PathVariable Integer raceId) {
+        return ResponseEntity.ok(refereeService.getRaceResults(raceId));
     }
 
     @PostMapping("/races/{raceId}/confirm-results")

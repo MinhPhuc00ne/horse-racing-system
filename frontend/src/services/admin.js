@@ -136,12 +136,12 @@ export async function rejectRaceRegistrationAPI(id) {
   }
 }
 
-export async function confirmRaceRegistrationsAPI(raceId) {
+export async function confirmRaceRegistrationsAPI(tournamentId) {
   try {
-    const response = await axiosClient.post(`/admin/races/${raceId}/confirm-registration`);
+    const response = await axiosClient.post(`/admin/tournaments/${tournamentId}/confirm-registration`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể chốt danh sách đăng ký đua.';
+    const errMsg = error.response?.data?.message || 'Không thể chốt danh sách thi đấu.';
     throw new Error(errMsg, { cause: error });
   }
 }

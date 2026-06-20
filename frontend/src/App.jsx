@@ -18,6 +18,7 @@ const RefereePage = lazy(() => import('./pages/Race-Referee/RefereePage'));
 const SpectatorPage = lazy(() => import('./pages/Spectator/SpectatorPage'));
 const UnauthorizedPage = lazy(() => import('./pages/Unauthorized/UnauthorizedPage'));
 const PaymentQRPage = lazy(() => import('./pages/Payment/PaymentQRPage'));
+const PaymentCallback = lazy(() => import('./pages/Payment/PaymentCallback'));
 
 const MainLayout = () => {
   return (
@@ -126,6 +127,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/payment-success" element={<PaymentCallback />} />
+            <Route path="/payment-cancel" element={<PaymentCallback />} />
 
             {/* Public and Protected Routes enclosed in MainLayout */}
             <Route element={<MainLayout />}>
