@@ -130,8 +130,8 @@ public class UpgradeRequestService {
         for (User admin : admins) {
             notificationService.sendNotification(
                     admin,
-                    "Có yêu cầu nâng cấp tài khoản mới",
-                    "Người dùng " + user.getFullName() + " đã gửi yêu cầu nâng cấp tài khoản lên " + role + ". Vui lòng vào trang quản trị để xem xét.",
+                    "New account upgrade request",
+                    "User " + user.getFullName() + " has submitted a request to upgrade their account to " + role + ". Please review it in the admin panel.",
                     NotificationType.ROLE_UPGRADE
             );
         }
@@ -211,8 +211,8 @@ public class UpgradeRequestService {
 
         notificationService.sendNotification(
                 user,
-                "Nâng cấp tài khoản thành công",
-                "Chúc mừng! Yêu cầu nâng cấp tài khoản của bạn lên " + request.getRequestedRole() + " đã được Ban quản trị duyệt thành công. Vui lòng đăng nhập lại để trải nghiệm giao diện mới.",
+                "Account upgraded successfully",
+                "Congratulations! Your request to upgrade your account to " + request.getRequestedRole() + " has been approved by the Admin. Please log in again to experience the new interface.",
                 NotificationType.ROLE_UPGRADE
         );
 
@@ -235,8 +235,8 @@ public class UpgradeRequestService {
 
         notificationService.sendNotification(
                 request.getUser(),
-                "Yêu cầu nâng cấp bị từ chối",
-                "Yêu cầu nâng cấp tài khoản của bạn đã bị từ chối. Lý do từ chối: " + rejectDto.getRejectionReason(),
+                "Account upgrade request rejected",
+                "Your account upgrade request has been rejected. Reason: " + rejectDto.getRejectionReason(),
                 NotificationType.ROLE_UPGRADE
         );
 

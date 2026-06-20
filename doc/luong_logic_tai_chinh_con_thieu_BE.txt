@@ -1,0 +1,127 @@
+TÀI LIỆU ĐẶC TẢ CÁC LUỒNG LOGIC TÀI CHÍNH CÒN THIẾU TRÊN BACKEND (BE)
+
+Tài liệu này tổng hợp chi tiết luồng xử lý và các bước kỹ thuật (Database, Ví tiền, Giao dịch, Thông báo) cần được triển khai để khắc phục các lỗ hổng tài chính hiện tại trên Backend.
+
+=========================================
+LUỒNG 1: JOCKEY TỪ CHỐI LỜI MỜI THI ĐẤU (JOCKEY REJECTS INVITATION)
+=========================================
+1. Trạng thái hiện tại:
+   - Khi Chủ ngựa (Owner) đăng ký đua, hệ thống trừ phí tham gia (entryFee) của Owner và lưu trạng thái PENDING_JOCKEY.
+   - Khi Jockey bấm từ chối (REJECT), hệ thống chuyển trạng thái RaceRegistration thành REJECTED_BY_JOCKEY nhưng KHÔNG hoàn tiền cho Owner.
+
+2. Luồng nghiệp vụ chuẩn:
+   [Jockey bấm REJECT] -> [Cập nhật trạng thái Đăng ký] -> [Kiểm tra phí tham gia] -> [Hoàn trả 100% tiền ví cho Owner] -> [Lưu giao dịch hoàn tiền] -> [Gửi thông báo đến Owner].
+
+3. Các bước xử lý chi tiết ở Backend:
+   - Bước 3.1: Nhận request từ Jockey (API: PUT /api/jockeys/invitations/{id} với action=REJECT).
+   - Bước 3.2: Lấy bản ghi RaceRegistration theo ID. Xác nhận trạng thái hiện tại là PENDING_JOCKEY và Jockey thực hiện đúng là người được mời.
+   - Bước 3.3: Cập nhật status của RaceRegistration thành "REJECTED_BY_JOCKEY".
+   - Bước 3.4: Lấy thông tin Tournament liên quan để kiểm tra entryFee.
+   - Bước 3.5: Nếu entryFee > 0:
+     + Lấy ví (Wallet) của User (Chủ ngựa - owner_id).
+     + Cộng số dư ví: balance = balance + entryFee.
+     + Lưu ví vào cơ sở dữ liệu.
+     + Tạo một bản ghi mới trong bảng [wallet_transactions]:
+       * wallet_id = ví của Owner.
+       * transaction_type = 'REFUND'
+       * amount = entryFee
+       * status = 'SUCCESS'
+       * reference_type = 'RACE_REGISTRATION'
+       * reference_id = ID của RaceRegistration.
+   - Bước 3.6: Gửi thông báo (Notification) loại REGISTRATION đến Owner:
+     + Tiêu đề: "Jockey từ chối lời mời thi đấu"
+     + Nội dung: "Jockey [Jockey Name] đã từ chối lời mời tham gia vòng đua [Race Name] với ngựa [Horse Name]. Phí tham gia ([entryFee] VNĐ) đã được hoàn lại vào ví của bạn."
+
+=========================================
+LUỒNG 2: ADMIN TỪ CHỐI ĐƠN ĐĂNG KÝ THI ĐẤU (ADMIN REJECTS REGISTRATION)
+=========================================
+1. Trạng thái hiện tại:
+   - Admin từ chối đơn đăng ký thi đấu của chủ ngựa qua API /api/admin/race-registrations/{id}/reject.
+   - Hệ thống chuyển trạng thái thành REJECTED và gửi thông báo nói rằng đã hoàn tiền, nhưng code thực tế không thực hiện hoàn tiền vào ví cho Owner.
+
+2. Luồng nghiệp vụ chuẩn:
+   [Admin bấm REJECT] -> [Cập nhật trạng thái Đăng ký] -> [Kiểm tra phí tham gia] -> [Hoàn trả 100% tiền ví cho Owner] -> [Lưu giao dịch hoàn tiền] -> [Gửi thông báo hoàn tiền cho cả Owner & Jockey].
+
+3. Các bước xử lý chi tiết ở Backend:
+   - Bước 3.1: Nhận request từ Admin (API: PUT /api/admin/race-registrations/{id}/reject).
+   - Bước 3.2: Kiểm tra quyền ADMIN. Lấy bản ghi RaceRegistration theo ID, xác nhận trạng thái hiện tại phải là PENDING.
+   - Bước 3.3: Cập nhật status của RaceRegistration thành "REJECTED".
+   - Bước 3.4: Lấy thông tin Tournament liên quan để kiểm tra entryFee.
+   - Bước 3.5: Nếu entryFee > 0:
+     + Lấy ví (Wallet) của Owner (owner_id).
+     + Cộng số dư ví: balance = balance + entryFee.
+     + Lưu ví vào cơ sở dữ liệu.
+     + Tạo bản ghi mới trong bảng [wallet_transactions]:
+       * wallet_id = ví của Owner.
+       * transaction_type = 'REFUND'
+       * amount = entryFee
+       * status = 'SUCCESS'
+       * reference_type = 'RACE_REGISTRATION'
+       * reference_id = ID của RaceRegistration.
+   - Bước 3.6: Gửi thông báo (Notification) loại REGISTRATION cho cả Owner và Jockey thông báo đơn đăng ký đã bị từ chối và tiền đã được hoàn trả thành công.
+
+=========================================
+LUỒNG 3: ADMIN CHỐT DANH SÁCH THI ĐẤU CHÍNH THỨC (ADMIN CONFIRMS REGISTRATION)
+=========================================
+1. Trạng thái hiện tại:
+   - Admin gọi API chốt danh sách thi đấu chính thức qua API POST /api/admin/races/{raceId}/confirm-registration.
+   - Hệ thống chuyển trạng thái Race thành CLOSED_FOR_REGISTER, nhưng không xử lý các đơn đăng ký chưa được duyệt vẫn còn tồn đọng trong danh sách chờ (hàng đợi).
+
+2. Luồng nghiệp vụ chuẩn:
+   [Admin bấm CONFIRM] -> [Kiểm tra số lượng đăng ký tối thiểu] -> [Đóng cổng đăng ký: status = CLOSED_FOR_REGISTER] -> [Quét toàn bộ đơn đăng ký PENDING/PENDING_JOCKEY còn lại] -> [Với mỗi đơn đăng ký còn lại: chuyển thành REJECTED và hoàn phí tham gia cho Owner] -> [Gửi thông báo].
+
+3. Các bước xử lý chi tiết ở Backend:
+   - Bước 3.1: Nhận request chốt danh sách (API: POST /api/admin/races/{raceId}/confirm-registration).
+   - Bước 3.2: Lấy thông tin Race và các đơn đăng ký liên quan. Kiểm tra điều kiện số đơn đạt chuẩn (APPROVED + PENDING) >= minSlots của Tournament.
+   - Bước 3.3: Cập nhật status của Race thành "CLOSED_FOR_REGISTER".
+   - Bước 3.4: Lấy danh sách tất cả các đơn đăng ký của Race có status là "PENDING" hoặc "PENDING_JOCKEY".
+   - Bước 3.5: Với mỗi đơn đăng ký trong danh sách chờ này:
+     + Cập nhật status của đơn đăng ký thành "REJECTED".
+     + Kiểm tra entryFee của giải đấu. Nếu entryFee > 0:
+       * Lấy ví (Wallet) của Owner tương ứng.
+       * Cộng số dư ví: balance = balance + entryFee.
+       * Lưu ví.
+       * Tạo giao dịch ví [wallet_transactions] kiểu 'REFUND', tham chiếu đến ID đăng ký.
+     + Gửi thông báo loại REGISTRATION đến Owner và Jockey:
+       * Tiêu đề: "Đăng ký giải đấu không được chọn"
+       * Nội dung: "Đăng ký thi đấu vòng đua [Race Name] với ngựa [Horse Name] của bạn không được chọn (do vượt quá số lượng giới hạn hoặc không đạt tiêu chí). Phí tham gia ([entryFee] VNĐ) đã được hoàn lại 100% vào ví."
+
+=========================================
+LUỒNG 4: HỦY GIẢI ĐẤU (ADMIN CANCELS TOURNAMENT)
+=========================================
+1. Trạng thái hiện tại:
+   - Admin cập nhật trạng thái Tournament thành "Cancelled" qua API PUT /api/admin/tournaments/{id}/status.
+   - Hệ thống lưu trạng thái mới, nhưng các bên liên quan (Chủ ngựa đã đăng ký thi đấu, Spectators đã đặt cược) không được xử lý hoàn tiền ví.
+
+2. Luồng nghiệp vụ chuẩn:
+   [Admin bấm CANCEL giải đấu] -> [Cập nhật status Tournament = Cancelled, Race = CANCELLED] -> [Hoàn trả phí tham gia cho toàn bộ đăng ký APPROVED/PENDING/PENDING_JOCKEY] -> [Hoàn trả 100% tiền đặt cược cho toàn bộ Spectators có vé cược PENDING] -> [Gửi thông báo hệ thống].
+
+3. Các bước xử lý chi tiết ở Backend:
+   - Bước 3.1: Nhận request cập nhật trạng thái (API: PUT /api/admin/tournaments/{id}/status với status=Cancelled).
+   - Bước 3.2: Cập nhật trạng thái Tournament thành "Cancelled".
+   - Bước 3.3: Lấy thông tin Race mặc định liên kết với Tournament. Đổi trạng thái Race thành "CANCELLED".
+   - Bước 3.4: Xử lý hoàn tiền đăng ký (Entry Fee):
+     + Lấy toàn bộ đơn đăng ký (RaceRegistration) của Race này có trạng thái là "PENDING", "PENDING_JOCKEY", hoặc "APPROVED".
+     + Với mỗi đơn đăng ký:
+       * Cập nhật status thành "CANCELLED".
+       * Nếu entryFee > 0:
+         - Lấy ví (Wallet) của Owner.
+         - Cộng ví Owner: balance = balance + entryFee.
+         - Lưu ví và tạo lịch sử giao dịch [wallet_transactions] loại 'REFUND'.
+       * Gửi thông báo loại REGISTRATION cho Owner và Jockey thông báo giải đấu bị hủy và hoàn trả phí tham gia.
+   - Bước 3.5: Xử lý hoàn tiền đặt cược (Spectator Bets):
+     + Tìm tất cả các cược (Bet) liên quan đến Race này có trạng thái là "PENDING".
+     + Với mỗi cược (Bet):
+       * Cập nhật status thành "REFUNDED".
+       * Lấy ví của Spectator (user_id của Bet).
+       * Cộng tiền cược trở lại ví: balance = balance + bet.amount.
+       * Lưu ví.
+       * Tạo giao dịch ví [wallet_transactions]:
+         - transaction_type = 'REFUND'
+         - amount = bet.amount
+         - status = 'SUCCESS'
+         - reference_type = 'BET'
+         - reference_id = ID của Bet.
+       * Gửi thông báo loại WALLET cho Spectator:
+         - Tiêu đề: "Hoàn tiền cược do hủy giải đấu"
+         - Nội dung: "Giải đấu [Tournament Name] đã bị hủy. Hệ thống đã hoàn trả 100% số tiền đặt cược ([amount] VNĐ) của bạn vào ví."

@@ -4,6 +4,7 @@ import com.horseracing.dto.request.CreateTournamentRequest;
 import com.horseracing.dto.request.UpdateTournamentRequest;
 import com.horseracing.dto.request.RegisterRaceRequest;
 import com.horseracing.entities.*;
+import com.horseracing.entities.enums.NotificationType;
 import com.horseracing.repositories.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,14 @@ public class TournamentServiceTest {
     private RaceTrackRepository raceTrackRepository;
     @Mock
     private RaceParticipantRepository raceParticipantRepository;
+    @Mock
+    private WalletRepository walletRepository;
+    @Mock
+    private WalletTransactionRepository walletTransactionRepository;
+    @Mock
+    private BetRepository betRepository;
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private TournamentService tournamentService;
@@ -428,7 +437,7 @@ public class TournamentServiceTest {
 
         User ref = User.builder().id(3).fullName("Referee").role(com.horseracing.entities.enums.Role.RACE_REFEREE).build();
         when(userRepository.findById(3)).thenReturn(Optional.of(ref));
-        when(raceTrackRepository.findByName("Unknown Track")).thenReturn(Optional.empty());
+        when(raceTrackRepository.findFirstByName("Unknown Track")).thenReturn(Optional.empty());
         when(raceTrackRepository.findAll()).thenReturn(new ArrayList<>());
 
         Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
@@ -456,7 +465,7 @@ public class TournamentServiceTest {
         when(userRepository.findById(3)).thenReturn(Optional.of(ref));
 
         RaceTrack track = RaceTrack.builder().id(10).name("Phu Tho").location("TPHCM").build();
-        when(raceTrackRepository.findByName("Phu Tho")).thenReturn(Optional.of(track));
+        when(raceTrackRepository.findFirstByName("Phu Tho")).thenReturn(Optional.of(track));
 
         Race existingRace = Race.builder()
                 .id(1)
@@ -493,7 +502,7 @@ public class TournamentServiceTest {
         when(userRepository.findById(3)).thenReturn(Optional.of(ref));
 
         RaceTrack track = RaceTrack.builder().id(10).name("Phu Tho").location("TPHCM").build();
-        when(raceTrackRepository.findByName("Phu Tho")).thenReturn(Optional.of(track));
+        when(raceTrackRepository.findFirstByName("Phu Tho")).thenReturn(Optional.of(track));
         when(raceRepository.findByRaceTrackIdAndRaceDate(10, request.getStartDate())).thenReturn(new ArrayList<>());
         
         Tournament savedTournament = Tournament.builder()
@@ -514,5 +523,59 @@ public class TournamentServiceTest {
         assertEquals(100, response.getId());
         assertEquals("Phu Tho", response.getLocation());
         verify(raceRepository, times(1)).save(any(Race.class));
+    }
+
+    @Test
+    void testUpdateTournamentStatus_Cancelled_Success() {
+        tournament.setEntryFee(BigDecimal.valueOf(50.0));
+        when(tournamentRepository.findById(1)).thenReturn(Optional.of(tournament));
+        when(tournamentRepository.save(any(Tournament.class))).thenReturn(tournament);
+
+        Race race = Race.builder().id(20).tournament(tournament).status("Upcoming").build();
+        when(raceRepository.findByTournamentId(1)).thenReturn(List.of(race));
+
+        User ownerUser = User.builder().id(5).fullName("Owner").build();
+        HorseOwnerProfile owner = HorseOwnerProfile.builder().id(10).user(ownerUser).build();
+        User jockeyUser = User.builder().id(6).fullName("Jockey").build();
+        JockeyProfile jockey = JockeyProfile.builder().id(11).user(jockeyUser).build();
+        Horse horse = Horse.builder().id(7).name("Lightning").build();
+
+        RaceRegistration reg = RaceRegistration.builder()
+                .id(30)
+                .race(race)
+                .owner(owner)
+                .jockey(jockey)
+                .horse(horse)
+                .status("APPROVED")
+                .build();
+        when(raceRegistrationRepository.findByRaceId(20)).thenReturn(List.of(reg));
+
+        Wallet ownerWallet = Wallet.builder().id(50).user(ownerUser).balance(BigDecimal.valueOf(100.0)).build();
+        when(walletRepository.findByUserId(5)).thenReturn(Optional.of(ownerWallet));
+
+        User spectatorUser = User.builder().id(8).fullName("Spectator").build();
+        Bet bet = Bet.builder().id(40).user(spectatorUser).amount(BigDecimal.valueOf(20.0)).status("PENDING").build();
+        when(betRepository.findByRaceIdAndStatus(20, "PENDING")).thenReturn(List.of(bet));
+
+        Wallet spectatorWallet = Wallet.builder().id(51).user(spectatorUser).balance(BigDecimal.valueOf(50.0)).build();
+        when(walletRepository.findByUserId(8)).thenReturn(Optional.of(spectatorWallet));
+
+        com.horseracing.dto.response.TournamentResponse response = tournamentService.updateTournamentStatus(1, "Cancelled");
+
+        assertNotNull(response);
+        assertEquals("Cancelled", response.getTournamentStatus());
+        assertEquals("CANCELLED", race.getStatus());
+        assertEquals("CANCELLED", reg.getStatus());
+        assertEquals("REFUNDED", bet.getStatus());
+
+        // Verify wallets updated
+        assertEquals(BigDecimal.valueOf(150.0), ownerWallet.getBalance()); // 100 + 50 entryFee
+        assertEquals(BigDecimal.valueOf(70.0), spectatorWallet.getBalance()); // 50 + 20 bet amount
+
+        // Verify transactions saved
+        verify(walletTransactionRepository, times(2)).save(any(WalletTransaction.class));
+
+        // Verify notifications sent
+        verify(notificationService, times(3)).sendNotification(any(User.class), anyString(), anyString(), any(NotificationType.class));
     }
 }

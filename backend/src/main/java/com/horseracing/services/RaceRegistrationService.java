@@ -155,8 +155,8 @@ public class RaceRegistrationService {
 
         notificationService.sendNotification(
                 jockey.getUser(),
-                "Lời mời tham gia giải đấu",
-                "Chủ ngựa " + owner.getUser().getFullName() + " mời bạn làm nài ngựa điều khiển ngựa " + horse.getName() + " tham gia vòng đua " + race.getRaceName() + " thuộc giải đấu " + race.getTournament().getTournamentName() + " với tỷ lệ chia thưởng: Jockey " + request.getJockeySharePercent() + "% - Owner " + request.getOwnerSharePercent() + "%. Vui lòng xác nhận.",
+                "Tournament registration invitation",
+                "Horse Owner " + owner.getUser().getFullName() + " invited you to be the jockey for horse " + horse.getName() + " in race " + race.getRaceName() + " of tournament " + race.getTournament().getTournamentName() + " with profit sharing ratio: Jockey " + request.getJockeySharePercent() + "% - Owner " + request.getOwnerSharePercent() + "%. Please confirm.",
                 NotificationType.REGISTRATION
         );
 
@@ -217,14 +217,14 @@ public class RaceRegistrationService {
 
         notificationService.sendNotification(
                 registration.getOwner().getUser(),
-                "Đăng ký giải đấu được phê duyệt",
-                "Đăng ký thi đấu vòng đua " + race.getRaceName() + " với ngựa " + registration.getHorse().getName() + " của bạn đã được Admin phê duyệt chính thức. Bạn đã nằm trong danh sách thi đấu.",
+                "Tournament registration approved",
+                "Your registration for race " + race.getRaceName() + " with horse " + registration.getHorse().getName() + " has been officially approved by the Admin. You are now on the participant list.",
                 NotificationType.REGISTRATION
         );
         notificationService.sendNotification(
                 registration.getJockey().getUser(),
-                "Đăng ký giải đấu được phê duyệt",
-                "Đăng ký thi đấu vòng đua " + race.getRaceName() + " với ngựa " + registration.getHorse().getName() + " của bạn đã được Admin phê duyệt chính thức. Bạn đã nằm trong danh sách thi đấu.",
+                "Tournament registration approved",
+                "Your registration for race " + race.getRaceName() + " with horse " + registration.getHorse().getName() + " has been officially approved by the Admin. You are now on the participant list.",
                 NotificationType.REGISTRATION
         );
 
@@ -243,16 +243,35 @@ public class RaceRegistrationService {
         registration.setStatus("REJECTED");
         registration = raceRegistrationRepository.save(registration);
 
+        BigDecimal entryFee = registration.getRace().getTournament().getEntryFee();
+        if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+            Wallet wallet = walletRepository.findByUserId(registration.getOwner().getUser().getId())
+                    .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+            wallet.setBalance(wallet.getBalance().add(entryFee));
+            walletRepository.save(wallet);
+
+            WalletTransaction transaction = WalletTransaction.builder()
+                    .wallet(wallet)
+                    .transactionType("REFUND")
+                    .amount(entryFee)
+                    .status("SUCCESS")
+                    .referenceType("RACE_REGISTRATION")
+                    .referenceId(registration.getId())
+                    .build();
+            walletTransactionRepository.save(transaction);
+        }
+
         notificationService.sendNotification(
                 registration.getOwner().getUser(),
-                "Đăng ký giải đấu không được chọn",
-                "Đăng ký thi đấu vòng đua " + registration.getRace().getRaceName() + " với ngựa " + registration.getHorse().getName() + " của bạn không được chọn (do vượt quá số lượng giới hạn hoặc không đạt tiêu chí giải đấu). Phí tham gia (nếu có) đã được hoàn lại 100% vào ví.",
+                "Tournament registration not selected",
+                "Your registration for race " + registration.getRace().getRaceName() + " with horse " + registration.getHorse().getName() + " was not selected (due to slot limits or not meeting requirements). The entry fee (" + entryFee + " VND) has been refunded 100% to your wallet.",
                 NotificationType.REGISTRATION
         );
         notificationService.sendNotification(
                 registration.getJockey().getUser(),
-                "Đăng ký giải đấu không được chọn",
-                "Đăng ký thi đấu vòng đua " + registration.getRace().getRaceName() + " với ngựa " + registration.getHorse().getName() + " của bạn không được chọn (do vượt quá số lượng giới hạn hoặc không đạt tiêu chí giải đấu). Phí tham gia (nếu có) đã được hoàn lại 100% vào ví.",
+                "Tournament registration not selected",
+                "Your registration for race " + registration.getRace().getRaceName() + " with horse " + registration.getHorse().getName() + " was not selected (due to slot limits or not meeting requirements). The entry fee (" + entryFee + " VND) has been refunded 100% to the wallet.",
                 NotificationType.REGISTRATION
         );
 
@@ -300,8 +319,8 @@ public class RaceRegistrationService {
 
         notificationService.sendNotification(
                 registration.getJockey().getUser(),
-                "Hủy đăng ký giải đấu",
-                "Chủ ngựa " + registration.getOwner().getUser().getFullName() + " đã hủy đăng ký tham gia vòng đua " + registration.getRace().getRaceName() + " đối với bạn.",
+                "Tournament registration cancelled",
+                "Horse Owner " + registration.getOwner().getUser().getFullName() + " has cancelled the registration for race " + registration.getRace().getRaceName() + " for you.",
                 NotificationType.REGISTRATION
         );
 
@@ -404,8 +423,8 @@ public class RaceRegistrationService {
 
         notificationService.sendNotification(
                 registration.getJockey().getUser(),
-                "Cập nhật thông tin đăng ký giải đấu",
-                "Thông tin đăng ký thi đấu vòng đua " + registration.getRace().getRaceName() + " của bạn đã được cập nhật bởi Chủ ngựa " + registration.getOwner().getUser().getFullName() + ". Vui lòng kiểm tra và xác nhận lại.",
+                "Tournament registration updated",
+                "Your registration info for race " + registration.getRace().getRaceName() + " has been updated by Horse Owner " + registration.getOwner().getUser().getFullName() + ". Please check and re-confirm.",
                 NotificationType.REGISTRATION
         );
 
@@ -433,6 +452,49 @@ public class RaceRegistrationService {
 
         race.setStatus("CLOSED_FOR_REGISTER");
         raceRepository.save(race);
+
+        // Find all pending or pending_jockey registrations that were not approved
+        List<RaceRegistration> waitingList = raceRegistrationRepository.findByRaceId(raceId).stream()
+                .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus()) || "PENDING_JOCKEY".equalsIgnoreCase(r.getStatus()))
+                .collect(Collectors.toList());
+
+        BigDecimal entryFee = race.getTournament().getEntryFee();
+
+        for (RaceRegistration reg : waitingList) {
+            reg.setStatus("REJECTED");
+            raceRegistrationRepository.save(reg);
+
+            if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+                Wallet wallet = walletRepository.findByUserId(reg.getOwner().getUser().getId())
+                        .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+                wallet.setBalance(wallet.getBalance().add(entryFee));
+                walletRepository.save(wallet);
+
+                WalletTransaction transaction = WalletTransaction.builder()
+                        .wallet(wallet)
+                        .transactionType("REFUND")
+                        .amount(entryFee)
+                        .status("SUCCESS")
+                        .referenceType("RACE_REGISTRATION")
+                        .referenceId(reg.getId())
+                        .build();
+                walletTransactionRepository.save(transaction);
+            }
+
+            notificationService.sendNotification(
+                    reg.getOwner().getUser(),
+                    "Tournament registration not selected",
+                    "Your registration for race " + race.getRaceName() + " with horse " + reg.getHorse().getName() + " was not selected (due to slot limits or not meeting requirements). The entry fee (" + entryFee + " VND) has been refunded 100% to your wallet.",
+                    NotificationType.REGISTRATION
+            );
+            notificationService.sendNotification(
+                    reg.getJockey().getUser(),
+                    "Tournament registration not selected",
+                    "Your registration for race " + race.getRaceName() + " with horse " + reg.getHorse().getName() + " was not selected (due to slot limits or not meeting requirements). The entry fee (" + entryFee + " VND) has been refunded 100% to the wallet.",
+                    NotificationType.REGISTRATION
+            );
+        }
     }
 
     private boolean isAgeAllowed(Integer age, String allowedAges) {

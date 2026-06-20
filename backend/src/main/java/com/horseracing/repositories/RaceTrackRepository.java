@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface RaceTrackRepository extends JpaRepository<RaceTrack, Integer> {
-    Optional<RaceTrack> findByName(String name);
+    Optional<RaceTrack> findFirstByName(String name);
     boolean existsByName(String name);
 }

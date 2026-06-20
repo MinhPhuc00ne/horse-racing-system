@@ -16,12 +16,20 @@ import com.horseracing.entities.User;
 import com.horseracing.entities.enums.Role;
 import com.horseracing.entities.Race;
 import com.horseracing.entities.RaceTrack;
+import com.horseracing.entities.Wallet;
+import com.horseracing.entities.WalletTransaction;
+import com.horseracing.entities.Bet;
+import com.horseracing.entities.RaceRegistration;
+import com.horseracing.entities.enums.NotificationType;
 import com.horseracing.repositories.RaceParticipantRepository;
 import com.horseracing.repositories.RaceRegistrationRepository;
 import com.horseracing.repositories.RaceRepository;
 import com.horseracing.repositories.RaceTrackRepository;
 import com.horseracing.repositories.TournamentRepository;
 import com.horseracing.repositories.UserRepository;
+import com.horseracing.repositories.WalletRepository;
+import com.horseracing.repositories.WalletTransactionRepository;
+import com.horseracing.repositories.BetRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,6 +43,10 @@ public class TournamentService {
     private final RaceTrackRepository raceTrackRepository;
     private final RaceRegistrationRepository raceRegistrationRepository;
     private final RaceParticipantRepository raceParticipantRepository;
+    private final WalletRepository walletRepository;
+    private final WalletTransactionRepository walletTransactionRepository;
+    private final BetRepository betRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public TournamentResponse createTournament(CreateTournamentRequest request) {
@@ -97,7 +109,7 @@ public class TournamentService {
         if (request.getLocation() == null || request.getLocation().isBlank()) {
             throw new RuntimeException("Location (venue name or region) is required");
         }
-        RaceTrack track = raceTrackRepository.findByName(request.getLocation()).orElse(null);
+        RaceTrack track = raceTrackRepository.findFirstByName(request.getLocation()).orElse(null);
         if (track == null) {
             track = raceTrackRepository.findAll().stream()
                     .filter(t -> request.getLocation().equalsIgnoreCase(t.getLocation()))
@@ -256,7 +268,7 @@ public class TournamentService {
         if (request.getLocation() == null || request.getLocation().isBlank()) {
             throw new RuntimeException("Location (venue name or region) is required");
         }
-        RaceTrack track = raceTrackRepository.findByName(request.getLocation()).orElse(null);
+        RaceTrack track = raceTrackRepository.findFirstByName(request.getLocation()).orElse(null);
         if (track == null) {
             track = raceTrackRepository.findAll().stream()
                     .filter(t -> request.getLocation().equalsIgnoreCase(t.getLocation()))
@@ -339,6 +351,91 @@ public class TournamentService {
 
         tournament.setTournamentStatus(status);
         tournament = tournamentRepository.save(tournament);
+
+        if ("Cancelled".equalsIgnoreCase(status)) {
+            // 1. Cancel the associated races
+            List<Race> races = raceRepository.findByTournamentId(tournament.getId());
+            for (Race race : races) {
+                race.setStatus("CANCELLED");
+                raceRepository.save(race);
+
+                // 2. Refund all registrations (PENDING, PENDING_JOCKEY, APPROVED)
+                List<RaceRegistration> regs = raceRegistrationRepository.findByRaceId(race.getId()).stream()
+                        .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus()) || 
+                                     "PENDING_JOCKEY".equalsIgnoreCase(r.getStatus()) || 
+                                     "APPROVED".equalsIgnoreCase(r.getStatus()))
+                        .collect(Collectors.toList());
+
+                BigDecimal entryFee = tournament.getEntryFee();
+                for (RaceRegistration reg : regs) {
+                    reg.setStatus("CANCELLED");
+                    raceRegistrationRepository.save(reg);
+
+                    if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+                        Wallet wallet = walletRepository.findByUserId(reg.getOwner().getUser().getId())
+                                .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+                        wallet.setBalance(wallet.getBalance().add(entryFee));
+                        walletRepository.save(wallet);
+
+                        WalletTransaction transaction = WalletTransaction.builder()
+                                .wallet(wallet)
+                                .transactionType("REFUND")
+                                .amount(entryFee)
+                                .status("SUCCESS")
+                                .referenceType("RACE_REGISTRATION")
+                                .referenceId(reg.getId())
+                                .build();
+                        walletTransactionRepository.save(transaction);
+                    }
+
+                    // Send cancellation notification to Owner and Jockey
+                    notificationService.sendNotification(
+                            reg.getOwner().getUser(),
+                            "Tournament registration cancelled",
+                            "Tournament " + tournament.getTournamentName() + " has been cancelled by the Organizer. The entry fee (" + entryFee + " VND) has been refunded to your wallet.",
+                            NotificationType.REGISTRATION
+                    );
+                    notificationService.sendNotification(
+                            reg.getJockey().getUser(),
+                            "Tournament registration cancelled",
+                            "Tournament " + tournament.getTournamentName() + " has been cancelled by the Organizer.",
+                            NotificationType.REGISTRATION
+                    );
+                }
+
+                // 3. Refund spectator bets
+                List<Bet> bets = betRepository.findByRaceIdAndStatus(race.getId(), "PENDING");
+                for (Bet bet : bets) {
+                    bet.setStatus("REFUNDED");
+                    betRepository.save(bet);
+
+                    Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
+                            .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+                    wallet.setBalance(wallet.getBalance().add(bet.getAmount()));
+                    walletRepository.save(wallet);
+
+                    WalletTransaction transaction = WalletTransaction.builder()
+                            .wallet(wallet)
+                            .transactionType("REFUND")
+                            .amount(bet.getAmount())
+                            .status("SUCCESS")
+                            .referenceType("BET")
+                            .referenceId(bet.getId())
+                            .build();
+                    walletTransactionRepository.save(transaction);
+
+                    notificationService.sendNotification(
+                            bet.getUser(),
+                            "Bet refund due to tournament cancellation",
+                            "Tournament " + tournament.getTournamentName() + " has been cancelled. The system has refunded 100% of your bet amount (" + bet.getAmount() + " VND) to your wallet.",
+                            NotificationType.WALLET
+                    );
+                }
+            }
+        }
+
         return TournamentResponse.fromEntity(tournament);
     }
 

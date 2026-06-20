@@ -158,14 +158,14 @@ public class RefereeService {
             // Notify Owner and Jockey
             notificationService.sendNotification(
                     reg.getOwner().getUser(),
-                    "Truất quyền thi đấu trước trận",
-                    "Cặp đấu của bạn (Ngựa: " + participant.getHorse().getName() + ", Jockey: " + participant.getJockey().getUser().getFullName() + ") đã bị Trọng tài loại khỏi vòng đua " + participant.getRace().getRaceName() + " do vi phạm điều lệ thi đấu. Lý do: " + reason + ". Phí tham gia không được hoàn lại.",
+                    "Pre-race disqualification",
+                    "Your entry (Horse: " + participant.getHorse().getName() + ", Jockey: " + participant.getJockey().getUser().getFullName() + ") has been disqualified from race " + participant.getRace().getRaceName() + " by the Referee due to rule violations. Reason: " + reason + ". The entry fee is non-refundable.",
                     NotificationType.RACE_STATUS
             );
             notificationService.sendNotification(
                     reg.getJockey().getUser(),
-                    "Truất quyền thi đấu trước trận",
-                    "Cặp đấu của bạn (Ngựa: " + participant.getHorse().getName() + ", Jockey: " + participant.getJockey().getUser().getFullName() + ") đã bị Trọng tài loại khỏi vòng đua " + participant.getRace().getRaceName() + " do vi phạm điều lệ thi đấu. Lý do: " + reason + ". Phí tham gia không được hoàn lại.",
+                    "Pre-race disqualification",
+                    "Your entry (Horse: " + participant.getHorse().getName() + ", Jockey: " + participant.getJockey().getUser().getFullName() + ") has been disqualified from race " + participant.getRace().getRaceName() + " by the Referee due to rule violations. Reason: " + reason + ". The entry fee is non-refundable.",
                     NotificationType.RACE_STATUS
             );
         }
@@ -197,8 +197,8 @@ public class RefereeService {
 
             notificationService.sendNotification(
                     bet.getUser(),
-                    "Hoàn tiền cược cuộc đua",
-                    "Ngựa " + participant.getHorse().getName() + " đã bị loại khỏi vòng đua " + participant.getRace().getRaceName() + " trước giờ chạy. Hệ thống đã hoàn trả 100% số tiền đặt cược (" + bet.getAmount() + " VNĐ) vào ví của bạn.",
+                    "Bet refund for race",
+                    "Horse " + participant.getHorse().getName() + " has been disqualified from race " + participant.getRace().getRaceName() + " before the start. The system has refunded 100% of your bet amount (" + bet.getAmount() + " VND) to your wallet.",
                     NotificationType.WALLET
             );
         }
@@ -449,27 +449,27 @@ public class RefereeService {
         if (disqualified) {
             notificationService.sendNotification(
                     horse.getOwner().getUser(),
-                    "Truất quyền thi đấu do nhận đủ 3 cờ vi phạm",
-                    "Ngựa " + horse.getName() + " đã bị xử thua và truất quyền thi đấu trực tiếp (Disqualified) tại vòng đua " + part.getRace().getRaceName() + " do nhận đủ 3 cờ vi phạm từ Trọng tài.",
+                    "Disqualification due to 3 penalty flags",
+                    "Horse " + horse.getName() + " has been disqualified in race " + part.getRace().getRaceName() + " due to receiving 3 penalty flags from the Referee.",
                     NotificationType.RACE_STATUS
             );
             notificationService.sendNotification(
                     part.getJockey().getUser(),
-                    "Truất quyền thi đấu do nhận đủ 3 cờ vi phạm",
-                    "Ngựa " + horse.getName() + " đã bị xử thua và truất quyền thi đấu trực tiếp (Disqualified) tại vòng đua " + part.getRace().getRaceName() + " do nhận đủ 3 cờ vi phạm từ Trọng tài.",
+                    "Disqualification due to 3 penalty flags",
+                    "Horse " + horse.getName() + " has been disqualified in race " + part.getRace().getRaceName() + " due to receiving 3 penalty flags from the Referee.",
                     NotificationType.RACE_STATUS
             );
         } else {
             notificationService.sendNotification(
                     horse.getOwner().getUser(),
-                    "Cảnh cáo vi phạm trên sân đua",
-                    "Cảnh cáo: Ngựa " + horse.getName() + " của bạn bị Trọng tài gắn cờ vi phạm (" + request.getViolationType() + " - " + request.getDescription() + ") tại vòng đua " + part.getRace().getRaceName() + ". Tổng số cờ hiện tại: " + count + "/3. Bị phạt cộng thêm " + (count * 3) + " giây vào thời gian về đích.",
+                    "Violation warning on race track",
+                    "Warning: Your horse " + horse.getName() + " was flagged by the Referee for a violation (" + request.getViolationType() + " - " + request.getDescription() + ") in race " + part.getRace().getRaceName() + ". Total flags: " + count + "/3. A penalty of " + (count * 3) + " seconds has been added to the finish time.",
                     NotificationType.RACE_STATUS
             );
             notificationService.sendNotification(
                     part.getJockey().getUser(),
-                    "Cảnh cáo vi phạm trên sân đua",
-                    "Cảnh cáo: Ngựa " + horse.getName() + " của bạn bị Trọng tài gắn cờ vi phạm (" + request.getViolationType() + " - " + request.getDescription() + ") tại vòng đua " + part.getRace().getRaceName() + ". Tổng số cờ hiện tại: " + count + "/3. Bị phạt cộng thêm " + (count * 3) + " giây vào thời gian về đích.",
+                    "Violation warning on race track",
+                    "Warning: Your horse " + horse.getName() + " was flagged by the Referee for a violation (" + request.getViolationType() + " - " + request.getDescription() + ") in race " + part.getRace().getRaceName() + ". Total flags: " + count + "/3. A penalty of " + (count * 3) + " seconds has been added to the finish time.",
                     NotificationType.RACE_STATUS
             );
         }
@@ -514,8 +514,8 @@ public class RefereeService {
 
             notificationService.sendNotification(
                     target,
-                    "Tài khoản bị tạm khóa / Đưa vào Blacklist",
-                    "Tài khoản của bạn đã bị khóa bởi Trọng tài. Lý do: " + request.getReason() + ". Thời hạn cấm: " + (Boolean.TRUE.equals(request.getIsPermanent()) ? "Vĩnh viễn" : request.getEndDate()) + ". Vui lòng liên hệ Admin để được giải quyết.",
+                    "Account suspended / Blacklisted",
+                    "Your account has been suspended by the Referee. Reason: " + request.getReason() + ". Duration: " + (Boolean.TRUE.equals(request.getIsPermanent()) ? "Permanent" : request.getEndDate()) + ". Please contact the Admin for resolution.",
                     NotificationType.SYSTEM_ALERT
             );
         } else if ("HORSE".equalsIgnoreCase(request.getTargetType())) {
@@ -526,8 +526,8 @@ public class RefereeService {
 
             notificationService.sendNotification(
                     target.getOwner().getUser(),
-                    "Chiến mã bị đưa vào Blacklist",
-                    "Ngựa " + target.getName() + " của bạn đã bị đưa vào Blacklist bởi Trọng tài. Lý do: " + request.getReason() + ".",
+                    "Horse blacklisted",
+                    "Your horse " + target.getName() + " has been blacklisted by the Referee. Reason: " + request.getReason() + ".",
                     NotificationType.SYSTEM_ALERT
             );
         }
@@ -624,15 +624,15 @@ public class RefereeService {
 
                     notificationService.sendNotification(
                             reg.getOwner().getUser(),
-                            "Nhận tiền thưởng giải đấu",
-                            "Chúc mừng! Ngựa " + p.getHorse().getName() + " và Jockey " + p.getJockey().getUser().getFullName() + " đã đạt Giải " + (p.getFinalRank() == 1 ? "Nhất" : (p.getFinalRank() == 2 ? "Nhì" : "Ba")) + " tại vòng đua " + race.getRaceName() + ". Số tiền thưởng " + ownerAmount + " VNĐ đã được cộng vào ví của bạn.",
+                            "Tournament prize received",
+                            "Congratulations! Horse " + p.getHorse().getName() + " and Jockey " + p.getJockey().getUser().getFullName() + " won " + (p.getFinalRank() == 1 ? "1st" : (p.getFinalRank() == 2 ? "2nd" : "3rd")) + " place in race " + race.getRaceName() + ". The prize money " + ownerAmount + " VND has been credited to your wallet.",
                             NotificationType.WALLET
                     );
 
                     notificationService.sendNotification(
                             reg.getJockey().getUser(),
-                            "Nhận tiền thưởng giải đấu",
-                            "Chúc mừng! Ngựa " + p.getHorse().getName() + " và Jockey " + p.getJockey().getUser().getFullName() + " đã đạt Giải " + (p.getFinalRank() == 1 ? "Nhất" : (p.getFinalRank() == 2 ? "Nhì" : "Ba")) + " tại vòng đua " + race.getRaceName() + ". Số tiền thưởng " + jockeyAmount + " VNĐ đã được cộng vào ví của bạn.",
+                            "Tournament prize received",
+                            "Congratulations! Horse " + p.getHorse().getName() + " and Jockey " + p.getJockey().getUser().getFullName() + " won " + (p.getFinalRank() == 1 ? "1st" : (p.getFinalRank() == 2 ? "2nd" : "3rd")) + " place in race " + race.getRaceName() + ". The prize money " + jockeyAmount + " VND has been credited to your wallet.",
                             NotificationType.WALLET
                     );
                 }
@@ -674,8 +674,8 @@ public class RefereeService {
 
                     notificationService.sendNotification(
                             bet.getUser(),
-                            "Chúc mừng thắng cược cuộc đua",
-                            "Chúc mừng! Bạn đã thắng cược tại vòng đua " + race.getRaceName() + " với số tiền thắng cược " + payout + " VNĐ (dựa trên tỷ lệ odds x số tiền đặt cược). Số tiền đã được cộng vào ví.",
+                            "Congratulations on winning your bet",
+                            "Congratulations! You won your bet on race " + race.getRaceName() + " with a payout of " + payout + " VND. The amount has been credited to your wallet.",
                             NotificationType.WALLET
                     );
                 } else {
@@ -685,8 +685,8 @@ public class RefereeService {
 
                     notificationService.sendNotification(
                             bet.getUser(),
-                            "Kết quả đặt cược cuộc đua",
-                            "Kết quả vòng đua " + race.getRaceName() + " đã được Trọng tài xác nhận. Thật tiếc, vé cược của bạn vào ngựa " + bet.getParticipant().getHorse().getName() + " không trúng thưởng. Chúc bạn may mắn lần sau!",
+                            "Race bet result",
+                            "The result for race " + race.getRaceName() + " has been confirmed by the Referee. Unfortunately, your bet on horse " + bet.getParticipant().getHorse().getName() + " did not win. Better luck next time!",
                             NotificationType.RACE_STATUS
                     );
                 }

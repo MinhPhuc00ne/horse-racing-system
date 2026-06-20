@@ -17,9 +17,13 @@ import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import com.horseracing.dto.response.*;
 import com.horseracing.entities.RaceRegistration;
+import com.horseracing.entities.Wallet;
+import com.horseracing.entities.WalletTransaction;
 import com.horseracing.entities.enums.NotificationType;
 import com.horseracing.repositories.RaceRegistrationRepository;
 import com.horseracing.repositories.RaceParticipantRepository;
+import com.horseracing.repositories.WalletRepository;
+import com.horseracing.repositories.WalletTransactionRepository;
 @Service
 @RequiredArgsConstructor
 public class JockeyService {
@@ -29,6 +33,8 @@ public class JockeyService {
     private final UpgradeRequestRepository upgradeRequestRepository;
     private final RaceRegistrationRepository raceRegistrationRepository;
     private final RaceParticipantRepository raceParticipantRepository;
+    private final WalletRepository walletRepository;
+    private final WalletTransactionRepository walletTransactionRepository;
     private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
@@ -133,17 +139,37 @@ public class JockeyService {
             registration = raceRegistrationRepository.save(registration);
             notificationService.sendNotification(
                     registration.getOwner().getUser(),
-                    "Jockey chấp nhận lời mời thi đấu",
-                    "Jockey " + registration.getJockey().getUser().getFullName() + " đã đồng ý tham gia vòng đua " + registration.getRace().getRaceName() + " với ngựa " + registration.getHorse().getName() + ". Hồ sơ đăng ký đã chính thức được gửi lên Ban Tổ Chức (chờ Admin duyệt).",
+                    "Jockey accepted race invitation",
+                    "Jockey " + registration.getJockey().getUser().getFullName() + " accepted the invitation for race " + registration.getRace().getRaceName() + " with horse " + registration.getHorse().getName() + ". The registration has been submitted to the organizer (awaiting Admin approval).",
                     NotificationType.REGISTRATION
             );
         } else if ("REJECT".equalsIgnoreCase(action)) {
             registration.setStatus("REJECTED_BY_JOCKEY");
             registration = raceRegistrationRepository.save(registration);
+
+            BigDecimal entryFee = registration.getRace().getTournament().getEntryFee();
+            if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+                Wallet wallet = walletRepository.findByUserId(registration.getOwner().getUser().getId())
+                        .orElseThrow(() -> new RuntimeException("Wallet not found"));
+
+                wallet.setBalance(wallet.getBalance().add(entryFee));
+                walletRepository.save(wallet);
+
+                WalletTransaction transaction = WalletTransaction.builder()
+                        .wallet(wallet)
+                        .transactionType("REFUND")
+                        .amount(entryFee)
+                        .status("SUCCESS")
+                        .referenceType("RACE_REGISTRATION")
+                        .referenceId(registration.getId())
+                        .build();
+                walletTransactionRepository.save(transaction);
+            }
+
             notificationService.sendNotification(
                     registration.getOwner().getUser(),
-                    "Jockey từ chối lời mời thi đấu",
-                    "Jockey " + registration.getJockey().getUser().getFullName() + " đã từ chối lời mời tham gia vòng đua " + registration.getRace().getRaceName() + " với ngựa " + registration.getHorse().getName() + ". Lượt đăng ký này đã bị hủy bỏ.",
+                    "Jockey rejected race invitation",
+                    "Jockey " + registration.getJockey().getUser().getFullName() + " rejected the invitation for race " + registration.getRace().getRaceName() + " with horse " + registration.getHorse().getName() + ". The entry fee (" + entryFee + " VND) has been refunded 100% to your wallet.",
                     NotificationType.REGISTRATION
             );
         } else {

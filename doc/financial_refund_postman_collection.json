@@ -1,0 +1,1508 @@
+{
+	"info": {
+		"_postman_id": "a98d3618-97f2-4bc3-95c5-7f12e8cd484a",
+		"name": "Horse Racing - Financial Refunds Comprehensive Test Suite",
+		"description": "Comprehensive E2E Postman test suite to verify the 4 newly implemented financial refund flows on the backend. This suite contains registration, activation, login, dynamic wallet creation, mock deposits, connections management, horse creation, tournament setup, and testing scenarios for Jockey reject (Flow 1), Admin reject (Flow 2), Admin confirm/lock (Flow 3), and Admin cancel tournament (Flow 4) with Spectator bet refunds.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Auth & Setup (Đăng ký & Đăng nhập)",
+			"item": [
+				{
+					"name": "Register Spectator User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"spectator1\",\n    \"fullName\": \"Test Spectator 1\",\n    \"email\": \"spectator1@test.com\",\n    \"password\": \"Password123!\",\n    \"role\": \"SPECTATOR\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Registers spectator1 account. By default on local docker without mail setup, this user starts disabled (enabled = 0)."
+					},
+					"response": []
+				},
+				{
+					"name": "Enable Spectator User (Test Tool)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/test/users/enable?email=spectator1@test.com",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"users",
+								"enable"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "spectator1@test.com"
+								}
+							]
+						},
+						"description": "Utility API to auto-enable spectator1 account so we can login without email verification OTP codes."
+					},
+					"response": []
+				},
+				{
+					"name": "Login as Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.accessToken) {",
+									"    pm.collectionVariables.set(\"adminToken\", jsonData.accessToken);",
+									"    console.log(\"Saved adminToken: \" + jsonData.accessToken);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@gmail.com\",\n    \"password\": \"Admin@12345\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Log in as Administrator."
+					},
+					"response": []
+				},
+				{
+					"name": "Login as Jockey",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.accessToken) {",
+									"    pm.collectionVariables.set(\"jockeyToken\", jsonData.accessToken);",
+									"    console.log(\"Saved jockeyToken: \" + jsonData.accessToken);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"jockey1@test.com\",\n    \"password\": \"Password123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Log in as Jockey 1."
+					},
+					"response": []
+				},
+				{
+					"name": "Jockey - Get Profile (Dynamic Jockey ID)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"jockeyId\", jsonData.id);",
+									"    console.log(\"Saved jockeyId (profile id): \" + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jockeyToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/jockey/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"jockey",
+								"profile"
+							]
+						},
+						"description": "Retrieves the Jockey's Profile ID and saves it dynamically to avoid hardcoding."
+					},
+					"response": []
+				},
+				{
+					"name": "Login as Owner (Chủ ngựa)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.accessToken) {",
+									"    pm.collectionVariables.set(\"ownerToken\", jsonData.accessToken);",
+									"    console.log(\"Saved ownerToken: \" + jsonData.accessToken);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"owner1@test.com\",\n    \"password\": \"Password123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Log in as Horse Owner 1."
+					},
+					"response": []
+				},
+				{
+					"name": "Login as Spectator",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.accessToken) {",
+									"    pm.collectionVariables.set(\"spectatorToken\", jsonData.accessToken);",
+									"    console.log(\"Saved spectatorToken: \" + jsonData.accessToken);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"spectator1@test.com\",\n    \"password\": \"Password123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Log in as Spectator 1."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Owner Wallet (Tạo ví Owner)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ownerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/wallets/balance",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"wallets",
+								"balance"
+							]
+						},
+						"description": "Initializes the wallet in DB for Owner (balance initially 0)."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Spectator Wallet (Tạo ví Spectator)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{spectatorToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/wallets/balance",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"wallets",
+								"balance"
+							]
+						},
+						"description": "Initializes the wallet in DB for Spectator."
+					},
+					"response": []
+				},
+				{
+					"name": "Deposit to Owner Wallet (Test Tool)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"owner1@test.com\",\n    \"amount\": 1000000.00\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/test/wallets/deposit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"wallets",
+								"deposit"
+							]
+						},
+						"description": "Utility API to deposit 1,000,000 VND to Owner's wallet so they can pay race entry fees."
+					},
+					"response": []
+				},
+				{
+					"name": "Deposit to Spectator Wallet (Test Tool)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"spectator1@test.com\",\n    \"amount\": 1000000.00\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/test/wallets/deposit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"wallets",
+								"deposit"
+							]
+						},
+						"description": "Utility API to deposit 1,000,000 VND to Spectator's wallet so they can place test bets."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Prep Data (Chuẩn bị ngựa & Kết nối & Giải đấu)",
+			"item": [
+				{
+					"name": "Admin - Get Referees (Dynamic Referee ID)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (Array.isArray(jsonData) && jsonData.length > 0) {",
+									"    pm.collectionVariables.set(\"refereeId\", jsonData[0].id);",
+									"    console.log(\"Saved refereeId: \" + jsonData[0].id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/referees",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"referees"
+							]
+						},
+						"description": "Gets all referee users and captures the first one's ID dynamically."
+					},
+					"response": []
+				},
+				{
+					"name": "Owner - Create Horse",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"horseId\", jsonData.id);",
+									"    console.log(\"Saved horseId: \" + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ownerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Speedy Boy\",\n    \"breedName\": \"Thoroughbred\",\n    \"age\": 4,\n    \"gender\": \"MALE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/owner/horses",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"owner",
+								"horses"
+							]
+						},
+						"description": "Creates a horse named Speedy Boy for the Owner."
+					},
+					"response": []
+				},
+				{
+					"name": "Owner - Get Friends (Get Connection ID)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (Array.isArray(jsonData) && jsonData.length > 0) {",
+									"    pm.collectionVariables.set(\"connectionId\", jsonData[0].connectionId);",
+									"    console.log(\"Saved connectionId: \" + jsonData[0].connectionId);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ownerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/connections/friends",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"connections",
+								"friends"
+							]
+						},
+						"description": "Fetch active connections for Owner 1. Captures connectionId to prepare for clean delete."
+					},
+					"response": []
+				},
+				{
+					"name": "Owner - Delete Existing Connection (Clean up)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ownerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/connections/{{connectionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"connections",
+								"{{connectionId}}"
+							]
+						},
+						"description": "Deletes the existing connection request between owner1 and jockey1 to make the E2E connect suite repeatable."
+					},
+					"response": []
+				},
+				{
+					"name": "Owner - Send Connection Request to Jockey",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.connectionId) {",
+									"    pm.collectionVariables.set(\"connectionId\", jsonData.connectionId);",
+									"    console.log(\"Saved connectionId: \" + jsonData.connectionId);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ownerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/connections/request?recipientId=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"connections",
+								"request"
+							],
+							"query": [
+								{
+									"key": "recipientId",
+									"value": "2",
+									"description": "User ID of Jockey 1"
+								}
+							]
+						},
+						"description": "Owner sends connection request to Jockey 1 (user_id = 2)."
+					},
+					"response": []
+				},
+				{
+					"name": "Jockey - Accept Connection",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jockeyToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/connections/request/{{connectionId}}/respond?action=ACCEPT",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"connections",
+								"request",
+								"{{connectionId}}",
+								"respond"
+							],
+							"query": [
+								{
+									"key": "action",
+									"value": "ACCEPT"
+								}
+							]
+						},
+						"description": "Jockey accepts connection so they are friend-linked and eligible to race together."
+					},
+					"response": []
+				},
+				{
+					"name": "Admin - Create Tournament",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"tournamentId\", jsonData.id);",
+									"    console.log(\"Saved tournamentId: \" + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tournamentName\": \"Grand Autumn Cup\",\n    \"location\": \"Grand National Track\",\n    \"description\": \"Championship Series for Thoroughbreds\",\n    \"registrationDeadline\": \"2026-06-29T12:00:00\",\n    \"maxSlots\": 8,\n    \"startDate\": \"2026-06-30\",\n    \"endDate\": \"2026-07-05\",\n    \"prizeFirst\": 20000.0,\n    \"prizeSecond\": 10000.0,\n    \"prizeThird\": 5000.0,\n    \"minBetAmount\": 10.0,\n    \"refereeId\": {{refereeId}},\n    \"entryFee\": 500.0,\n    \"minSlots\": 2,\n    \"allowedClasses\": \"Thoroughbred\",\n    \"allowedAges\": \"3,4\",\n    \"allowedGenders\": \"MALE\",\n    \"registrationOpeningTime\": \"2026-06-20T00:00:00\",\n    \"officialRaceTime\": \"2026-07-01T09:00:00\",\n    \"surfaceType\": \"Grass\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/tournaments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"tournaments"
+							]
+						},
+						"description": "Creates a tournament. This automatically creates a default Race with status OPEN_FOR_REGISTER."
+					},
+					"response": []
+				},
+				{
+					"name": "Public - Get Tournament Races (Lấy Race ID)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (Array.isArray(jsonData) && jsonData.length > 0) {",
+									"    pm.collectionVariables.set(\"raceId\", jsonData[0].id);",
+									"    console.log(\"Saved raceId: \" + jsonData[0].id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tournaments/{{tournamentId}}/races",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tournaments",
+								"{{tournamentId}}",
+								"races"
+							]
+						},
+						"description": "Lists races for the created tournament and saves the first race's ID."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Test Luồng 1 (Jockey từ chối)",
+			"item": [
+				{
+					"name": "Owner - Submit Race Registration (Scenario 1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"registrationId\", jsonData.id);",
+									"    console.log(\"Saved registrationId: \" + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ownerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"raceId\": {{raceId}},\n    \"horseId\": {{horseId}},\n    \"jockeyId\": {{jockeyId}},\n    \"ownerSharePercent\": 70.0,\n    \"jockeySharePercent\": 30.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/owner/race-registrations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"owner",
+								"race-registrations"
+							]
+						},
+						"description": "Owner registers for race. Deducts 500 VND entryFee from owner wallet. Registration status set to PENDING_JOCKEY."
+					},
+					"response": []
+				},
+				{
+					"name": "Jockey - REJECT Invitation (Refund to Owner)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jockeyToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/jockey/invitations/{{registrationId}}/respond?action=REJECT",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"jockey",
+								"invitations",
+								"{{registrationId}}",
+								"respond"
+							],
+							"query": [
+								{
+									"key": "action",
+									"value": "REJECT"
+								}
+							]
+						},
+						"description": "Jockey rejects the invitation. Status changes to REJECTED_BY_JOCKEY. The 500 VND entryFee is instantly refunded to Owner's wallet."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Test Luồng 2 (Admin từ chối đơn)",
+			"item": [
+				{
+					"name": "Owner - Submit Race Registration (Scenario 2)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"registrationId\", jsonData.id);",
+									"    console.log(\"Saved registrationId: \" + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ownerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"raceId\": {{raceId}},\n    \"horseId\": {{horseId}},\n    \"jockeyId\": {{jockeyId}},\n    \"ownerSharePercent\": 70.0,\n    \"jockeySharePercent\": 30.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/owner/race-registrations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"owner",
+								"race-registrations"
+							]
+						},
+						"description": "Owner registers for race. Deducts 500 VND entryFee."
+					},
+					"response": []
+				},
+				{
+					"name": "Jockey - ACCEPT Invitation (Scenario 2)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jockeyToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/jockey/invitations/{{registrationId}}/respond?action=ACCEPT",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"jockey",
+								"invitations",
+								"{{registrationId}}",
+								"respond"
+							],
+							"query": [
+								{
+									"key": "action",
+									"value": "ACCEPT"
+								}
+							]
+						},
+						"description": "Jockey accepts the invitation. Registration status moves to PENDING (waiting for admin approval)."
+					},
+					"response": []
+				},
+				{
+					"name": "Admin - REJECT Registration (Refund to Owner)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/race-registrations/{{registrationId}}/reject",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"race-registrations",
+								"{{registrationId}}",
+								"reject"
+							]
+						},
+						"description": "Admin rejects registration. Status changes to REJECTED. The 500 VND entryFee is instantly refunded to Owner's wallet."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Test Luồng 3 (Admin chốt danh sách)",
+			"item": [
+				{
+					"name": "Owner - Submit Race Registration (Scenario 3)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"registrationId\", jsonData.id);",
+									"    console.log(\"Saved registrationId: \" + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ownerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"raceId\": {{raceId}},\n    \"horseId\": {{horseId}},\n    \"jockeyId\": {{jockeyId}},\n    \"ownerSharePercent\": 70.0,\n    \"jockeySharePercent\": 30.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/owner/race-registrations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"owner",
+								"race-registrations"
+							]
+						},
+						"description": "Owner registers for race. Deducts 500 VND entryFee."
+					},
+					"response": []
+				},
+				{
+					"name": "Admin - Confirm Race Registration (Clear Waitlist & Refund)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/races/{{raceId}}/confirm-registration",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"races",
+								"{{raceId}}",
+								"confirm-registration"
+							]
+						},
+						"description": "Admin locks the participant list. The race status changes to CLOSED_FOR_REGISTER. The registration queue is cleared; all PENDING/PENDING_JOCKEY registrations for this race are set to REJECTED, and their entry fees are refunded."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Test Luồng 4 (Admin hủy giải đấu & hoàn cược)",
+			"item": [
+				{
+					"name": "Admin - Create Tournament for Cancel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"cancelTournamentId\", jsonData.id);",
+									"    console.log(\"Saved cancelTournamentId: \" + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tournamentName\": \"Tournament to Cancel\",\n    \"location\": \"Grand National Track\",\n    \"description\": \"This tournament will be cancelled to test refund of entries and bets.\",\n    \"registrationDeadline\": \"2026-06-29T12:00:00\",\n    \"maxSlots\": 8,\n    \"startDate\": \"2026-06-30\",\n    \"endDate\": \"2026-07-05\",\n    \"prizeFirst\": 20000.0,\n    \"prizeSecond\": 10000.0,\n    \"prizeThird\": 5000.0,\n    \"minBetAmount\": 10.0,\n    \"refereeId\": {{refereeId}},\n    \"entryFee\": 500.0,\n    \"minSlots\": 1,\n    \"allowedClasses\": \"Thoroughbred\",\n    \"allowedAges\": \"3,4\",\n    \"allowedGenders\": \"MALE\",\n    \"registrationOpeningTime\": \"2026-06-20T00:00:00\",\n    \"officialRaceTime\": \"2026-07-01T09:00:00\",\n    \"surfaceType\": \"Grass\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/tournaments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"tournaments"
+							]
+						},
+						"description": "Creates a separate tournament specifically to test cancellation refunds without interfering with other scenarios."
+					},
+					"response": []
+				},
+				{
+					"name": "Public - Get Tournament Races for Cancel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (Array.isArray(jsonData) && jsonData.length > 0) {",
+									"    pm.collectionVariables.set(\"cancelRaceId\", jsonData[0].id);",
+									"    console.log(\"Saved cancelRaceId: \" + jsonData[0].id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/tournaments/{{cancelTournamentId}}/races",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"tournaments",
+								"{{cancelTournamentId}}",
+								"races"
+							]
+						},
+						"description": "Retrieves the raceId for the cancel tournament."
+					},
+					"response": []
+				},
+				{
+					"name": "Owner - Submit Race Registration for Cancel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set(\"cancelRegistrationId\", jsonData.id);",
+									"    console.log(\"Saved cancelRegistrationId: \" + jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{ownerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"raceId\": {{cancelRaceId}},\n    \"horseId\": {{horseId}},\n    \"jockeyId\": {{jockeyId}},\n    \"ownerSharePercent\": 70.0,\n    \"jockeySharePercent\": 30.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/owner/race-registrations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"owner",
+								"race-registrations"
+							]
+						},
+						"description": "Owner registers for the cancel tournament race."
+					},
+					"response": []
+				},
+				{
+					"name": "Jockey - ACCEPT Invitation for Cancel",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jockeyToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/jockey/invitations/{{cancelRegistrationId}}/respond?action=ACCEPT",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"jockey",
+								"invitations",
+								"{{cancelRegistrationId}}",
+								"respond"
+							],
+							"query": [
+								{
+									"key": "action",
+									"value": "ACCEPT"
+								}
+							]
+						},
+						"description": "Jockey accepts the invitation. Moves to PENDING."
+					},
+					"response": []
+				},
+				{
+					"name": "Admin - APPROVE Registration for Cancel",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/race-registrations/{{cancelRegistrationId}}/approve",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"race-registrations",
+								"{{cancelRegistrationId}}",
+								"approve"
+							]
+						},
+						"description": "Admin approves the registration. Moves to APPROVED, creating a participant record which lets spectators bet."
+					},
+					"response": []
+				},
+				{
+					"name": "Spectator - Place Bet (Test Tool)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"spectator1@test.com\",\n    \"raceId\": {{cancelRaceId}},\n    \"amount\": 200000.00\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/test/bets/place",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"bets",
+								"place"
+							]
+						},
+						"description": "Utility API that lets the Spectator place a 200,000 VND bet on the approved horse participant in this race. Deducts 200,000 VND from spectator wallet."
+					},
+					"response": []
+				},
+				{
+					"name": "Admin - Cancel Tournament (Refund entries & bets)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"Cancelled\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/tournaments/{{cancelTournamentId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"tournaments",
+								"{{cancelTournamentId}}",
+								"status"
+							]
+						},
+						"description": "Admin cancels the tournament. Status updates to Cancelled. System cancels the associated race, cancels the owner registration (refunding 500 VND to Owner), and refunds the spectator's pending bet (refunding 200,000 VND to Spectator)."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "jockeyToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ownerToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "spectatorToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "jockeyId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refereeId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "horseId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "connectionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "tournamentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "raceId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "registrationId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cancelTournamentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cancelRaceId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cancelRegistrationId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
