@@ -31,6 +31,7 @@ import com.horseracing.repositories.UserRepository;
 import com.horseracing.services.RaceRegistrationService;
 import com.horseracing.services.RaceService;
 import com.horseracing.services.TournamentService;
+import com.horseracing.services.RefereeService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,7 @@ public class AdminRaceController {
     private final RaceService raceService;
     private final RaceRegistrationService raceRegistrationService;
     private final UserRepository userRepository;
+    private final RefereeService refereeService;
 
     @GetMapping("/referees")
     public ResponseEntity<List<UserResponse>> getAllReferees() {
@@ -149,6 +151,39 @@ public class AdminRaceController {
         try {
             raceRegistrationService.confirmRegistration(tournamentId);
             return ResponseEntity.ok().body(new MessageResponse("Registrations confirmed successfully. Waiting list cleared and refunded."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/races/{id}/status")
+    public ResponseEntity<?> updateRaceStatus(
+            @PathVariable Integer id,
+            @RequestBody java.util.Map<String, String> body) {
+        try {
+            String status = body.get("status");
+            if (status == null) {
+                return ResponseEntity.badRequest().body(new ErrorResponse(400, "Status field is required"));
+            }
+            if ("FINISHED".equalsIgnoreCase(status)) {
+                refereeService.confirmResults(id);
+                return ResponseEntity.ok().body(new MessageResponse("Race results confirmed, prize distribution and bet payouts completed successfully."));
+            } else if ("CANCELLED".equalsIgnoreCase(status)) {
+                refereeService.cancelRace(id);
+                return ResponseEntity.ok().body(new MessageResponse("Race cancelled successfully. Bets and registration entry fees have been refunded."));
+            } else {
+                return ResponseEntity.badRequest().body(new ErrorResponse(400, "Invalid status. Must be FINISHED or CANCELLED"));
+            }
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @GetMapping("/races/{id}/prize-distributions")
+    public ResponseEntity<?> getPrizeDistributions(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(refereeService.getPrizeDistributions(id));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }

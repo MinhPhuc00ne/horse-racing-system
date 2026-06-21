@@ -125,8 +125,13 @@ public class RefereeController {
     }
 
     @PostMapping("/races/{raceId}/confirm-results")
-    public ResponseEntity<MessageResponse> confirmResults(@PathVariable Integer raceId) {
-        refereeService.confirmResults(raceId);
-        return ResponseEntity.ok(new MessageResponse("Results confirmed. Prize distribution and bet payouts completed successfully."));
+    public ResponseEntity<?> confirmResults(@PathVariable Integer raceId) {
+        try {
+            refereeService.confirmResults(raceId);
+            return ResponseEntity.ok(new MessageResponse("Results confirmed. Prize distribution and bet payouts completed successfully."));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, "Debug error: " + e.getMessage() + " | Cause: " + (e.getCause() != null ? e.getCause().getMessage() : "none")));
+        }
     }
 }

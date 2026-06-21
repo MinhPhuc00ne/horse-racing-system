@@ -7,7 +7,9 @@ import {
   getRaceRegistrationsAPI,
   approveRaceRegistrationAPI,
   rejectRaceRegistrationAPI,
-  confirmRaceRegistrationsAPI
+  confirmRaceRegistrationsAPI,
+  updateRaceStatusAPI,
+  getPrizeDistributionsAPI
 } from '../../../services/admin';
 import { FaPlus, FaCheck, FaTimes, FaFlagCheckered, FaCalendarAlt, FaClock, FaCloud, FaRoad, FaCheckCircle, FaUser, FaInfoCircle } from 'react-icons/fa';
 
@@ -18,6 +20,26 @@ export default function RacesPanel() {
   const [referees, setReferees] = useState([]);
   const [tracks, setTracks] = useState([]);
   const [registrations, setRegistrations] = useState([]);
+
+  // Custom Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    cancelText: '',
+    theme: 'success',
+    onConfirm: null
+  });
+
+  // Prize Distributions Modal State
+  const [payoutDetailsModal, setPayoutDetailsModal] = useState({
+    show: false,
+    raceName: '',
+    distributions: [],
+    loading: false,
+    error: ''
+  });
   
   const [loading, setLoading] = useState(false);
   const [loadingReg, setLoadingReg] = useState(false);
@@ -188,6 +210,63 @@ export default function RacesPanel() {
       fetchRegistrations();
     } catch (err) {
       setError(err.message || 'Lỗi khi từ chối đơn đăng ký.');
+    }
+  };
+
+  const handleUpdateRaceStatus = (raceId, status) => {
+    const actionText = status === 'FINISHED' ? 'kết thúc và trao giải' : 'hủy bỏ';
+    const title = status === 'FINISHED' ? 'Xác Nhận Kết Thúc & Trao Giải' : 'Xác Nhận Hủy Vòng Đua';
+    const confirmMsg = status === 'FINISHED'
+      ? 'Bạn có chắc chắn muốn kết thúc vòng đua này và trao giải? Tiền thưởng sẽ được chia theo tỷ lệ nài ngựa/chủ ngựa đã cài đặt và tiền cược sẽ được thanh toán.'
+      : 'Bạn có chắc chắn muốn hủy vòng đua này? Tất cả tiền cược và lệ phí đăng ký sẽ được hoàn trả.';
+
+    setConfirmModal({
+      show: true,
+      title: title,
+      message: confirmMsg,
+      confirmText: status === 'FINISHED' ? 'Xác nhận & Trao giải' : 'Hủy vòng đua',
+      cancelText: 'Quay lại',
+      theme: status === 'FINISHED' ? 'success' : 'danger',
+      onConfirm: async () => {
+        setError('');
+        setSuccess('');
+        try {
+          await updateRaceStatusAPI(raceId, status);
+          setSuccess(`Đã ${actionText} vòng đua thành công!`);
+          fetchRaces();
+          
+          if (status === 'FINISHED') {
+            const raceObj = races.find(r => r.id === raceId);
+            handleViewPayoutDetails(raceId, raceObj ? raceObj.raceName : 'Vòng đua');
+          }
+        } catch (err) {
+          setError(err.message || `Lỗi khi ${actionText} vòng đua.`);
+        }
+      }
+    });
+  };
+
+  const handleViewPayoutDetails = async (raceId, raceName) => {
+    setPayoutDetailsModal({
+      show: true,
+      raceName: raceName,
+      distributions: [],
+      loading: true,
+      error: ''
+    });
+    try {
+      const data = await getPrizeDistributionsAPI(raceId);
+      setPayoutDetailsModal(prev => ({
+        ...prev,
+        distributions: data,
+        loading: false
+      }));
+    } catch (err) {
+      setPayoutDetailsModal(prev => ({
+        ...prev,
+        loading: false,
+        error: err.message || 'Không thể tải thông tin trao giải.'
+      }));
     }
   };
 
@@ -493,7 +572,7 @@ export default function RacesPanel() {
                     </div>
 
                     {/* Right Column Action */}
-                    <div>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                       {r.status === 'Upcoming' || r.status === 'OPEN_FOR_REGISTER' ? (
                         <button
                           onClick={() => handleConfirmRegistrations(selectedTournamentId)}
@@ -502,8 +581,39 @@ export default function RacesPanel() {
                         >
                           <FaCheckCircle /> Chốt Danh Sách Thi Đấu
                         </button>
+                      ) : r.status === 'RUNNING' ? (
+                        <>
+                          <button
+                            onClick={() => handleUpdateRaceStatus(r.id, 'FINISHED')}
+                            className="btn btn-success btn-sm d-flex align-items-center gap-2 fw-bold"
+                            style={{ padding: '8px 14px', borderRadius: '8px' }}
+                          >
+                            <FaCheckCircle /> Kết thúc & Trao giải
+                          </button>
+                          <button
+                            onClick={() => handleUpdateRaceStatus(r.id, 'CANCELLED')}
+                            className="btn btn-danger btn-sm d-flex align-items-center gap-2 fw-bold"
+                            style={{ padding: '8px 14px', borderRadius: '8px' }}
+                          >
+                            <FaTimes /> Hủy vòng đua
+                          </button>
+                        </>
                       ) : (
-                        <span style={{ fontSize: '13px', color: 'var(--ho-text-muted)', fontStyle: 'italic' }}>Đã đóng / Đang chạy</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
+                          <span style={{ fontSize: '13px', color: 'var(--ho-text-muted)', fontStyle: 'italic' }}>
+                            {r.status === 'FINISHED' ? 'Đã kết thúc & trao giải' : r.status === 'CANCELLED' ? 'Đã hủy' : 'Đã đóng'}
+                          </span>
+                          {r.status === 'FINISHED' && (
+                            <button
+                              type="button"
+                              onClick={() => handleViewPayoutDetails(r.id, r.raceName)}
+                              className="btn btn-outline-success btn-sm fw-bold d-flex align-items-center gap-1"
+                              style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '12px' }}
+                            >
+                              <FaInfoCircle /> Chi tiết trao giải
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
 
@@ -547,9 +657,18 @@ export default function RacesPanel() {
                   {registrations.map((reg) => (
                     <tr key={reg.id} style={{ borderBottom: '1px solid var(--ho-border-muted)', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 56, 32, 0.02)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
                       <td style={{ padding: '16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>#{reg.id}</td>
-                      <td style={{ padding: '16px', color: 'var(--ho-text-dark)', fontWeight: '500' }}>Race ID: {reg.raceId}</td>
-                      <td style={{ padding: '16px', color: 'var(--ho-text-dark)', fontWeight: '600' }}>Horse ID: {reg.horseId}</td>
-                      <td style={{ padding: '16px', color: 'var(--ho-text-dark)', fontWeight: '600' }}>Jockey ID: {reg.jockeyId}</td>
+                      <td style={{ padding: '16px' }}>
+                        <span className="fw-bold d-block text-dark">{reg.tournamentName || 'Giải đấu'}</span>
+                        <span className="text-secondary small">{reg.raceName} (ID: {reg.raceId})</span>
+                      </td>
+                      <td style={{ padding: '16px' }}>
+                        <span className="fw-bold d-block text-dark">{reg.horseName}</span>
+                        <span className="text-secondary small">{reg.horseBreed || 'Thoroughbred'} (ID: {reg.horseId})</span>
+                      </td>
+                      <td style={{ padding: '16px' }}>
+                        <span className="fw-bold d-block text-dark">{reg.jockeyName}</span>
+                        <span className="text-secondary small">ID: {reg.jockeyId}</span>
+                      </td>
                       <td style={{ padding: '16px', color: 'var(--ho-text-muted)' }}>{reg.jockeySharePercent}% / {reg.ownerSharePercent}%</td>
                       <td style={{ padding: '16px' }}>
                         <span style={{
@@ -615,6 +734,123 @@ export default function RacesPanel() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.show && (
+        <div className="modal-overlay" style={{ zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.5)' }}>
+          <div className="glass-card animate-scale-up" style={{ width: '450px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '15px', border: confirmModal.theme === 'danger' ? '1px solid #ef4444' : '1px solid var(--ho-border-gold)', background: 'rgba(255, 255, 255, 0.98)' }}>
+            <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: confirmModal.theme === 'danger' ? '#ef4444' : 'var(--ho-primary-dark)', margin: 0, borderBottom: '1px solid var(--ho-border-gold)', paddingBottom: '10px' }}>
+              {confirmModal.title}
+            </h3>
+            <p style={{ fontSize: '14px', color: 'var(--ho-text-muted)', lineHeight: '1.6', margin: 0 }}>
+              {confirmModal.message}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setConfirmModal(prev => ({ ...prev, show: false }))}
+                className="btn btn-outline-secondary btn-sm fw-bold"
+                style={{ padding: '8px 20px', borderRadius: '8px' }}
+              >
+                {confirmModal.cancelText || 'Hủy bỏ'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  confirmModal.onConfirm();
+                  setConfirmModal(prev => ({ ...prev, show: false }));
+                }}
+                className={confirmModal.theme === 'danger' ? 'btn btn-danger btn-sm fw-bold' : 'btn btn-success btn-sm fw-bold'}
+                style={{ padding: '8px 24px', borderRadius: '8px' }}
+              >
+                {confirmModal.confirmText || 'Xác nhận'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Payout Details Modal */}
+      {payoutDetailsModal.show && (
+        <div className="modal-overlay" style={{ zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.5)' }}>
+          <div className="glass-card animate-scale-up" style={{ width: '800px', maxWidth: '90%', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', border: '1px solid var(--ho-border-gold)', background: 'rgba(255, 255, 255, 0.98)', color: '#000000' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--ho-border-gold)', paddingBottom: '12px' }}>
+              <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: 'var(--ho-primary-dark)', margin: 0 }}>
+                Chi Tiết Phân Chia Tiền Thưởng - Vòng Đua: {payoutDetailsModal.raceName}
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setPayoutDetailsModal(prev => ({ ...prev, show: false }))}
+                style={{ background: 'transparent', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--ho-text-muted)' }}
+              >
+                &times;
+              </button>
+            </div>
+
+            {payoutDetailsModal.loading ? (
+              <div style={{ textAlign: 'center', padding: '30px', color: 'var(--ho-text-muted)' }}>Đang tải thông tin phân chia giải thưởng...</div>
+            ) : payoutDetailsModal.error ? (
+              <div style={{ color: '#ef4444', padding: '15px', background: 'rgba(239, 68, 68, 0.08)', borderRadius: '8px' }}>{payoutDetailsModal.error}</div>
+            ) : payoutDetailsModal.distributions.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '30px', color: 'var(--ho-text-muted)' }}>Chưa có thông tin trao giải nào được lưu.</div>
+            ) : (
+              <div style={{ overflowX: 'auto', borderRadius: '8px', border: '1px solid var(--ho-border-gold)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ background: 'rgba(0, 56, 32, 0.04)', borderBottom: '1px solid var(--ho-border-gold)' }}>
+                      <th style={{ padding: '12px 16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>Hạng</th>
+                      <th style={{ padding: '12px 16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>Đối Tượng</th>
+                      <th style={{ padding: '12px 16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>Tổng Giải Thưởng</th>
+                      <th style={{ padding: '12px 16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>Phần Chia Chủ Ngựa (Owner)</th>
+                      <th style={{ padding: '12px 16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>Phần Chia Nài Ngựa (Jockey)</th>
+                      <th style={{ padding: '12px 16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>Thời Gian</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payoutDetailsModal.distributions.map((dist, idx) => (
+                      <tr key={idx} style={{ borderBottom: '1px solid var(--ho-border-gold)' }}>
+                        <td style={{ padding: '12px 16px', fontWeight: 'bold', color: '#000000' }}>
+                          {dist.rank === 1 ? '🥇 Hạng 1' : dist.rank === 2 ? '🥈 Hạng 2' : dist.rank === 3 ? '🥉 Hạng 3' : `Hạng ${dist.rank}`}
+                        </td>
+                        <td style={{ padding: '12px 16px', color: '#000000' }}>
+                          <strong className="d-block" style={{ color: '#000000' }}>Ngựa: {dist.horseName}</strong>
+                          <span className="text-secondary small d-block">Chủ ngựa: {dist.ownerName}</span>
+                          <span className="text-secondary small d-block">Nài ngựa: {dist.jockeyName}</span>
+                        </td>
+                        <td style={{ padding: '12px 16px', fontWeight: 'bold', color: 'var(--ho-accent-gold-text)' }}>
+                          {dist.totalPrize?.toLocaleString()} VND
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span className="d-block fw-semibold text-success">{dist.ownerAmount?.toLocaleString()} VND</span>
+                          <span className="text-secondary small">Tỷ lệ: {dist.ownerSharePercent}%</span>
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <span className="d-block fw-semibold text-success">{dist.jockeyAmount?.toLocaleString()} VND</span>
+                          <span className="text-secondary small">Tỷ lệ: {dist.jockeySharePercent}%</span>
+                        </td>
+                        <td style={{ padding: '12px 16px', color: 'var(--ho-text-muted)' }}>
+                          {dist.distributedAt ? new Date(dist.distributedAt).toLocaleString('vi-VN') : 'N/A'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setPayoutDetailsModal(prev => ({ ...prev, show: false }))}
+                className="ho-btn ho-btn-gold-solid py-2 px-4"
+                style={{ borderRadius: '8px' }}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

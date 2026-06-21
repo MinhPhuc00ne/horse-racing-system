@@ -29,6 +29,27 @@ export default function LiveSimulation() {
   const canvasRef = useRef(null);
   const horsesRef = useRef(horses);
   const visualHorses = useRef([]);
+  const confettiParticles = useRef([]);
+
+  const triggerConfetti = () => {
+    const colors = ['#fbbf24', '#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#ec4899', '#8b5cf6'];
+    const newParticles = [];
+    for (let i = 0; i < 80; i++) {
+      newParticles.push({
+        x: 440 + (Math.random() - 0.5) * 300,
+        y: 495,
+        vx: (Math.random() - 0.5) * 10,
+        vy: -15 - Math.random() * 15,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 3 + Math.random() * 6,
+        alpha: 1.0,
+        gravity: 0.35,
+        rotation: Math.random() * Math.PI,
+        rotationSpeed: (Math.random() - 0.5) * 0.2
+      });
+    }
+    confettiParticles.current.push(...newParticles);
+  };
 
   // Sync state to ref for rendering frame rate decoupling
   useEffect(() => {
@@ -54,6 +75,7 @@ export default function LiveSimulation() {
               if (newProgress === 100 && !h.finishedTime) {
                 const penalty = (h.flaggedPositions?.length || 0) * 4000;
                 finishedTime = Date.now() + penalty;
+                triggerConfetti();
               }
               return { ...h, progress: newProgress, finishedTime };
             }
@@ -131,6 +153,8 @@ export default function LiveSimulation() {
           }
         } else {
           setSimulatedRaceName('Chưa có vòng đua nào');
+          setHorses([]);
+          setActualRaceId(null);
         }
       } catch (err) {
         console.error("Failed to fetch real race data for simulation", err);
@@ -225,6 +249,188 @@ export default function LiveSimulation() {
       const startX = W * 0.06;
       const endX = W * 0.94;
       const Vx = W / 2;
+
+      const drawStands = (isLeft) => {
+        ctx.save();
+        ctx.fillStyle = environment === 'cyber' ? '#111827' : '#334155';
+        ctx.strokeStyle = environment === 'cyber' ? '#00f2fe' : '#475569';
+        ctx.lineWidth = 2;
+
+        let topX1, topY1_val, topX2, topY2_val, bottomX2, bottomY2, bottomX1, bottomY1;
+        if (isLeft) {
+          topX1 = 0;
+          topY1_val = horizonY - 40;
+          topX2 = Vx - 55;
+          topY2_val = horizonY - 20;
+          bottomX2 = startX - 80;
+          bottomY2 = H;
+          bottomX1 = 0;
+          bottomY1 = H;
+        } else {
+          topX1 = Vx + 55;
+          topY1_val = horizonY - 20;
+          topX2 = W;
+          topY2_val = horizonY - 40;
+          bottomX2 = W;
+          bottomY2 = H;
+          bottomX1 = endX + 80;
+          bottomY1 = H;
+        }
+
+        // Draw main concrete stand structure
+        ctx.beginPath();
+        ctx.moveTo(topX1, topY1_val);
+        ctx.lineTo(topX2, topY2_val);
+        ctx.lineTo(bottomX2, bottomY2);
+        ctx.lineTo(bottomX1, bottomY1);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw stand roof (canopy)
+        ctx.fillStyle = environment === 'cyber' ? '#0f172a' : '#1e293b';
+        ctx.beginPath();
+        if (isLeft) {
+          ctx.moveTo(0, topY1_val - 25);
+          ctx.lineTo(Vx - 65, topY2_val - 15);
+          ctx.lineTo(Vx - 55, topY2_val);
+          ctx.lineTo(0, topY1_val);
+        } else {
+          ctx.moveTo(Vx + 55, topY1_val);
+          ctx.lineTo(W, topY2_val);
+          ctx.lineTo(W, topY2_val - 25);
+          ctx.lineTo(Vx + 65, topY1_val - 15);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        // Canopy trim/neon light
+        ctx.strokeStyle = environment === 'cyber' ? '#00f2fe' : '#f59e0b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        if (isLeft) {
+          ctx.moveTo(0, topY1_val);
+          ctx.lineTo(Vx - 55, topY2_val);
+        } else {
+          ctx.moveTo(Vx + 55, topY1_val);
+          ctx.lineTo(W, topY2_val);
+        }
+        ctx.stroke();
+
+        // Draw Tiers
+        const numTiers = 8;
+        ctx.strokeStyle = environment === 'cyber' ? 'rgba(0, 242, 254, 0.4)' : 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1.5;
+        for (let t = 1; t < numTiers; t++) {
+          const ratio = t / numTiers;
+          ctx.beginPath();
+          if (isLeft) {
+            const startX_tier = 0;
+            const startY_tier = topY1_val + (H - topY1_val) * ratio;
+            const endX_tier = (Vx - 55) + ((startX - 80) - (Vx - 55)) * ratio;
+            const endY_tier = topY2_val + (H - topY2_val) * ratio;
+            ctx.moveTo(startX_tier, startY_tier);
+            ctx.lineTo(endX_tier, endY_tier);
+          } else {
+            const startX_tier = (Vx + 55) + ((endX + 80) - (Vx + 55)) * ratio;
+            const startY_tier = topY1_val + (H - topY1_val) * ratio;
+            const endX_tier = W;
+            const endY_tier = topY2_val + (H - topY2_val) * ratio;
+            ctx.moveTo(startX_tier, startY_tier);
+            ctx.lineTo(endX_tier, endY_tier);
+          }
+          ctx.stroke();
+        }
+
+        const timeSec = Date.now() * 0.005;
+        const crowdColors = ['#f87171', '#60a5fa', '#34d399', '#fbbf24', '#f472b6', '#e2e8f0', '#a78bfa'];
+
+        // Draw Spectators
+        for (let tier = 0; tier < numTiers; tier++) {
+          const ratio = (tier + 0.5) / numTiers;
+          
+          let startX_tier, startY_tier, endX_tier, endY_tier;
+          if (isLeft) {
+            startX_tier = 0;
+            startY_tier = topY1_val + (H - topY1_val) * ratio;
+            endX_tier = (Vx - 55) + ((startX - 80) - (Vx - 55)) * ratio;
+            endY_tier = topY2_val + (H - topY2_val) * ratio;
+          } else {
+            startX_tier = (Vx + 55) + ((endX + 80) - (Vx + 55)) * ratio;
+            startY_tier = topY1_val + (H - topY1_val) * ratio;
+            endX_tier = W;
+            endY_tier = topY2_val + (H - topY2_val) * ratio;
+          }
+
+          const size = 2.2 + 8.5 * ratio;
+          const count = Math.floor(25 + 65 * ratio); // Dense crowd
+          
+          for (let i = 0; i < count; i++) {
+            const xRatio = i / (count - 1 || 1);
+            const x = startX_tier + (endX_tier - startX_tier) * xRatio;
+            const y = startY_tier + (endY_tier - startY_tier) * xRatio;
+            
+            const seed = (tier * 100 + i) * 2.3;
+            const bob = (racePhase === 'RUNNING') ? Math.sin(timeSec * 3 + seed) * (1.2 + 3.8 * ratio) : 0;
+
+            // Optional cheering arms (drawn behind/next to body)
+            if (racePhase === 'RUNNING' && (i + tier) % 3 === 0) {
+              ctx.strokeStyle = '#fca5a5';
+              ctx.lineWidth = Math.max(1, size * 0.22);
+              ctx.beginPath();
+              // Left arm
+              ctx.moveTo(x - size * 0.22, y - size * 0.8 + bob);
+              ctx.lineTo(x - size * 0.55, y - size * 1.5 + bob + Math.cos(timeSec * 6 + seed) * (size * 0.4));
+              // Right arm
+              ctx.moveTo(x + size * 0.22, y - size * 0.8 + bob);
+              ctx.lineTo(x + size * 0.55, y - size * 1.5 + bob + Math.sin(timeSec * 6 + seed) * (size * 0.4));
+              ctx.stroke();
+            }
+
+            // Body
+            ctx.fillStyle = crowdColors[(tier + i) % crowdColors.length];
+            ctx.beginPath();
+            ctx.arc(x, y - size * 0.8 + bob, size * 0.45, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Head
+            ctx.fillStyle = '#fca5a5';
+            ctx.beginPath();
+            ctx.arc(x, y - size * 1.25 + bob, size * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cap/Hair
+            ctx.fillStyle = crowdColors[(tier + i + 3) % crowdColors.length];
+            ctx.beginPath();
+            ctx.arc(x, y - size * 1.4 + bob, size * 0.28, Math.PI, 0);
+            ctx.fill();
+
+            // Waving flags
+            if ((i + tier * 3) % 12 === 0) {
+              const flagColor = crowdColors[(tier + i + 1) % crowdColors.length];
+              const flagHeight = size * 1.6;
+              const flagWaving = Math.sin(timeSec * 5 + seed) * (size * 0.35);
+              
+              ctx.strokeStyle = '#94a3b8';
+              ctx.lineWidth = Math.max(1, size * 0.15);
+              ctx.beginPath();
+              ctx.moveTo(x, y - size * 0.8 + bob);
+              ctx.lineTo(x + size * 0.3, y - size * 0.8 - flagHeight + bob);
+              ctx.stroke();
+              
+              ctx.fillStyle = flagColor;
+              ctx.beginPath();
+              ctx.moveTo(x + size * 0.3, y - size * 0.8 - flagHeight + bob);
+              ctx.lineTo(x + size * 0.3 + size * 1.0, y - size * 0.8 - flagHeight + flagWaving + bob);
+              ctx.lineTo(x + size * 0.3, y - size * 0.8 - flagHeight + size * 0.65 + bob);
+              ctx.closePath();
+              ctx.fill();
+            }
+          }
+        }
+
+        ctx.restore();
+      };
 
       // Theme-specific configurations
       const themeConfigs = {
@@ -380,6 +586,10 @@ export default function LiveSimulation() {
       ctx.lineTo(0, H);
       ctx.closePath();
       ctx.fill();
+
+      // Draw Spectator Stands (left and right)
+      drawStands(true);
+      drawStands(false);
 
       // 3. Draw Track Surface
       ctx.fillStyle = config.trackColor;
@@ -745,6 +955,61 @@ export default function LiveSimulation() {
         ctx.restore();
       }
 
+      // Update and Draw Confetti
+      if (confettiParticles.current.length > 0) {
+        confettiParticles.current.forEach((p, idx) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.rotation += p.rotationSpeed;
+          p.alpha -= 0.008;
+
+          if (p.alpha <= 0 || p.y > H) {
+            confettiParticles.current.splice(idx, 1);
+            return;
+          }
+
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = p.color;
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rotation);
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+      }
+
+      // Camera flashes in the crowd
+      if (racePhase === 'RUNNING' && Math.random() < 0.12) {
+        const flashCount = Math.floor(Math.random() * 3) + 1;
+        for (let f = 0; f < flashCount; f++) {
+          const flashIsLeft = Math.random() < 0.5;
+          const flashTier = Math.floor(Math.random() * 8);
+          const flashRatio = (flashTier + 0.5) / 8;
+          const flashY_val = horizonY + (H - horizonY) * flashRatio;
+          
+          let lineStartX, lineEndX;
+          if (flashIsLeft) {
+            lineStartX = 0;
+            lineEndX = (Vx - 55) + ((startX - 80) - (Vx - 55)) * flashRatio;
+          } else {
+            lineStartX = (Vx + 55) + ((endX + 80) - (Vx + 55)) * flashRatio;
+            lineEndX = W;
+          }
+          const flashX = lineStartX + Math.random() * (lineEndX - lineStartX);
+          const flashSize = 2 + 10 * Math.random();
+          
+          ctx.save();
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = environment === 'cyber' ? '#00f2fe' : '#ffffff';
+          ctx.shadowBlur = 18;
+          ctx.beginPath();
+          ctx.arc(flashX, flashY_val - (2 + 9 * flashRatio), flashSize, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
       animationFrameId = requestAnimationFrame(render);
     };
 
@@ -1093,19 +1358,10 @@ export default function LiveSimulation() {
 
             <div className="d-flex gap-2">
               <button
-                className="ho-btn ho-btn-outline-secondary flex-grow-1"
+                className="ho-btn ho-btn-gold-solid flex-grow-1 py-2"
                 onClick={() => setShowResultsSummary(false)}
               >
                 Close
-              </button>
-              <button
-                className="ho-btn ho-btn-gold-solid flex-grow-1 py-2"
-                onClick={() => {
-                  setShowResultsSummary(false);
-                  navigate('/referee/confirm-results');
-                }}
-              >
-                Confirm Results
               </button>
             </div>
           </div>

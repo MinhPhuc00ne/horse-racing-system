@@ -71,9 +71,13 @@ public class RefereeService {
                 matches = "Upcoming".equalsIgnoreCase(r.getStatus()) 
                         || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus());
             } else if ("running".equalsIgnoreCase(status) || "ongoing".equalsIgnoreCase(status)) {
-                matches = "RUNNING".equalsIgnoreCase(r.getStatus());
+                boolean hasFinishedSim = raceSimulationRepository.findByRaceId(r.getId()).stream()
+                        .anyMatch(sim -> "FINISHED".equalsIgnoreCase(sim.getStatus()));
+                matches = "RUNNING".equalsIgnoreCase(r.getStatus()) && !hasFinishedSim;
             } else if ("finished".equalsIgnoreCase(status) || "completed".equalsIgnoreCase(status)) {
-                matches = "FINISHED".equalsIgnoreCase(r.getStatus());
+                boolean hasFinishedSim = raceSimulationRepository.findByRaceId(r.getId()).stream()
+                        .anyMatch(sim -> "FINISHED".equalsIgnoreCase(sim.getStatus()));
+                matches = "FINISHED".equalsIgnoreCase(r.getStatus()) || hasFinishedSim;
             }
 
             if (matches) {
@@ -755,6 +759,7 @@ public class RefereeService {
                             .totalPrize(totalPrize)
                             .ownerAmount(ownerAmount)
                             .jockeyAmount(jockeyAmount)
+                            .platformFee(BigDecimal.ZERO)
                             .status("DISTRIBUTED")
                             .distributedAt(LocalDateTime.now())
                             .build();
@@ -830,6 +835,141 @@ public class RefereeService {
                 }
             }
         }
+    }
+
+    @Transactional
+    public void cancelRace(Integer raceId) {
+        Race race = raceRepository.findById(raceId)
+                .orElseThrow(() -> new RuntimeException("Race not found"));
+
+        if ("FINISHED".equalsIgnoreCase(race.getStatus()) || "CANCELLED".equalsIgnoreCase(race.getStatus())) {
+            throw new RuntimeException("Race is already finished or cancelled");
+        }
+
+        // 1. Stop any running simulation
+        Optional<RaceSimulation> activeSimOpt = raceSimulationRepository.findFirstByRaceIdAndStatus(raceId, "RUNNING");
+        if (activeSimOpt.isPresent()) {
+            RaceSimulation sim = activeSimOpt.get();
+            sim.setStatus("CANCELLED");
+            sim.setEndTime(LocalDateTime.now());
+            raceSimulationRepository.save(sim);
+            cancelSimulation(sim.getId());
+        }
+
+        // Update race status
+        race.setStatus("CANCELLED");
+        raceRepository.save(race);
+
+        // 2. Refund spectator bets
+        List<Bet> bets = betRepository.findByRaceId(raceId);
+        for (Bet bet : bets) {
+            if ("PENDING".equals(bet.getStatus())) {
+                bet.setStatus("REFUNDED");
+                bet.setPayoutAmount(BigDecimal.ZERO);
+                betRepository.save(bet);
+
+                Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
+                        .orElseGet(() -> {
+                            Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
+                            return walletRepository.save(w);
+                        });
+                wallet.setBalance(wallet.getBalance().add(bet.getAmount()));
+                walletRepository.save(wallet);
+
+                WalletTransaction transaction = WalletTransaction.builder()
+                        .wallet(wallet)
+                        .transactionType("REFUND")
+                        .amount(bet.getAmount())
+                        .status("SUCCESS")
+                        .referenceType("BET")
+                        .referenceId(bet.getId())
+                        .build();
+                walletTransactionRepository.save(transaction);
+
+                notificationService.sendNotification(
+                        bet.getUser(),
+                        "Hoàn tiền cược cuộc đua",
+                        "Cuộc đua " + race.getRaceName() + " đã bị hủy bỏ. Hệ thống đã hoàn trả 100% số tiền đặt cược (" + bet.getAmount() + " VNĐ) vào ví của bạn.",
+                        NotificationType.WALLET
+                );
+            }
+        }
+
+        // 3. Refund owner entry fees for non-rejected registrations
+        List<RaceRegistration> regs = raceRegistrationRepository.findByRaceId(raceId);
+        BigDecimal entryFee = race.getTournament().getEntryFee();
+        for (RaceRegistration reg : regs) {
+            if ("APPROVED".equalsIgnoreCase(reg.getStatus()) || "PENDING".equalsIgnoreCase(reg.getStatus()) || "PENDING_JOCKEY".equalsIgnoreCase(reg.getStatus())) {
+                reg.setStatus("CANCELLED");
+                raceRegistrationRepository.save(reg);
+
+                if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+                    Wallet wallet = walletRepository.findByUserId(reg.getOwner().getUser().getId())
+                            .orElseGet(() -> {
+                                Wallet w = Wallet.builder().user(reg.getOwner().getUser()).balance(BigDecimal.ZERO).build();
+                                return walletRepository.save(w);
+                            });
+                    wallet.setBalance(wallet.getBalance().add(entryFee));
+                    walletRepository.save(wallet);
+
+                    WalletTransaction transaction = WalletTransaction.builder()
+                            .wallet(wallet)
+                            .transactionType("REFUND")
+                            .amount(entryFee)
+                            .status("SUCCESS")
+                            .referenceType("RACE_REGISTRATION")
+                            .referenceId(reg.getId())
+                            .build();
+                    walletTransactionRepository.save(transaction);
+                }
+
+                notificationService.sendNotification(
+                        reg.getOwner().getUser(),
+                        "Hủy cuộc đua và hoàn lệ phí",
+                        "Cuộc đua " + race.getRaceName() + " đã bị hủy bỏ bởi Ban tổ chức. Lệ phí tham gia (" + (entryFee != null ? entryFee : BigDecimal.ZERO) + " VNĐ) đã được hoàn lại vào ví của bạn.",
+                        NotificationType.REGISTRATION
+                );
+
+                notificationService.sendNotification(
+                        reg.getJockey().getUser(),
+                        "Hủy cuộc đua",
+                        "Cuộc đua " + race.getRaceName() + " đã bị hủy bỏ bởi Ban tổ chức.",
+                        NotificationType.REGISTRATION
+                );
+            }
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getPrizeDistributions(Integer raceId) {
+        List<PrizeDistribution> pds = prizeDistributionRepository.findByParticipantRaceId(raceId);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (PrizeDistribution pd : pds) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("rank", pd.getParticipant().getFinalRank());
+            map.put("horseName", pd.getParticipant().getHorse().getName());
+            map.put("jockeyName", pd.getParticipant().getJockey().getUser().getFullName());
+            map.put("ownerName", pd.getParticipant().getHorse().getOwner().getUser().getFullName());
+            map.put("totalPrize", pd.getTotalPrize());
+            
+            RaceRegistration reg = raceRegistrationRepository
+                    .findFirstByRaceIdAndHorseId(raceId, pd.getParticipant().getHorse().getId())
+                    .orElse(null);
+            if (reg != null) {
+                map.put("jockeySharePercent", reg.getJockeySharePercent());
+                map.put("ownerSharePercent", reg.getOwnerSharePercent());
+            } else {
+                map.put("jockeySharePercent", 0.0);
+                map.put("ownerSharePercent", 100.0);
+            }
+            
+            map.put("jockeyAmount", pd.getJockeyAmount());
+            map.put("ownerAmount", pd.getOwnerAmount());
+            map.put("distributedAt", pd.getDistributedAt());
+            result.add(map);
+        }
+        result.sort(Comparator.comparing(m -> (Integer) m.getOrDefault("rank", 999)));
+        return result;
     }
 
     private static class ParticipantRankInfo {

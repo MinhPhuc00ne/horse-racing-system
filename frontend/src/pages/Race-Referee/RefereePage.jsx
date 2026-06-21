@@ -15,7 +15,6 @@ const refereeNavLinks = [
   { path: '/referee/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { path: '/referee/pre-race-check', label: 'Pre-Race Check', icon: 'fact_check' },
   { path: '/referee/live-simulation', label: 'Live Simulation', icon: 'sports_score' },
-  { path: '/referee/confirm-results', label: 'Confirm Results', icon: 'verified' },
   { path: '/referee/violations', label: 'Violations & Flags', icon: 'gavel' }
 ];
 
@@ -28,7 +27,6 @@ export default function RefereePage() {
         <Route path="pre-race-check" element={<PreRaceCheck />} />
         <Route path="live-simulation" element={<LiveSimulation />} />
         <Route path="live simulation" element={<LiveSimulation />} />
-        <Route path="confirm-results" element={<ConfirmResults />} />
         <Route path="violations" element={<Violations />} />
       </Routes>
     </DashboardLayout>

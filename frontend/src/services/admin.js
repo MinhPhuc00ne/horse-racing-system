@@ -175,3 +175,23 @@ export async function rejectWithdrawalAPI(id) {
     throw new Error(errMsg, { cause: error });
   }
 }
+
+export async function updateRaceStatusAPI(id, status) {
+  try {
+    const response = await axiosClient.put(`/admin/races/${id}/status`, { status });
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể cập nhật trạng thái vòng đua.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function getPrizeDistributionsAPI(raceId) {
+  try {
+    const response = await axiosClient.get(`/admin/races/${raceId}/prize-distributions`);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể lấy thông tin trao giải.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
