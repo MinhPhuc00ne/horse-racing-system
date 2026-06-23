@@ -1,0 +1,99 @@
+================================================================================
+          TÀI LIỆU HƯỚNG DẪN THUYẾT TRÌNH: HỆ THỐNG GIẢ LẬP ĐUA NGỰA (LIVE SIMULATION)
+                          Dành cho Trọng Tài (Race Referee)
+================================================================================
+
+Tài liệu này ghi lại chi tiết cách xây dựng giao diện (UI/UX) và kiến trúc kết nối 
+Frontend (FE) - Backend (BE) của màn hình Giả Lập Trực Tiếp (Live Simulation). 
+Đây là cẩm nang giúp bạn tự tin trình bày và giải thích trước Hội đồng Thuyết trình.
+
+--------------------------------------------------------------------------------
+MỤC LỤC
+1. TỔNG QUAN HỆ THỐNG GIẢ LẬP (OVERVIEW)
+2. THIẾT KẾ GIAO DIỆN & LOGIC FRONTEND (FE)
+3. HỆ THỐNG BACKEND & TÍCH HỢP API (BE)
+4. QUY TRÌNH THIẾT KẾ: TỪ CANVA MOCKUP ĐẾN LẬP TRÌNH THỰC TẾ (FROM CANVA TO CODE)
+5. CÁC QUYẾT ĐỊNH THIẾT KẾ ĐẶC BIỆT & CẢI TIẾN THẨM MỸ (UI/UX ITERATION)
+6. KỊCH BẢN THUYẾT TRÌNH TỪNG BƯỚC (PRESENTATION SCRIPT)
+--------------------------------------------------------------------------------
+
+1. TỔNG QUAN HỆ THỐNG GIẢ LẬP (OVERVIEW)
+   - Vai trò: Màn hình Live Simulation là công cụ làm việc trung tâm của Trọng tài (Race Referee).
+   - Mục tiêu: Giám sát toàn bộ diễn biến cuộc đua ngựa trực quan theo thời gian thực (real-time), 
+     phát hiện các hành vi vi phạm điều lệ đua và tiến hành "thổi còi" phạt trực tiếp.
+   - Cơ chế cốt lõi: Kết hợp giữa giả lập đồ họa 2D Canvas chuyển động mượt mà và hệ thống 
+     điều khiển sự kiện (event-driven) để xử lý phạt tiền, cộng giây phạt hoặc truất quyền thi đấu (DSQ).
+
+2. THIẾT KẾ GIAO DIỆN & LOGIC FRONTEND (FE)
+   - Công nghệ cốt lõi: ReactJS kết hợp HTML5 Canvas 2D Context.
+   - Tại sao chọn Canvas thay vì DOM thông thường?
+     + Hiệu năng tối đa: Khả năng vẽ liên tục với tần suất 60 khung hình/giây (60 FPS) thông qua 
+       vòng lặp requestAnimationFrame. Tránh lag/giật màn hình khi render đồng thời hàng chục 
+       ngựa đua, hiệu ứng thời tiết và hàng ngàn khán giả.
+     + Tính linh hoạt: Dễ dàng vẽ các hiệu ứng đồ họa phức tạp, hiệu ứng ánh sáng (shadowBlur, gradients).
+   - Các tính năng UI/UX nổi bật trên Canvas:
+     + Bản đồ nhỏ (Mini-map) ở đỉnh màn hình: Hiển thị tiến trình dạng phần trăm (%) của từng nài ngựa dưới dạng chấm tròn neon mang số hiệu riêng.
+     + Đèn xuất phát kiểu F1: Gồm 5 cụm đèn led. Khi đếm ngược từ 5 giây về 1, đèn đỏ sáng dần, và chuyển sang xanh lá (GO!) nhấp nháy khi cuộc đua chính thức bắt đầu.
+     + Hệ thống thời tiết & môi trường linh hoạt (Environment Selector):
+       * Sunset Twilight: Bầu trời hoàng hôn vàng ấm, phản chiếu ánh sáng nhẹ dịu.
+       * Cyber Neon: Bầu trời tối hiện đại, đi kèm 4 cột đèn Spotlight quét qua lại trên khán đài, tạo cảm giác đua ngựa tương lai (cyberpunk).
+       * Sunny Turf: Trời nắng gắt, có hiệu ứng chói sáng (Lens Flare) chuyển động theo thời gian.
+       * Snowy Winter: Tuyết rơi phủ trắng đường chạy, gió thổi hạt tuyết bay xiên góc.
+       * Rainy Storm: Mưa bão lớn kèm hiệu ứng sấm chớp giật sáng toàn màn hình ngẫu nhiên và hiệu ứng rung camera (screen shake) mô phỏng tiếng sấm nổ.
+     + Khán đài sống động:
+       * Khán giả cử động nhảy cổ vũ, vẫy cờ nhiều màu sắc.
+       * Đèn flash từ điện thoại khán giả nháy ngẫu nhiên chụp ảnh cuộc đua.
+       * Bong bóng biểu tượng cảm xúc (cheering emojis như 🙌, 📣, 🎉, 🔥, 🏇) bay lên từ phía khán đài khi cuộc đua ở giai đoạn cao trào.
+     + Hiệu ứng bụi đường đua (Dust Trail): Khi ngựa chạy nhanh, các hạt bụi đất bốc lên phía sau chân ngựa tạo cảm giác tốc độ chân thực.
+     + Màn hình Photo Finish (Ảnh chụp cán đích): 
+       * Khi ngựa đầu tiên vượt qua vạch đích, hệ thống tự động chụp và hiển thị bảng Photo Finish.
+       * Bảng này giả lập máy quét vạch đích chuyên dụng của trọng tài, hiển thị top 3 ngựa đua cán đích đầu tiên kèm khoảng cách chênh lệch thời gian (+ giây).
+       * Mỗi chú ngựa được đại diện bằng biểu tượng 🏇 đặt trong một vòng tròn neon phát sáng (holographic ring) trùng với màu áo đua của nài ngựa.
+   - Hệ thống âm thanh (Audio Manager):
+     + Sử dụng Web Audio API để quản lý âm thanh đa kênh.
+     + Nhạc nền kịch tính (Race Music) tăng cường sự hồi hộp.
+     + Tiếng vó ngựa dồn dập (Gallop sound) chạy lặp (looping) khi cuộc đua diễn ra.
+     + Tiếng hò reo của đám đông (Crowd cheering) tự động tăng âm lượng (swell) lên mức tối đa (100% volume) khi có ngựa chuẩn bị cán đích để tạo không khí bùng nổ.
+     + Tiếng còi trọng tài (Referee Whistle) vang lên đanh thép mỗi khi nhấn nút phạt vi phạm.
+
+3. HỆ THỐNG BACKEND & TÍCH HỢP API (BE)
+   - Công nghệ: Java Spring Boot, REST API, JPA Hibernate kết nối cơ sở dữ liệu MySQL.
+   - Các API tích hợp chính (Xem trong dịch vụ `referee.js`):
+     + Lấy danh sách trận đua: `GET /api/referee/races?status=upcoming` (hoặc `running`)
+       * FE gọi API này để lấy thông tin các cuộc đua được chỉ định cho trọng tài đang đăng nhập quản lý.
+     + Kiểm tra thông tin ngựa đua (Pre-check): `GET /api/referee/races/{raceId}/pre-check`
+       * Trả về danh sách chi tiết các ngựa tham gia trận đua (Participant), bao gồm: horseName, jockeyName, ownerName, actualWeight. FE sẽ map dữ liệu này vào simulator.
+     + Kích hoạt bắt đầu trận đấu: `POST /api/referee/races/{raceId}/start`
+       * Đồng bộ trạng thái cuộc đua trên hệ thống sang RUNNING để người dùng khác (khán giả, người đặt cược) có thể theo dõi trực tiếp.
+     + Báo cáo vi phạm (Flagging Incident): `POST /api/referee/races/{raceId}/flags`
+       * Trọng tài có thể phạt ngựa bằng cách click trực tiếp lên vị trí nài ngựa trên màn hình Canvas hoặc bảng xếp hạng bên phải.
+       * Dữ liệu gửi đi bao gồm: `horseId`, `violationType` (Illegal Blocking, Dangerous Riding, Whip Violation), và vị trí phần trăm (%) xảy ra vi phạm.
+       * Luật xử phạt: Mỗi lần bị phạt, ngựa sẽ bị cộng thêm 4 giây vào tổng thời gian chạy (phạt tốc độ). Nếu bị phạt từ 3 lần trở lên, ngựa lập tức nhận thẻ đỏ truất quyền thi đấu (Disqualified - DSQ), tốc độ giảm về 0 và không có thứ hạng.
+     + Lưu kết quả trận đua: `POST /api/referee/races/{raceId}/save` (kết hợp lưu kết quả chung cuộc)
+       * Sau khi tất cả ngựa về đích, FE tính toán thời gian chạy chính xác của từng ngựa (đã cộng thời gian phạt), lập bảng xếp hạng chính thức gửi về BE để lưu vào database và kết toán tiền cược.
+
+4. QUY TRÌNH THIẾT KẾ: TỪ CANVA MOCKUP ĐẾN LẬP TRÌNH THỰC TẾ (FROM CANVA TO CODE)
+   - Để có được giao diện ấn tượng, nhóm đã tuân thủ quy trình thiết kế UI/UX bài bản:
+     + Bước 1: Nghiên cứu & Mood boarding trên Canva: Lựa chọn phong cách Cyberpunk / High-Tech HUD làm chủ đạo. Thiết kế palette màu tối (Dark Mode) trên Canva với các màu bổ trợ là xanh neon, vàng cam để thu hút thị giác và thể hiện rõ tính công nghệ cao.
+     + Bước 2: Thiết kế Wireframe & Layout trên Canva: Bố cục màn hình Live Simulation được chia tỉ lệ khoa học (70% dành cho đường chạy Canvas 3D góc nhìn phối cảnh tụ, 30% dành cho danh sách bảng xếp hạng Leaderboard nổi phía bên phải).
+     + Bước 3: Thiết kế Hiệu ứng Kính Mờ (Glassmorphism): Trên Canva, nhóm thử nghiệm các lớp phủ bán trong suốt (semi-transparent overlays) xếp chồng lên nhau để chọn độ mờ (opacity) và độ bóng viền (border shadow) phù hợp nhất, trước khi chuyển đổi trực tiếp thành các thuộc tính CSS thực tế (`background: rgba(255,255,255, 0.08)`, `backdrop-filter: blur(...)`).
+     + Bước 4: Chuẩn bị Asset & Mockup Trải nghiệm: Toàn bộ layout trải nghiệm của Trọng tài được demo kiểm thử chuyển động trên Canva để đảm bảo khoảng cách bấm nút và điều khiển trực quan trước khi bắt tay vào viết code.
+
+5. CÁC QUYẾT ĐỊNH THIẾT KẾ ĐẶC BIỆT & CẢI TIẾN THẨM MỸ (UI/UX ITERATION)
+   * Chi tiết đắt giá cho bài thuyết trình (Design Refinement):
+     - Trước đây, hệ thống có một màn hình chiếu cận cảnh PiP (Picture-in-Picture) vẽ ngựa chạy bằng các khối hình học cơ bản (vẽ vector thô). 
+     - Nhận thấy việc vẽ sinh vật sống (ngựa và người cưỡi) bằng hình học phẳng trên Canvas 2D trông thiếu chân thực và làm mất đi vẻ cao cấp của UI (trông hoạt hình, thô kệch), nhóm phát triển đã quyết định tối ưu hóa:
+       + Gỡ bỏ màn hình cận cảnh thô kệch đó để giải phóng không gian, giúp tổng thể giao diện simulator thoáng đãng, chuyên nghiệp.
+       + Chuyển hướng tập trung sang các chi tiết HUD công nghệ cao khác như: Hệ thống thời tiết động, bản đồ neon siêu thực, và các bảng điều khiển dạng kính mờ (glassmorphism).
+       + Tại màn hình Photo Finish, thay vì vẽ lại chú ngựa thô sơ, nhóm đã chuyển sang sử dụng icon biểu tượng `🏇` nằm gọn trong các vòng tròn định vị neon phát sáng. Điều này giúp giao diện nhất quán với ngôn ngữ thiết kế "Holographic Cyber HUD" của toàn bộ hệ thống.
+
+6. KỊCH BẢN THUYẾT TRÌNH TỪNG BƯỚC (PRESENTATION SCRIPT)
+   - Bước 1: Giới thiệu vai trò của màn hình Live Simulation đối với Trọng tài. Nhấn mạnh tính minh bạch, tự động hóa và thời gian thực.
+   - Bước 2: Bấm "Start Simulation". Giới thiệu hệ thống đếm ngược F1 và âm thanh dồn dập.
+   - Bước 3: Khi cuộc đua đang diễn ra, trình bày tính năng thay đổi thời tiết động (Showcase thử Cyber Neon và Rain Storm để hội đồng thấy sấm sét/rung màn hình). Giải thích công nghệ Canvas 2D giúp chạy mượt mà.
+   - Bước 4: Thực hiện demo "Thổi còi vi phạm" (Flagging). Click trực tiếp lên một lane đua trên Canvas, chọn lỗi "Illegal Blocking" và bấm gửi. Chỉ ra nài ngựa bị phạt sẽ xuất hiện icon cờ đỏ trên bảng xếp hạng và bị giảm tốc độ rõ rệt. Nhấn phạt 3 lần để minh họa tính năng truất quyền thi đấu (DSQ).
+   - Bước 5: Ngựa cán đích, âm thanh đám đông bùng nổ, pháo hoa bắn lên. Show màn hình "Photo Finish" và giải thích cơ chế tính thời gian chạy thực tế cộng giây phạt vi phạm đồng bộ về Backend. Bấm "Close" để hoàn thành quy trình lưu trữ kết quả.
+
+================================================================================
+                       CHÚC BẠN CÓ BUỔI THUYẾT TRÌNH THÀNH CÔNG!
+================================================================================

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAssignedRacesAPI, getRacePreCheckAPI, getCompletedRacesAPI, reportViolationAPI, saveSimulatedRaceAPI, startRaceAPI } from '../../services/referee';
 import RaphaelHUD from './RaphaelHUD';
 import './LiveSimulation.css';
+import { audioManager } from './audioHelper';
 
 export default function LiveSimulation() {
   const navigate = useNavigate();
@@ -13,6 +14,10 @@ export default function LiveSimulation() {
   const [spawnedCount, setSpawnedCount] = useState(0);
   const [countdown, setCountdown] = useState(null);
   const [resultsSaved, setResultsSaved] = useState(false);
+
+  // Sound settings state
+  const [isSfxMuted, setIsSfxMuted] = useState(false);
+  const [volume, setVolume] = useState(0.45);
 
   // Custom Modals State
   const [showResultsSummary, setShowResultsSummary] = useState(false);
@@ -30,6 +35,12 @@ export default function LiveSimulation() {
   const horsesRef = useRef(horses);
   const visualHorses = useRef([]);
   const confettiParticles = useRef([]);
+  const shakeIntensity = useRef(0);
+  const lightningIntensity = useRef(0);
+  const lastCommentaryChange = useRef(0);
+  const commentaryText = useRef("Hệ thống đang chuẩn bị cuộc đua...");
+  const fireworks = useRef([]);
+  const crowdBubbles = useRef([]);
 
   const triggerConfetti = () => {
     const colors = ['#fbbf24', '#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#ec4899', '#8b5cf6'];
@@ -51,6 +62,69 @@ export default function LiveSimulation() {
     confettiParticles.current.push(...newParticles);
   };
 
+  const updateLiveCommentary = (currentHorses) => {
+    const now = Date.now();
+    if (now - lastCommentaryChange.current < 2500) return;
+
+    const activeRunners = currentHorses.filter(h => !h.isDisqualified);
+    if (activeRunners.length === 0) return;
+
+    const sorted = [...activeRunners].sort((a, b) => b.progress - a.progress);
+    const leader = sorted[0];
+    const second = sorted[1];
+
+    // Near finish
+    const nearFinish = sorted.filter(h => h.progress > 80 && h.progress < 100);
+    if (nearFinish.length > 0) {
+      const finishLeader = nearFinish[0];
+      const finishedCount = currentHorses.filter(h => h.progress >= 100).length;
+      if (finishedCount === 0) {
+        const finishComments = [
+          `Chiến mã ${finishLeader.name} (Số ${finishLeader.id}) đang tiến rất sát vạch đích!`,
+          `Giai đoạn nước rút cực kỳ căng thẳng! ${finishLeader.name} đang dẫn đầu!`,
+          `Cơ hội chiến thắng đang chia đều, các chiến mã đang bung hết sức mình!`,
+          `Ai sẽ là nhà vô địch? Tất cả đang dồn mắt về vạch đích!`
+        ];
+        commentaryText.current = finishComments[Math.floor(Math.random() * finishComments.length)];
+        lastCommentaryChange.current = now;
+        return;
+      }
+    }
+
+    const leadDiff = second ? (leader.progress - second.progress) : 100;
+    const comments = [];
+
+    if (leadDiff > 12) {
+      comments.push(
+        `Chiến mã ${leader.name} (Số ${leader.id}) đang bứt tốc ngoạn mục, tạo khoảng cách lớn!`,
+        `Khoảng cách dẫn đầu của ${leader.name} vẫn đang được duy trì rất tốt!`,
+        `${leader.name} đang một mình băng băng dẫn đầu đoàn đua!`
+      );
+    } else if (second && leadDiff <= 3) {
+      comments.push(
+        `Cuộc rượt đuổi nghẹt thở! ${leader.name} và ${second.name} đang kèn cựa cực kỳ gay cấn!`,
+        `Cạnh tranh khốc liệt! ${second.name} đang bám đuổi quyết liệt phía sau ${leader.name}!`,
+        `Hai vị trí dẫn đầu liên tục so kè nhau từng mét đường đua!`
+      );
+    } else {
+      comments.push(
+        `Chiến mã ${leader.name} (Số ${leader.id}) đang tạm dẫn đầu đoàn đua với tốc độ ${leader.speed || 60} km/h!`,
+        `Đoàn đua đang bám đuổi sát sao phía sau vị trí của ${leader.name}!`,
+        `${leader.name} đang làm chủ tốc độ ở chặng giữa đường đua!`
+      );
+    }
+
+    comments.push(
+      `Tốc độ cuộc đua đang được đẩy lên rất cao!`,
+      `Khán giả trên khán đài đang hò reo cổ vũ vô cùng náo nhiệt!`,
+      `Các chiến mã đang dồn hết thể lực cho những mét đua quyết định!`,
+      `Trọng tài đang theo dõi sát sao từng chuyển động trên sa bàn!`
+    );
+
+    commentaryText.current = comments[Math.floor(Math.random() * comments.length)];
+    lastCommentaryChange.current = now;
+  };
+
   // Sync state to ref for rendering frame rate decoupling
   useEffect(() => {
     horsesRef.current = horses;
@@ -64,7 +138,7 @@ export default function LiveSimulation() {
         setHorses(prev => {
           let allFinished = true;
           const nextHorses = prev.map(h => {
-            if (h.isDisqualified) return h;
+            if (h.isDisqualified) return { ...h, speed: 0 };
             if (h.progress < 100) {
               // Adjust advance to make the race last ~30s (average 1.25% per 400ms)
               const advance = 0.5 + Math.random() * 1.5;
@@ -76,15 +150,45 @@ export default function LiveSimulation() {
                 const penalty = (h.flaggedPositions?.length || 0) * 4000;
                 finishedTime = Date.now() + penalty;
                 triggerConfetti();
+                
+                // Play finish bell (commented out as requested to remove the 'ting ting ting' sound during victory)
+                // audioManager.playFinishBell();
+                
+                // Trigger screen shake when a horse crosses the finish line
+                shakeIntensity.current = 12;
+
+                // If it is the first horse to finish, swell the crowd immediately
+                const alreadyFinished = prev.some(other => other.progress >= 100 && other.id !== h.id);
+                if (!alreadyFinished) {
+                  audioManager.setSfxVolume('crowd', 0.95);
+                  commentaryText.current = `🏆 CHIẾN THẮNG! Chiến mã số ${h.id} (${h.name}) đã xuất sắc cán đích đầu tiên!`;
+                  lastCommentaryChange.current = Date.now() + 8000;
+                }
               }
-              return { ...h, progress: newProgress, finishedTime };
+              const currentSpeed = newProgress >= 100 ? 0 : Math.round(55 + Math.random() * 20);
+              return { ...h, progress: newProgress, finishedTime, speed: currentSpeed };
             }
-            return h;
+            return { ...h, speed: 0 };
           });
 
           allFinished = nextHorses.length > 0 && nextHorses.every(h => h.progress >= 100 || h.isDisqualified);
           if (allFinished) {
             setRacePhase('FINISHED');
+            const sorted = [...nextHorses].sort((a, b) => {
+              if (a.isDisqualified && b.isDisqualified) return 0;
+              if (a.isDisqualified) return 1;
+              if (b.isDisqualified) return -1;
+              return (a.finishedTime || 0) - (b.finishedTime || 0);
+            });
+            const winner = sorted.find(h => !h.isDisqualified);
+            if (winner) {
+              commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Chiến thắng chung cuộc thuộc về ${winner.name} (Số ${winner.id})!`;
+            } else {
+              commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Tất cả chiến mã đều phạm quy và bị truất quyền thi đấu!`;
+            }
+            lastCommentaryChange.current = Date.now() + 999999;
+          } else {
+            updateLiveCommentary(nextHorses);
           }
           return nextHorses;
         });
@@ -98,19 +202,32 @@ export default function LiveSimulation() {
     if (racePhase === 'PRE_RACE') {
       let isCancelled = false;
       const runPreRace = async () => {
+        // Start rain loop early if it is raining
+        if (environment === 'rain') {
+          audioManager.playSfx('rain', true);
+        }
+
         for (let i = 1; i <= numLanes; i++) {
           await new Promise(r => setTimeout(r, 600));
           if (isCancelled) return;
           setSpawnedCount(i);
+          audioManager.playIntroChime(); // Play spawn chime
+          
+          const currentHorseName = horsesRef.current[i - 1]?.name || `Chiến mã ${i}`;
+          commentaryText.current = `Đang dắt chiến mã số ${i} (${currentHorseName}) vào cổng xuất phát...`;
         }
         await new Promise(r => setTimeout(r, 600));
         for (let i = 5; i > 0; i--) {
           if (isCancelled) return;
           setCountdown(i.toString());
+          audioManager.playCountdownBeep(false); // Play tick beep
+          commentaryText.current = `Chuẩn bị xuất phát... T-minus ${i} giây!`;
           await new Promise(r => setTimeout(r, 1000));
         }
         if (isCancelled) return;
         setCountdown('GO!');
+        audioManager.playCountdownBeep(true); // Play GO beep
+        commentaryText.current = "CỔNG MỞ! CUỘC ĐUA CHÍNH THỨC BẮT ĐẦU!";
         await new Promise(r => setTimeout(r, 600));
         if (isCancelled) return;
         setCountdown(null);
@@ -119,10 +236,30 @@ export default function LiveSimulation() {
       runPreRace();
       return () => { isCancelled = true; };
     }
-  }, [racePhase, numLanes]);
+  }, [racePhase, numLanes, environment]);
 
   // Fetch real upcoming race and participants
   useEffect(() => {
+    const loadMockHorses = () => {
+      const mockNames = ['Thần Phong', 'Xích Thố', 'Bạch Long', 'Hắc Báo', 'Tia Chớp'];
+      const jockeys = ['Nguyễn Văn Đạt', 'Lê Hoàng Minh', 'Trần Văn Nam', 'Phạm Quốc Bảo', 'Huỳnh Gia Huy'];
+      const mockHorses = mockNames.map((name, idx) => ({
+        id: idx + 1,
+        horseId: 200 + idx,
+        name: name,
+        jockeyName: jockeys[idx],
+        ownerName: 'Tập đoàn ' + ['Alpha', 'Vanguard', 'Omega', 'Titan', 'Apex'][idx % 5],
+        weight: (450 + Math.random() * 50).toFixed(1),
+        progress: 0,
+        color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
+        flaggedPositions: []
+      }));
+      setHorses(mockHorses);
+      visualHorses.current = mockHorses.map(h => ({ ...h, visualProgress: 0, trail: [] }));
+      setSimulatedRaceName('Đua Mô Phỏng Thử Nghiệm (Demo Mode)');
+      setActualRaceId(999);
+    };
+
     const fetchUpcomingRace = async () => {
       try {
         let races = await getAssignedRacesAPI('upcoming');
@@ -150,15 +287,15 @@ export default function LiveSimulation() {
             }));
             setHorses(fetchedHorses);
             visualHorses.current = fetchedHorses.map(h => ({ ...h, visualProgress: 0, trail: [] }));
+          } else {
+            loadMockHorses();
           }
         } else {
-          setSimulatedRaceName('Chưa có vòng đua nào');
-          setHorses([]);
-          setActualRaceId(null);
+          loadMockHorses();
         }
       } catch (err) {
-        console.error("Failed to fetch real race data for simulation", err);
-        setSimulatedRaceName('Lỗi tải dữ liệu');
+        console.error("Failed to fetch real race data, using mock data", err);
+        loadMockHorses();
       }
     };
     fetchUpcomingRace();
@@ -193,15 +330,23 @@ export default function LiveSimulation() {
         status: 'FINISHED'
       };
 
-      saveSimulatedRaceAPI(newRace, results).then(() => {
+      if (actualRaceId && actualRaceId !== 999) {
+        saveSimulatedRaceAPI(newRace, results).then(() => {
+          setResultsSaved(true);
+          setFinalPodium(results);
+          setShowResultsSummary(true);
+        }).catch(err => {
+          console.error('Failed to save simulated race', err);
+        });
+      } else {
+        // Fallback for Demo Mode
+        console.log("Mock saved simulated race", newRace, results);
         setResultsSaved(true);
         setFinalPodium(results);
         setShowResultsSummary(true);
-      }).catch(err => {
-        console.error('Failed to save simulated race', err);
-      });
+      }
     }
-  }, [racePhase, horses, resultsSaved, simulatedRaceName]);
+  }, [racePhase, horses, resultsSaved, simulatedRaceName, actualRaceId]);
 
   // Canvas drawing loop
   useEffect(() => {
@@ -210,6 +355,8 @@ export default function LiveSimulation() {
     const ctx = canvas.getContext('2d');
     let animationFrameId;
     let speedOffset = 0;
+
+
 
     // Pre-generate clouds for a realistic sky
     const clouds = [
@@ -249,6 +396,19 @@ export default function LiveSimulation() {
       const startX = W * 0.06;
       const endX = W * 0.94;
       const Vx = W / 2;
+
+      // Clear the canvas
+      ctx.clearRect(0, 0, W, H);
+
+      // Save context for Screen Shake (Feature 10)
+      ctx.save();
+      if (shakeIntensity.current > 0) {
+        const dx = (Math.random() - 0.5) * shakeIntensity.current;
+        const dy = (Math.random() - 0.5) * shakeIntensity.current;
+        ctx.translate(dx, dy);
+        shakeIntensity.current *= 0.88; // decay shake
+        if (shakeIntensity.current < 0.2) shakeIntensity.current = 0;
+      }
 
       const drawStands = (isLeft) => {
         ctx.save();
@@ -405,6 +565,18 @@ export default function LiveSimulation() {
             ctx.arc(x, y - size * 1.4 + bob, size * 0.28, Math.PI, 0);
             ctx.fill();
 
+            // Phone camera flashes (Feature 11)
+            if (racePhase === 'RUNNING' && Math.random() < 0.015) {
+              ctx.save();
+              ctx.fillStyle = '#ffffff';
+              ctx.shadowColor = '#ffffff';
+              ctx.shadowBlur = 10;
+              ctx.beginPath();
+              ctx.arc(x + (Math.random() - 0.5) * 3, y - size * 1.1 + bob, 1.0 + Math.random() * 1.5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+            }
+
             // Waving flags
             if ((i + tier * 3) % 12 === 0) {
               const flagColor = crowdColors[(tier + i + 1) % crowdColors.length];
@@ -506,15 +678,41 @@ export default function LiveSimulation() {
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, W, horizonY);
 
-      // Draw Sun
-      const sunGrad = ctx.createRadialGradient(Vx, horizonY, 0, Vx, horizonY, config.sunRadius);
-      sunGrad.addColorStop(0, '#ffffff');
-      sunGrad.addColorStop(0.3, config.sunColor);
-      sunGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      ctx.fillStyle = sunGrad;
-      ctx.beginPath();
-      ctx.arc(Vx, horizonY, config.sunRadius, 0, Math.PI * 2);
-      ctx.fill();
+      // Draw Pulsing Sun (Feature 3)
+      let sunR = config.sunRadius;
+      if (environment === 'sunny') {
+        sunR = config.sunRadius + Math.sin(Date.now() * 0.003) * 6; // Sunny theme sun pulses
+      }
+      if (sunR > 0) {
+        const sunGrad = ctx.createRadialGradient(Vx, horizonY, 0, Vx, horizonY, sunR);
+        sunGrad.addColorStop(0, '#ffffff');
+        sunGrad.addColorStop(0.3, config.sunColor);
+        sunGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = sunGrad;
+        ctx.beginPath();
+        ctx.arc(Vx, horizonY, sunR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Lens Flare reflection for sunny theme (Feature 3)
+      if (environment === 'sunny') {
+        ctx.save();
+        const timeSec = Date.now() * 0.001;
+        const flares = [
+          { dist: 0.20, r: 8, color: 'rgba(253, 224, 71, 0.12)' },
+          { dist: 0.45, r: 20, color: 'rgba(147, 51, 234, 0.06)' },
+          { dist: 0.65, r: 14, color: 'rgba(59, 130, 246, 0.08)' }
+        ];
+        flares.forEach(f => {
+          const fx = Vx + (W / 2 - Vx) * f.dist + Math.sin(timeSec) * 2;
+          const fy = horizonY + (H / 2 - horizonY) * f.dist + Math.cos(timeSec) * 2;
+          ctx.fillStyle = f.color;
+          ctx.beginPath();
+          ctx.arc(fx, fy, f.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
 
       // Clouds (Sunset and Sunny themes)
       if (environment !== 'cyber') {
@@ -721,6 +919,69 @@ export default function LiveSimulation() {
       ctx.textAlign = 'center';
       ctx.fillText("FINISH", Vx, bannerY + 12);
 
+      // Starting Gates (Feature 4)
+      if (racePhase === 'PRE_RACE' || racePhase === 'RUNNING') {
+        const t_gate = 0.08;
+        const y_gate = horizonY + (H - horizonY) * (t_gate * t_gate);
+        
+        // Horizontal structure
+        const gateLeftX = Vx - 18 + (startX - (Vx - 18)) * t_gate;
+        const gateRightX = Vx + 18 + (endX - (Vx + 18)) * t_gate;
+        ctx.strokeStyle = environment === 'cyber' ? '#00f2fe' : '#78350f';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(gateLeftX, y_gate - 12);
+        ctx.lineTo(gateRightX, y_gate - 12);
+        ctx.stroke();
+
+        horsesRef.current.forEach((horse, laneIndex) => {
+          const laneStartX_left = startX + laneIndex * (endX - startX) / numLanes;
+          const laneStartX_right = startX + (laneIndex + 1) * (endX - startX) / numLanes;
+          const xL = Vx + (laneStartX_left - Vx) * t_gate;
+          const xR = Vx + (laneStartX_right - Vx) * t_gate;
+          const gateWidth = xR - xL;
+
+          // Vertical gate post
+          ctx.fillStyle = environment === 'cyber' ? '#00f2fe' : '#a1a1aa';
+          ctx.fillRect(xL - 1, y_gate - 12, 2, 12);
+          if (laneIndex === numLanes - 1) {
+            ctx.fillRect(xR - 1, y_gate - 12, 2, 12);
+          }
+
+          // Gate Barrier Door
+          const openPct = racePhase === 'RUNNING' ? Math.min(1, horse.progress / 5) : 0;
+          ctx.save();
+          ctx.strokeStyle = horse.color;
+          ctx.lineWidth = 1.5;
+          ctx.translate(xL, y_gate - 3);
+
+          if (openPct < 1) {
+            const angle = -openPct * (Math.PI / 2);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(gateWidth, 0);
+            ctx.stroke();
+            // diagonal cross on barrier
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(gateWidth, -3);
+            ctx.moveTo(0, -3);
+            ctx.lineTo(gateWidth, 0);
+            ctx.stroke();
+          } else {
+            // fully open: drawn up vertically
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, -9);
+            ctx.stroke();
+          }
+          ctx.restore();
+        });
+      }
+
       // 8. Draw Violation Flags
       horsesRef.current.forEach((horse, laneIndex) => {
         if (horse.flaggedPositions && horse.flaggedPositions.length > 0) {
@@ -768,6 +1029,7 @@ export default function LiveSimulation() {
           if (racePhase === 'PRE_RACE' && laneIndex >= spawnedCount) return;
           const stateHorse = horsesRef.current.find(h => h.id === vHorse.id);
           const targetProgress = stateHorse ? stateHorse.progress : 0;
+          const speedVal = stateHorse ? stateHorse.speed || 0 : 0;
 
           vHorse.visualProgress += (targetProgress - vHorse.visualProgress) * 0.08;
           if (Math.abs(targetProgress - vHorse.visualProgress) < 0.01) {
@@ -786,10 +1048,7 @@ export default function LiveSimulation() {
           const horseY = baseHorseY + bobY;
           const size = 16 + 42 * t;
 
-          let horseColor = '#00f2fe';
-          if (vHorse.id === 2) horseColor = '#10b981';
-          if (vHorse.id === 3) horseColor = '#ef4444';
-          if (vHorse.id === 4) horseColor = '#d4af37';
+          const horseColor = vHorse.color || '#00f2fe';
 
           if (!vHorse.trail) vHorse.trail = [];
           if (racePhase === 'RUNNING' && vHorse.visualProgress < 100) {
@@ -804,6 +1063,33 @@ export default function LiveSimulation() {
           ctx.beginPath();
           ctx.ellipse(horseX, baseHorseY + 2 * t, size * 0.45, size * 0.16, 0, 0, Math.PI * 2);
           ctx.fill();
+
+          // Speed Trails & Wind Streaks (Feature 8)
+          if (racePhase === 'RUNNING' && vHorse.visualProgress < 100 && speedVal > 0) {
+            ctx.save();
+            ctx.strokeStyle = environment === 'cyber' ? 'rgba(0, 242, 254, 0.4)' : 'rgba(255, 255, 255, 0.45)';
+            ctx.lineWidth = 1.2 * t;
+            // Draw wind streak lines extending backwards
+            ctx.beginPath();
+            ctx.moveTo(horseX, horseY - size * 0.1);
+            ctx.lineTo(horseX - size * 1.5, horseY - size * 0.1);
+            ctx.moveTo(horseX - size * 0.2, horseY + size * 0.15);
+            ctx.lineTo(horseX - size * 1.8, horseY + size * 0.15);
+            ctx.stroke();
+
+            // Cyber spark particles
+            if (environment === 'cyber') {
+              ctx.fillStyle = horseColor;
+              for (let p = 0; p < 2; p++) {
+                ctx.fillRect(
+                  horseX - (size * 0.45) - Math.random() * 25 * t,
+                  horseY + (Math.random() - 0.5) * 12 * t,
+                  2, 2
+                );
+              }
+            }
+            ctx.restore();
+          }
 
           // Trail ribbon
           vHorse.trail.forEach((p, idx) => {
@@ -860,13 +1146,13 @@ export default function LiveSimulation() {
           ctx.textBaseline = 'middle';
           ctx.fillText('🏇', horseX, horseY);
 
-          // Nametag
+          // Nametag with Speedometer (Feature 5)
           if (size > 22) {
             ctx.save();
             ctx.fillStyle = 'rgba(15, 30, 24, 0.85)';
             ctx.strokeStyle = horseColor;
             ctx.lineWidth = 1;
-            const labelW = size * 1.5;
+            const labelW = size * 1.6;
             const labelH = size * 0.4;
             const lx = horseX - labelW * 0.5;
             const ly = horseY - size * 0.65 - labelH;
@@ -876,8 +1162,60 @@ export default function LiveSimulation() {
 
             ctx.fillStyle = '#ffffff';
             ctx.font = `bold ${Math.max(9, Math.round(size * 0.22))}px 'Inter', sans-serif`;
-            ctx.fillText(`H${vHorse.id}: ${vHorse.name.split(' ')[0]}`, horseX, ly + labelH * 0.55);
+            const speedText = racePhase === 'RUNNING' && speedVal > 0 ? ` (${speedVal}km/h)` : '';
+            ctx.fillText(`H${vHorse.id}: ${vHorse.name.split(' ')[0]}${speedText}`, horseX, ly + labelH * 0.55);
             ctx.restore();
+          }
+
+          // Jockey Speech Bubble (Feature 9)
+          if (racePhase === 'RUNNING') {
+            if (vHorse.bubbleTimer === undefined) {
+              vHorse.bubbleTimer = 0;
+              vHorse.bubbleText = "";
+            }
+            
+            if (vHorse.bubbleTimer > 0) {
+              vHorse.bubbleTimer--;
+            } else if (Math.random() < 0.003) {
+              const phrases = ["Vượt lên!", "Nhanh hơn!", "Chặn đường kìa!", "Bứt phá nào!", "Sắp tới rồi!", "Cố lên!", "Đừng đầu hàng!", "Phóng thôi!"];
+              vHorse.bubbleText = phrases[Math.floor(Math.random() * phrases.length)];
+              vHorse.bubbleTimer = 80; // frames to show (~1.3s)
+            }
+
+            if (vHorse.bubbleTimer > 0 && vHorse.bubbleText) {
+              ctx.save();
+              ctx.font = "bold 9px sans-serif";
+              const textWidth = ctx.measureText(vHorse.bubbleText).width;
+              const bubbleW = textWidth + 10;
+              const bubbleH = 15;
+              const bx = horseX - bubbleW / 2;
+              const by = horseY - size * 0.65 - bubbleH - 22; // positioned higher than nametag
+
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+              ctx.strokeStyle = horseColor;
+              ctx.lineWidth = 1.2;
+              ctx.beginPath();
+              ctx.rect(bx, by, bubbleW, bubbleH);
+              ctx.fill();
+              ctx.stroke();
+
+              // downward pointer
+              ctx.beginPath();
+              ctx.moveTo(horseX - 3, by + bubbleH);
+              ctx.lineTo(horseX + 3, by + bubbleH);
+              ctx.lineTo(horseX, by + bubbleH + 3.5);
+              ctx.closePath();
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+              ctx.fill();
+              ctx.stroke();
+
+              // text
+              ctx.fillStyle = '#0f172a';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(vHorse.bubbleText, horseX, by + bubbleH / 2);
+              ctx.restore();
+            }
           }
 
           // Draw Flags
@@ -919,7 +1257,7 @@ export default function LiveSimulation() {
         });
       }
 
-      // Falling Rain Particles (Rain Theme)
+      // Falling Rain Particles with Lightning Strikes (Feature 3 & 10)
       if (environment === 'rain') {
         ctx.strokeStyle = 'rgba(174, 194, 224, 0.6)';
         ctx.lineWidth = 1.5;
@@ -937,6 +1275,38 @@ export default function LiveSimulation() {
           ctx.lineTo(drop.x - drop.speedX, drop.y + drop.l);
           ctx.stroke();
         });
+
+        // Lightning flash and strike trigger
+        if (racePhase === 'RUNNING' && Math.random() < 0.003) {
+          lightningIntensity.current = 1.0;
+          shakeIntensity.current = 16; // screenshake on thunder
+        }
+      }
+
+      // Render Lightning strike overlay
+      if (lightningIntensity.current > 0) {
+        ctx.save();
+        ctx.fillStyle = `rgba(224, 242, 254, ${lightningIntensity.current * 0.7})`;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3.5;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#00f2fe';
+        ctx.beginPath();
+        let lx = W * 0.15 + Math.random() * W * 0.7;
+        let ly = 0;
+        ctx.moveTo(lx, ly);
+        while (ly < horizonY + 30) {
+          lx += (Math.random() - 0.5) * 35;
+          ly += 18 + Math.random() * 18;
+          ctx.lineTo(lx, ly);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        lightningIntensity.current -= 0.07;
+        if (lightningIntensity.current < 0) lightningIntensity.current = 0;
       }
 
       // Draw Countdown Text
@@ -955,20 +1325,238 @@ export default function LiveSimulation() {
         ctx.restore();
       }
 
-      // Update and Draw Confetti
-      if (confettiParticles.current.length > 0) {
-        confettiParticles.current.forEach((p, idx) => {
-          p.x += p.vx;
-          p.y += p.vy;
-          p.vy += p.gravity;
-          p.rotation += p.rotationSpeed;
-          p.alpha -= 0.008;
 
-          if (p.alpha <= 0 || p.y > H) {
-            confettiParticles.current.splice(idx, 1);
-            return;
+
+      // Restore screen shake context (Feature 10)
+      ctx.restore();
+
+      // --- HUD Overlays (Not affected by screen shake) ---
+
+      // 1. Mini-map / Distance Track (Feature 7)
+      if (racePhase === 'PRE_RACE' || racePhase === 'RUNNING' || racePhase === 'FINISHED') {
+        ctx.save();
+        const mx_start = 120;
+        const mx_end = W - 120;
+        const my = 28;
+        const m_w = mx_end - mx_start;
+
+        // map track bar backdrop
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.roundRect(mx_start - 12, my - 6, m_w + 24, 12, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        // start/finish text labels
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '900 8px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('S', mx_start - 6, my);
+        ctx.fillText('F', mx_end + 6, my);
+
+        // draw each horse indicator dot
+        horsesRef.current.forEach(horse => {
+          const progress = horse.progress || 0;
+          const hx = mx_start + (progress / 100) * m_w;
+          
+          ctx.fillStyle = horse.isDisqualified ? '#64748b' : horse.color;
+          ctx.beginPath();
+          ctx.arc(hx, my, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '900 7px sans-serif';
+          ctx.fillText(horse.id.toString(), hx, my);
+        });
+        ctx.restore();
+      }
+
+      // 2. F1 Starting Lights (Feature 6)
+      let activeRedLights = 0;
+      let showGreenLights = false;
+      if (countdown === "5") activeRedLights = 1;
+      else if (countdown === "4") activeRedLights = 2;
+      else if (countdown === "3") activeRedLights = 3;
+      else if (countdown === "2") activeRedLights = 4;
+      else if (countdown === "1") activeRedLights = 5;
+      else if (countdown === "GO!") showGreenLights = true;
+
+      // Keep green lights flashing during early race running
+      if (racePhase === 'RUNNING' && horsesRef.current.some(h => h.progress > 0 && h.progress < 5)) {
+        showGreenLights = true;
+      }
+
+      if (racePhase === 'PRE_RACE' || showGreenLights) {
+        ctx.save();
+        const l_center_x = W / 2;
+        const l_y = 15;
+        const l_spacing = 16;
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(l_center_x - 52, l_y - 8, 104, 16, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        for (let l = 0; l < 5; l++) {
+          const lx = l_center_x - 32 + l * l_spacing;
+          ctx.beginPath();
+          ctx.arc(lx, l_y, 5, 0, Math.PI * 2);
+
+          if (showGreenLights) {
+            const isFlashOn = Math.sin(Date.now() * 0.015) > 0;
+            ctx.fillStyle = isFlashOn ? '#10b981' : '#047857';
+            ctx.shadowBlur = isFlashOn ? 8 : 0;
+            ctx.shadowColor = '#10b981';
+          } else {
+            const isOn = l < activeRedLights;
+            ctx.fillStyle = isOn ? '#ef4444' : '#7f1d1d';
+            ctx.shadowBlur = isOn ? 8 : 0;
+            ctx.shadowColor = '#ef4444';
+          }
+          ctx.fill();
+          ctx.strokeStyle = '#020617';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+
+
+      // 4. Draw Photo Finish (Feature 12)
+      if (racePhase === 'FINISHED') {
+        const sorted = [...horsesRef.current].sort((a, b) => {
+          if (a.isDisqualified && b.isDisqualified) return 0;
+          if (a.isDisqualified) return 1;
+          if (b.isDisqualified) return -1;
+          return (a.finishedTime || 0) - (b.finishedTime || 0);
+        });
+
+        if (sorted.length > 0) {
+          ctx.save();
+          const f_w = 340;
+          const f_h = 160;
+          const f_x = W / 2 - f_w / 2;
+          const f_y = H / 2 - f_h / 2 - 30;
+
+          // Metal border window popup
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+          ctx.strokeStyle = '#fbbf24'; // Gold border
+          ctx.lineWidth = 3;
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = 'rgba(251, 191, 36, 0.5)';
+          ctx.beginPath();
+          ctx.roundRect(f_x, f_y, f_w, f_h, 8);
+          ctx.fill();
+          ctx.stroke();
+
+          // Title
+          ctx.fillStyle = '#fbbf24';
+          ctx.font = "900 12px 'Inter', sans-serif";
+          ctx.textAlign = 'center';
+          ctx.fillText("★ PHOTO FINISH OFFICIAL ★", W / 2, f_y + 18);
+
+          // Subtext
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = "bold 8px sans-serif";
+          ctx.fillText("BĂNG GHI HÌNH CÁN ĐÍCH TRỌNG TÀI", W / 2, f_y + 28);
+
+          // Sweep camera line-scan box
+          const b_x = f_x + 15;
+          const b_y = f_y + 36;
+          const b_w = f_w - 30;
+          const b_h = 110;
+          
+          ctx.fillStyle = '#1e293b';
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1;
+          ctx.fillRect(b_x, b_y, b_w, b_h);
+          ctx.strokeRect(b_x, b_y, b_w, b_h);
+
+          // Grid scan lines
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(b_x, b_y, b_w, b_h);
+          ctx.clip();
+
+          // Vertical lines (camera scanlines)
+          ctx.strokeStyle = 'rgba(71, 85, 105, 0.3)';
+          ctx.lineWidth = 1;
+          for (let gx = b_x; gx < b_x + b_w; gx += 8) {
+            ctx.beginPath();
+            ctx.moveTo(gx, b_y);
+            ctx.lineTo(gx, b_y + b_h);
+            ctx.stroke();
           }
 
+          // Draw vertical red finish line marker in center
+          const finishLineX = b_x + b_w / 2 + 30;
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(finishLineX, b_y);
+          ctx.lineTo(finishLineX, b_y + b_h);
+          ctx.stroke();
+
+          // Draw the top 3 horses positioned relative to the finish line
+          const top3 = sorted.filter(h => !h.isDisqualified).slice(0, 3);
+          top3.forEach((h, index) => {
+            const timeDiff = index === 0 ? 0.00 : (h.finishedTime - top3[0].finishedTime) / 1000;
+            // First horse touches finish line. Backwards spacing based on time difference
+            const hx = finishLineX - (timeDiff * 140);
+            const hy = b_y + 22 + index * 26;
+
+            // Draw standard horse emoji inside a glowing holographic ring matching the horse's color
+            ctx.save();
+            ctx.strokeStyle = h.color;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = h.color;
+            ctx.beginPath();
+            ctx.arc(hx, hy, 12, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(hx, hy, 11, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "12px Arial";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🏇', hx, hy);
+            ctx.restore();
+
+            // Label text for rankings
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "bold 9px sans-serif";
+            ctx.textAlign = 'left';
+            ctx.fillText(`${index + 1}st`, b_x + 10, hy + 3);
+            ctx.fillStyle = h.color;
+            ctx.fillText(h.name.substring(0, 7), b_x + 35, hy + 3);
+            
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText(index === 0 ? `Winner` : `+${timeDiff.toFixed(2)}s`, b_x + 95, hy + 3);
+          });
+
+          ctx.restore();
+          ctx.restore();
+        }
+      }
+
+      // 5. Draw Confetti & Fireworks
+      if (confettiParticles.current.length > 0) {
+        confettiParticles.current.forEach((p, idx) => {
           ctx.save();
           ctx.globalAlpha = p.alpha;
           ctx.fillStyle = p.color;
@@ -979,36 +1567,86 @@ export default function LiveSimulation() {
         });
       }
 
-      // Camera flashes in the crowd
-      if (racePhase === 'RUNNING' && Math.random() < 0.12) {
-        const flashCount = Math.floor(Math.random() * 3) + 1;
-        for (let f = 0; f < flashCount; f++) {
-          const flashIsLeft = Math.random() < 0.5;
-          const flashTier = Math.floor(Math.random() * 8);
-          const flashRatio = (flashTier + 0.5) / 8;
-          const flashY_val = horizonY + (H - horizonY) * flashRatio;
-          
-          let lineStartX, lineEndX;
-          if (flashIsLeft) {
-            lineStartX = 0;
-            lineEndX = (Vx - 55) + ((startX - 80) - (Vx - 55)) * flashRatio;
-          } else {
-            lineStartX = (Vx + 55) + ((endX + 80) - (Vx + 55)) * flashRatio;
-            lineEndX = W;
+      if (fireworks.current.length > 0) {
+        fireworks.current.forEach((p) => {
+          if (p.type === 'spark') {
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          } else if (p.type === 'rocket') {
+            ctx.save();
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
           }
-          const flashX = lineStartX + Math.random() * (lineEndX - lineStartX);
-          const flashSize = 2 + 10 * Math.random();
-          
-          ctx.save();
-          ctx.fillStyle = '#ffffff';
-          ctx.shadowColor = environment === 'cyber' ? '#00f2fe' : '#ffffff';
-          ctx.shadowBlur = 18;
-          ctx.beginPath();
-          ctx.arc(flashX, flashY_val - (2 + 9 * flashRatio), flashSize, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
+        });
       }
+
+      // 6. Draw Live Commentary Ticker
+      if (racePhase === 'PRE_RACE' || racePhase === 'RUNNING' || racePhase === 'FINISHED') {
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.fillRect(0, H - 24, W, 24);
+        ctx.strokeRect(0, H - 24, W, 24);
+
+        const dotOn = Math.sin(Date.now() * 0.012) > 0;
+        ctx.fillStyle = dotOn ? '#ef4444' : '#7f1d1d';
+        ctx.beginPath();
+        ctx.arc(16, H - 12, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ef4444';
+        ctx.font = "bold 8.5px 'Inter', sans-serif";
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText("LIVE FEED:", 26, H - 12);
+
+        ctx.fillStyle = '#fef08a';
+        ctx.font = "bold 10px 'Inter', sans-serif";
+        ctx.fillText(commentaryText.current, 95, H - 12);
+        ctx.restore();
+      }
+
+      // 7. Render Spectator Cheering Bubbles & Cheering flashpoints (Feature 11)
+      if (racePhase === 'RUNNING' && Math.random() < 0.035) {
+        crowdBubbles.current.push({
+          x: Math.random() < 0.5 ? Math.random() * 150 : W - Math.random() * 150,
+          y: horizonY - 10 + Math.random() * 80,
+          vy: -0.4 - Math.random() * 0.6,
+          text: ['🙌', '📣', '🎉', '🔥', '🏆', '🏇'][Math.floor(Math.random() * 6)],
+          alpha: 1.0,
+          size: 10 + Math.random() * 7
+        });
+      }
+
+      if (crowdBubbles.current.length > 0) {
+        crowdBubbles.current.forEach((b, idx) => {
+          b.y += b.vy;
+          b.alpha -= 0.014; // fade out
+          if (b.alpha <= 0) {
+            crowdBubbles.current.splice(idx, 1);
+            return;
+          }
+          ctx.save();
+          ctx.globalAlpha = b.alpha;
+          ctx.font = `bold ${b.size}px Arial`;
+          ctx.fillText(b.text, b.x, b.y);
+          ctx.restore();
+        });
+      }
+
+      // Restore screen shake context (Feature 10)
+      ctx.restore();
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -1017,10 +1655,81 @@ export default function LiveSimulation() {
     return () => cancelAnimationFrame(animationFrameId);
   }, [racePhase, environment, countdown, spawnedCount]);
 
+  // Manage looping ambient sounds, rain, music, and victory fanfares
+  useEffect(() => {
+    if (racePhase === 'RAPHAEL') {
+      audioManager.playSfx('horse_intro', true);
+      audioManager.setSfxVolume('horse_intro', 0.45); // low volume for intro
+      if (environment === 'rain') {
+        audioManager.playSfx('rain', true);
+      } else {
+        audioManager.stopSfx('rain');
+      }
+    } else if (racePhase === 'PRE_RACE') {
+      audioManager.playSfx('music', true);
+      audioManager.playSfx('crowd', true);
+      audioManager.setSfxVolume('music', 0.45); // low volume for countdown
+      audioManager.setSfxVolume('crowd', 0.2);  // low crowd ambient
+      if (environment === 'rain') {
+        audioManager.playSfx('rain', true);
+      } else {
+        audioManager.stopSfx('rain');
+      }
+    } else if (racePhase === 'RUNNING') {
+      audioManager.playSfx('gallop', true);
+      audioManager.playSfx('crowd', true);
+      audioManager.playSfx('music', true);
+      audioManager.setSfxVolume('music', 0.60); // background music level
+      audioManager.setSfxVolume('crowd', 0.70); // crowd cheering level (louder than music)
+      if (environment === 'rain') {
+        audioManager.playSfx('rain', true);
+      } else {
+        audioManager.stopSfx('rain');
+      }
+    } else if (racePhase === 'FINISHED') {
+      audioManager.stopSfx('gallop');
+      audioManager.stopSfx('music');
+      audioManager.stopSfx('horse_intro'); // just in case
+      audioManager.setSfxVolume('crowd', 1.0); // swell volume of crowd
+      audioManager.playSfx('victory', false);  // play trumpet fanfare
+      
+      const timer = setTimeout(() => {
+        audioManager.stopSfx('crowd');
+        audioManager.stopSfx('victory');
+        audioManager.stopSfx('rain');
+      }, 7000);
+      return () => clearTimeout(timer);
+    } else {
+      audioManager.stopAllSfx();
+    }
+  }, [racePhase, environment]);
+
+  // Sound controllers
+  const toggleSfx = () => {
+    const nextVal = !isSfxMuted;
+    setIsSfxMuted(nextVal);
+    audioManager.setSfxMuted(nextVal);
+  };
+
+  const handleVolumeChange = (e) => {
+    const vol = parseFloat(e.target.value) / 100;
+    setVolume(vol);
+    audioManager.setVolume(vol);
+  };
+
   const handleStart = async () => {
+    audioManager.unlockAudio();
+    // Reset visual refs
+    shakeIntensity.current = 0;
+    lightningIntensity.current = 0;
+    lastCommentaryChange.current = 0;
+    commentaryText.current = "Hệ thống đang chuẩn bị cuộc đua...";
+    fireworks.current = [];
+    crowdBubbles.current = [];
+
     if (racePhase === 'FINISHED') {
       // Refresh real data if any
-      if (actualRaceId) {
+      if (actualRaceId && actualRaceId !== 999) {
         try {
           const preCheck = await getRacePreCheckAPI(actualRaceId);
           if (preCheck && preCheck.participants && preCheck.participants.length > 0) {
@@ -1033,17 +1742,33 @@ export default function LiveSimulation() {
               weight: p.actualWeight || (450 + Math.random() * 50).toFixed(1),
               progress: 0,
               color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
-              flaggedPositions: []
+              flaggedPositions: [],
+              speed: 0
             }));
             setHorses(fetchedHorses);
-            visualHorses.current = fetchedHorses.map(h => ({ ...h, visualProgress: 0, trail: [] }));
+            visualHorses.current = fetchedHorses.map(h => ({ ...h, visualProgress: 0, trail: [], bubbleText: '', bubbleTimer: 0 }));
           }
         } catch (err) {
           console.error(err);
         }
       } else {
-        setHorses([]);
-        visualHorses.current = [];
+        // Fallback for Demo Mode
+        const mockNames = ['Thần Phong', 'Xích Thố', 'Bạch Long', 'Hắc Báo', 'Tia Chớp'];
+        const jockeys = ['Nguyễn Văn Đạt', 'Lê Hoàng Minh', 'Trần Văn Nam', 'Phạm Quốc Bảo', 'Huỳnh Gia Huy'];
+        const mockHorses = mockNames.map((name, idx) => ({
+          id: idx + 1,
+          horseId: 200 + idx,
+          name: name,
+          jockeyName: jockeys[idx],
+          ownerName: 'Tập đoàn ' + ['Alpha', 'Vanguard', 'Omega', 'Titan', 'Apex'][idx % 5],
+          weight: (450 + Math.random() * 50).toFixed(1),
+          progress: 0,
+          color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
+          flaggedPositions: [],
+          speed: 0
+        }));
+        setHorses(mockHorses);
+        visualHorses.current = mockHorses.map(h => ({ ...h, visualProgress: 0, trail: [], bubbleText: '', bubbleTimer: 0 }));
       }
       setResultsSaved(false);
       setSpawnedCount(0);
@@ -1051,7 +1776,7 @@ export default function LiveSimulation() {
     }
 
     // Call start API if real race
-    if (actualRaceId && racePhase !== 'FINISHED') {
+    if (actualRaceId && actualRaceId !== 999 && racePhase !== 'FINISHED') {
       try {
         await startRaceAPI(actualRaceId);
       } catch (err) {
@@ -1131,11 +1856,19 @@ export default function LiveSimulation() {
       const newFlags = [...(selectedHorseForFlag.flaggedPositions || []), position];
       const isBlacklisted = newFlags.length >= 3;
 
-      await reportViolationAPI(actualRaceId, {
-        horseId: selectedHorseForFlag.horseId,
-        violationType: `${flagReason} (at ${position}%)`,
-        description: `Flagged at ${position}%`
-      });
+      // Play referee whistle
+      audioManager.playWhistle();
+      shakeIntensity.current = 14;
+
+      if (actualRaceId && actualRaceId !== 999) {
+        await reportViolationAPI(actualRaceId, {
+          horseId: selectedHorseForFlag.horseId,
+          violationType: `${flagReason} (at ${position}%)`,
+          description: `Flagged at ${position}%`
+        });
+      } else {
+        console.log("Mock reported violation:", selectedHorseForFlag.name, flagReason);
+      }
 
       setHorses(prev => prev.map(h => {
         if (h.id === selectedHorseForFlag.id) {
@@ -1148,6 +1881,14 @@ export default function LiveSimulation() {
         }
         return h;
       }));
+
+      // Update commentary immediately for flag/violation
+      if (isBlacklisted) {
+        commentaryText.current = `🚩 TRUẤT QUYỀN THI ĐẤU! Chiến mã số ${selectedHorseForFlag.id} (${selectedHorseForFlag.name}) phạm quy lần 3 và bị loại (DSQ)!`;
+      } else {
+        commentaryText.current = `🚩 VI PHẠM! Trọng tài phạt cờ Chiến mã số ${selectedHorseForFlag.id} (${selectedHorseForFlag.name}) vì lỗi ${flagReason}!`;
+      }
+      lastCommentaryChange.current = Date.now() + 3500; // keep it on screen for 3.5s
 
       setShowFlagModal(false);
       setFlagReason('');
@@ -1206,8 +1947,39 @@ export default function LiveSimulation() {
               <span className="fw-bold text-dark fs-6 d-flex align-items-center gap-2">
                 <span className="material-symbols-outlined text-success" style={{ fontSize: '18px' }}>analytics</span>
                 {simulatedRaceName}
+                {actualRaceId === 999 && (
+                  <span className="badge bg-warning text-dark border border-warning-subtle py-1 px-2" style={{ fontSize: '10px' }}>DEMO MODE</span>
+                )}
               </span>
               <div className="d-flex flex-wrap align-items-center gap-2">
+                {/* Audio Controls */}
+                <div className="d-flex align-items-center gap-2 px-2 py-1 rounded bg-light border" style={{ fontSize: '11px' }}>
+                  <button
+                    className="btn btn-sm p-1 d-flex align-items-center justify-content-center border-0 bg-transparent"
+                    style={{ color: isSfxMuted ? '#dc3545' : '#198754' }}
+                    onClick={toggleSfx}
+                    title={isSfxMuted ? "Bật âm thanh" : "Tắt âm thanh"}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                      {isSfxMuted ? 'volume_off' : 'volume_up'}
+                    </span>
+                  </button>
+
+                  <div className="d-flex align-items-center gap-1">
+                    <span className="text-secondary" style={{ fontSize: '10px' }}>Vol:</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={Math.round(volume * 100)}
+                      onChange={handleVolumeChange}
+                      className="form-range"
+                      style={{ width: '50px', height: '4px', padding: 0 }}
+                    />
+                    <span className="text-dark fw-bold" style={{ width: '22px', textAlign: 'right', fontSize: '9px' }}>{Math.round(volume * 100)}%</span>
+                  </div>
+                </div>
+
                 <div className="d-flex align-items-center gap-1 small text-secondary me-2">
                   <span>Theme:</span>
                   <select
@@ -1275,6 +2047,11 @@ export default function LiveSimulation() {
                     </div>
 
                     <div className="leaderboard-metrics">
+                      {racePhase === 'RUNNING' && horse.speed > 0 && (
+                        <span className="badge bg-dark text-warning border border-warning-subtle me-2" style={{ fontSize: '9px', borderRadius: '4px', padding: '2px 5px' }}>
+                          ⚡ {horse.speed} km/h
+                        </span>
+                      )}
                       <div className="leaderboard-progress">{Math.round(horse.progress)}%</div>
                       <button
                         className="btn-flag-action"

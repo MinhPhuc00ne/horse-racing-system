@@ -1,7 +1,93 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './RaphaelHUD.css';
+import { audioManager } from './audioHelper';
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const transitionStyles = `
+@keyframes slideFromOutside {
+  0% {
+    transform: scale(4.5);
+    opacity: 0;
+    filter: blur(25px) drop-shadow(0 0 0px #00ccff);
+  }
+  20% {
+    transform: scale(1);
+    opacity: 1;
+    filter: blur(0px) drop-shadow(0 0 20px #00ccff);
+  }
+  82% {
+    transform: scale(0.96);
+    opacity: 1;
+    filter: blur(0px) drop-shadow(0 0 25px #ff8800);
+  }
+  100% {
+    transform: scale(0.5);
+    opacity: 0;
+    filter: blur(15px) drop-shadow(0 0 50px #ff8800);
+  }
+}
+
+.transition-logo-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(5,10,20,0.9) 0%, rgba(1,3,7,0.98) 100%);
+  overflow: hidden;
+}
+
+.transition-logo-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  animation: slideFromOutside 3.4s cubic-bezier(0.08, 0.82, 0.17, 1) forwards;
+  color: #ffffff;
+  font-family: 'Epilogue', 'Inter', sans-serif;
+  text-align: center;
+}
+
+.hud-logo-icon {
+  font-size: 100px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 15px #ff8800);
+}
+
+.hud-logo-title {
+  font-size: 54px;
+  font-weight: 900;
+  letter-spacing: 12px;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px #ff8800, 0 0 40px #ff8800;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.hud-logo-subtitle {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  color: #00ccff;
+  text-shadow: 0 0 10px #00ccff, 0 0 20px #00ccff;
+  margin-top: 15px;
+  text-transform: uppercase;
+}
+
+.hud-glow-line {
+  width: 180px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #00ccff, #ff8800, #00ccff, transparent);
+  margin-top: 25px;
+  box-shadow: 0 0 15px #00ccff;
+  border-radius: 2px;
+}
+`;
 
 export default function RaphaelHUD({ horses, environment, onComplete }) {
     const noticeContainerRef = useRef(null);
@@ -16,6 +102,35 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
     const [currentText, setCurrentText] = useState("");
     const [textOpacity, setTextOpacity] = useState(0);
     const [currentHorse, setCurrentHorse] = useState(null);
+    const [showTransitionLogo, setShowTransitionLogo] = useState(false);
+    const [transitionStep, setTransitionStep] = useState(0); // 0: none, 1: Ready, 2: Bet, 3: Start
+
+    // Helper to generate deterministic values based on a horse seed
+    const getDeterministicValues = (horse) => {
+        if (!horse) return { speed: 90, stamina: 90, accel: 'MAX', winRate: '95.00%', age: 4, recentForm: [1, 1, 2, 1, 3] };
+        const seed = horse.horseId || horse.id || 0;
+        const getPseudoRandom = (s, offset) => {
+            const x = Math.sin(s + offset) * 10000;
+            return x - Math.floor(x);
+        };
+        const speed = Math.floor(82 + getPseudoRandom(seed, 1) * 17);
+        const stamina = Math.floor(80 + getPseudoRandom(seed, 2) * 19);
+        const winRate = (80 + getPseudoRandom(seed, 3) * 19.9).toFixed(2) + "%";
+        const accels = ["MAX", "BURST", "STEADY", "RAPID", "STABLE", "EXPLOSIVE"];
+        const accel = accels[Math.floor(getPseudoRandom(seed, 4) * accels.length)];
+        const age = Math.floor(3 + getPseudoRandom(seed, 5) * 6);
+        const recentForm = [];
+        for (let j = 0; j < 5; j++) {
+            const rand = getPseudoRandom(seed, 6 + j);
+            if (rand < 0.5) recentForm.push(1);
+            else if (rand < 0.75) recentForm.push(2);
+            else if (rand < 0.9) recentForm.push(3);
+            else recentForm.push(4);
+        }
+        return { speed, stamina, accel, winRate, age, recentForm };
+    };
+
+    const currentStats = getDeterministicValues(currentHorse);
 
     const updateSystemText = (text) => {
         setTextOpacity(0);
@@ -42,6 +157,7 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
             if (noticeContainerRef.current) {
                 noticeContainerRef.current.style.animation = 'appearNotice 2.5s forwards';
             }
+            audioManager.playSystemBoot();
             updateSystemText("[ KHỞI ĐỘNG HỆ THỐNG TRÌNH DIỄN NGỰA ĐUA ]");
 
             await wait(2500);
@@ -60,10 +176,12 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
             for (let i = 0; i < horses.length; i++) {
                 const horse = horses[i];
                 setCurrentHorse(horse);
+                audioManager.playIntroChime(); // Play intro chime arpeggio for each horse
 
-                const speed = horse.id === 1 ? 99 : horse.id === 2 ? 92 : horse.id === 3 ? 96 : 88;
-                const stamina = horse.id === 1 ? 95 : horse.id === 2 ? 88 : horse.id === 3 ? 90 : 92;
-                const accel = horse.id === 1 ? "MAX" : horse.id === 2 ? "BURST" : horse.id === 3 ? "STEADY" : "RAPID";
+                const stats = getDeterministicValues(horse);
+                const speed = stats.speed;
+                const stamina = stats.stamina;
+                const accel = stats.accel;
 
                 if (fgHorseRef.current) {
                     fgHorseRef.current.style.setProperty('--horse-color', horse.color || '#00ccff');
@@ -85,7 +203,7 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
                 if (elStaminaFill) elStaminaFill.style.width = stamina + '%';
                 if (elAccel) elAccel.innerText = accel;
                 if (elCond) elCond.innerText = environment.toUpperCase();
-                if (elWinRate) elWinRate.innerText = (85 + Math.random() * 14).toFixed(2) + "%";
+                if (elWinRate) elWinRate.innerText = stats.winRate;
 
                 if (fgHorseRef.current) {
                     fgHorseRef.current.style.opacity = '1';
@@ -95,17 +213,26 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
 
                 await wait(1200);
                 if (isCancelled) return;
-                if (panel1Ref.current) panel1Ref.current.style.animation = 'slideInRight 0.4s ease-out forwards';
+                if (panel1Ref.current) {
+                    panel1Ref.current.style.animation = 'slideInRight 0.4s ease-out forwards';
+                    audioManager.playSlideTick();
+                }
 
                 await wait(1000);
                 if (isCancelled) return;
                 updateSystemText(`Trích xuất thông tin Đội Đua & Nài Ngựa [${horse.name}]...`);
-                if (panel2Ref.current) panel2Ref.current.style.animation = 'slideInRight 0.4s ease-out forwards';
+                if (panel2Ref.current) {
+                    panel2Ref.current.style.animation = 'slideInRight 0.4s ease-out forwards';
+                    audioManager.playSlideTick();
+                }
 
                 await wait(1000);
                 if (isCancelled) return;
                 triggerFlash(200);
-                if (panel3Ref.current) panel3Ref.current.style.animation = 'slideInRight 0.4s ease-out forwards';
+                if (panel3Ref.current) {
+                    panel3Ref.current.style.animation = 'slideInRight 0.4s ease-out forwards';
+                    audioManager.playSlideTick();
+                }
                 updateSystemText(`Hiển thị phong độ gần đây của [${horse.name}].`);
 
                 await wait(2000);
@@ -125,9 +252,45 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
             }
 
             updateSystemText("Đã giới thiệu xong. Chuẩn bị mở cổng đua!");
-            await wait(1500);
+            await wait(1200);
             if (isCancelled) return;
-            triggerFlash(1200);
+
+            // Stop the introductory music/crowd and trigger the heroic transition music
+            audioManager.stopSfx('horse_intro');
+            audioManager.stopSfx('crowd');
+            audioManager.playSfx('intro_heroic');
+
+            // Trigger Transition Step 1: "BẠN ĐÃ SẴN SÀNG?"
+            setShowTransitionLogo(true);
+            setTransitionStep(1);
+            
+            await wait(3500); // 3.5 seconds
+            if (isCancelled) return;
+
+            // Trigger Transition Step 2: "HÃY ĐẶT CƯỢC"
+            triggerFlash(150);
+            setTransitionStep(2);
+
+            await wait(3500); // 3.5 seconds
+            if (isCancelled) return;
+
+            // Trigger Transition Step 3: "CUỘC ĐUA BẮT ĐẦU"
+            triggerFlash(200);
+            setTransitionStep(3);
+
+            await wait(2800); // Wait 2.8s for the text to scale in and show
+            if (isCancelled) return;
+            
+            // Trigger transition flash
+            triggerFlash(1000);
+            await wait(180); // Wait 180ms to reach peak brightness (pure white screen)
+            if (isCancelled) return;
+
+            setShowTransitionLogo(false);
+            setTransitionStep(0);
+            
+            await wait(820); // Wait for flash to fade out completely
+            if (isCancelled) return;
 
             onComplete();
         };
@@ -139,6 +302,36 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
 
     return (
         <div className="raphael-hud-overlay">
+            <style dangerouslySetInnerHTML={{ __html: transitionStyles }} />
+            
+            {showTransitionLogo && (
+                <div className="transition-logo-overlay">
+                    {transitionStep === 1 && (
+                        <div className="transition-logo-content" key="step1">
+                            <div className="hud-logo-icon">🔔</div>
+                            <div className="hud-logo-title">BẠN ĐÃ SẴN SÀNG?</div>
+                            <div className="hud-logo-subtitle">HỆ THỐNG ĐÃ KÍCH HOẠT</div>
+                            <div className="hud-glow-line"></div>
+                        </div>
+                    )}
+                    {transitionStep === 2 && (
+                        <div className="transition-logo-content" key="step2">
+                            <div className="hud-logo-icon">💰</div>
+                            <div className="hud-logo-title">HÃY ĐẶT CƯỢC</div>
+                            <div className="hud-logo-subtitle">CƠ HỘI CHIẾN THẮNG TRONG TẦM TAY</div>
+                            <div className="hud-glow-line"></div>
+                        </div>
+                    )}
+                    {transitionStep === 3 && (
+                        <div className="transition-logo-content" key="step3">
+                            <div className="hud-logo-icon">🏁</div>
+                            <div className="hud-logo-title">CUỘC ĐUA BẮT ĐẦU</div>
+                            <div className="hud-logo-subtitle">CỔNG ĐUA CHUẨN BỊ MỞ</div>
+                            <div className="hud-glow-line"></div>
+                        </div>
+                    )}
+                </div>
+            )}
             <div className="dark-overlay" style={{ opacity: 1 }}></div>
 
             <div className="notice-container" ref={noticeContainerRef}>
@@ -214,7 +407,7 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
                         </div>
                         <div className="panel-data">
                             <span>Tuổi (Age)</span>
-                            <span className="highlight" style={{ color: '#ff8800' }}>4 Tuổi</span>
+                            <span className="highlight" style={{ color: '#ff8800' }}>{currentStats.age} Tuổi</span>
                         </div>
                         <div className="panel-data">
                             <span>Cân nặng (Weight)</span>
@@ -238,16 +431,19 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
                         <div className="panel-title">PHONG ĐỘ (RECENT FORM)</div>
                         <div className="panel-data" style={{ borderBottom: 'none', paddingBottom: '0' }}>
                             <span>Tỉ lệ thắng (Win Rate):</span>
-                            <span className="highlight-supreme" id="hud-statWinRate" style={{ fontSize: '24px' }}>99.9%</span>
+                            <span className="highlight-supreme" id="hud-statWinRate" style={{ fontSize: '24px' }}>{currentStats.winRate}</span>
                         </div>
                         <div className="panel-data" style={{ borderBottom: 'none', paddingTop: '5px' }}>
                             <span>5 trận gần nhất:</span>
                             <div style={{ display: 'flex', gap: '5px' }}>
-                                <span style={{ background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>1</span>
-                                <span style={{ background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>1</span>
-                                <span style={{ background: '#ef4444', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>4</span>
-                                <span style={{ background: '#f59e0b', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>2</span>
-                                <span style={{ background: '#10b981', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>1</span>
+                                {currentStats.recentForm.map((pos, idx) => {
+                                    const bg = pos === 1 ? '#10b981' : pos === 2 ? '#f59e0b' : pos === 3 ? '#3b82f6' : '#ef4444';
+                                    return (
+                                        <span key={idx} style={{ background: bg, color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+                                            {pos}
+                                        </span>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
