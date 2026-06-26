@@ -16,7 +16,7 @@ const refereeNavLinks = [
   { path: '/referee/pre-race-check', label: 'Pre-Race Check', icon: 'fact_check' },
   { path: '/referee/live-simulation', label: 'Live Simulation', icon: 'sports_score' },
   { path: '/referee/violations', label: 'Violations & Flags', icon: 'gavel' },
-  { path: '/spectator/tournaments', label: 'Đặt Cược', icon: 'local_atm' }
+  { path: '/spectator/tournaments', label: 'Betting', icon: 'local_atm' }
 ];
 
 export default function RefereePage() {

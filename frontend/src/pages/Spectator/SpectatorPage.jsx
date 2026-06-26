@@ -14,10 +14,10 @@ import './Spectator.css';
 
 const spectatorNavLinks = [
   { path: '/spectator/dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { path: '/spectator/tournaments', label: 'Giải Đấu & Vòng Đua', icon: 'emoji_events' },
-  { path: '/spectator/live', label: 'Mô Phỏng Trực Tiếp', icon: 'sports_score' },
-  { path: '/spectator/wallet', label: 'Ví & Giao Dịch', icon: 'account_balance_wallet' },
-  { path: '/spectator/upgrade', label: 'Nâng Cấp Tài Khoản', icon: 'manage_accounts' }
+  { path: '/spectator/tournaments', label: 'Tournaments & Races', icon: 'emoji_events' },
+  { path: '/spectator/live', label: 'Live Simulation', icon: 'sports_score' },
+  { path: '/spectator/wallet', label: 'Wallet & Transactions', icon: 'account_balance_wallet' },
+  { path: '/spectator/upgrade', label: 'Account Upgrade', icon: 'manage_accounts' }
 ];
 
 export default function SpectatorPage() {
@@ -32,16 +32,16 @@ export default function SpectatorPage() {
   const dynamicNavLinks = [...spectatorNavLinks];
   if (user?.role && user.role !== 'SPECTATOR') {
     let backPath = '/';
-    let label = 'Về Trang Quản Trị';
+    let label = 'Back to Admin Portal';
     if (user.role === 'HORSE_OWNER') {
       backPath = '/owner/dashboard';
-      label = 'Về Trang Owner';
+      label = 'Back to Owner Portal';
     } else if (user.role === 'JOCKEY') {
       backPath = '/jockey/dashboard';
-      label = 'Về Trang Jockey';
+      label = 'Back to Jockey Portal';
     } else if (user.role === 'RACE_REFEREE') {
       backPath = '/referee/dashboard';
-      label = 'Về Trang Referee';
+      label = 'Back to Referee Portal';
     }
     dynamicNavLinks.unshift({
       path: backPath,

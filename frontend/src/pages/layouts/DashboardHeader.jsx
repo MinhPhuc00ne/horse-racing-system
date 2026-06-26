@@ -202,14 +202,14 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
             {notificationOpen && (
               <div className="avatar-dropdown-menu" style={{ width: '320px', right: 0, paddingBottom: 0 }}>
                 <div className="avatar-dropdown-header d-flex justify-content-between align-items-center">
-                  <span>Thông báo ({pendingNotifications.length})</span>
+                  <span>Notifications ({pendingNotifications.length})</span>
                 </div>
                 <div className="avatar-dropdown-divider" style={{ marginBottom: 0 }} />
                 
                 <div className="no-scrollbar" style={{ maxHeight: '280px', overflowY: 'auto' }}>
                   {pendingNotifications.length === 0 ? (
                     <div className="py-4 text-center text-muted small" style={{ fontStyle: 'italic' }}>
-                      Không có thông báo mới
+                      No new notifications
                     </div>
                   ) : (
                     pendingNotifications.map((noti) => (
@@ -224,14 +224,14 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                             {noti.type === 'FRIEND_REQUEST' ? 'person' : 'sports_score'}
                           </span>
                           <span className="fw-bold text-dark text-truncate" style={{ fontSize: '12.5px', maxWidth: '200px' }}>
-                            {noti.senderName || 'Lời mời'}
+                            {noti.senderName || 'Invitation'}
                           </span>
-                          <span className="badge bg-warning text-dark ms-auto" style={{ fontSize: '8px', padding: '2px 4px' }}>Mới</span>
+                          <span className="badge bg-warning text-dark ms-auto" style={{ fontSize: '8px', padding: '2px 4px' }}>New</span>
                         </div>
                         <p className="text-secondary small m-0 text-truncate-2" style={{ fontSize: '11.5px', lineHeight: '1.4', textAlign: 'left', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', whiteSpace: 'normal' }}>
                           {noti.type === 'FRIEND_REQUEST' 
-                            ? `Gửi yêu cầu kết bạn đến bạn.`
-                            : `Mời bạn đua ngựa ${noti.horseName} tại cúp ${noti.tournamentName}`
+                            ? 'sent you a connection request.'
+                            : `Invited you to ride ${noti.horseName} at tournament ${noti.tournamentName}`
                           }
                         </p>
                       </button>
@@ -241,8 +241,6 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
               </div>
             )}
           </div>
-
-
 
           {/* User profile avatar */}
           <div className="avatar-dropdown-container" ref={dropdownRef}>

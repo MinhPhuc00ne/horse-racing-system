@@ -47,7 +47,7 @@ export default function SpectatorWallet() {
     if (e) e.preventDefault();
     const amountVal = parseFloat(depositAmount);
     if (isNaN(amountVal) || amountVal <= 0) {
-      alert("Vui lòng nhập số tiền nạp hợp lệ.");
+      alert("Please enter a valid deposit amount.");
       return;
     }
 
@@ -59,10 +59,10 @@ export default function SpectatorWallet() {
         // Redirect to PayOS checkout page
         window.location.href = res.checkoutUrl;
       } else {
-        alert("Không thể sinh mã thanh toán PayOS. Vui lòng thử lại.");
+        alert("Failed to generate PayOS checkout link. Please try again.");
       }
     } catch (err) {
-      alert(err.message || "Giao dịch nạp tiền thất bại.");
+      alert(err.message || "Deposit transaction failed.");
     } finally {
       setDepositing(false);
     }
@@ -72,25 +72,25 @@ export default function SpectatorWallet() {
     if (e) e.preventDefault();
     const amountVal = parseFloat(withdrawAmount);
     if (isNaN(amountVal) || amountVal <= 0) {
-      alert("Vui lòng nhập số tiền rút hợp lệ.");
+      alert("Please enter a valid withdrawal amount.");
       return;
     }
 
     if (amountVal > balance) {
-      alert("Số dư khả dụng không đủ để thực hiện yêu cầu.");
+      alert("Insufficient balance for this withdrawal request.");
       return;
     }
 
     setWithdrawing(true);
     try {
       await withdrawAPI(amountVal);
-      alert("Gửi yêu cầu rút tiền thành công. Vui lòng chờ quản trị viên phê duyệt.");
+      alert("Withdrawal request submitted successfully. Please wait for Admin approval.");
       setWithdrawAmount('');
       // Refresh wallet & history
       await fetchWalletData();
       await fetchHistoryData();
     } catch (err) {
-      alert(err.message || "Giao dịch rút tiền thất bại.");
+      alert(err.message || "Withdrawal transaction failed.");
     } finally {
       setWithdrawing(false);
     }
@@ -106,8 +106,8 @@ export default function SpectatorWallet() {
       {/* Title */}
       <div className="mb-4">
         <span className="role-badge">SPECTATOR ROLE</span>
-        <h2 className="ho-font-epilogue fs-3 fw-bold text-dark mb-1">Ví Cá Nhân & Giao Dịch</h2>
-        <p className="text-secondary small">Quản lý tài chính, thực hiện nạp tiền qua VietQR hoặc tạo yêu cầu rút tiền mặt.</p>
+        <h2 className="ho-font-epilogue fs-3 fw-bold text-dark mb-1">My Wallet & Transactions</h2>
+        <p className="text-secondary small">Manage your funds, make deposits via VietQR, or request cash withdrawals.</p>
       </div>
 
       <div className="row g-4">
@@ -121,9 +121,9 @@ export default function SpectatorWallet() {
               <span className="card-brand">EquineElite Member Wallet</span>
               <div className="card-chip"></div>
             </div>
-            <div className="balance-label">Số dư hiện tại</div>
+            <div className="balance-label">Current Balance</div>
             <div className="balance-amount">
-              {loading ? 'Đang tải...' : `${balance.toLocaleString('vi-VN')} VND`}
+              {loading ? 'Loading...' : `${balance.toLocaleString('en-US')} VND`}
             </div>
             <div style={{ position: 'absolute', bottom: '15px', right: '20px', opacity: 0.15, fontSize: '48px' }}>
               💳
@@ -144,7 +144,7 @@ export default function SpectatorWallet() {
                   aria-controls="pills-deposit" 
                   aria-selected="true"
                 >
-                  Nạp tiền
+                  Deposit
                 </button>
               </li>
               <li className="nav-item flex-grow-1" role="presentation">
@@ -158,7 +158,7 @@ export default function SpectatorWallet() {
                   aria-controls="pills-withdraw" 
                   aria-selected="false"
                 >
-                  Rút tiền
+                  Withdraw
                 </button>
               </li>
             </ul>
@@ -169,23 +169,23 @@ export default function SpectatorWallet() {
               <div className="tab-pane fade show active" id="pills-deposit" role="tabpanel" aria-labelledby="pills-deposit-tab">
                 <form onSubmit={handleDepositSubmit} className="d-flex flex-column gap-3">
                   <div className="form-group">
-                    <label className="ho-input-label">Nhập số tiền nạp (VND)</label>
+                    <label className="ho-input-label">Enter Deposit Amount (VND)</label>
                     <input 
                       type="number" 
                       min="10000" 
                       step="1000"
                       className="ho-form-input" 
-                      placeholder="Ví dụ: 100000" 
+                      placeholder="Example: 100000" 
                       value={depositAmount}
                       onChange={(e) => setDepositAmount(e.target.value)}
                       required
                     />
-                    <small className="text-muted small mt-1 block">Nạp tối thiểu 10,000 VND</small>
+                    <small className="text-muted small mt-1 block">Minimum deposit: 10,000 VND</small>
                   </div>
 
                   {/* Quick Options */}
                   <div>
-                    <label className="ho-input-label">Chọn nhanh số tiền</label>
+                    <label className="ho-input-label">Quick Select Amount</label>
                     <div className="d-flex flex-wrap gap-2">
                       {[50000, 100000, 200000, 500000, 1000000].map(val => (
                         <button 
@@ -195,7 +195,7 @@ export default function SpectatorWallet() {
                           className="btn btn-sm btn-outline-success rounded-pill px-3"
                           style={{ fontSize: '11.5px', fontWeight: '600' }}
                         >
-                          {val.toLocaleString('vi-VN')}
+                          {val.toLocaleString('en-US')}
                         </button>
                       ))}
                     </div>
@@ -206,7 +206,7 @@ export default function SpectatorWallet() {
                     className="ho-btn ho-btn-gold-solid w-100 mt-2 py-3"
                     disabled={depositing}
                   >
-                    {depositing ? 'Đang tạo liên kết...' : 'Nạp tiền qua VietQR'}
+                    {depositing ? 'Generating checkout...' : 'Deposit via VietQR'}
                   </button>
                 </form>
               </div>
@@ -215,23 +215,23 @@ export default function SpectatorWallet() {
               <div className="tab-pane fade" id="pills-withdraw" role="tabpanel" aria-labelledby="pills-withdraw-tab">
                 <form onSubmit={handleWithdrawSubmit} className="d-flex flex-column gap-3">
                   <div className="form-group">
-                    <label className="ho-input-label">Nhập số tiền rút (VND)</label>
+                    <label className="ho-input-label">Enter Withdrawal Amount (VND)</label>
                     <input 
                       type="number" 
                       min="20000" 
                       step="1000"
                       className="ho-form-input" 
-                      placeholder="Ví dụ: 50000" 
+                      placeholder="Example: 50000" 
                       value={withdrawAmount}
                       onChange={(e) => setWithdrawAmount(e.target.value)}
                       required
                     />
-                    <small className="text-muted small mt-1 block">Rút tối thiểu 20,000 VND</small>
+                    <small className="text-muted small mt-1 block">Minimum withdrawal: 20,000 VND</small>
                   </div>
 
                   <div className="p-3 rounded text-secondary small mb-2" style={{ background: '#f8f9fa', border: '1px solid #e2e8f0' }}>
-                    <span className="fw-bold block text-dark mb-1">Quy trình xử lý rút tiền:</span>
-                    Khán giả tạo yêu cầu rút tiền mặt → Số tiền sẽ bị đóng băng tạm thời → Ban quản trị (Admin) kiểm tra thông tin và duyệt giao dịch → Nhận tiền mặt/chuyển khoản ngoài đời thực.
+                    <span className="fw-bold block text-dark mb-1">Withdrawal Processing Flow:</span>
+                    Spectator submits request → Amount is temporarily frozen → Admin reviews and approves transaction → Cash/transfer completed externally.
                   </div>
 
                   <button 
@@ -239,7 +239,7 @@ export default function SpectatorWallet() {
                     className="ho-btn ho-btn-gold-solid w-100 py-3"
                     disabled={withdrawing}
                   >
-                    {withdrawing ? 'Đang xử lý...' : 'Gửi yêu cầu rút tiền'}
+                    {withdrawing ? 'Processing...' : 'Submit Withdrawal Request'}
                   </button>
                 </form>
               </div>
@@ -254,26 +254,26 @@ export default function SpectatorWallet() {
           <div className="glass-card h-100">
             <h3 className="form-section-title">
               <span className="material-symbols-outlined text-success">history</span>
-              Lịch Sử Giao Dịch
+              Transaction History
             </h3>
 
             {loadingHistory ? (
               <div className="text-center py-5">
                 <div className="spinner-border spinner-border-sm text-success" role="status"></div>
-                <p className="text-secondary small mt-2">Đang tải lịch sử...</p>
+                <p className="text-secondary small mt-2">Loading history...</p>
               </div>
             ) : history.length === 0 ? (
-              <div className="text-center py-5 text-secondary small">Chưa phát sinh giao dịch nào.</div>
+              <div className="text-center py-5 text-secondary small">No transaction history found.</div>
             ) : (
               <div className="table-responsive">
                 <table className="table ho-table">
                   <thead>
                     <tr>
-                      <th>Mã GD</th>
-                      <th>Ngày Tạo</th>
-                      <th>Chi Tiết Giao Dịch</th>
-                      <th>Số Tiền</th>
-                      <th>Trạng Thái</th>
+                      <th>TXID</th>
+                      <th>Date Created</th>
+                      <th>Transaction Details</th>
+                      <th>Amount</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -285,7 +285,7 @@ export default function SpectatorWallet() {
                           <td style={{ fontSize: '12px', whiteSpace: 'nowrap' }}>{tx.date}</td>
                           <td>{tx.event}</td>
                           <td className={`fw-bold ${isDeposit ? 'text-success' : 'text-danger'}`} style={{ whiteSpace: 'nowrap' }}>
-                            {isDeposit ? '+' : ''}{tx.amount.toLocaleString('vi-VN')} đ
+                            {isDeposit ? '+' : ''}{tx.amount.toLocaleString('en-US')} VND
                           </td>
                           <td>
                             <span className={`badge ${
@@ -293,8 +293,8 @@ export default function SpectatorWallet() {
                               tx.status === 'PENDING' ? 'bg-warning text-dark' :
                               'bg-danger'
                             } text-uppercase small`} style={{ fontSize: '9px' }}>
-                              {tx.status === 'SUCCESS' ? 'Thành công' :
-                               tx.status === 'PENDING' ? 'Chờ duyệt' : 'Thất bại'}
+                              {tx.status === 'SUCCESS' ? 'Success' :
+                               tx.status === 'PENDING' ? 'Pending' : 'Failed'}
                             </span>
                           </td>
                         </tr>

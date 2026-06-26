@@ -17,8 +17,8 @@ const adminNavLinks = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { path: '/admin/usermanagement', label: 'User Management', icon: 'group' },
   { path: '/admin/upgradeuserrole', label: 'Upgrade User Role', icon: 'manage_accounts' },
-  { path: '/admin/tournamentmanagement', label: 'Quản Lý Giải Đấu', icon: 'emoji_events' },
-  { path: '/admin/racemanagement', label: 'Duyệt Đăng Ký Đua', icon: 'flag' },
+  { path: '/admin/tournamentmanagement', label: 'Tournament Management', icon: 'emoji_events' },
+  { path: '/admin/racemanagement', label: 'Race Registrations', icon: 'flag' },
   { path: '/admin/withdrawals', label: 'Withdrawals', icon: 'account_balance_wallet' }
 ];
 

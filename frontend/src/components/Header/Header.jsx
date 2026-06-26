@@ -176,7 +176,9 @@ const Header = () => {
                 {/* PHẦN USER: HIỂN THỊ ĐỘNG TÊN TỪ DATABASE/GOOGLE */}
                 <div className="d-flex align-items-center gap-2 ms-2 ps-3 border-start border-secondary">
                   <div className="text-end d-none d-sm-block">
-                    <div className="text-white-50" style={{ fontSize: '0.7rem' }}>Welcome back,</div>
+                    <div className="text-white-50" style={{ fontSize: '0.7rem' }}>
+                      Welcome back,
+                    </div>
                     <div className="text-white fw-bold" style={{ fontSize: '0.85rem' }}>
                       {username}
                     </div>
@@ -205,7 +207,6 @@ const Header = () => {
                   >
                     <NavDropdown.Header>Account Actions</NavDropdown.Header>
                     <NavDropdown.Item href="#profile">My Profile</NavDropdown.Item>
-                    <NavDropdown.Item href="#settings">Settings</NavDropdown.Item>
                     <NavDropdown.Divider />
                     <NavDropdown.Item onClick={handleLogout} className="text-danger d-flex align-items-center gap-2">
                       <FiLogOut /> Logout

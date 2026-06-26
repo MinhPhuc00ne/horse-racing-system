@@ -137,10 +137,10 @@ export default function DashboardContent() {
                 Race Registration
               </h3>
               <p className="text-dark fw-bold mb-2" style={{ fontSize: '14px' }}>
-                Đăng ký giải đấu mới
+                Register New Tournament
               </p>
               <p className="text-secondary small mb-3" style={{ lineHeight: '1.4' }}>
-                Các giải đấu lớn đang mở cổng đăng ký thi đấu. Nhấp vào đây để điều hướng nhanh đến bảng đăng ký giải đấu dành cho các chiến mã của bạn.
+                Major tournaments are currently open for registration. Click here to quickly navigate to the registration board for your horses.
               </p>
             </div>
             <button
@@ -148,7 +148,7 @@ export default function DashboardContent() {
               style={{ fontSize: '12.5px' }}
             >
               <span className="material-symbols-outlined text-dark" style={{ fontSize: '16px' }}>sports_score</span>
-              Đến Bảng Đăng Ký
+              Go to Registration
             </button>
           </div>
         </div>

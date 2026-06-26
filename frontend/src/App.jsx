@@ -155,7 +155,7 @@ function App() {
         )}
 
         <FloatingAiChat />
-      </BrowserRouter>
+        </BrowserRouter>
       </NotificationProvider>
     </AuthProvider>
   );

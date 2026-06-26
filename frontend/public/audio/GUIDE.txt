@@ -1,0 +1,35 @@
+HƯỚNG DẪN THAY THẾ NHẠC MP3 CHO HỆ THỐNG ĐUA NGỰA
+=================================================
+
+Để thay thế nhạc nền, nhạc giới thiệu ngựa, nhạc lúc sẵn sàng, nhạc chiến thắng, và tiếng khán giả reo hò bằng các file MP3 của riêng bạn, hãy làm theo hướng dẫn dưới đây:
+
+1. Chuẩn bị các file nhạc MP3 của bạn.
+2. Copy các file MP3 đó vào thư mục này (`frontend/public/audio/`).
+3. Đổi tên các file MP3 trùng khớp với tên dưới đây:
+
+   - Nhạc lúc giới thiệu ngựa (lúc hiện profile từng con ngựa):
+     Tên file: horse_intro.mp3
+     Đường dẫn: frontend/public/audio/horse_intro.mp3
+     Thời lượng gợi ý: 17s (hoặc tự do vì nhạc tự động lặp lại - Loop)
+
+   - Nhạc khúc chiếu chữ chuyển tiếp "BẠN ĐÃ SẴN SÀNG?", "HÃY ĐẶT CƯỢC", "CUỘC ĐUA BẮT ĐẦU":
+     Tên file: intro_heroic.mp3
+     Đường dẫn: frontend/public/audio/intro_heroic.mp3
+     Thời lượng gợi ý: 12s (khớp với thời gian chạy hiệu ứng chữ)
+
+   - Nhạc nền cuộc đua (phát khi ngựa bắt đầu phi và đếm ngược):
+     Tên file: bg_music.mp3
+     Đường dẫn: frontend/public/audio/bg_music.mp3
+     Thời lượng gợi ý: 8s (hoặc tự do vì nhạc tự động lặp lại - Loop)
+
+   - Tiếng reo hò của khán giả (phát cùng lúc với nhạc nền đua):
+     Tên file: storegraphic-crowd-cheers-477401.mp3
+     Đường dẫn: frontend/public/audio/storegraphic-crowd-cheers-477401.mp3
+     Thời lượng gợi ý: 8s (hoặc tự do vì tiếng reo hò tự động lặp lại - Loop)
+
+   - Nhạc chiến thắng khi có ngựa về đích (Victory Music):
+     Tên file: victory.mp3
+     Đường dẫn: frontend/public/audio/victory.mp3
+     Thời lượng gợi ý: 9s (hoặc tự do)
+
+Sau khi copy và đổi tên đúng, hãy F5 tải lại trang web. Hệ thống sẽ tự động sử dụng nhạc mới của bạn mà không cần chỉnh sửa code gì thêm!

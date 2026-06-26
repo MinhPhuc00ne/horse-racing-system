@@ -348,7 +348,7 @@ export default function JockeyProfileContent() {
                 </div>
 
                 <div>
-                  <label className="ho-input-label ho-font-grotesk">Tiểu sử & Ghi chú kỹ năng</label>
+                  <label className="ho-input-label ho-font-grotesk">Biography & Skill Notes</label>
                   <textarea
                     className="ho-form-input text-dark"
                     rows="3"
@@ -359,7 +359,7 @@ export default function JockeyProfileContent() {
 
                 <div className="text-end mt-2">
                   <button type="submit" className="ho-btn ho-btn-gold-solid py-2 px-5 fw-bold">
-                    Lưu Thay Đổi
+                    Save Changes
                   </button>
                 </div>
               </form>

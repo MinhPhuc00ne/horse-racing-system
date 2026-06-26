@@ -22,10 +22,10 @@ export default function JockeyRacesContent() {
       <div className="d-flex justify-content-between align-items-end border-bottom pb-3 mb-4" style={{ borderColor: 'var(--ho-border-muted)' }}>
         <div>
           <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
-            Lịch trình & Giải đấu
+            Schedule & Tournaments
           </h2>
           <p className="text-secondary small m-0">
-            Theo dõi các cuộc đua bạn chuẩn bị tham gia và xem toàn bộ thông tin các giải đấu.
+            Track the races you are about to participate in and view all tournament details.
           </p>
         </div>
       </div>
@@ -37,14 +37,14 @@ export default function JockeyRacesContent() {
           className={`ho-tab-btn ${activeTab === 'my-schedule' ? 'ho-tab-btn-active' : ''}`}
           style={{ borderRadius: '30px' }}
         >
-          Lịch thi đấu của tôi ({schedule.length})
+          My Schedule ({schedule.length})
         </button>
         <button
           onClick={() => setActiveTab('all-races')}
           className={`ho-tab-btn ${activeTab === 'all-races' ? 'ho-tab-btn-active' : ''}`}
           style={{ borderRadius: '30px' }}
         >
-          Giải đấu hệ thống ({tournaments.length})
+          System Tournaments ({tournaments.length})
         </button>
       </div>
 
@@ -53,46 +53,46 @@ export default function JockeyRacesContent() {
         <div className="row g-4">
           {schedule.length === 0 ? (
             <div className="col-12 text-center py-5 glass-card text-secondary italic">
-              Bạn chưa đăng ký hoặc chưa đồng ý tham gia cuộc đua nào sắp tới.
-              Vui lòng duyệt các lời mời ở tab "Lời mời" để bắt đầu.
+              You have not registered or agreed to participate in any upcoming races.
+              Please review invitations in the "Invitations" tab to get started.
             </div>
           ) : (
             schedule.map((race, index) => (
               <div key={race.id || index} className="col-12 col-md-6 col-lg-4">
                 <DataCard 
                   title={race.tournamentName} 
-                  subtitle={`${race.raceDate} lúc ${race.raceTime}`}
+                  subtitle={`${race.raceDate} at ${race.raceTime}`}
                   interactive={true}
                 >
                   <div className="d-flex flex-column gap-2 mb-3">
                     <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                      <span className="fw-bold text-dark">Chủ ngựa:</span>
+                      <span className="fw-bold text-dark">Horse Owner:</span>
                       <span className="text-secondary small">{race.ownerName} ({race.stableName})</span>
                     </div>
                     <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                      <span className="fw-bold text-dark">Ngựa chiến:</span>
+                      <span className="fw-bold text-dark">Horse:</span>
                       <span className="text-secondary small">{race.horseName} ({race.horseBreed})</span>
                     </div>
                     <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                      <span className="fw-bold text-dark">Trường đua:</span>
+                      <span className="fw-bold text-dark">Location:</span>
                       <span className="text-dark small text-truncate ms-2" style={{ maxWidth: '150px' }}>{race.location}</span>
                     </div>
                     <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                      <span className="fw-bold text-dark">Cổng xuất phát:</span>
-                      <span className="fw-bold text-warning">Cổng #{race.gateNumber || index + 1}</span>
+                      <span className="fw-bold text-dark">Starting Gate:</span>
+                      <span className="fw-bold text-warning">Gate #{race.gateNumber || index + 1}</span>
                     </div>
                     <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                      <span className="fw-bold text-dark">Phần chia giải:</span>
+                      <span className="fw-bold text-dark">Prize Share:</span>
                       <span className="fw-bold text-success">{race.jockeyShare}%</span>
                     </div>
                     <div className="d-flex justify-content-between py-1 align-items-center">
-                      <span className="fw-bold text-dark">Trạng thái:</span>
+                      <span className="fw-bold text-dark">Status:</span>
                       <StatusBadge status="READY" />
                     </div>
                   </div>
 
                   <div className="mt-3 p-2 text-center rounded fw-semibold text-success small" style={{ backgroundColor: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                    Đã được xác nhận tham gia
+                    Confirmed Participant
                   </div>
                 </DataCard>
               </div>
@@ -112,7 +112,7 @@ export default function JockeyRacesContent() {
               </span>
               <input
                 type="text"
-                placeholder="Tìm kiếm giải đấu, vòng đua hoặc địa điểm trường đua..."
+                placeholder="Search tournaments, races, or racetracks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="ho-form-input ps-5 text-dark"
@@ -124,7 +124,7 @@ export default function JockeyRacesContent() {
           <div className="row g-4">
             {filteredRaces.length === 0 ? (
               <div className="col-12 text-center py-5 glass-card text-secondary italic">
-                Không tìm thấy vòng đua nào phù hợp với từ khóa tìm kiếm.
+                No races matched your search keyword.
               </div>
             ) : (
               filteredRaces.map((race, index) => {
@@ -133,34 +133,34 @@ export default function JockeyRacesContent() {
                   <div key={race.id || index} className="col-12 col-md-6 col-lg-4">
                     <DataCard 
                       title={`${race.tournamentName}`} 
-                      subtitle={`${race.date} lúc ${race.time}`}
+                      subtitle={`${race.date} at ${race.time}`}
                       interactive={true}
                     >
                       <div className="d-flex flex-column gap-2 mb-3">
                         <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                          <span className="fw-bold text-dark">Trường đua:</span>
+                          <span className="fw-bold text-dark">Location:</span>
                           <span className="text-dark small text-truncate ms-2" style={{ maxWidth: '160px' }}>{race.location}</span>
                         </div>
                         <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                          <span className="fw-bold text-dark">Đường chạy:</span>
+                          <span className="fw-bold text-dark">Track Type:</span>
                           <span className="text-secondary small">{race.trackType}</span>
                         </div>
                         <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                          <span className="fw-bold text-dark">Tổng tiền thưởng:</span>
+                          <span className="fw-bold text-dark">Total Prize Pool:</span>
                           <span className="fw-bold text-success small">{race.prizePool}</span>
                         </div>
                         <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                          <span className="fw-bold text-dark">Số ngựa tham gia:</span>
-                          <span className="text-secondary small">{totalParticipants} ngựa</span>
+                          <span className="fw-bold text-dark">Participants:</span>
+                          <span className="text-secondary small">{totalParticipants} horses</span>
                         </div>
                         <div className="d-flex justify-content-between py-1 align-items-center">
-                          <span className="fw-bold text-dark">Trạng thái:</span>
-                          <StatusBadge status={race.status === 'OPEN_FOR_REGISTER' ? 'Đang mở đăng ký' : race.status} />
+                          <span className="fw-bold text-dark">Status:</span>
+                          <StatusBadge status={race.status === 'OPEN_FOR_REGISTER' ? 'Registration Open' : race.status} />
                         </div>
                       </div>
 
                       <div className="mt-3 p-2 rounded text-center small text-secondary fw-medium" style={{ backgroundColor: '#f0f0f0', border: '1px solid #ddd' }}>
-                        {race.status === 'OPEN_FOR_REGISTER' ? 'Chờ chủ ngựa gửi yêu cầu đăng ký' : 'Giải đấu sắp khởi tranh'}
+                        {race.status === 'OPEN_FOR_REGISTER' ? 'Awaiting Horse Owner Registration' : 'Tournament Starting Soon'}
                       </div>
                     </DataCard>
                   </div>
