@@ -92,7 +92,7 @@ public class RaceRegistrationService {
         if (tournament.getAllowedClasses() != null && !tournament.getAllowedClasses().isBlank()) {
             String horseBreed = horse.getBreed().getBreedName();
             boolean breedMatch = java.util.Arrays.stream(tournament.getAllowedClasses().split(","))
-                    .map(String::trim)
+                    .map(s -> s.trim())
                     .anyMatch(b -> b.equalsIgnoreCase(horseBreed));
             if (!breedMatch) {
                 throw new RuntimeException("Horse breed '" + horseBreed + "' is not allowed in this tournament (Allowed: " + tournament.getAllowedClasses() + ")");
@@ -104,7 +104,7 @@ public class RaceRegistrationService {
                 throw new RuntimeException("Horse gender is not specified");
             }
             boolean genderMatch = java.util.Arrays.stream(tournament.getAllowedGenders().split(","))
-                    .map(String::trim)
+                    .map(s -> s.trim())
                     .anyMatch(g -> g.equalsIgnoreCase(horseGender));
             if (!genderMatch) {
                 throw new RuntimeException("Horse gender '" + horseGender + "' is not allowed in this tournament (Allowed: " + tournament.getAllowedGenders() + ")");
@@ -436,7 +436,7 @@ public class RaceRegistrationService {
             if (tournament.getAllowedClasses() != null && !tournament.getAllowedClasses().isBlank()) {
                 String horseBreed = horse.getBreed().getBreedName();
                 boolean breedMatch = java.util.Arrays.stream(tournament.getAllowedClasses().split(","))
-                        .map(String::trim)
+                        .map(s -> s.trim())
                         .anyMatch(b -> b.equalsIgnoreCase(horseBreed));
                 if (!breedMatch) {
                     throw new RuntimeException("Horse breed '" + horseBreed + "' is not allowed in this tournament (Allowed: " + tournament.getAllowedClasses() + ")");
@@ -448,7 +448,7 @@ public class RaceRegistrationService {
                     throw new RuntimeException("Horse gender is not specified");
                 }
                 boolean genderMatch = java.util.Arrays.stream(tournament.getAllowedGenders().split(","))
-                        .map(String::trim)
+                        .map(s -> s.trim())
                         .anyMatch(g -> g.equalsIgnoreCase(horseGender));
                 if (!genderMatch) {
                     throw new RuntimeException("Horse gender '" + horseGender + "' is not allowed in this tournament (Allowed: " + tournament.getAllowedGenders() + ")");
@@ -546,7 +546,7 @@ public class RaceRegistrationService {
             }
         }
 
-        race.setStatus("CLOSED_FOR_REGISTER");
+        race.setStatus("LOCKED_LIST");
         raceRepository.save(race);
     }
 

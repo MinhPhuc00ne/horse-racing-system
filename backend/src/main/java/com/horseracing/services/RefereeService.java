@@ -69,7 +69,9 @@ public class RefereeService {
                 matches = true;
             } else if ("upcoming".equalsIgnoreCase(status) || "preparation".equalsIgnoreCase(status)) {
                 matches = "Upcoming".equalsIgnoreCase(r.getStatus()) 
-                        || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus());
+                        || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
+                        || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
+                        || "LOCKED_LIST".equalsIgnoreCase(r.getStatus());
             } else if ("running".equalsIgnoreCase(status) || "ongoing".equalsIgnoreCase(status)) {
                 boolean hasFinishedSim = raceSimulationRepository.findByRaceId(r.getId()).stream()
                         .anyMatch(sim -> "FINISHED".equalsIgnoreCase(sim.getStatus()));
@@ -96,7 +98,7 @@ public class RefereeService {
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Race r : races) {
-            if ("CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus())) {
+            if ("CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "LOCKED_LIST".equalsIgnoreCase(r.getStatus())) {
                 List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(r.getId());
                 for (RaceParticipant p : participants) {
                     if ("PENDING_INSPECTION".equalsIgnoreCase(p.getStatus())) {
@@ -191,12 +193,12 @@ public class RefereeService {
 
         List<Race> races = raceRepository.findByRefereeId(referee.getId());
         long upcomingRaces = races.stream()
-                .filter(r -> "Upcoming".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()))
+                .filter(r -> "Upcoming".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "LOCKED_LIST".equalsIgnoreCase(r.getStatus()))
                 .count();
 
         long horsesToInspect = 0;
         for (Race r : races) {
-            if ("CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus())) {
+            if ("CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "LOCKED_LIST".equalsIgnoreCase(r.getStatus())) {
                 horsesToInspect += raceParticipantRepository.findByRaceId(r.getId()).stream()
                         .filter(p -> "PENDING_INSPECTION".equalsIgnoreCase(p.getStatus()))
                         .count();
@@ -338,8 +340,25 @@ public class RefereeService {
         Race race = raceRepository.findById(raceId)
                 .orElseThrow(() -> new RuntimeException("Race not found"));
 
-        if ("RUNNING".equalsIgnoreCase(race.getStatus())) {
-            throw new RuntimeException("Race is already running");
+        if (!"LOCKED_LIST".equalsIgnoreCase(race.getStatus())) {
+                throw new RuntimeException("Race must be LOCKED_LIST to start");
+            }
+
+        List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
+        
+        // Validate all participants have been inspected (not in PENDING_INSPECTION status)
+        boolean hasPendingInspection = participants.stream()
+                .anyMatch(p -> "PENDING_INSPECTION".equalsIgnoreCase(p.getStatus()));
+        if (hasPendingInspection) {
+            throw new RuntimeException("Cannot start race. All participants must be inspected first.");
+        }
+
+        // Validate we have at least one approved participant to start the race simulation
+        long approvedCount = participants.stream()
+                .filter(p -> "APPROVED".equalsIgnoreCase(p.getStatus()))
+                .count();
+        if (approvedCount == 0) {
+            throw new RuntimeException("Cannot start race. No approved participants in this race.");
         }
 
         race.setStatus("RUNNING");
@@ -386,9 +405,8 @@ public class RefereeService {
                 .build();
         simulation = raceSimulationRepository.save(simulation);
 
-        List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
         for (RaceParticipant p : participants) {
-            if (!"DISQUALIFIED".equalsIgnoreCase(p.getStatus())) {
+            if ("APPROVED".equalsIgnoreCase(p.getStatus())) {
                 p.setStatus("RACING");
                 raceParticipantRepository.save(p);
 
@@ -697,6 +715,12 @@ public class RefereeService {
 
         if (!"RUNNING".equalsIgnoreCase(race.getStatus())) {
             throw new RuntimeException("Race is not running or already confirmed");
+        }
+
+        boolean hasFinishedSim = raceSimulationRepository.findByRaceId(raceId).stream()
+                .anyMatch(sim -> "FINISHED".equalsIgnoreCase(sim.getStatus()));
+        if (!hasFinishedSim) {
+            throw new RuntimeException("Cannot confirm results. The race simulation has not finished yet.");
         }
 
         race.setStatus("FINISHED");

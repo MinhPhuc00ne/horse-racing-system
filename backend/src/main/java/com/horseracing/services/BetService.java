@@ -25,22 +25,30 @@ public class BetService {
     private final WalletRepository walletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
     private final BettingTransactionRepository bettingTransactionRepository;
+    private final RaceSimulationRepository raceSimulationRepository;
 
     @Transactional
     public BetResponse placeBet(User user, PlaceBetRequest request) {
-        // 1. Check user role (must not be ADMIN)
-        if (user.getRole() == Role.ADMIN) {
-            throw new BusinessException("Quản trị viên (ADMIN) không được phép đặt cược.", HttpStatus.FORBIDDEN);
+        // 1. Check user role (must be SPECTATOR)
+        if (user.getRole() != Role.SPECTATOR) {
+            throw new BusinessException("Chỉ người xem (SPECTATOR) mới được phép đặt cược.", HttpStatus.FORBIDDEN);
         }
 
         // 2. Retrieve and validate Race
         Race race = raceRepository.findById(request.getRaceId())
                 .orElseThrow(() -> new BusinessException("Không tìm thấy cuộc đua.", HttpStatus.NOT_FOUND));
 
-        // Betting is only allowed when race status is CLOSED_FOR_REGISTER or RUNNING
+        // Betting is only allowed when race status is LOCKED_LIST
         String status = race.getStatus();
-        if (!"CLOSED_FOR_REGISTER".equalsIgnoreCase(status) && !"RUNNING".equalsIgnoreCase(status)) {
-            throw new BusinessException("Cổng đặt cược chỉ mở sau khi chốt danh sách và trong quá trình đua, trước khi kết quả được duyệt.", HttpStatus.BAD_REQUEST);
+        if (!"LOCKED_LIST".equalsIgnoreCase(status)) {
+            throw new BusinessException("Cổng đặt cược đã đóng. Đặt cược chỉ khả dụng khi danh sách đã được chốt và công bố.", HttpStatus.BAD_REQUEST);
+        }
+
+        // Block placing bets if the simulation has already finished
+        boolean isSimFinished = raceSimulationRepository.findByRaceId(race.getId()).stream()
+                .anyMatch(sim -> "FINISHED".equalsIgnoreCase(sim.getStatus()));
+        if (isSimFinished) {
+            throw new BusinessException("Cuộc đua đã chạy xong, cổng đặt cược đã đóng.", HttpStatus.BAD_REQUEST);
         }
 
         // 3. Retrieve and validate RaceParticipant

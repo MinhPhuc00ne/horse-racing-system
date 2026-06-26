@@ -4,8 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +28,7 @@ import com.horseracing.entities.PrizeDistribution;
 import com.horseracing.entities.Race;
 import com.horseracing.entities.RaceParticipant;
 import com.horseracing.entities.RaceRegistration;
+import com.horseracing.entities.RaceSimulation;
 import com.horseracing.entities.RaceTrack;
 import com.horseracing.entities.Tournament;
 import com.horseracing.entities.User;
@@ -208,6 +208,8 @@ public class RefereeServiceTest {
         when(walletRepository.findByUserId(11)).thenReturn(Optional.of(jockeyWallet));
         when(betRepository.findByRaceId(5)).thenReturn(List.of(bet, bet2));
         when(walletRepository.findByUserId(20)).thenReturn(Optional.of(bettorWallet));
+        RaceSimulation finishedSim = RaceSimulation.builder().status("FINISHED").build();
+        when(raceSimulationRepository.findByRaceId(5)).thenReturn(List.of(finishedSim));
 
         refereeService.confirmResults(5);
 
@@ -258,5 +260,67 @@ public class RefereeServiceTest {
         assertEquals(BigDecimal.valueOf(150.0), bettorWallet.getBalance());
         verify(walletRepository, times(1)).save(bettorWallet);
         verify(walletTransactionRepository, times(1)).save(any(WalletTransaction.class));
+    }
+
+    @Test
+    void testStartRace_Success() {
+        race.setStatus("LOCKED_LIST");
+        User ownerUser = User.builder().id(10).email("owner@test.com").build();
+        HorseOwnerProfile owner = HorseOwnerProfile.builder().id(1).user(ownerUser).build();
+        Horse horse = Horse.builder().id(4).name("Lightning").owner(owner).build();
+        JockeyProfile jockey = JockeyProfile.builder().id(2).user(User.builder().id(11).email("jockey@test.com").build()).build();
+        
+        RaceParticipant participant = RaceParticipant.builder()
+                .id(12)
+                .race(race)
+                .horse(horse)
+                .jockey(jockey)
+                .status("APPROVED")
+                .build();
+
+        when(raceRepository.findById(5)).thenReturn(Optional.of(race));
+        when(raceParticipantRepository.findByRaceId(5)).thenReturn(List.of(participant));
+        when(raceSimulationRepository.save(any(RaceSimulation.class))).thenAnswer(i -> {
+            RaceSimulation sim = i.getArgument(0);
+            sim.setId(100);
+            return sim;
+        });
+
+        refereeService.startRace(5);
+
+        assertEquals("RUNNING", race.getStatus());
+        assertEquals("RACING", participant.getStatus());
+    }
+
+    @Test
+    void testStartRace_WrongStatus() {
+        race.setStatus("OPEN_FOR_REGISTER");
+
+        when(raceRepository.findById(5)).thenReturn(Optional.of(race));
+
+        Exception ex = assertThrows(RuntimeException.class, () -> refereeService.startRace(5));
+        assertEquals("Race must be LOCKED_LIST to start", ex.getMessage());
+    }
+
+    @Test
+    void testStartRace_PendingInspection() {
+        race.setStatus("LOCKED_LIST");
+        RaceParticipant participant = RaceParticipant.builder().id(12).status("PENDING_INSPECTION").build();
+
+        when(raceRepository.findById(5)).thenReturn(Optional.of(race));
+        when(raceParticipantRepository.findByRaceId(5)).thenReturn(List.of(participant));
+
+        Exception ex = assertThrows(RuntimeException.class, () -> refereeService.startRace(5));
+        assertEquals("Cannot start race. All participants must be inspected first.", ex.getMessage());
+    }
+
+    @Test
+    void testConfirmResults_SimNotFinished() {
+        race.setStatus("RUNNING");
+        when(raceRepository.findById(5)).thenReturn(Optional.of(race));
+        when(raceSimulationRepository.findByRaceId(5)).thenReturn(List.of()); // No finished simulation
+
+        Exception ex = assertThrows(RuntimeException.class, () -> refereeService.confirmResults(5));
+        assertEquals("Cannot confirm results. The race simulation has not finished yet.", ex.getMessage());
     }
 }

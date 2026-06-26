@@ -112,7 +112,7 @@ public class RaceServiceTest {
 
     @Test
     void testApproveRegistration_GateAssignment() {
-        Race race = Race.builder().id(1).maxHorses(8).build();
+        Race race = Race.builder().id(1).maxHorses(8).status("OPEN_FOR_REGISTER").build();
 
         User ownerUser = User.builder().fullName("Owner Name").email("owner@test.com").build();
         HorseOwnerProfile owner = HorseOwnerProfile.builder().id(1).user(ownerUser).build();

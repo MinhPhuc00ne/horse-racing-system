@@ -39,8 +39,6 @@ public class TournamentServiceTest {
     private UserRepository userRepository;
     @Mock
     private RaceTrackRepository raceTrackRepository;
-    @Mock
-    private RaceParticipantRepository raceParticipantRepository;
 
     @InjectMocks
     private TournamentService tournamentService;
@@ -143,7 +141,7 @@ public class TournamentServiceTest {
                 .build();
 
         when(horseOwnerProfileRepository.findByUserEmail("owner@test.com")).thenReturn(Optional.of(owner));
-        when(raceRepository.findById(5)).thenReturn(Optional.of(race));
+        when(raceRepository.findByTournamentId(5)).thenReturn(List.of(race));
         when(horseRepository.findById(4)).thenReturn(Optional.of(horse));
 
         Exception ex = assertThrows(RuntimeException.class, () -> raceRegistrationService.submitRegistration("owner@test.com", request));
@@ -170,7 +168,7 @@ public class TournamentServiceTest {
                 .build();
 
         when(horseOwnerProfileRepository.findByUserEmail("owner@test.com")).thenReturn(Optional.of(owner));
-        when(raceRepository.findById(5)).thenReturn(Optional.of(race));
+        when(raceRepository.findByTournamentId(5)).thenReturn(List.of(race));
         when(horseRepository.findById(4)).thenReturn(Optional.of(horse));
 
         Exception ex = assertThrows(RuntimeException.class, () -> raceRegistrationService.submitRegistration("owner@test.com", request));
@@ -197,7 +195,7 @@ public class TournamentServiceTest {
                 .build();
 
         when(horseOwnerProfileRepository.findByUserEmail("owner@test.com")).thenReturn(Optional.of(owner));
-        when(raceRepository.findById(5)).thenReturn(Optional.of(race));
+        when(raceRepository.findByTournamentId(5)).thenReturn(List.of(race));
         when(horseRepository.findById(4)).thenReturn(Optional.of(horse));
 
         Exception ex = assertThrows(RuntimeException.class, () -> raceRegistrationService.submitRegistration("owner@test.com", request));
@@ -224,7 +222,7 @@ public class TournamentServiceTest {
                 .build();
 
         when(horseOwnerProfileRepository.findByUserEmail("owner@test.com")).thenReturn(Optional.of(owner));
-        when(raceRepository.findById(5)).thenReturn(Optional.of(race));
+        when(raceRepository.findByTournamentId(5)).thenReturn(List.of(race));
         when(horseRepository.findById(4)).thenReturn(Optional.of(horse));
 
         Exception ex = assertThrows(RuntimeException.class, () -> raceRegistrationService.submitRegistration("owner@test.com", request));
@@ -251,7 +249,7 @@ public class TournamentServiceTest {
                 .build();
 
         when(horseOwnerProfileRepository.findByUserEmail("owner@test.com")).thenReturn(Optional.of(owner));
-        when(raceRepository.findById(5)).thenReturn(Optional.of(race));
+        when(raceRepository.findByTournamentId(5)).thenReturn(List.of(race));
         when(horseRepository.findById(4)).thenReturn(Optional.of(horse));
 
         Exception ex = assertThrows(RuntimeException.class, () -> raceRegistrationService.submitRegistration("owner@test.com", request));
@@ -267,7 +265,7 @@ public class TournamentServiceTest {
         regs.add(RaceRegistration.builder().id(101).status("PENDING").build());
         regs.add(RaceRegistration.builder().id(102).status("APPROVED").build()); // only 2 registrations, min is 5
 
-        when(raceRepository.findById(5)).thenReturn(Optional.of(race));
+        when(raceRepository.findByTournamentId(5)).thenReturn(List.of(race));
         when(raceRegistrationRepository.findByRaceId(5)).thenReturn(regs);
 
         Exception ex = assertThrows(RuntimeException.class, () -> raceRegistrationService.confirmRegistration(5));
@@ -389,28 +387,6 @@ public class TournamentServiceTest {
     }
 
     @Test
-    void testCreateTournament_LocationRequired() {
-        CreateTournamentRequest request = CreateTournamentRequest.builder()
-                .tournamentName("Test Tournament")
-                .startDate(LocalDate.now().plusDays(5))
-                .endDate(LocalDate.now().plusDays(10))
-                .prizeFirst(BigDecimal.valueOf(100.0))
-                .prizeSecond(BigDecimal.valueOf(50.0))
-                .prizeThird(BigDecimal.valueOf(25.0))
-                .minBetAmount(BigDecimal.valueOf(10.0))
-                .maxSlots(8)
-                .registrationDeadline(LocalDateTime.now().plusDays(1))
-                .refereeId(3)
-                .build();
-
-        User ref = User.builder().id(3).fullName("Referee").role(com.horseracing.entities.enums.Role.RACE_REFEREE).build();
-        when(userRepository.findById(3)).thenReturn(Optional.of(ref));
-
-        Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
-        assertEquals("Location (venue name or region) is required", ex.getMessage());
-    }
-
-    @Test
     void testCreateTournament_TrackNotFound() {
         CreateTournamentRequest request = CreateTournamentRequest.builder()
                 .tournamentName("Test Tournament")
@@ -424,15 +400,16 @@ public class TournamentServiceTest {
                 .maxSlots(8)
                 .registrationDeadline(LocalDateTime.now().plusDays(1))
                 .refereeId(3)
+                .raceTrackId(999)
+                .distance(1200.0)
                 .build();
 
         User ref = User.builder().id(3).fullName("Referee").role(com.horseracing.entities.enums.Role.RACE_REFEREE).build();
         when(userRepository.findById(3)).thenReturn(Optional.of(ref));
-        when(raceTrackRepository.findByName("Unknown Track")).thenReturn(Optional.empty());
-        when(raceTrackRepository.findAll()).thenReturn(new ArrayList<>());
+        when(raceTrackRepository.findById(999)).thenReturn(Optional.empty());
 
         Exception ex = assertThrows(RuntimeException.class, () -> tournamentService.createTournament(request));
-        assertEquals("Race track not found: Unknown Track", ex.getMessage());
+        assertEquals("Race track not found", ex.getMessage());
     }
 
     @Test
@@ -450,13 +427,15 @@ public class TournamentServiceTest {
                 .registrationDeadline(LocalDateTime.now().plusDays(1))
                 .officialRaceTime(LocalDateTime.now().plusDays(5).withHour(9).withMinute(0))
                 .refereeId(3)
+                .raceTrackId(10)
+                .distance(1200.0)
                 .build();
 
         User ref = User.builder().id(3).fullName("Referee").role(com.horseracing.entities.enums.Role.RACE_REFEREE).build();
         when(userRepository.findById(3)).thenReturn(Optional.of(ref));
 
         RaceTrack track = RaceTrack.builder().id(10).name("Phu Tho").location("TPHCM").build();
-        when(raceTrackRepository.findByName("Phu Tho")).thenReturn(Optional.of(track));
+        when(raceTrackRepository.findById(10)).thenReturn(Optional.of(track));
 
         Race existingRace = Race.builder()
                 .id(1)
@@ -487,13 +466,15 @@ public class TournamentServiceTest {
                 .officialRaceTime(LocalDateTime.now().plusDays(5).withHour(10).withMinute(0))
                 .refereeId(3)
                 .surfaceType("Grass")
+                .raceTrackId(10)
+                .distance(1200.0)
                 .build();
 
         User ref = User.builder().id(3).fullName("Referee").role(com.horseracing.entities.enums.Role.RACE_REFEREE).build();
         when(userRepository.findById(3)).thenReturn(Optional.of(ref));
 
         RaceTrack track = RaceTrack.builder().id(10).name("Phu Tho").location("TPHCM").build();
-        when(raceTrackRepository.findByName("Phu Tho")).thenReturn(Optional.of(track));
+        when(raceTrackRepository.findById(10)).thenReturn(Optional.of(track));
         when(raceRepository.findByRaceTrackIdAndRaceDate(10, request.getStartDate())).thenReturn(new ArrayList<>());
         
         Tournament savedTournament = Tournament.builder()

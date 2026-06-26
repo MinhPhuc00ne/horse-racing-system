@@ -31,12 +31,12 @@ public class BetServiceTest {
     @Mock private WalletRepository walletRepository;
     @Mock private WalletTransactionRepository walletTransactionRepository;
     @Mock private BettingTransactionRepository bettingTransactionRepository;
+    @Mock private RaceSimulationRepository raceSimulationRepository;
 
     @InjectMocks
     private BetService betService;
 
     private User spectatorUser;
-    private User ownerUser;
     private User adminUser;
     private Race race;
     private RaceParticipant participant;
@@ -49,13 +49,6 @@ public class BetServiceTest {
                 .fullName("Spectator Test")
                 .email("spectator@test.com")
                 .role(Role.SPECTATOR)
-                .build();
-
-        ownerUser = User.builder()
-                .id(2)
-                .fullName("Owner Test")
-                .email("owner@test.com")
-                .role(Role.HORSE_OWNER)
                 .build();
 
         adminUser = User.builder()
@@ -72,7 +65,7 @@ public class BetServiceTest {
 
         race = Race.builder()
                 .id(10)
-                .status("CLOSED_FOR_REGISTER")
+                .status("LOCKED_LIST")
                 .tournament(tournament)
                 .build();
 
@@ -87,6 +80,7 @@ public class BetServiceTest {
                 .user(spectatorUser)
                 .balance(BigDecimal.valueOf(100.0))
                 .build();
+        lenient().when(raceSimulationRepository.findByRaceId(anyInt())).thenReturn(new java.util.ArrayList<>());
     }
 
     @Test
@@ -130,6 +124,27 @@ public class BetServiceTest {
     }
 
     @Test
+    void testPlaceBet_SimulationFinished() {
+        PlaceBetRequest request = PlaceBetRequest.builder()
+                .raceId(10)
+                .participantId(100)
+                .amount(BigDecimal.valueOf(50.0))
+                .betType("WIN")
+                .build();
+
+        RaceSimulation finishedSim = RaceSimulation.builder()
+                .status("FINISHED")
+                .build();
+
+        when(raceRepository.findById(10)).thenReturn(Optional.of(race));
+        when(raceSimulationRepository.findByRaceId(10)).thenReturn(List.of(finishedSim));
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
+        assertEquals("Cuộc đua đã chạy xong, cổng đặt cược đã đóng.", exception.getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+    }
+
+    @Test
     void testPlaceBet_AdminNotAllowed() {
         PlaceBetRequest request = PlaceBetRequest.builder()
                 .raceId(10)
@@ -139,7 +154,7 @@ public class BetServiceTest {
                 .build();
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(adminUser, request));
-        assertEquals("Quản trị viên (ADMIN) không được phép đặt cược.", exception.getMessage());
+        assertEquals("Chỉ người xem (SPECTATOR) mới được phép đặt cược.", exception.getMessage());
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
@@ -168,11 +183,11 @@ public class BetServiceTest {
                 .betType("WIN")
                 .build();
 
-        race.setStatus("OPEN_FOR_REGISTER");
+        race.setStatus("RUNNING");
         when(raceRepository.findById(10)).thenReturn(Optional.of(race));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Cổng đặt cược chỉ mở sau khi chốt danh sách và trong quá trình đua, trước khi kết quả được duyệt.", exception.getMessage());
+        assertEquals("Cổng đặt cược đã đóng. Đặt cược chỉ khả dụng khi danh sách đã được chốt và công bố.", exception.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
 

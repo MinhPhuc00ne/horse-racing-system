@@ -3,7 +3,6 @@ package com.horseracing.services;
 import com.horseracing.dto.request.UpdateJockeyProfileRequest;
 import com.horseracing.dto.response.JockeyProfileResponse;
 import com.horseracing.entities.JockeyProfile;
-import com.horseracing.entities.UpgradeRequest;
 import com.horseracing.entities.User;
 import com.horseracing.repositories.JockeyProfileRepository;
 import com.horseracing.repositories.UpgradeRequestRepository;
@@ -42,7 +41,7 @@ public class JockeyService {
                 .filter(req -> req.getStatus() == com.horseracing.entities.enums.RequestStatus.APPROVED 
                         && req.getRequestedRole() == com.horseracing.entities.enums.Role.JOCKEY)
                 .findFirst()
-                .map(UpgradeRequest::getDocumentUrls)
+                .map(req -> req.getDocumentUrls())
                 .orElse(java.util.Collections.emptyList());
 
         return JockeyProfileResponse.builder()
@@ -87,7 +86,7 @@ public class JockeyService {
                 .filter(req -> req.getStatus() == com.horseracing.entities.enums.RequestStatus.APPROVED 
                         && req.getRequestedRole() == com.horseracing.entities.enums.Role.JOCKEY)
                 .findFirst()
-                .map(UpgradeRequest::getDocumentUrls)
+                .map(req -> req.getDocumentUrls())
                 .orElse(java.util.Collections.emptyList());
 
         return JockeyProfileResponse.builder()
@@ -156,6 +155,8 @@ public class JockeyService {
     @Transactional(readOnly = true)
     public List<JockeyScheduleResponse> getSchedule(String email) {
         return raceParticipantRepository.findByJockeyUserEmailAndStatusNot(email, "FINISHED").stream()
+                .filter(rp -> !"FINISHED".equalsIgnoreCase(rp.getRace().getStatus()) 
+                        && !"CANCELLED".equalsIgnoreCase(rp.getRace().getStatus()))
                 .map(rp -> JockeyScheduleResponse.builder()
                         .participantId(rp.getId())
                         .raceId(rp.getRace().getId())
@@ -173,7 +174,7 @@ public class JockeyService {
 
     @Transactional(readOnly = true)
     public List<JockeyHistoryResponse> getHistory(String email) {
-        return raceParticipantRepository.findByJockeyUserEmailAndStatus(email, "FINISHED").stream()
+        return raceParticipantRepository.findByJockeyUserEmailAndRaceStatus(email, "FINISHED").stream()
                 .map(rp -> {
                     BigDecimal prize = BigDecimal.ZERO;
                     if (rp.getFinalRank() != null && rp.getFinalRank() <= 3) {

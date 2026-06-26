@@ -118,12 +118,10 @@ public class HorseService {
         for (RaceParticipant rp : participations) {
             if (rp.getFinalRank() != null) {
                 totalRaces++;
-                if (rp.getFinalRank() == 1) {
-                    top1Count++;
-                } else if (rp.getFinalRank() == 2) {
-                    top2Count++;
-                } else if (rp.getFinalRank() == 3) {
-                    top3Count++;
+                switch (rp.getFinalRank()) {
+                    case 1 -> top1Count++;
+                    case 2 -> top2Count++;
+                    case 3 -> top3Count++;
                 }
             }
         }
@@ -153,7 +151,7 @@ public class HorseService {
                 .filter(req -> req.getStatus() == com.horseracing.entities.enums.RequestStatus.APPROVED 
                         && req.getRequestedRole() == com.horseracing.entities.enums.Role.HORSE_OWNER)
                 .findFirst()
-                .map(UpgradeRequest::getDocumentUrls)
+                .map(req -> req.getDocumentUrls())
                 .orElse(java.util.Collections.emptyList());
 
         return OwnerProfileResponse.builder()
@@ -201,7 +199,7 @@ public class HorseService {
                 .filter(req -> req.getStatus() == com.horseracing.entities.enums.RequestStatus.APPROVED 
                         && req.getRequestedRole() == com.horseracing.entities.enums.Role.HORSE_OWNER)
                 .findFirst()
-                .map(UpgradeRequest::getDocumentUrls)
+                .map(req -> req.getDocumentUrls())
                 .orElse(java.util.Collections.emptyList());
 
         return OwnerProfileResponse.builder()
