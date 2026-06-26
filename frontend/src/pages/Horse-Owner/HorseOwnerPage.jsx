@@ -18,7 +18,8 @@ const ownerNavLinks = [
   { path: '/owner/entries', label: 'Race Entries', icon: 'emoji_events' },
   { path: '/owner/friends', label: 'Connections', icon: 'group' },
   { path: '/owner/financials', label: 'Financials', icon: 'payments' },
-  { path: '/owner/analytics', label: 'Analytics', icon: 'analytics' }
+  { path: '/owner/analytics', label: 'Analytics', icon: 'analytics' },
+  { path: '/spectator/tournaments', label: 'Đặt Cược', icon: 'local_atm' }
 ];
 
 function HorseOwnerRoutesBridge() {

@@ -28,8 +28,30 @@ export default function SpectatorPage() {
     avatar: user?.avatarUrl || ''
   };
 
+  // Dynamically construct navigation links based on user role
+  const dynamicNavLinks = [...spectatorNavLinks];
+  if (user?.role && user.role !== 'SPECTATOR') {
+    let backPath = '/';
+    let label = 'Về Trang Quản Trị';
+    if (user.role === 'HORSE_OWNER') {
+      backPath = '/owner/dashboard';
+      label = 'Về Trang Owner';
+    } else if (user.role === 'JOCKEY') {
+      backPath = '/jockey/dashboard';
+      label = 'Về Trang Jockey';
+    } else if (user.role === 'RACE_REFEREE') {
+      backPath = '/referee/dashboard';
+      label = 'Về Trang Referee';
+    }
+    dynamicNavLinks.unshift({
+      path: backPath,
+      label: label,
+      icon: 'arrow_back'
+    });
+  }
+
   return (
-    <DashboardLayout navLinks={spectatorNavLinks} profile={profile}>
+    <DashboardLayout navLinks={dynamicNavLinks} profile={profile}>
       <Routes>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<SpectatorDashboardContent />} />

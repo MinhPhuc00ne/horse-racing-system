@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { getTournamentsAPI, getTournamentRacesAPI, getRaceParticipantsAPI } from '../../../services/races';
 import { placeBetAPI, getMyBetsAPI } from '../../../services/bets';
 import { getWalletBalanceAPI } from '../../../services/wallet';
+import { AuthContext } from '../../../contexts/AuthContext';
 import SpectatorLiveSimulation from './SpectatorLiveSimulation';
 import '../Spectator.css';
 
 export default function SpectatorLiveSimulationPage() {
+  const { user } = useContext(AuthContext);
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -170,8 +172,8 @@ export default function SpectatorLiveSimulationPage() {
     ? myBets.filter(b => b.raceId === selectedRace.id || b.raceId === parseInt(selectedRace.id))
     : [];
 
-  const isBettingClosed = selectedRace && (
-    selectedRace.status === 'RUNNING' || 
+  const isBettingClosed = !selectedRace || (
+    selectedRace.status === 'OPEN_FOR_REGISTER' || 
     selectedRace.status === 'FINISHED' || 
     selectedRace.status === 'CANCELLED'
   );
@@ -196,7 +198,7 @@ export default function SpectatorLiveSimulationPage() {
       {/* Title */}
       <div className="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-          <span className="role-badge">SPECTATOR ROLE</span>
+          <span className="role-badge">{user?.role ? user.role.replace('_', ' ') : 'SPECTATOR'} ROLE</span>
           <h2 className="ho-font-epilogue fs-3 fw-bold text-dark mb-1">Mô Phỏng Trực Tiếp & Đặt Cược</h2>
           <p className="text-secondary small m-0">Xem trực tiếp mô phỏng giải đấu thời gian thực và đặt cược Pari-Mutuel cho các trận đấu.</p>
         </div>

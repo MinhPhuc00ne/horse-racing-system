@@ -102,7 +102,7 @@ function App() {
             <Route
               path="/spectator/*"
               element={
-                <ProtectedRoute allowedRoles={["SPECTATOR"]}>
+                <ProtectedRoute allowedRoles={["SPECTATOR", "HORSE_OWNER", "JOCKEY", "RACE_REFEREE"]}>
                   <SpectatorPage />
                 </ProtectedRoute>
               }

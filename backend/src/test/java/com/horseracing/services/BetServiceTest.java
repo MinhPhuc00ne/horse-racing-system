@@ -37,6 +37,7 @@ public class BetServiceTest {
 
     private User spectatorUser;
     private User ownerUser;
+    private User adminUser;
     private Race race;
     private RaceParticipant participant;
     private Wallet wallet;
@@ -57,6 +58,13 @@ public class BetServiceTest {
                 .role(Role.HORSE_OWNER)
                 .build();
 
+        adminUser = User.builder()
+                .id(3)
+                .fullName("Admin Test")
+                .email("admin@test.com")
+                .role(Role.ADMIN)
+                .build();
+
         Tournament tournament = Tournament.builder()
                 .id(1)
                 .minBetAmount(BigDecimal.valueOf(10.0))
@@ -64,7 +72,7 @@ public class BetServiceTest {
 
         race = Race.builder()
                 .id(10)
-                .status("OPEN_FOR_REGISTER")
+                .status("CLOSED_FOR_REGISTER")
                 .tournament(tournament)
                 .build();
 
@@ -122,7 +130,7 @@ public class BetServiceTest {
     }
 
     @Test
-    void testPlaceBet_NotSpectator() {
+    void testPlaceBet_AdminNotAllowed() {
         PlaceBetRequest request = PlaceBetRequest.builder()
                 .raceId(10)
                 .participantId(100)
@@ -130,8 +138,8 @@ public class BetServiceTest {
                 .betType("WIN")
                 .build();
 
-        BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(ownerUser, request));
-        assertEquals("Chỉ người xem (SPECTATOR) mới được phép đặt cược.", exception.getMessage());
+        BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(adminUser, request));
+        assertEquals("Quản trị viên (ADMIN) không được phép đặt cược.", exception.getMessage());
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
@@ -160,11 +168,11 @@ public class BetServiceTest {
                 .betType("WIN")
                 .build();
 
-        race.setStatus("RUNNING");
+        race.setStatus("OPEN_FOR_REGISTER");
         when(raceRepository.findById(10)).thenReturn(Optional.of(race));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Cuộc đua đã bắt đầu hoặc kết thúc, cổng đặt cược đã đóng.", exception.getMessage());
+        assertEquals("Cổng đặt cược chỉ mở sau khi chốt danh sách và trong quá trình đua, trước khi kết quả được duyệt.", exception.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
 

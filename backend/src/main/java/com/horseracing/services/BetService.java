@@ -28,19 +28,19 @@ public class BetService {
 
     @Transactional
     public BetResponse placeBet(User user, PlaceBetRequest request) {
-        // 1. Check user role (must be SPECTATOR)
-        if (user.getRole() != Role.SPECTATOR) {
-            throw new BusinessException("Chỉ người xem (SPECTATOR) mới được phép đặt cược.", HttpStatus.FORBIDDEN);
+        // 1. Check user role (must not be ADMIN)
+        if (user.getRole() == Role.ADMIN) {
+            throw new BusinessException("Quản trị viên (ADMIN) không được phép đặt cược.", HttpStatus.FORBIDDEN);
         }
 
         // 2. Retrieve and validate Race
         Race race = raceRepository.findById(request.getRaceId())
                 .orElseThrow(() -> new BusinessException("Không tìm thấy cuộc đua.", HttpStatus.NOT_FOUND));
 
-        // Betting is only allowed when race status is OPEN_FOR_REGISTER or CLOSED_FOR_REGISTER
+        // Betting is only allowed when race status is CLOSED_FOR_REGISTER or RUNNING
         String status = race.getStatus();
-        if (!"OPEN_FOR_REGISTER".equalsIgnoreCase(status) && !"CLOSED_FOR_REGISTER".equalsIgnoreCase(status)) {
-            throw new BusinessException("Cuộc đua đã bắt đầu hoặc kết thúc, cổng đặt cược đã đóng.", HttpStatus.BAD_REQUEST);
+        if (!"CLOSED_FOR_REGISTER".equalsIgnoreCase(status) && !"RUNNING".equalsIgnoreCase(status)) {
+            throw new BusinessException("Cổng đặt cược chỉ mở sau khi chốt danh sách và trong quá trình đua, trước khi kết quả được duyệt.", HttpStatus.BAD_REQUEST);
         }
 
         // 3. Retrieve and validate RaceParticipant

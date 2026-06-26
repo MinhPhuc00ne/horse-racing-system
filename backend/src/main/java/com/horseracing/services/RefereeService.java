@@ -704,8 +704,45 @@ public class RefereeService {
 
         Tournament tournament = race.getTournament();
 
-        // 1. Prize Distribution
+        // 1. Refund bets on disqualified/rejected participants
         List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
+        for (RaceParticipant p : participants) {
+            if ("DISQUALIFIED".equalsIgnoreCase(p.getStatus()) || "REJECTED".equalsIgnoreCase(p.getStatus())) {
+                List<Bet> pendingBets = betRepository.findByParticipantIdAndStatus(p.getId(), "PENDING");
+                for (Bet bet : pendingBets) {
+                    bet.setStatus("REFUNDED");
+                    bet.setPayoutAmount(BigDecimal.ZERO);
+                    betRepository.save(bet);
+
+                    Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
+                            .orElseGet(() -> {
+                                Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
+                                return walletRepository.save(w);
+                            });
+                    wallet.setBalance(wallet.getBalance().add(bet.getAmount()));
+                    walletRepository.save(wallet);
+
+                    WalletTransaction transaction = WalletTransaction.builder()
+                            .wallet(wallet)
+                            .transactionType("REFUND")
+                            .amount(bet.getAmount())
+                            .status("SUCCESS")
+                            .referenceType("BET")
+                            .referenceId(bet.getId())
+                            .build();
+                    walletTransactionRepository.save(transaction);
+
+                    notificationService.sendNotification(
+                            bet.getUser(),
+                            "Hoàn tiền cược cuộc đua",
+                            "Ngựa " + p.getHorse().getName() + " đã bị loại hoặc từ chối kết quả tại vòng đua " + race.getRaceName() + ". Hệ thống đã hoàn trả 100% số tiền đặt cược (" + bet.getAmount() + " VNĐ) vào ví của bạn.",
+                            NotificationType.WALLET
+                    );
+                }
+            }
+        }
+
+        // 2. Prize Distribution
         for (RaceParticipant p : participants) {
             if (p.getFinalRank() != null && p.getFinalRank() <= 3) {
                 BigDecimal totalPrize = switch (p.getFinalRank()) {

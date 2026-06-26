@@ -78,15 +78,15 @@ public class RaceRegistrationService {
         Horse horse = horseRepository.findById(request.getHorseId())
                 .orElseThrow(() -> new RuntimeException("Horse not found"));
 
-        // Check registration window (Bypassed for easier testing)
-        // LocalDateTime now = LocalDateTime.now();
+        // Check registration window
+        LocalDateTime now = LocalDateTime.now();
         Tournament tournament = race.getTournament();
-        // if (tournament.getRegistrationOpeningTime() != null && now.isBefore(tournament.getRegistrationOpeningTime())) {
-        //     throw new RuntimeException("Registration has not opened yet");
-        // }
-        // if (tournament.getRegistrationDeadline() != null && now.isAfter(tournament.getRegistrationDeadline())) {
-        //     throw new RuntimeException("Registration deadline has passed");
-        // }
+        if (tournament.getRegistrationOpeningTime() != null && now.isBefore(tournament.getRegistrationOpeningTime())) {
+            throw new RuntimeException("Registration has not opened yet");
+        }
+        if (tournament.getRegistrationDeadline() != null && now.isAfter(tournament.getRegistrationDeadline())) {
+            throw new RuntimeException("Registration deadline has passed");
+        }
 
         // Validate horse constraints
         if (tournament.getAllowedClasses() != null && !tournament.getAllowedClasses().isBlank()) {
@@ -391,15 +391,15 @@ public class RaceRegistrationService {
             throw new RuntimeException("Cannot update registration because the race is not open for registration");
         }
 
-        // Check registration window (Bypassed for easier testing)
-        // LocalDateTime now = LocalDateTime.now();
+        // Check registration window
+        LocalDateTime now = LocalDateTime.now();
         Tournament tournament = registration.getRace().getTournament();
-        // if (tournament.getRegistrationOpeningTime() != null && now.isBefore(tournament.getRegistrationOpeningTime())) {
-        //     throw new RuntimeException("Registration has not opened yet");
-        // }
-        // if (tournament.getRegistrationDeadline() != null && now.isAfter(tournament.getRegistrationDeadline())) {
-        //     throw new RuntimeException("Registration deadline has passed");
-        // }
+        if (tournament.getRegistrationOpeningTime() != null && now.isBefore(tournament.getRegistrationOpeningTime())) {
+            throw new RuntimeException("Registration has not opened yet");
+        }
+        if (tournament.getRegistrationDeadline() != null && now.isAfter(tournament.getRegistrationDeadline())) {
+            throw new RuntimeException("Registration deadline has passed");
+        }
 
         if (!"PENDING".equalsIgnoreCase(registration.getStatus()) && !"PENDING_JOCKEY".equalsIgnoreCase(registration.getStatus())) {
             throw new RuntimeException("Only pending registrations can be updated");

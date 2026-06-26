@@ -13,7 +13,8 @@ const jockeyNavLinks = [
   { path: '/jockey/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { path: '/jockey/races', label: 'Lịch thi đấu & Giải', icon: 'sports_score' },
   { path: '/jockey/invitations', label: 'Lời mời & Kết nối', icon: 'mail' },
-  { path: '/jockey/profile', label: 'Hồ sơ & Ví', icon: 'person' }
+  { path: '/jockey/profile', label: 'Hồ sơ & Ví', icon: 'person' },
+  { path: '/spectator/tournaments', label: 'Đặt Cược', icon: 'local_atm' }
 ];
 
 function JockeyRoutesBridge() {
