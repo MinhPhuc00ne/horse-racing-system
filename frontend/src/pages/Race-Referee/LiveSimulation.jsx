@@ -4,6 +4,11 @@ import { getAssignedRacesAPI, getRacePreCheckAPI, getCompletedRacesAPI, reportVi
 import RaphaelHUD from './RaphaelHUD';
 import './LiveSimulation.css';
 import { audioManager } from './audioHelper';
+import horseAction from '../../assets/horse_racing_action.png';
+import horseStatue from '../../assets/horse_racing_statue.png';
+import logoImg from '../../assets/logo.png';
+import bgImg1 from '../../assets/background1.jpg';
+import bgImg2 from '../../assets/background2.jpg';
 
 const darkenColor = (hex, percent) => {
   let num = parseInt(hex.replace("#",""), 16),
@@ -276,13 +281,6 @@ export default function LiveSimulation() {
     const loadMockHorses = () => {
       const mockNames = ['Thần Phong', 'Xích Thố', 'Bạch Long', 'Hắc Báo', 'Tia Chớp'];
       const jockeys = ['Nguyễn Văn Đạt', 'Lê Hoàng Minh', 'Trần Văn Nam', 'Phạm Quốc Bảo', 'Huỳnh Gia Huy'];
-      const mockImages = [
-        'https://images.unsplash.com/photo-1598974357801-ae6e44f80c98?auto=format&fit=crop&w=200&h=200&q=80',
-        'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&w=400&h=200&q=80',
-        'https://images.unsplash.com/photo-1598974357801-ae6e44f80c98?auto=format&fit=crop&w=200&h=400&q=80',
-        'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=250&h=250&q=80',
-        'https://images.unsplash.com/photo-1574158622643-69d34d726500?auto=format&fit=crop&w=300&h=150&q=80'
-      ];
       const mockHorses = mockNames.map((name, idx) => ({
         id: idx + 1,
         horseId: 200 + idx,
@@ -292,8 +290,7 @@ export default function LiveSimulation() {
         weight: (450 + Math.random() * 50).toFixed(1),
         progress: 0,
         color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
-        flaggedPositions: [],
-        imageUrl: mockImages[idx % mockImages.length]
+        flaggedPositions: []
       }));
       setHorses(mockHorses);
       visualHorses.current = mockHorses.map(h => ({ ...h, visualProgress: 0, trail: [] }));

@@ -156,13 +156,6 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
         setLoadingBets(true);
         // Load participants
         const participants = await getRaceParticipantsAPI(race.id);
-        const mockImages = [
-          'https://images.unsplash.com/photo-1598974357801-ae6e44f80c98?auto=format&fit=crop&w=200&h=200&q=80',
-          'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&w=400&h=200&q=80',
-          'https://images.unsplash.com/photo-1598974357801-ae6e44f80c98?auto=format&fit=crop&w=200&h=400&q=80',
-          'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=250&h=250&q=80',
-          'https://images.unsplash.com/photo-1574158622643-69d34d726500?auto=format&fit=crop&w=300&h=150&q=80'
-        ];
         const mappedHorses = (participants || []).map((p, idx) => ({
           id: p.gateNumber || (idx + 1),
           participantId: p.id,
@@ -175,7 +168,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
           color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea', '#f472b6', '#3b82f6'][idx % 7],
           flaggedPositions: [],
           isDisqualified: p.status === 'DISQUALIFIED',
-          imageUrl: p.horseImageUrl || mockImages[idx % mockImages.length]
+          imageUrl: p.horseImageUrl
         }));
         setHorses(mappedHorses);
         visualHorses.current = mappedHorses.map(h => ({ ...h, visualProgress: 0, trail: [], bubbleText: '', bubbleTimer: 0 }));
