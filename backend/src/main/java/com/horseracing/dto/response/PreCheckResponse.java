@@ -30,5 +30,6 @@ public class PreCheckResponse {
         private Double registeredWeight;
         private Double actualWeight;
         private String status;
+        private String horseImageUrl;
     }
 }

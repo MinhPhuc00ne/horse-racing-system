@@ -41,6 +41,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
   const commentaryText = useRef("Chào mừng quý khách đến với trường đua trực tiếp!");
   const fireworks = useRef([]);
   const crowdBubbles = useRef([]);
+  const horseImagesRef = useRef({});
 
   const triggerConfetti = () => {
     const colors = ['#fbbf24', '#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#ec4899', '#8b5cf6'];
@@ -131,6 +132,23 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
     povHorseRef.current = povHorse;
   }, [povHorse]);
 
+  // Preload horse avatar images
+  useEffect(() => {
+    horses.forEach(h => {
+      const url = h.imageUrl || h.avatarUrl;
+      if (url && !horseImagesRef.current[h.id]) {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => {
+          horseImagesRef.current[h.id] = img;
+        };
+        img.onerror = () => {
+          console.error(`Failed to load avatar image for horse: ${h.name} from URL: ${url}`);
+        };
+      }
+    });
+  }, [horses]);
+
   // Load participants and spectator bets on mount
   useEffect(() => {
     const loadData = async () => {
@@ -138,6 +156,13 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
         setLoadingBets(true);
         // Load participants
         const participants = await getRaceParticipantsAPI(race.id);
+        const mockImages = [
+          'https://images.unsplash.com/photo-1598974357801-ae6e44f80c98?auto=format&fit=crop&w=200&h=200&q=80',
+          'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&w=400&h=200&q=80',
+          'https://images.unsplash.com/photo-1598974357801-ae6e44f80c98?auto=format&fit=crop&w=200&h=400&q=80',
+          'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=250&h=250&q=80',
+          'https://images.unsplash.com/photo-1574158622643-69d34d726500?auto=format&fit=crop&w=300&h=150&q=80'
+        ];
         const mappedHorses = (participants || []).map((p, idx) => ({
           id: p.gateNumber || (idx + 1),
           participantId: p.id,
@@ -149,7 +174,8 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
           progress: 0,
           color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea', '#f472b6', '#3b82f6'][idx % 7],
           flaggedPositions: [],
-          isDisqualified: p.status === 'DISQUALIFIED'
+          isDisqualified: p.status === 'DISQUALIFIED',
+          imageUrl: p.horseImageUrl || mockImages[idx % mockImages.length]
         }));
         setHorses(mappedHorses);
         visualHorses.current = mappedHorses.map(h => ({ ...h, visualProgress: 0, trail: [], bubbleText: '', bubbleTimer: 0 }));
@@ -1312,11 +1338,43 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
           ctx.fill();
           ctx.restore();
 
-          ctx.fillStyle = '#ffffff';
-          ctx.font = `bold ${Math.max(5, Math.floor(10 * t))}px 'Inter', sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText("🏇", horseX_shifted, horseY - size * 0.4);
+          const horseImg = horseImagesRef.current[vHorse.id];
+          if (horseImg) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.ellipse(horseX_shifted, horseY - size * 0.4, size * 0.35, size * 0.35, 0, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+
+            const imgW = horseImg.width;
+            const imgH = horseImg.height;
+            const imgRatio = imgW / imgH;
+            
+            let sx = 0, sy = 0, sw = imgW, sh = imgH;
+            if (imgRatio > 1) {
+              sw = imgH;
+              sx = (imgW - sw) / 2;
+            } else {
+              sh = imgW;
+              sy = (imgH - sh) / 2;
+            }
+
+            ctx.drawImage(
+              horseImg,
+              sx, sy, sw, sh,
+              horseX_shifted - size * 0.35,
+              (horseY - size * 0.4) - size * 0.35,
+              size * 0.7,
+              size * 0.7
+            );
+            ctx.restore();
+          } else {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${Math.max(5, Math.floor(10 * t))}px 'Inter', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText("🏇", horseX_shifted, horseY - size * 0.4);
+          }
 
           ctx.fillStyle = '#ffffff';
           ctx.font = `bold ${Math.max(6, Math.floor(10 * t))}px 'Inter', sans-serif`;

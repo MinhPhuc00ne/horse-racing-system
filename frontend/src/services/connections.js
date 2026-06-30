@@ -54,7 +54,7 @@ export async function getConnectionsDirectoryAPI(query = '', role = 'ALL') {
     });
     return response.data; // List of ConnectionUserResponse
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to fetch connections directory.';
+    const errMsg = error.response?.data?.message || 'Không thể tải danh bạ liên kết.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -69,7 +69,7 @@ export async function getFriendsAPI() {
     const response = await axiosClient.get('/connections/friends');
     return response.data; // List of ConnectionUserResponse (active friends)
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to fetch friends.';
+    const errMsg = error.response?.data?.message || 'Không thể tải danh sách bạn bè.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -94,7 +94,7 @@ export async function sendConnectionRequestAPI(recipientId) {
     window.dispatchEvent(new Event('jockey_invitations_updated'));
     return response.data; // ConnectionUserResponse of the new connection
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to send friend request.';
+    const errMsg = error.response?.data?.message || 'Không thể gửi yêu cầu kết bạn.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -119,7 +119,7 @@ export async function respondToConnectionRequestAPI(connectionId, action) {
     window.dispatchEvent(new Event('jockey_invitations_updated'));
     return response.data; // ConnectionUserResponse
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to respond to friend request.';
+    const errMsg = error.response?.data?.message || 'Không thể phản hồi yêu cầu kết bạn.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -142,7 +142,7 @@ export async function deleteConnectionAPI(connectionId) {
     window.dispatchEvent(new Event('jockey_invitations_updated'));
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to delete connection.';
+    const errMsg = error.response?.data?.message || 'Không thể hủy kết nối bạn bè.';
     throw new Error(errMsg, { cause: error });
   }
 }

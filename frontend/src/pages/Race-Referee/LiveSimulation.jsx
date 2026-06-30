@@ -52,6 +52,7 @@ export default function LiveSimulation() {
   const commentaryText = useRef("Hệ thống đang chuẩn bị cuộc đua...");
   const fireworks = useRef([]);
   const crowdBubbles = useRef([]);
+  const horseImagesRef = useRef({});
 
   const triggerConfetti = () => {
     const colors = ['#fbbf24', '#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#ec4899', '#8b5cf6'];
@@ -144,6 +145,23 @@ export default function LiveSimulation() {
   useEffect(() => {
     povHorseRef.current = povHorse;
   }, [povHorse]);
+
+  // Preload horse avatar images
+  useEffect(() => {
+    horses.forEach(h => {
+      const url = h.imageUrl || h.avatarUrl;
+      if (url && !horseImagesRef.current[h.id]) {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => {
+          horseImagesRef.current[h.id] = img;
+        };
+        img.onerror = () => {
+          console.error(`Failed to load avatar image for horse: ${h.name} from URL: ${url}`);
+        };
+      }
+    });
+  }, [horses]);
 
   // Handle simulation timer
   useEffect(() => {
@@ -258,6 +276,13 @@ export default function LiveSimulation() {
     const loadMockHorses = () => {
       const mockNames = ['Thần Phong', 'Xích Thố', 'Bạch Long', 'Hắc Báo', 'Tia Chớp'];
       const jockeys = ['Nguyễn Văn Đạt', 'Lê Hoàng Minh', 'Trần Văn Nam', 'Phạm Quốc Bảo', 'Huỳnh Gia Huy'];
+      const mockImages = [
+        'https://images.unsplash.com/photo-1598974357801-ae6e44f80c98?auto=format&fit=crop&w=200&h=200&q=80',
+        'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&w=400&h=200&q=80',
+        'https://images.unsplash.com/photo-1598974357801-ae6e44f80c98?auto=format&fit=crop&w=200&h=400&q=80',
+        'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=250&h=250&q=80',
+        'https://images.unsplash.com/photo-1574158622643-69d34d726500?auto=format&fit=crop&w=300&h=150&q=80'
+      ];
       const mockHorses = mockNames.map((name, idx) => ({
         id: idx + 1,
         horseId: 200 + idx,
@@ -267,7 +292,8 @@ export default function LiveSimulation() {
         weight: (450 + Math.random() * 50).toFixed(1),
         progress: 0,
         color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
-        flaggedPositions: []
+        flaggedPositions: [],
+        imageUrl: mockImages[idx % mockImages.length]
       }));
       setHorses(mockHorses);
       visualHorses.current = mockHorses.map(h => ({ ...h, visualProgress: 0, trail: [] }));
@@ -298,7 +324,8 @@ export default function LiveSimulation() {
               weight: p.actualWeight || (450 + Math.random() * 50).toFixed(1),
               progress: 0,
               color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
-              flaggedPositions: []
+              flaggedPositions: [],
+              imageUrl: p.horseImageUrl
             }));
             setHorses(fetchedHorses);
             visualHorses.current = fetchedHorses.map(h => ({ ...h, visualProgress: 0, trail: [] }));
@@ -1458,12 +1485,44 @@ export default function LiveSimulation() {
           ctx.arc(horseX_shifted, horseY, size * 0.48, 0, Math.PI * 2);
           ctx.fill();
 
-          // Emoji
-          ctx.fillStyle = '#ffffff';
-          ctx.font = `${Math.round(size * 0.55)}px Arial`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('🏇', horseX_shifted, horseY);
+          // Avatar / Emoji
+          const horseImg = horseImagesRef.current[vHorse.id];
+          if (horseImg) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(horseX_shifted, horseY, size * 0.45, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+
+            const imgW = horseImg.width;
+            const imgH = horseImg.height;
+            const imgRatio = imgW / imgH;
+            
+            let sx = 0, sy = 0, sw = imgW, sh = imgH;
+            if (imgRatio > 1) {
+              sw = imgH;
+              sx = (imgW - sw) / 2;
+            } else {
+              sh = imgW;
+              sy = (imgH - sh) / 2;
+            }
+
+            ctx.drawImage(
+              horseImg,
+              sx, sy, sw, sh,
+              horseX_shifted - size * 0.45,
+              horseY - size * 0.45,
+              size * 0.9,
+              size * 0.9
+            );
+            ctx.restore();
+          } else {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `${Math.round(size * 0.55)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🏇', horseX_shifted, horseY);
+          }
 
           // Nametag with Speedometer (Feature 5)
           if (size > 22) {
@@ -2234,7 +2293,8 @@ export default function LiveSimulation() {
               progress: 0,
               color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
               flaggedPositions: [],
-              speed: 0
+              speed: 0,
+              imageUrl: p.horseImageUrl
             }));
             setHorses(fetchedHorses);
             visualHorses.current = fetchedHorses.map(h => ({ ...h, visualProgress: 0, trail: [], bubbleText: '', bubbleTimer: 0 }));

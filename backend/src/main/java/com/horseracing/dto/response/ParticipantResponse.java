@@ -17,6 +17,7 @@ public class ParticipantResponse {
     private String jockeyName;
     private Integer gateNumber;
     private String status;
+    private String horseImageUrl;
 
     public static ParticipantResponse fromEntity(RaceParticipant rp) {
         if (rp == null) return null;
@@ -29,6 +30,7 @@ public class ParticipantResponse {
                 .jockeyName(rp.getJockey().getUser().getFullName())
                 .gateNumber(rp.getGateNumber())
                 .status(rp.getStatus())
+                .horseImageUrl(rp.getHorse() != null ? rp.getHorse().getImageUrl() : null)
                 .build();
     }
 }

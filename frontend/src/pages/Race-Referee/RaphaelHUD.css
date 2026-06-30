@@ -472,3 +472,16 @@
         opacity: 0;
     }
 }
+
+.hud-horse-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--horse-color, #00ccff);
+    box-shadow: 0 0 25px var(--horse-color, #00ccff);
+    box-sizing: border-box;
+    transition: border-color 0.5s, box-shadow 0.5s;
+    background-color: #0c1524;
+}
+

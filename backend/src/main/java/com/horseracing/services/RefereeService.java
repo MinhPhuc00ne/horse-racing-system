@@ -234,6 +234,7 @@ public class RefereeService {
                     .registeredWeight(jockey.getWeight())
                     .actualWeight(jockey.getWeight()) // actualWeight can be updated via the weight endpoint
                     .status(p.getStatus())
+                    .horseImageUrl(p.getHorse().getImageUrl())
                     .build());
         }
 

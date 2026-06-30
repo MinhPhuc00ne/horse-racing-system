@@ -9,7 +9,7 @@ export async function getUpgradeRequestsAPI() {
     const response = await axiosClient.get('/admin/upgrade-requests');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to fetch upgrade requests.';
+    const errMsg = error.response?.data?.message || 'Không thể tải danh sách yêu cầu nâng cấp.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -19,7 +19,7 @@ export async function approveUpgradeRequestAPI(requestId) {
     const response = await axiosClient.put(`/admin/upgrade-requests/${requestId}/approve`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to approve request.';
+    const errMsg = error.response?.data?.message || 'Không thể phê duyệt yêu cầu nâng cấp.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -31,7 +31,7 @@ export async function rejectUpgradeRequestAPI(requestId, rejectionReason) {
     });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to reject request.';
+    const errMsg = error.response?.data?.message || 'Không thể từ chối yêu cầu nâng cấp.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -41,7 +41,7 @@ export async function getRefereesAPI() {
     const response = await axiosClient.get('/admin/referees');
     return response.data || [];
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to fetch referees.';
+    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách trọng tài.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -51,7 +51,7 @@ export async function getTracksAPI() {
     const response = await axiosClient.get('/admin/tracks');
     return response.data || [];
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to fetch tracks.';
+    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách đường đua.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -201,7 +201,7 @@ export async function getAdminDashboardStatsAPI() {
     const response = await axiosClient.get('/admin/dashboard/stats');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to fetch dashboard stats.';
+    const errMsg = error.response?.data?.message || 'Không thể lấy số liệu thống kê trang quản trị.';
     throw new Error(errMsg, { cause: error });
   }
 }

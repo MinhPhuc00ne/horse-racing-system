@@ -8,7 +8,7 @@ export async function getMyNotificationsAPI() {
     const response = await axiosClient.get('/notifications');
     return response.data; // List of NotificationResponse
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to fetch notifications.';
+    const errMsg = error.response?.data?.message || 'Không thể tải danh sách thông báo.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -21,7 +21,7 @@ export async function getUnreadCountAPI() {
     const response = await axiosClient.get('/notifications/unread-count');
     return response.data; // { unreadCount: count }
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to fetch unread notifications count.';
+    const errMsg = error.response?.data?.message || 'Không thể lấy số lượng thông báo chưa đọc.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -34,7 +34,7 @@ export async function markAsReadAPI(id) {
     const response = await axiosClient.put(`/notifications/${id}/read`);
     return response.data; // NotificationResponse
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to mark notification as read.';
+    const errMsg = error.response?.data?.message || 'Không thể đánh dấu thông báo đã đọc.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -47,7 +47,7 @@ export async function markAllAsReadAPI() {
     const response = await axiosClient.put('/notifications/read-all');
     return response.data; // MessageResponse
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Failed to mark all notifications as read.';
+    const errMsg = error.response?.data?.message || 'Không thể đánh dấu tất cả thông báo đã đọc.';
     throw new Error(errMsg, { cause: error });
   }
 }

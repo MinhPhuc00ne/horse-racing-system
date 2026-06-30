@@ -40,7 +40,7 @@ public class AiChatService {
     @Value("${app.gemini.api-key:}")
     private String geminiApiKey;
 
-    @Value("${app.gemini.model:gemini-2.5-flash}")
+    @Value("${app.gemini.model:gemini-3.1-flash-lite}")
     private String geminiModel;
 
     private final ResourceLoader resourceLoader;
