@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { sendChatMessageAPI, getChatHistoryAPI, clearChatHistoryAPI } from '../../../services/aiChat';
 import '../Spectator.css';
+import MarkdownRenderer from '../../../components/MarkdownRenderer';
 
 export default function SpectatorChatbot() {
   const [messages, setMessages] = useState([]);
@@ -152,7 +153,9 @@ export default function SpectatorChatbot() {
                   )}
 
                   <div className={`chat-bubble ${isUser ? 'user' : 'ai'}`}>
-                    <div className="message-content">{m.message}</div>
+                    <div className="message-content">
+                      {isUser ? m.message : <MarkdownRenderer content={m.message} />}
+                    </div>
                     <div className="chat-bubble-meta">
                       {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>

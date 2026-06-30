@@ -126,11 +126,15 @@ public class PaymentService {
             if ("SUCCESS".equals(tx.getStatus())) {
                 return "SUCCESS";
             }
+            if ("FAILED".equals(tx.getStatus())) {
+                return "FAILED";
+            }
             
             // Query PayOS directly
             try {
                 PaymentLink paymentLinkData = payOS.paymentRequests().get(orderCode);
-                if ("PAID".equals(String.valueOf(paymentLinkData.getStatus()))) {
+                String payosStatus = String.valueOf(paymentLinkData.getStatus());
+                if ("PAID".equals(payosStatus)) {
                     if ("PENDING".equals(tx.getStatus())) {
                         tx.setStatus("SUCCESS");
                         walletTransactionRepository.save(tx);
@@ -141,13 +145,71 @@ public class PaymentService {
                         log.info("Successfully updated wallet balance via manual check for user: {}", wallet.getUser().getUsername());
                     }
                     return "SUCCESS";
+                } else if ("CANCELLED".equals(payosStatus) || "EXPIRED".equals(payosStatus)) {
+                    if ("PENDING".equals(tx.getStatus())) {
+                        tx.setStatus("FAILED");
+                        walletTransactionRepository.save(tx);
+                        log.info("Transaction {} marked as FAILED in database because PayOS status is: {}", orderCode, payosStatus);
+                    }
+                    return "FAILED";
                 }
-                return paymentLinkData.getStatus().name(); // PENDING, CANCELLED, etc.
+                return payosStatus;
             } catch (Exception e) {
-                log.error("Error checking payment status from PayOS: {}", e.getMessage());
+                log.error("Error checking payment status from PayOS for order {}: {}", orderCode, e.getMessage());
             }
             return tx.getStatus();
         }
         return "NOT_FOUND";
+    }
+
+    /**
+     * Scheduled cleanup job: runs every 5 minutes to query status of pending PayOS deposits
+     * and automatically cancel/fail them if they have timed out or been cancelled.
+     */
+    @org.springframework.scheduling.annotation.Scheduled(fixedRate = 300000) // Every 5 minutes
+    @Transactional
+    public void cleanupPendingDeposits() {
+        log.info("Scheduled task: Starting cleanup of stuck pending PayOS deposits...");
+        java.time.LocalDateTime cutoff = java.time.LocalDateTime.now().minusMinutes(15);
+        List<WalletTransaction> pendingTxs = walletTransactionRepository.findAllPendingPayosDepositsBefore(cutoff);
+        
+        for (WalletTransaction tx : pendingTxs) {
+            log.info("Processing cleanup for pending transaction ID: {}, Order Code: {}", tx.getId(), tx.getPayosOrderCode());
+            try {
+                PaymentLink paymentLinkData = payOS.paymentRequests().get(tx.getPayosOrderCode());
+                String payosStatus = String.valueOf(paymentLinkData.getStatus());
+                
+                if ("PAID".equals(payosStatus)) {
+                    tx.setStatus("SUCCESS");
+                    walletTransactionRepository.save(tx);
+
+                    Wallet wallet = tx.getWallet();
+                    wallet.setBalance(wallet.getBalance().add(tx.getAmount()));
+                    walletRepository.save(wallet);
+                    log.info("Stuck transaction {} was actually PAID. Updated balance.", tx.getPayosOrderCode());
+                } else if ("CANCELLED".equals(payosStatus) || "EXPIRED".equals(payosStatus)) {
+                    tx.setStatus("FAILED");
+                    walletTransactionRepository.save(tx);
+                    log.info("Stuck transaction {} marked as FAILED based on PayOS status: {}", tx.getPayosOrderCode(), payosStatus);
+                } else {
+                    // Still PENDING on PayOS side, but locally timed out (older than 15 minutes)
+                    // Attempt to cancel payment link on PayOS side and mark as FAILED locally
+                    try {
+                        payOS.paymentRequests().cancel(tx.getPayosOrderCode(), "Transaction timed out after 15 minutes");
+                        log.info("Successfully cancelled payment link on PayOS for order: {}", tx.getPayosOrderCode());
+                    } catch (Exception e) {
+                        log.warn("Failed to cancel payment link on PayOS for order {}: {}", tx.getPayosOrderCode(), e.getMessage());
+                    }
+                    tx.setStatus("FAILED");
+                    walletTransactionRepository.save(tx);
+                    log.info("Stuck transaction {} timed out locally and marked as FAILED.", tx.getPayosOrderCode());
+                }
+            } catch (Exception e) {
+                // If payment link not found or any other PayOS error, mark as FAILED locally
+                tx.setStatus("FAILED");
+                walletTransactionRepository.save(tx);
+                log.warn("Error querying PayOS for order {}. Marked as FAILED locally. Error: {}", tx.getPayosOrderCode(), e.getMessage());
+            }
+        }
     }
 }

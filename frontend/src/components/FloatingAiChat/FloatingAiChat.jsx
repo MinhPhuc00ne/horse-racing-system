@@ -5,6 +5,7 @@ import { BsChatDotsFill } from 'react-icons/bs';
 import { sendChatMessageAPI, getChatHistoryAPI } from '../../services/aiChat';
 import { AuthContext } from '../../contexts/AuthContext';
 import './FloatingAiChat.css';
+import MarkdownRenderer from '../MarkdownRenderer';
 
 export default function FloatingAiChat() {
   const [isOpen, setIsOpen] = useState(false);
@@ -357,9 +358,13 @@ export default function FloatingAiChat() {
                     <div key={index} className={`chat-bubble-wrapper ${msg.sender === 'USER' ? 'user' : 'ai'}`}>
                       {msg.sender === 'AI' && <div className="avatar ai-avatar"><FaRobot size={12} /></div>}
                       <div className={`chat-bubble ${msg.sender === 'USER' ? 'user' : 'ai'}`}>
-                        {msg.text && msg.text.split('\n').map((line, lIdx) => (
-                          <p key={lIdx} style={{ margin: '0 0 6px 0' }}>{line}</p>
-                        ))}
+                        {msg.sender === 'AI' ? (
+                          <MarkdownRenderer content={msg.text} />
+                        ) : (
+                          msg.text && msg.text.split('\n').map((line, lIdx) => (
+                            <p key={lIdx} style={{ margin: '0 0 6px 0' }}>{line}</p>
+                          ))
+                        )}
                         {msg.image && (
                           <img src={msg.image} alt="Gửi kèm" className="chat-bubble-image" />
                         )}
