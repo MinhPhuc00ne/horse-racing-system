@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './RaphaelHUD.css';
 import { audioManager } from './audioHelper';
+import logo from '../../assets/logo.png';
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -57,6 +58,13 @@ const transitionStyles = `
   font-size: 100px;
   margin-bottom: 20px;
   filter: drop-shadow(0 0 15px #ff8800);
+}
+
+.hud-logo-icon-img {
+  height: 160px;
+  width: auto;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 25px rgba(0, 204, 255, 0.8)) drop-shadow(0 0 15px rgba(255, 136, 0, 0.6));
 }
 
 .hud-logo-title {
@@ -308,7 +316,7 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
                 <div className="transition-logo-overlay">
                     {transitionStep === 1 && (
                         <div className="transition-logo-content" key="step1">
-                            <div className="hud-logo-icon">🔔</div>
+                            <img src={logo} alt="EquineElite Logo" className="hud-logo-icon-img" />
                             <div className="hud-logo-title">BẠN ĐÃ SẴN SÀNG?</div>
                             <div className="hud-logo-subtitle">HỆ THỐNG ĐÃ KÍCH HOẠT</div>
                             <div className="hud-glow-line"></div>
@@ -316,7 +324,7 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
                     )}
                     {transitionStep === 2 && (
                         <div className="transition-logo-content" key="step2">
-                            <div className="hud-logo-icon">💰</div>
+                            <img src={logo} alt="EquineElite Logo" className="hud-logo-icon-img" />
                             <div className="hud-logo-title">HÃY ĐẶT CƯỢC</div>
                             <div className="hud-logo-subtitle">CƠ HỘI CHIẾN THẮNG TRONG TẦM TAY</div>
                             <div className="hud-glow-line"></div>
@@ -324,7 +332,7 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
                     )}
                     {transitionStep === 3 && (
                         <div className="transition-logo-content" key="step3">
-                            <div className="hud-logo-icon">🏁</div>
+                            <img src={logo} alt="EquineElite Logo" className="hud-logo-icon-img" />
                             <div className="hud-logo-title">CUỘC ĐUA BẮT ĐẦU</div>
                             <div className="hud-logo-subtitle">CỔNG ĐUA CHUẨN BỊ MỞ</div>
                             <div className="hud-glow-line"></div>

@@ -208,6 +208,14 @@
   animation: pt-hologram-glitch 4s ease infinite;
 }
 
+.pt-hologram-logo-img {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 15px rgba(0, 240, 255, 0.85)) drop-shadow(0 0 25px rgba(252, 211, 77, 0.5));
+  animation: pt-hologram-glitch 4s ease infinite;
+}
+
 /* Tạo lớp phủ scanline ảo giác */
 .pt-hologram-scanline-overlay {
   position: absolute;

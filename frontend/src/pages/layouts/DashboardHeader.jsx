@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { getConnectionsDirectoryAPI } from '../../services/connections';
 import { getJockeyInvitationsAPI } from '../../services/jockey';
+import logo from '../../assets/logo.png';
 
 export default function DashboardHeader({ user, profile, navLinks, logout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -154,13 +155,13 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
             </span>
           </button>
           
-          <h1 
-            className="ho-font-epilogue fs-5 fw-extrabold m-0 cursor-pointer" 
-            style={{ color: 'var(--ho-accent-gold-hover, #fed65b)', cursor: 'pointer' }}
+          <div 
+            className="d-flex align-items-center cursor-pointer"
             onClick={() => navigate('/')}
+            style={{ cursor: 'pointer' }}
           >
-            EquineElite Pro
-          </h1>
+            <img src={logo} alt="EquineElite Logo" style={{ height: '48px', width: 'auto' }} />
+          </div>
         </div>
 
         {/* Desktop Navigation Links */}

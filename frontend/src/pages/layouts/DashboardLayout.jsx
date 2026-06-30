@@ -6,6 +6,7 @@ import AdminHeader from './AdminHeader';
 import AdminFooter from './AdminFooter';
 import Footer from '../../components/Footer/Footer';
 import './DashboardLayout.css';
+import logo from '../../assets/logo.png';
 
 export default function DashboardLayout({ navLinks, profile, children }) {
   const { user, logout } = useContext(AuthContext);
@@ -28,17 +29,13 @@ export default function DashboardLayout({ navLinks, profile, children }) {
           {/* Left Sidebar for Admin (Desktop only) */}
           <aside className="admin-sidebar d-none d-xl-flex flex-column py-4 flex-shrink-0" style={{ width: '260px', height: 'calc(100vh - 80px)', position: 'sticky', top: '80px' }}>
             {/* Logo / Branding in Sidebar */}
-            <div className="px-4 mb-3 pb-3 border-bottom admin-sidebar-brand-wrapper">
-              <h1 
-                className="ho-font-epilogue fs-5 fw-extrabold m-0 cursor-pointer admin-sidebar-logo" 
+            <div className="px-4 mb-3 pb-3 border-bottom admin-sidebar-brand-wrapper d-flex justify-content-center align-items-center">
+              <div 
                 style={{ cursor: 'pointer' }}
                 onClick={() => navigate('/')}
               >
-                EquineElite <span className="admin-sidebar-logo-accent">Pro</span>
-              </h1>
-              <span className="ho-font-grotesk fw-bold text-uppercase admin-sidebar-sublabel" style={{ fontSize: '9px', letterSpacing: '0.05em' }}>
-                Admin Control Panel
-              </span>
+                <img src={logo} alt="EquineElite Logo" style={{ height: '60px', width: 'auto' }} />
+              </div>
             </div>
 
             {/* Navigation Links */}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo.png';
 
 export default function AdminHeader({ user, profile, navLinks, logout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -69,13 +70,13 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
             >
               System Management Console
             </h1>
-            <h1 
-              className="ho-font-epilogue fs-5 fw-extrabold m-0 d-xl-none cursor-pointer" 
-              style={{ color: 'var(--ho-accent-gold-hover, #fed65b)', cursor: 'pointer' }}
+            <div 
+              className="d-flex align-items-center d-xl-none cursor-pointer"
               onClick={() => navigate('/admin/dashboard')}
+              style={{ cursor: 'pointer' }}
             >
-              Admin Portal
-            </h1>
+              <img src={logo} alt="EquineElite Logo" style={{ height: '48px', width: 'auto' }} />
+            </div>
           </>
         </div>
 

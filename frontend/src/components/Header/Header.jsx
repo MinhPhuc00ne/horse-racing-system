@@ -4,6 +4,7 @@ import { FiBell, FiSettings, FiLogOut, FiCheckSquare, FiAlertCircle, FiInfo, FiP
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import { NotificationContext } from '../../contexts/NotificationContext';
+import logo from '../../assets/logo.png';
 
 const Header = () => {
   const { user, logout } = useContext(AuthContext);
@@ -58,8 +59,8 @@ const Header = () => {
     <Navbar expand="md" variant="dark" className="py-2 shadow-sm" style={{ backgroundColor: '#112211', sticky: 'top', zIndex: 1050 }}>
       <Container fluid="lg">
         {/* LOGO: Đổi từ Equine Elite Pro sang Horse Racing */}
-        <Navbar.Brand href="/" className="fw-bold fs-4">
-          <span className="text-white">Horse</span> <span style={{ color: '#ffc107' }}>Racing</span>
+        <Navbar.Brand href="/" className="fw-bold d-flex align-items-center">
+          <img src={logo} alt="EquineElite Logo" style={{ height: '48px', width: 'auto' }} />
         </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="header-nav" />
