@@ -6,7 +6,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -27,11 +26,7 @@ public class CreateTournamentRequest {
 
     private Integer maxSlots;
 
-    @NotNull(message = "Start date is required")
-    private LocalDate startDate;
 
-    @NotNull(message = "End date is required")
-    private LocalDate endDate;
 
     @NotNull(message = "First prize reward is required")
     @PositiveOrZero(message = "Prize money must be positive or zero")

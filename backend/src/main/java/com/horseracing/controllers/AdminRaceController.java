@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.horseracing.dto.request.CreateRaceRequest;
 import com.horseracing.dto.request.CreateTournamentRequest;
 import com.horseracing.dto.request.UpdateTournamentRequest;
+import com.horseracing.dto.request.TrackRequest;
 import com.horseracing.dto.response.ErrorResponse;
 import com.horseracing.dto.response.MessageResponse;
 import com.horseracing.dto.response.RaceRegistrationResponse;
@@ -32,6 +33,7 @@ import com.horseracing.services.RaceRegistrationService;
 import com.horseracing.services.RaceService;
 import com.horseracing.services.TournamentService;
 import com.horseracing.services.RefereeService;
+import com.horseracing.services.TrackService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +50,8 @@ public class AdminRaceController {
     private final RaceRegistrationService raceRegistrationService;
     private final UserRepository userRepository;
     private final RefereeService refereeService;
+    private final TrackService trackService;
+    private final com.horseracing.services.RefereeChangeRequestService changeRequestService;
 
     @GetMapping("/referees")
     public ResponseEntity<List<UserResponse>> getAllReferees() {
@@ -65,6 +69,36 @@ public class AdminRaceController {
                 .map(TrackResponse::fromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(tracks);
+    }
+
+    @PostMapping("/tracks")
+    public ResponseEntity<?> createTrack(@Valid @RequestBody TrackRequest request) {
+        try {
+            TrackResponse response = trackService.createTrack(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/tracks/{id}")
+    public ResponseEntity<?> updateTrack(@PathVariable Integer id, @Valid @RequestBody TrackRequest request) {
+        try {
+            TrackResponse response = trackService.updateTrack(id, request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/tracks/{id}")
+    public ResponseEntity<?> deleteTrack(@PathVariable Integer id) {
+        try {
+            trackService.deleteTrack(id);
+            return ResponseEntity.ok().body(new MessageResponse("Track deleted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
     }
 
     @PostMapping("/tournaments")
@@ -184,6 +218,31 @@ public class AdminRaceController {
     public ResponseEntity<?> getPrizeDistributions(@PathVariable Integer id) {
         try {
             return ResponseEntity.ok(refereeService.getPrizeDistributions(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @GetMapping("/referee-requests")
+    public ResponseEntity<?> getAllChangeRequests() {
+        return ResponseEntity.ok(changeRequestService.getAllRequests());
+    }
+
+    @PutMapping("/referee-requests/{id}/approve")
+    public ResponseEntity<?> approveChangeRequest(@PathVariable Integer id, @RequestBody java.util.Map<String, Integer> body) {
+        try {
+            Integer newRefereeId = body.get("newRefereeId");
+            if (newRefereeId == null) return ResponseEntity.badRequest().body(new ErrorResponse(400, "newRefereeId is required"));
+            return ResponseEntity.ok(changeRequestService.approveRequest(id, newRefereeId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    @PutMapping("/referee-requests/{id}/reject")
+    public ResponseEntity<?> rejectChangeRequest(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(changeRequestService.rejectRequest(id));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }

@@ -62,13 +62,7 @@ public class RaceService {
             throw new RuntimeException("Race date cannot be in the past");
         }
 
-        // Validate race date falls within tournament date range
-        if (tournament.getStartDate() != null && request.getRaceDate().isBefore(tournament.getStartDate())) {
-            throw new RuntimeException("Race date cannot be before tournament start date");
-        }
-        if (tournament.getEndDate() != null && request.getRaceDate().isAfter(tournament.getEndDate())) {
-            throw new RuntimeException("Race date cannot be after tournament end date");
-        }
+
 
         RaceTrack raceTrack = raceTrackRepository.findById(request.getRaceTrackId())
                 .orElseThrow(() -> new RuntimeException("Race track not found"));

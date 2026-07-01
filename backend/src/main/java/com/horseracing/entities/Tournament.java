@@ -37,11 +37,6 @@ public class Tournament {
     @Column(name = "max_slots")
     private Integer maxSlots;
 
-    @Column(name = "start_date")
-    private LocalDate startDate;
-
-    @Column(name = "end_date")
-    private LocalDate endDate;
 
     @Column(name = "total_prize", precision = 18, scale = 2)
     private BigDecimal totalPrize;

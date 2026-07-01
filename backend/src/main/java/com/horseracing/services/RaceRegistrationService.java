@@ -46,7 +46,7 @@ public class RaceRegistrationService {
         if (races.isEmpty()) {
             Tournament tournament = tournamentRepository.findById(request.getTournamentId())
                     .orElseThrow(() -> new RuntimeException("Tournament not found"));
-            java.time.LocalDate raceDate = tournament.getStartDate() != null ? tournament.getStartDate() : java.time.LocalDate.now();
+            java.time.LocalDate raceDate = java.time.LocalDate.now();
             java.time.LocalTime startTime = tournament.getOfficialRaceTime() != null ? tournament.getOfficialRaceTime().toLocalTime() : java.time.LocalTime.of(9, 0);
             java.time.LocalTime endTime = startTime.plusHours(1);
 

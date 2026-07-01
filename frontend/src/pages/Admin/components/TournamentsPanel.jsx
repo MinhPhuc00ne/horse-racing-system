@@ -32,8 +32,6 @@ export default function TournamentsPanel() {
     description: '',
     registrationDeadline: '',
     maxSlots: 10,
-    startDate: '',
-    endDate: '',
     prizeFirst: 10000000,
     prizeSecond: 5000000,
     prizeThird: 2000000,
@@ -189,8 +187,6 @@ export default function TournamentsPanel() {
       description: t.description || '',
       registrationDeadline: formatLocalDateTime(t.registrationDeadline),
       maxSlots: t.maxSlots || 10,
-      startDate: t.startDate || '',
-      endDate: t.endDate || '',
       prizeFirst: t.prizeFirst || 0,
       prizeSecond: t.prizeSecond || 0,
       prizeThird: t.prizeThird || 0,
@@ -358,10 +354,10 @@ export default function TournamentsPanel() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div className="form-group">
-                  <label className="ho-input-label">Điều kiện mặt sân (Chỉ đọc)</label>
+                  <label className="ho-input-label">Hình dáng sân (Chỉ đọc)</label>
                   <input
                     type="text"
-                    value={selectedTrack ? selectedTrack.surfaceCondition : 'Chưa chọn'}
+                    value={selectedTrack ? (selectedTrack.shape === 'OVAL' ? 'Vòng tròn (Oval)' : 'Đường thẳng (Straight)') : 'Chưa chọn'}
                     readOnly
                     className="ho-form-input text-secondary fw-semibold bg-light"
                     style={{ cursor: 'not-allowed' }}
@@ -409,30 +405,7 @@ export default function TournamentsPanel() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                <div className="form-group">
-                  <label className="ho-input-label">Ngày bắt đầu *</label>
-                  <input
-                    type="date"
-                    name="startDate"
-                    value={formData.startDate}
-                    onChange={handleInputChange}
-                    required
-                    className="ho-form-input text-dark fw-semibold"
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="ho-input-label">Ngày kết thúc *</label>
-                  <input
-                    type="date"
-                    name="endDate"
-                    value={formData.endDate}
-                    onChange={handleInputChange}
-                    required
-                    className="ho-form-input text-dark fw-semibold"
-                  />
-                </div>
-              </div>
+
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                 <div className="form-group">
@@ -752,8 +725,8 @@ export default function TournamentsPanel() {
                     <span className="text-dark fw-semibold">{t.location || 'Chưa xác định'}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaCalendarAlt /> Thời gian:</span>
-                    <span className="text-dark fw-semibold">{t.startDate} - {t.endDate}</span>
+                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaCalendarAlt /> Hạn đăng ký:</span>
+                    <span className="text-dark fw-semibold">{new Date(t.registrationDeadline).toLocaleString('vi-VN')}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaDollarSign /> Lệ phí đăng ký:</span>

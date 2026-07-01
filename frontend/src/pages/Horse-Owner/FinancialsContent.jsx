@@ -41,59 +41,7 @@ export default function FinancialsContent() {
 
   const netEarnings = totalWinnings + totalEntryFees;
 
-  // Columns for Transactions DataTable
-  const columns = [
-    {
-      key: 'date',
-      label: 'Date & Time',
-    },
-    {
-      key: 'horse',
-      label: 'Horse',
-      render: (item) => item.horse ? (
-        <span className="fw-bold text-dark">{item.horse}</span>
-      ) : (
-        <span className="text-muted">-</span>
-      )
-    },
-    {
-      key: 'event',
-      label: 'Event / Details',
-    },
-    {
-      key: 'type',
-      label: 'Type',
-      render: (item) => (
-        <StatusBadge status={item.type} />
-      )
-    },
-    {
-      key: 'amount',
-      label: 'Amount',
-      align: 'right',
-      render: (item) => {
-        const isPos = item.amount >= 0;
-        const isPending = item.status === 'PENDING';
-        const isFailed = item.status === 'FAILED' || item.status === 'CANCELLED';
-        
-        let colorClass = isPos ? 'text-success' : 'text-danger';
-        let decorationStyle = {};
-        
-        if (isPending) {
-          colorClass = 'text-warning';
-        } else if (isFailed) {
-          colorClass = 'text-muted';
-          decorationStyle = { textDecoration: 'line-through' };
-        }
-        
-        return (
-          <span className={`fw-bold ${colorClass}`} style={{ fontSize: '13px', ...decorationStyle }}>
-            {isPos && !isPending && !isFailed ? '+' : ''}{formatVND(item.amount)}
-          </span>
-        );
-      }
-    }
-  ];
+
 
   return (
     <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>

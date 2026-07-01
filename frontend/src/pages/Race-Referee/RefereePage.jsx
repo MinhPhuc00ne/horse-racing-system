@@ -8,7 +8,7 @@ import '../Horse-Owner/HorseOwner.css';
 // Import Referee Components
 import PreRaceCheck from './PreRaceCheck';
 import LiveSimulation from './LiveSimulation';
-import ConfirmResults from './ConfirmResults';
+
 import Violations from './Violations';
 
 const refereeNavLinks = [

@@ -22,6 +22,6 @@ public class RaceTrack {
     @Column(length = 255)
     private String location;
 
-    @Column(name = "surface_condition", length = 100)
-    private String surfaceCondition;
+    @Column(length = 50)
+    private String shape;
 }

@@ -4,7 +4,6 @@ import com.horseracing.entities.Tournament;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -19,8 +18,7 @@ public class TournamentResponse {
     private String description;
     private LocalDateTime registrationDeadline;
     private Integer maxSlots;
-    private LocalDate startDate;
-    private LocalDate endDate;
+
     private BigDecimal totalPrize;
     private String tournamentStatus;
     private BigDecimal prizeFirst;
@@ -52,8 +50,7 @@ public class TournamentResponse {
                 .description(t.getDescription())
                 .registrationDeadline(t.getRegistrationDeadline())
                 .maxSlots(t.getMaxSlots())
-                .startDate(t.getStartDate())
-                .endDate(t.getEndDate())
+
                 .totalPrize(t.getTotalPrize())
                 .tournamentStatus(t.getTournamentStatus())
                 .prizeFirst(t.getPrizeFirst())

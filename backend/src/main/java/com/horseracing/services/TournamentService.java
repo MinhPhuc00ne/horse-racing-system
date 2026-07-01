@@ -58,20 +58,7 @@ public class TournamentService {
         if (request.getEntryFee() != null && request.getEntryFee().compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Entry fee must be positive or zero");
         }
-        if (request.getStartDate() != null && request.getEndDate() != null
-                && request.getStartDate().isAfter(request.getEndDate())) {
-            throw new RuntimeException("Start date must be before end date");
-        }
-        if (request.getStartDate() != null && request.getStartDate().isBefore(java.time.LocalDate.now())) {
-            throw new RuntimeException("Start date cannot be in the past");
-        }
-        if (request.getEndDate() != null && request.getEndDate().isBefore(java.time.LocalDate.now())) {
-            throw new RuntimeException("End date cannot be in the past");
-        }
-        if (request.getRegistrationDeadline() != null && request.getStartDate() != null
-                && request.getRegistrationDeadline().toLocalDate().isAfter(request.getStartDate())) {
-            throw new RuntimeException("Registration deadline must be before start date");
-        }
+
         if (request.getRegistrationOpeningTime() != null && request.getRegistrationDeadline() != null
                 && request.getRegistrationOpeningTime().isAfter(request.getRegistrationDeadline())) {
             throw new RuntimeException("Registration opening time must be before registration deadline");
@@ -105,7 +92,7 @@ public class TournamentService {
             request.setLocation(track.getName());
         }
 
-        java.time.LocalDate raceDate = request.getStartDate() != null ? request.getStartDate() : java.time.LocalDate.now();
+        java.time.LocalDate raceDate = request.getOfficialRaceTime() != null ? request.getOfficialRaceTime().toLocalDate() : java.time.LocalDate.now();
         java.time.LocalTime startTime = request.getOfficialRaceTime() != null ? request.getOfficialRaceTime().toLocalTime() : java.time.LocalTime.of(9, 0);
         java.time.LocalTime endTime = startTime.plusHours(1);
 
@@ -127,8 +114,7 @@ public class TournamentService {
                 .description(request.getDescription())
                 .registrationDeadline(request.getRegistrationDeadline())
                 .maxSlots(request.getMaxSlots())
-                .startDate(request.getStartDate())
-                .endDate(request.getEndDate())
+
                 .totalPrize(totalPrize)
                 .tournamentStatus("Upcoming")
                 .prizeFirst(request.getPrizeFirst())
@@ -214,24 +200,7 @@ public class TournamentService {
         if (request.getEntryFee() != null && request.getEntryFee().compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Entry fee must be positive or zero");
         }
-        if (request.getStartDate() != null && request.getEndDate() != null
-                && request.getStartDate().isAfter(request.getEndDate())) {
-            throw new RuntimeException("Start date must be before end date");
-        }
-        // Only enforce start date not in the past if it is being changed
-        if (request.getStartDate() != null && !request.getStartDate().equals(tournament.getStartDate())
-                && request.getStartDate().isBefore(java.time.LocalDate.now())) {
-            throw new RuntimeException("Start date cannot be in the past");
-        }
-        // Only enforce end date not in the past if it is being changed
-        if (request.getEndDate() != null && !request.getEndDate().equals(tournament.getEndDate())
-                && request.getEndDate().isBefore(java.time.LocalDate.now())) {
-            throw new RuntimeException("End date cannot be in the past");
-        }
-        if (request.getRegistrationDeadline() != null && request.getStartDate() != null
-                && request.getRegistrationDeadline().toLocalDate().isAfter(request.getStartDate())) {
-            throw new RuntimeException("Registration deadline must be before start date");
-        }
+
         if (request.getRegistrationOpeningTime() != null && request.getRegistrationDeadline() != null
                 && request.getRegistrationOpeningTime().isAfter(request.getRegistrationDeadline())) {
             throw new RuntimeException("Registration opening time must be before registration deadline");
@@ -266,7 +235,7 @@ public class TournamentService {
             request.setLocation(track.getName());
         }
 
-        java.time.LocalDate raceDate = request.getStartDate() != null ? request.getStartDate() : java.time.LocalDate.now();
+        java.time.LocalDate raceDate = request.getOfficialRaceTime() != null ? request.getOfficialRaceTime().toLocalDate() : java.time.LocalDate.now();
         java.time.LocalTime startTime = request.getOfficialRaceTime() != null ? request.getOfficialRaceTime().toLocalTime() : java.time.LocalTime.of(9, 0);
         java.time.LocalTime endTime = startTime.plusHours(1);
 
@@ -289,8 +258,7 @@ public class TournamentService {
         tournament.setDescription(request.getDescription());
         tournament.setRegistrationDeadline(request.getRegistrationDeadline());
         tournament.setMaxSlots(request.getMaxSlots());
-        tournament.setStartDate(request.getStartDate());
-        tournament.setEndDate(request.getEndDate());
+
         tournament.setTotalPrize(totalPrize);
         tournament.setPrizeFirst(request.getPrizeFirst());
         tournament.setPrizeSecond(request.getPrizeSecond());

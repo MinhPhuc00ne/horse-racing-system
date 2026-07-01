@@ -44,7 +44,7 @@ public class AuthController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse(401, "Login failed: " + e.getMessage() + " | Class: " + e.getClass().getSimpleName()));
+                    .body(new ErrorResponse(401, e.getMessage()));
         }
     }
 

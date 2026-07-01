@@ -12,7 +12,7 @@ public class TrackResponse {
     private Integer id;
     private String name;
     private String location;
-    private String surfaceCondition;
+    private String shape;
 
     public static TrackResponse fromEntity(RaceTrack track) {
         if (track == null) return null;
@@ -20,7 +20,7 @@ public class TrackResponse {
                 .id(track.getId())
                 .name(track.getName())
                 .location(track.getLocation())
-                .surfaceCondition(track.getSurfaceCondition())
+                .shape(track.getShape())
                 .build();
     }
 }

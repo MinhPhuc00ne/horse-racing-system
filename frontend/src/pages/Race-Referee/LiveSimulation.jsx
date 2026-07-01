@@ -24,6 +24,7 @@ export default function LiveSimulation() {
 
   const [horses, setHorses] = useState([]);
   const numLanes = Math.max(1, horses.length);
+  const [trackShape, setTrackShape] = useState('STRAIGHT'); // STRAIGHT, OVAL
   const [racePhase, setRacePhase] = useState('IDLE'); // IDLE, RAPHAEL, PRE_RACE, RUNNING, FINISHED
   const [spawnedCount, setSpawnedCount] = useState(0);
   const [countdown, setCountdown] = useState(null);
@@ -246,7 +247,7 @@ export default function LiveSimulation() {
         }
 
         for (let i = 1; i <= numLanes; i++) {
-          await new Promise(r => setTimeout(r, 600));
+          await new Promise(r => setTimeout(r, 1000));
           if (isCancelled) return;
           setSpawnedCount(i);
           audioManager.playIntroChime(); // Play spawn chime
@@ -278,26 +279,6 @@ export default function LiveSimulation() {
 
   // Fetch real upcoming race and participants
   useEffect(() => {
-    const loadMockHorses = () => {
-      const mockNames = ['Thần Phong', 'Xích Thố', 'Bạch Long', 'Hắc Báo', 'Tia Chớp'];
-      const jockeys = ['Nguyễn Văn Đạt', 'Lê Hoàng Minh', 'Trần Văn Nam', 'Phạm Quốc Bảo', 'Huỳnh Gia Huy'];
-      const mockHorses = mockNames.map((name, idx) => ({
-        id: idx + 1,
-        horseId: 200 + idx,
-        name: name,
-        jockeyName: jockeys[idx],
-        ownerName: 'Tập đoàn ' + ['Alpha', 'Vanguard', 'Omega', 'Titan', 'Apex'][idx % 5],
-        weight: (450 + Math.random() * 50).toFixed(1),
-        progress: 0,
-        color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
-        flaggedPositions: []
-      }));
-      setHorses(mockHorses);
-      visualHorses.current = mockHorses.map(h => ({ ...h, visualProgress: 0, trail: [] }));
-      setSimulatedRaceName('Đua Mô Phỏng Thử Nghiệm (Demo Mode)');
-      setActualRaceId(999);
-    };
-
     const fetchUpcomingRace = async () => {
       try {
         let races = await getAssignedRacesAPI('upcoming');
@@ -309,6 +290,7 @@ export default function LiveSimulation() {
           const rId = race.raceId || race.id;
           setActualRaceId(rId);
           setSimulatedRaceName(race.raceName);
+          setTrackShape(race.trackShape || 'STRAIGHT');
 
           const preCheck = await getRacePreCheckAPI(rId);
           if (preCheck && preCheck.participants && preCheck.participants.length > 0) {
@@ -320,21 +302,20 @@ export default function LiveSimulation() {
               ownerName: p.ownerName || 'Tập đoàn ' + ['Alpha', 'Vanguard', 'Omega', 'Titan', 'Apex'][idx % 5],
               weight: p.actualWeight || (450 + Math.random() * 50).toFixed(1),
               progress: 0,
-              color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
+              color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea', '#f472b6', '#3b82f6'][idx % 7],
               flaggedPositions: [],
               imageUrl: p.horseImageUrl
             }));
             setHorses(fetchedHorses);
             visualHorses.current = fetchedHorses.map(h => ({ ...h, visualProgress: 0, trail: [] }));
           } else {
-            loadMockHorses();
+            console.warn("No participants found for this race.");
           }
         } else {
-          loadMockHorses();
+          console.warn("No upcoming or running races found.");
         }
       } catch (err) {
-        console.error("Failed to fetch real race data, using mock data", err);
-        loadMockHorses();
+        console.error("Failed to fetch real race data", err);
       }
     };
     fetchUpcomingRace();
@@ -435,6 +416,286 @@ export default function LiveSimulation() {
       const startX = W * 0.06;
       const endX = W * 0.94;
       const Vx = W / 2;
+
+      // Theme-specific configurations
+      const themeConfigs = {
+        sunset: {
+          skyColors: ['#10375c', '#1a5f7a', '#f9d976'],
+          sunColor: 'rgba(253, 186, 116, 0.8)',
+          sunRadius: 45,
+          grassColor: '#194d33',
+          trackColor: '#654321',
+          fenceColor: '#ffffff',
+          laneLineColor: 'rgba(255, 255, 255, 0.4)',
+          gridColor: 'rgba(0, 0, 0, 0.18)',
+          dustColor: 'rgba(180, 150, 110, 0.35)',
+          postColor: '#f8fafc'
+        },
+        cyber: {
+          skyColors: ['#020408', '#050a12', '#0a192f'],
+          sunColor: 'rgba(0, 242, 254, 0.15)',
+          sunRadius: 70,
+          grassColor: '#030d1a',
+          trackColor: '#0a0f1d',
+          fenceColor: '#00f2fe',
+          laneLineColor: 'rgba(0, 242, 254, 0.25)',
+          gridColor: 'rgba(0, 242, 254, 0.08)',
+          dustColor: 'rgba(0, 242, 254, 0.15)',
+          postColor: '#00f2fe'
+        },
+        sunny: {
+          skyColors: ['#38bdf8', '#7dd3fc', '#bae6fd'],
+          sunColor: 'rgba(253, 224, 71, 0.95)',
+          sunRadius: 35,
+          grassColor: '#16a34a',
+          trackColor: '#15803d',
+          fenceColor: '#ffffff',
+          laneLineColor: 'rgba(255, 255, 255, 0.55)',
+          gridColor: 'rgba(255, 255, 255, 0.15)',
+          dustColor: 'rgba(255, 255, 255, 0.25)',
+          postColor: '#ffffff'
+        },
+        snow: {
+          skyColors: ['#475569', '#64748b', '#94a3b8'],
+          sunColor: 'rgba(255, 255, 255, 0.4)',
+          sunRadius: 50,
+          grassColor: '#cbd5e1',
+          trackColor: '#f1f5f9',
+          fenceColor: '#78350f',
+          laneLineColor: 'rgba(71, 85, 105, 0.25)',
+          gridColor: 'rgba(71, 85, 105, 0.08)',
+          dustColor: 'rgba(255, 255, 255, 0.5)',
+          postColor: '#78350f'
+        },
+        rain: {
+          skyColors: ['#2b323a', '#44515c', '#606c76'],
+          sunColor: 'rgba(255, 255, 255, 0)',
+          sunRadius: 0,
+          grassColor: '#123524',
+          trackColor: '#3d2b1f',
+          fenceColor: '#a0aec0',
+          laneLineColor: 'rgba(255, 255, 255, 0.3)',
+          gridColor: 'rgba(0, 0, 0, 0.25)',
+          dustColor: 'rgba(60, 40, 30, 0.4)',
+          postColor: '#e2e8f0'
+        }
+      };
+      const config = themeConfigs[environment] || themeConfigs.sunset;
+
+      if (trackShape === 'OVAL') {
+        const skyGrd = ctx.createLinearGradient(0, 0, 0, H * 0.4);
+        skyGrd.addColorStop(0, config.skyColors[0]);
+        skyGrd.addColorStop(0.5, config.skyColors[1]);
+        skyGrd.addColorStop(1, config.skyColors[2]);
+        ctx.fillStyle = skyGrd;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.save();
+        if (shakeIntensity.current > 0) {
+          ctx.translate((Math.random() - 0.5) * shakeIntensity.current, (Math.random() - 0.5) * shakeIntensity.current);
+          shakeIntensity.current *= 0.88;
+          if (shakeIntensity.current < 0.2) shakeIntensity.current = 0;
+        }
+
+        const activePov = povHorseRef.current;
+        const followedVisualHorse = activePov ? visualHorses.current.find(h => h.id === activePov.id) : null;
+        const povProgress = followedVisualHorse ? followedVisualHorse.visualProgress : (activePov ? activePov.progress : 0);
+
+        const outerRx = W * 0.85; 
+        const trackWidth = Math.max(W, H) * 0.22;
+        const innerRx = outerRx - trackWidth;
+
+        let camX = 0;
+        let camY = 0;
+        if (activePov) {
+            const angle = -Math.PI / 2 + (povProgress / 100) * (Math.PI * 2);
+            const laneOffset = ((activePov.id - 1) + 0.5) * trackWidth / numLanes;
+            const currentRx = innerRx + laneOffset;
+            camX = -(Math.cos(angle) * currentRx);
+            camY = -(Math.sin(angle) * currentRx * 0.45);
+        }
+
+        ctx.translate(W / 2 + camX, H / 2 + 100 + camY);
+
+        ctx.save();
+        ctx.scale(1, 0.45);
+
+        ctx.fillStyle = config.grassColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, outerRx + 800, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = environment === 'cyber' ? '#111827' : '#334155';
+        ctx.beginPath();
+        ctx.arc(0, 0, outerRx + 180, 0, Math.PI * 2);
+        ctx.arc(0, 0, outerRx, 0, Math.PI * 2, true);
+        ctx.fill();
+
+        ctx.fillStyle = config.trackColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, outerRx, 0, Math.PI * 2);
+        ctx.arc(0, 0, innerRx, 0, Math.PI * 2, true);
+        ctx.fill();
+
+        ctx.fillStyle = config.grassColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, innerRx, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.strokeStyle = config.fenceColor;
+        ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.arc(0, 0, outerRx, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, 0, innerRx, 0, Math.PI * 2); ctx.stroke();
+
+        ctx.strokeStyle = config.laneLineColor;
+        ctx.lineWidth = 3;
+        ctx.setLineDash([20, 20]);
+        for (let i = 1; i < numLanes; i++) {
+          ctx.beginPath();
+          ctx.arc(0, 0, innerRx + (trackWidth * i) / numLanes, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.moveTo(0, -outerRx);
+        ctx.lineTo(0, -innerRx);
+        ctx.stroke();
+
+        const timeSec = Date.now() * 0.005;
+        const crowdColors = ['#f87171', '#60a5fa', '#34d399', '#fbbf24', '#f472b6', '#e2e8f0', '#a78bfa'];
+        for(let a=0; a<Math.PI*2; a+=0.02) {
+            const standR = outerRx + 20 + Math.random()*140;
+            const cx = Math.cos(a) * standR;
+            const cy = Math.sin(a) * standR;
+            
+            if (Math.abs(cx + camX) > W/0.7 || Math.abs((cy*0.45) + camY) > H/0.7) continue;
+
+            const size = 5 + Math.random()*5;
+            ctx.fillStyle = crowdColors[Math.floor(Math.random() * crowdColors.length)];
+            ctx.beginPath();
+            ctx.arc(cx, cy, size, 0, Math.PI*2);
+            ctx.fill();
+
+            if (racePhase === 'RUNNING' && Math.random() < 0.015) {
+               ctx.fillStyle = '#ffffff';
+               ctx.beginPath();
+               ctx.arc(cx, cy, 12, 0, Math.PI*2);
+               ctx.fill();
+            }
+        }
+
+        ctx.restore();
+
+        if (racePhase === 'PRE_RACE') {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+          ctx.fillRect(-W*2, -H*2, W*4, H*4);
+        }
+
+        if (racePhase === 'PRE_RACE' || racePhase === 'RUNNING' || racePhase === 'FINISHED') {
+          const horsesToDraw = [];
+          visualHorses.current.forEach((vHorse, laneIndex) => {
+            if (racePhase === 'PRE_RACE' && laneIndex >= spawnedCount) return;
+            const stateHorse = horsesRef.current.find(h => h.id === vHorse.id);
+            const targetProgress = stateHorse ? stateHorse.progress : 0;
+            vHorse.visualProgress += (targetProgress - vHorse.visualProgress) * 0.08;
+
+            const angle = -Math.PI / 2 + (vHorse.visualProgress / 100) * (Math.PI * 2);
+            const currentRx = innerRx + ((laneIndex + 0.5) * trackWidth / numLanes);
+            
+            const horseX = Math.cos(angle) * currentRx;
+            const horseY = Math.sin(angle) * currentRx * 0.45;
+
+            horsesToDraw.push({vHorse, x: horseX, y: horseY, laneIndex, angle});
+          });
+
+          horsesToDraw.sort((a,b) => a.y - b.y);
+
+          horsesToDraw.forEach(hData => {
+            const {vHorse, x, y} = hData;
+            const isActivePOV = activePov && activePov.id === vHorse.id;
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 12, 22, 10, 0, 0, Math.PI*2);
+            ctx.fill();
+
+            const size = isActivePOV ? 42 : 32;
+            
+            if (horseImagesRef.current[vHorse.id]) {
+                ctx.save();
+                if (isActivePOV) {
+                    ctx.shadowColor = '#ff8800';
+                    ctx.shadowBlur = 15;
+                    ctx.beginPath(); ctx.arc(x, y - size/2, size*0.7, 0, Math.PI*2); ctx.fillStyle='rgba(255,136,0,0.3)'; ctx.fill();
+                }
+                ctx.beginPath();
+                ctx.arc(x, y - size/2, size/2, 0, Math.PI*2);
+                ctx.clip();
+                ctx.drawImage(horseImagesRef.current[vHorse.id], x - size/2, y - size, size, size);
+                ctx.restore();
+                ctx.strokeStyle = isActivePOV ? '#ff8800' : (vHorse.color || '#ffffff');
+                ctx.lineWidth = isActivePOV ? 4 : 2;
+                ctx.beginPath();
+                ctx.arc(x, y - size/2, size/2, 0, Math.PI*2);
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = vHorse.color || '#00f2fe';
+                ctx.beginPath();
+                ctx.roundRect(x - size/2, y - size, size, size, 8);
+                ctx.fill();
+                ctx.strokeStyle = isActivePOV ? '#ff8800' : '#ffffff';
+                ctx.lineWidth = isActivePOV ? 4 : 2;
+                ctx.stroke();
+
+                ctx.fillStyle = darkenColor(vHorse.color || '#00f2fe', 0.5);
+                ctx.beginPath();
+                ctx.arc(x, y - size - 8, size/3, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(vHorse.id, x, y - size - 12);
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.8)';
+            ctx.fillRect(x - 35, y - size - 40, 70, 18);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '12px sans-serif';
+            ctx.fillText(vHorse.name, x, y - size - 30);
+          });
+        }
+        
+        ctx.restore();
+
+        if (environment === 'rain' || environment === 'snow') {
+           ctx.fillStyle = environment === 'rain' ? 'rgba(173, 216, 230, 0.4)' : 'rgba(255, 255, 255, 0.7)';
+           const particles = environment === 'rain' ? rainDrops : snowFlakes;
+           particles.forEach(p => {
+             ctx.beginPath();
+             if (environment === 'rain') {
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x - p.speedX * 2, p.y + p.l);
+                ctx.strokeStyle = ctx.fillStyle;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+             } else {
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                ctx.fill();
+             }
+             p.x -= p.speedX;
+             p.y += p.speedY;
+             if (p.y > H) { p.y = -10; p.x = Math.random() * W; }
+           });
+        }
+
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
 
       // Clear the canvas
       ctx.clearRect(0, 0, W, H);
@@ -672,71 +933,7 @@ export default function LiveSimulation() {
         ctx.restore();
       };
 
-      // Theme-specific configurations
-      const themeConfigs = {
-        sunset: {
-          skyColors: ['#10375c', '#1a5f7a', '#f9d976'],
-          sunColor: 'rgba(253, 186, 116, 0.8)',
-          sunRadius: 45,
-          grassColor: '#194d33',
-          trackColor: '#654321',
-          fenceColor: '#ffffff',
-          laneLineColor: 'rgba(255, 255, 255, 0.4)',
-          gridColor: 'rgba(0, 0, 0, 0.18)',
-          dustColor: 'rgba(180, 150, 110, 0.35)',
-          postColor: '#f8fafc'
-        },
-        cyber: {
-          skyColors: ['#020408', '#050a12', '#0a192f'],
-          sunColor: 'rgba(0, 242, 254, 0.15)',
-          sunRadius: 70,
-          grassColor: '#030d1a',
-          trackColor: '#0a0f1d',
-          fenceColor: '#00f2fe',
-          laneLineColor: 'rgba(0, 242, 254, 0.25)',
-          gridColor: 'rgba(0, 242, 254, 0.08)',
-          dustColor: 'rgba(0, 242, 254, 0.15)',
-          postColor: '#00f2fe'
-        },
-        sunny: {
-          skyColors: ['#38bdf8', '#7dd3fc', '#bae6fd'],
-          sunColor: 'rgba(253, 224, 71, 0.95)',
-          sunRadius: 35,
-          grassColor: '#16a34a',
-          trackColor: '#15803d',
-          fenceColor: '#ffffff',
-          laneLineColor: 'rgba(255, 255, 255, 0.55)',
-          gridColor: 'rgba(255, 255, 255, 0.15)',
-          dustColor: 'rgba(255, 255, 255, 0.25)',
-          postColor: '#ffffff'
-        },
-        snow: {
-          skyColors: ['#475569', '#64748b', '#94a3b8'],
-          sunColor: 'rgba(255, 255, 255, 0.4)',
-          sunRadius: 50,
-          grassColor: '#cbd5e1',
-          trackColor: '#f1f5f9',
-          fenceColor: '#78350f',
-          laneLineColor: 'rgba(71, 85, 105, 0.25)',
-          gridColor: 'rgba(71, 85, 105, 0.08)',
-          dustColor: 'rgba(255, 255, 255, 0.5)',
-          postColor: '#78350f'
-        },
-        rain: {
-          skyColors: ['#2b323a', '#44515c', '#606c76'],
-          sunColor: 'rgba(255, 255, 255, 0)',
-          sunRadius: 0,
-          grassColor: '#123524',
-          trackColor: '#3d2b1f',
-          fenceColor: '#a0aec0',
-          laneLineColor: 'rgba(255, 255, 255, 0.3)',
-          gridColor: 'rgba(0, 0, 0, 0.25)',
-          dustColor: 'rgba(60, 40, 30, 0.4)',
-          postColor: '#e2e8f0'
-        }
-      };
 
-      const config = themeConfigs[environment] || themeConfigs.sunset;
 
       // 1. Draw Sky Gradient
       const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
@@ -2300,23 +2497,10 @@ export default function LiveSimulation() {
           console.error(err);
         }
       } else {
-        // Fallback for Demo Mode
-        const mockNames = ['Thần Phong', 'Xích Thố', 'Bạch Long', 'Hắc Báo', 'Tia Chớp'];
-        const jockeys = ['Nguyễn Văn Đạt', 'Lê Hoàng Minh', 'Trần Văn Nam', 'Phạm Quốc Bảo', 'Huỳnh Gia Huy'];
-        const mockHorses = mockNames.map((name, idx) => ({
-          id: idx + 1,
-          horseId: 200 + idx,
-          name: name,
-          jockeyName: jockeys[idx],
-          ownerName: 'Tập đoàn ' + ['Alpha', 'Vanguard', 'Omega', 'Titan', 'Apex'][idx % 5],
-          weight: (450 + Math.random() * 50).toFixed(1),
-          progress: 0,
-          color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
-          flaggedPositions: [],
-          speed: 0
-        }));
-        setHorses(mockHorses);
-        visualHorses.current = mockHorses.map(h => ({ ...h, visualProgress: 0, trail: [], bubbleText: '', bubbleTimer: 0 }));
+        // Reset progress for existing horses
+        const resetHorses = horses.map(h => ({ ...h, progress: 0, speed: 0, flaggedPositions: [] }));
+        setHorses(resetHorses);
+        visualHorses.current = resetHorses.map(h => ({ ...h, visualProgress: 0, trail: [], bubbleText: '', bubbleTimer: 0 }));
       }
       setResultsSaved(false);
       setSpawnedCount(0);

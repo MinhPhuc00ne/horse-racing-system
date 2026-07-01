@@ -220,14 +220,14 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
                 }
                 updateSystemText(`Bắt đầu giới thiệu: [${horse.name}]...`);
 
-                await wait(1200);
+                await wait(1500);
                 if (isCancelled) return;
                 if (panel1Ref.current) {
                     panel1Ref.current.style.animation = 'slideInRight 0.4s ease-out forwards';
                     audioManager.playSlideTick();
                 }
 
-                await wait(1000);
+                await wait(1500);
                 if (isCancelled) return;
                 updateSystemText(`Trích xuất thông tin Đội Đua & Nài Ngựa [${horse.name}]...`);
                 if (panel2Ref.current) {
@@ -235,7 +235,7 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
                     audioManager.playSlideTick();
                 }
 
-                await wait(1000);
+                await wait(1500);
                 if (isCancelled) return;
                 triggerFlash(200);
                 if (panel3Ref.current) {
@@ -244,7 +244,7 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
                 }
                 updateSystemText(`Hiển thị phong độ gần đây của [${horse.name}].`);
 
-                await wait(2000);
+                await wait(2500);
                 if (isCancelled) return;
 
                 if (i < horses.length - 1) {
@@ -256,7 +256,7 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
                     if (panel1Ref.current) { panel1Ref.current.style.animation = ''; panel1Ref.current.style.opacity = '0'; }
                     if (panel2Ref.current) { panel2Ref.current.style.animation = ''; panel2Ref.current.style.opacity = '0'; }
                     if (panel3Ref.current) { panel3Ref.current.style.animation = ''; panel3Ref.current.style.opacity = '0'; }
-                    await wait(400);
+                    await wait(500);
                 }
             }
 

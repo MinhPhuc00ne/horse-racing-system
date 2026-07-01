@@ -241,7 +241,7 @@ public class RefereeService {
         return PreCheckResponse.builder()
                 .raceId(race.getId())
                 .raceName(race.getRaceName())
-                .trackCondition(race.getRaceTrack().getSurfaceCondition())
+                .trackCondition(race.getRaceTrack() != null ? race.getRaceTrack().getShape() : "Unknown")
                 .weather(race.getWeather())
                 .participants(list)
                 .build();
