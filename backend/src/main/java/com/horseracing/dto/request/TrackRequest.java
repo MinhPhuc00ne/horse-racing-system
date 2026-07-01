@@ -16,6 +16,5 @@ public class TrackRequest {
     @NotBlank(message = "Location is required")
     private String location;
 
-    @NotBlank(message = "Shape is required")
     private String shape;
 }
