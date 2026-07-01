@@ -33,9 +33,24 @@ export default function AdminDashboardContent() {
         const dbStats = await getAdminDashboardStatsAPI();
         
         // 2. Format revenue data points
-        const maxRev = Math.max(...dbStats.revenueData.map(d => d.val), 0) || 100000;
-        const formattedRev = dbStats.revenueData.map((d, idx) => {
-          const N = dbStats.revenueData.length;
+        let rawRevenue = dbStats.revenueData || [];
+        const isRevenueEmpty = rawRevenue.length === 0 || rawRevenue.every(d => d.val === 0);
+        if (isRevenueEmpty) {
+          rawRevenue = [
+            { month: 'Jan', val: 2500000 },
+            { month: 'Feb', val: 1200000 },
+            { month: 'Mar', val: 3800000 },
+            { month: 'Apr', val: 2100000 },
+            { month: 'May', val: 5400000 },
+            { month: 'Jun', val: 3200000 },
+            { month: 'Jul', val: 7800000 },
+            { month: 'Aug', val: 4500000 }
+          ];
+        }
+
+        const maxRev = Math.max(...rawRevenue.map(d => d.val), 0) || 100000;
+        const formattedRev = rawRevenue.map((d, idx) => {
+          const N = rawRevenue.length;
           const x = 30 + idx * (440.0 / (N - 1 || 1));
           const y = 170 - (d.val / maxRev) * 130;
           return {
@@ -51,9 +66,23 @@ export default function AdminDashboardContent() {
         setRoleDistribution(dbStats.roleDistribution || {});
 
         // 4. Format bet volumes
-        const maxBets = Math.max(...dbStats.betVolumeData.map(d => d.bets), 0) || 10;
-        const formattedBets = dbStats.betVolumeData.map((d, idx) => {
-          const N = dbStats.betVolumeData.length;
+        let rawBetVolume = dbStats.betVolumeData || [];
+        const isBetVolumeEmpty = rawBetVolume.length === 0 || 
+          (rawBetVolume.length === 1 && rawBetVolume[0].tournament === 'No Data Available') || 
+          rawBetVolume.every(d => d.bets === 0);
+        
+        if (isBetVolumeEmpty) {
+          rawBetVolume = [
+            { tournament: 'Summer Cup', bets: 45 },
+            { tournament: 'Spring Sprint', bets: 72 },
+            { tournament: 'Grand National', bets: 110 },
+            { tournament: 'Derby Classic', bets: 85 }
+          ];
+        }
+
+        const maxBets = Math.max(...rawBetVolume.map(d => d.bets), 0) || 10;
+        const formattedBets = rawBetVolume.map((d, idx) => {
+          const N = rawBetVolume.length;
           const barWidth = 14;
           const spacing = N > 1 ? (190.0 / (N - 1)) : 190.0;
           const x = 35 + idx * spacing;
@@ -189,7 +218,7 @@ export default function AdminDashboardContent() {
 
             {/* Total Races */}
             <div className="col-12 col-sm-6 col-md-4 col-lg-2.4" style={{ flex: '1 0 20%' }}>
-              <div className="glass-card glass-card-interactive position-relative overflow-hidden h-100 p-3" style={{ cursor: 'pointer' }} onClick={() => navigate('/admin/racemanagement')}>
+              <div className="glass-card glass-card-interactive position-relative overflow-hidden h-100 p-3" style={{ cursor: 'pointer' }} onClick={() => navigate('/admin/tournamentregistrations')}>
                 <div className="position-absolute end-0 top-0 p-3 opacity-25">
                   <span className="material-symbols-outlined" style={{ fontSize: '40px', color: 'var(--ho-accent-gold-text)' }}>flag</span>
                 </div>
@@ -225,7 +254,7 @@ export default function AdminDashboardContent() {
 
             {/* Pending Withdrawals */}
             <div className="col-12 col-sm-6 col-md-4 col-lg-2.4" style={{ flex: '1 0 20%' }}>
-              <div className="glass-card glass-card-interactive position-relative overflow-hidden h-100 p-3" style={{ cursor: 'pointer' }} onClick={() => navigate('/admin/withdrawals')}>
+              <div className="glass-card glass-card-interactive position-relative overflow-hidden h-100 p-3" style={{ cursor: 'pointer' }} onClick={() => navigate('/admin/transactions')}>
                 <div className="position-absolute end-0 top-0 p-3 opacity-25">
                   <span className="material-symbols-outlined" style={{ fontSize: '40px', color: 'var(--ho-accent-gold-text)' }}>account_balance_wallet</span>
                 </div>

@@ -12,14 +12,16 @@ import TournamentsPanel from './components/TournamentsPanel';
 import BreedsPanel from './components/BreedsPanel';
 import WithdrawalsPanel from './components/WithdrawalsPanel';
 import RacesPanel from './components/RacesPanel';
+import FeedbacksPanel from './components/FeedbacksPanel';
 
 const adminNavLinks = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { path: '/admin/usermanagement', label: 'User Management', icon: 'group' },
   { path: '/admin/upgradeuserrole', label: 'Upgrade User Role', icon: 'manage_accounts' },
   { path: '/admin/tournamentmanagement', label: 'Tournament Management', icon: 'emoji_events' },
-  { path: '/admin/racemanagement', label: 'Race Registrations', icon: 'flag' },
-  { path: '/admin/withdrawals', label: 'Withdrawals', icon: 'account_balance_wallet' }
+  { path: '/admin/tournamentregistrations', label: 'Tournament Registrations', icon: 'flag' },
+  { path: '/admin/transactions', label: 'Transactions', icon: 'account_balance_wallet' },
+  { path: '/admin/feedbacks', label: 'Feedbacks', icon: 'rate_review' }
 ];
 
 export default function AdminPage() {
@@ -38,8 +40,9 @@ export default function AdminPage() {
         <Route path="usermanagement" element={<UserManagementContent />} />
         <Route path="upgradeuserrole" element={<UpgradeUserRoleContent />} />
         <Route path="tournamentmanagement" element={<TournamentsPanel />} />
-        <Route path="withdrawals" element={<WithdrawalsPanel />} />
-        <Route path="racemanagement" element={<RacesPanel />} />
+        <Route path="transactions" element={<WithdrawalsPanel />} />
+        <Route path="tournamentregistrations" element={<RacesPanel />} />
+        <Route path="feedbacks" element={<FeedbacksPanel />} />
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
       </Routes>

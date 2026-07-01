@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getRefereesAPI } from '../../../services/admin';
 import DataTable from '../../../components/DataTable';
 import { FaSearch, FaFilter, FaToggleOn, FaToggleOff, FaUserCircle, FaPlus, FaEdit, FaTrash, FaInfoCircle, FaCheckCircle } from 'react-icons/fa';
@@ -8,9 +9,11 @@ export default function UserManagementContent() {
   const [usersList, setUsersList] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [successModalMessage, setSuccessModalMessage] = useState('');
 
   // Form & CRUD States
   const [showForm, setShowForm] = useState(false);
@@ -123,7 +126,8 @@ export default function UserManagementContent() {
       setUsersList(prev =>
         prev.map(u => (u.id === editId ? { ...formData, id: editId, username: formData.username.trim(), email: formData.email.trim(), fullName: formData.fullName.trim() } : u))
       );
-      setSuccess(`Cập nhật tài khoản @${formData.username} thành công!`);
+      const msg = `Cập nhật tài khoản @${formData.username} thành công!`;
+      setSuccessModalMessage(msg);
     } else {
       // Create
       const newUser = {
@@ -134,7 +138,8 @@ export default function UserManagementContent() {
         fullName: formData.fullName.trim()
       };
       setUsersList(prev => [newUser, ...prev]);
-      setSuccess(`Tạo mới tài khoản @${formData.username} thành công!`);
+      const msg = `Tạo mới tài khoản @${formData.username} thành công!`;
+      setSuccessModalMessage(msg);
     }
 
     resetForm();
@@ -152,7 +157,6 @@ export default function UserManagementContent() {
     setEditId(user.id);
     setIsEditing(true);
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDeleteClick = (user) => {
@@ -170,7 +174,10 @@ export default function UserManagementContent() {
                           u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           u.username.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === '' || u.role === roleFilter;
-    return matchesSearch && matchesRole;
+    const matchesStatus = statusFilter === '' || 
+                          (statusFilter === 'active' && u.enabled) || 
+                          (statusFilter === 'locked' && !u.enabled);
+    return matchesSearch && matchesRole && matchesStatus;
   });
 
   const columns = [
@@ -221,31 +228,6 @@ export default function UserManagementContent() {
         <span className={`badge ${item.enabled ? 'bg-success' : 'bg-warning text-dark'}`} style={{ fontSize: '10px' }}>
           {item.enabled ? 'Hoạt động' : 'Tạm khóa'}
         </span>
-      )
-    },
-    {
-      key: 'statusToggle',
-      label: 'Khóa/Mở',
-      align: 'center',
-      render: (item) => (
-        <button
-          onClick={() => handleToggleStatus(item.id)}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: item.enabled ? '#10b981' : '#a0aec0',
-            fontSize: '22px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto',
-            transition: 'color 0.2s'
-          }}
-          title={item.enabled ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
-        >
-          {item.enabled ? <FaToggleOn style={{ color: '#10b981' }} /> : <FaToggleOff style={{ color: '#a0aec0' }} />}
-        </button>
       )
     },
     {
@@ -307,16 +289,15 @@ export default function UserManagementContent() {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            if (showForm) resetForm();
-            else setShowForm(true);
-          }}
-          className={`btn ${showForm ? 'btn-outline-danger' : 'btn-success'} d-flex align-items-center gap-2 fw-bold`}
-          style={{ fontSize: '14px', padding: '10px 18px' }}
-        >
-          {showForm ? 'Đóng Form' : <><FaPlus /> Thêm Thành Viên</>}
-        </button>
+        {!showForm && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="btn btn-success d-flex align-items-center gap-2 fw-bold"
+            style={{ fontSize: '13px', padding: '6px 14px' }}
+          >
+            <FaPlus /> Thêm Thành Viên
+          </button>
+        )}
       </div>
 
       {/* Message alerts */}
@@ -331,121 +312,236 @@ export default function UserManagementContent() {
         </div>
       )}
 
-      {/* CRUD Form Panel */}
-      {showForm && (
-        <form onSubmit={handleSubmit} className="glass-card mb-4" style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '24px' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#ffffff', margin: 0, borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '10px' }}>
-            {isEditing ? 'Cập Nhật Thông Tin Thành Viên' : 'Thêm Thành Viên Mới'}
-          </h3>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
-            <div className="row g-3">
-              <div className="col-12 col-md-6 form-group">
-                <label className="profile-label">Tên tài khoản (Username) *</label>
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  required
-                  className="form-input"
-                  placeholder="Nhập tên tài khoản (VD: spectator1)"
-                />
-              </div>
-
-              <div className="col-12 col-md-6 form-group">
-                <label className="profile-label">Họ và tên *</label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  required
-                  className="form-input"
-                  placeholder="Nhập họ và tên đầy đủ..."
-                />
-              </div>
-
-              <div className="col-12 col-md-6 form-group">
-                <label className="profile-label">Email liên hệ *</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="form-input"
-                  placeholder="Nhập email..."
-                />
-              </div>
-
-              <div className="col-12 col-md-6 form-group">
-                <label className="profile-label">Số điện thoại</label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="form-input"
-                  placeholder="Nhập số điện thoại..."
-                />
-              </div>
-
-              <div className="col-12 col-md-6 form-group">
-                <label className="profile-label">Vai trò hệ thống *</label>
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  required
-                  className="form-input"
+      {/* CRUD Form Modal */}
+      {showForm && createPortal(
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'transparent',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1050,
+          }}
+          onClick={resetForm}
+        >
+          <div 
+            className="glass-card" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '650px', 
+              padding: '24px', 
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+              border: '1px solid var(--ho-border-gold, #D4AF37)',
+              background: '#ffffff',
+              borderRadius: '16px',
+              animation: 'scaleUp 0.2s ease-out'
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className="d-flex justify-content-between align-items-center" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
+                <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)' }}>
+                  {isEditing ? 'Cập Nhật Thông Tin Thành Viên' : 'Thêm Thành Viên Mới'}
+                </h3>
+                <button 
+                  type="button" 
+                  onClick={resetForm} 
+                  style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#a0aec0', padding: '0 4px', lineHeight: 1 }}
+                  aria-label="Close"
                 >
-                  <option value="SPECTATOR">SPECTATOR (Khán giả)</option>
-                  <option value="HORSE_OWNER">HORSE_OWNER (Chủ ngựa)</option>
-                  <option value="JOCKEY">JOCKEY (Kỵ sĩ)</option>
-                  <option value="RACE_REFEREE">RACE_REFEREE (Trọng tài)</option>
-                  <option value="ADMIN">ADMIN (Quản trị viên)</option>
-                </select>
+                  &times;
+                </button>
               </div>
 
-              <div className="col-12 col-md-6 d-flex align-items-center mt-4 pt-2">
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    role="switch"
-                    id="userEnabledSwitch"
-                    name="enabled"
-                    checked={formData.enabled}
-                    onChange={handleInputChange}
-                    style={{ cursor: 'pointer' }}
-                  />
-                  <label className="form-check-label text-dark fw-bold ms-2" htmlFor="userEnabledSwitch" style={{ cursor: 'pointer' }}>
-                    Kích hoạt tài khoản ngay khi tạo
-                  </label>
+              <div style={{ maxHeight: 'calc(80vh - 120px)', overflowY: 'auto', paddingRight: '4px' }} className="no-scrollbar">
+                <div className="row g-3">
+                  <div className="col-12 col-md-6 form-group">
+                    <label className="ho-input-label">Tên tài khoản (Username) *</label>
+                    <input
+                      type="text"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleInputChange}
+                      required
+                      className="ho-form-input text-dark fw-semibold"
+                      placeholder="Nhập tên tài khoản (VD: spectator1)"
+                      disabled={isEditing}
+                    />
+                  </div>
+
+                  <div className="col-12 col-md-6 form-group">
+                    <label className="ho-input-label">Họ và tên *</label>
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      required
+                      className="ho-form-input text-dark fw-semibold"
+                      placeholder="Nhập họ và tên đầy đủ..."
+                      disabled={isEditing}
+                    />
+                  </div>
+
+                  <div className="col-12 col-md-6 form-group">
+                    <label className="ho-input-label">Email liên hệ *</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className="ho-form-input text-dark fw-semibold"
+                      placeholder="Nhập email..."
+                      disabled={isEditing}
+                    />
+                  </div>
+
+                  <div className="col-12 col-md-6 form-group">
+                    <label className="ho-input-label">Số điện thoại</label>
+                    <input
+                      type="text"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="ho-form-input text-dark fw-semibold"
+                      placeholder="Nhập số điện thoại..."
+                      disabled={isEditing}
+                    />
+                  </div>
+
+                  <div className="col-12 col-md-6 form-group">
+                    <label className="ho-input-label">Vai trò hệ thống *</label>
+                    <select
+                      name="role"
+                      value={formData.role}
+                      onChange={handleInputChange}
+                      required
+                      className="ho-form-input text-dark fw-semibold"
+                    >
+                      <option value="SPECTATOR">SPECTATOR (Khán giả)</option>
+                      <option value="HORSE_OWNER">HORSE_OWNER (Chủ ngựa)</option>
+                      <option value="JOCKEY">JOCKEY (Kỵ sĩ)</option>
+                      <option value="RACE_REFEREE">RACE_REFEREE (Trọng tài)</option>
+                      <option value="ADMIN">ADMIN (Quản trị viên)</option>
+                    </select>
+                  </div>
+
+                  <div className="col-12 col-md-6 d-flex align-items-center mt-4 pt-2">
+                    <div className="form-check form-switch">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="userEnabledSwitch"
+                        name="enabled"
+                        checked={formData.enabled}
+                        onChange={handleInputChange}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      <label className="form-check-label text-dark fw-bold ms-2" htmlFor="userEnabledSwitch" style={{ cursor: 'pointer', fontSize: '13px' }}>
+                        Tài khoản hoạt động
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid rgba(0, 0, 0, 0.08)', paddingTop: '15px' }}>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="btn btn-outline-secondary btn-sm"
+                  style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-success btn-sm fw-bold"
+                  style={{ padding: '8px 24px', fontSize: '13px', borderRadius: '8px' }}
+                >
+                  {isEditing ? 'Lưu Thay Đổi' : 'Thêm Thành Viên'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Success Modal */}
+      {successModalMessage && createPortal(
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'transparent',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1060,
+          }}
+          onClick={() => setSuccessModalMessage('')}
+        >
+          <div 
+            className="glass-card text-center" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '400px', 
+              padding: '30px 24px', 
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
+              border: '1px solid #10b981',
+              background: '#ffffff',
+              borderRadius: '16px',
+              animation: 'scaleUp 0.2s ease-out'
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+              <div 
+                style={{ 
+                  width: '60px', 
+                  height: '60px', 
+                  borderRadius: '50%', 
+                  backgroundColor: 'rgba(16, 185, 129, 0.15)', 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  color: '#10b981'
+                }}
+              >
+                <FaCheckCircle size="36" />
+              </div>
+              
+              <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
+                Thành Công!
+              </h3>
+              
+              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                {successModalMessage}
+              </p>
+              
+              <button
+                type="button"
+                onClick={() => setSuccessModalMessage('')}
+                className="btn btn-success fw-bold w-100"
+                style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
+              >
+                Xác nhận
+              </button>
             </div>
           </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '15px' }}>
-            <button
-              type="button"
-              onClick={resetForm}
-              className="btn btn-outline-secondary btn-sm"
-              style={{ padding: '8px 18px', fontSize: '13px' }}
-            >
-              Hủy bỏ
-            </button>
-            <button
-              type="submit"
-              className="btn btn-success btn-sm fw-bold"
-              style={{ padding: '8px 24px', fontSize: '13px' }}
-            >
-              {isEditing ? 'Lưu Thay Đổi' : 'Thêm Thành Viên'}
-            </button>
-          </div>
-        </form>
+        </div>,
+        document.body
       )}
 
       {/* Filter & Search Controls */}
@@ -473,7 +569,7 @@ export default function UserManagementContent() {
             className="ho-form-input text-dark fw-semibold"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            style={{ fontSize: '14px', minWidth: '180px', height: '42px', paddingRight: '24px' }}
+            style={{ fontSize: '14px', minWidth: '150px', height: '42px', paddingRight: '24px' }}
           >
             <option value="">Tất cả vai trò</option>
             <option value="ADMIN">ADMIN</option>
@@ -481,6 +577,23 @@ export default function UserManagementContent() {
             <option value="JOCKEY">JOCKEY</option>
             <option value="RACE_REFEREE">RACE REFEREE</option>
             <option value="SPECTATOR">SPECTATOR</option>
+          </select>
+        </div>
+
+        {/* Status Filter */}
+        <div className="d-flex align-items-center gap-2" style={{ flex: '0 0 auto' }}>
+          <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--ho-primary-dark)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+            <FaFilter className="me-1" /> Trạng thái:
+          </span>
+          <select
+            className="ho-form-input text-dark fw-semibold"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{ fontSize: '14px', minWidth: '150px', height: '42px', paddingRight: '24px' }}
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="active">Hoạt động</option>
+            <option value="locked">Tạm khóa</option>
           </select>
         </div>
 

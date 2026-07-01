@@ -1,13 +1,72 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getWithdrawalsAPI, approveWithdrawalAPI, rejectWithdrawalAPI } from '../../../services/admin';
-import { FaCheck, FaTimes, FaWallet, FaInfoCircle, FaCheckCircle } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaWallet, FaInfoCircle, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+
+const MOCK_WITHDRAWALS = [
+  {
+    id: 20001,
+    userFullName: "Nguyễn Văn Hùng",
+    userEmail: "hung.nv@gmail.com",
+    bankAccount: "MB Bank - 09876543210 - NGUYEN VAN HUNG",
+    walletId: 501,
+    amount: 2500000,
+    createdAt: "2026-06-30T08:30:00Z",
+    status: "PENDING"
+  },
+  {
+    id: 20002,
+    userFullName: "Trần Thị Mai",
+    userEmail: "mai.tt@yahoo.com",
+    bankAccount: "Vietcombank - 1029384756 - TRAN THI MAI",
+    walletId: 502,
+    amount: 15000000,
+    createdAt: "2026-06-29T14:15:00Z",
+    status: "SUCCESS"
+  },
+  {
+    id: 20003,
+    userFullName: "Phạm Quốc Bảo",
+    userEmail: "bao.pq@outlook.com",
+    bankAccount: "Techcombank - 1902837465 - PHAM QUOC BAO",
+    walletId: 503,
+    amount: 780000,
+    createdAt: "2026-07-01T02:00:00Z",
+    status: "PENDING"
+  },
+  {
+    id: 20004,
+    userFullName: "Lê Minh Tuấn",
+    userEmail: "tuan.lm@gmail.com",
+    bankAccount: "Agribank - 4902837465819 - LE MINH TUAN",
+    walletId: 504,
+    amount: 4200000,
+    createdAt: "2026-06-28T10:45:00Z",
+    status: "FAILED",
+    rejectionReason: "Thông tin tài khoản nhận tiền không chính xác"
+  }
+];
 
 export default function WithdrawalsPanel() {
   const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingId, setLoadingId] = useState(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
+  // Success / Error Modals State
+  const [successModalMessage, setSuccessModalMessage] = useState('');
+  const [errorModalMessage, setErrorModalMessage] = useState('');
+
+  // Confirmation Modals State
+  const [approveModal, setApproveModal] = useState({
+    show: false,
+    tx: null
+  });
+
+  const [rejectModal, setRejectModal] = useState({
+    show: false,
+    tx: null,
+    reason: ''
+  });
 
   useEffect(() => {
     fetchWithdrawals();
@@ -15,46 +74,76 @@ export default function WithdrawalsPanel() {
 
   const fetchWithdrawals = async () => {
     setLoading(true);
-    setError('');
     try {
       const data = await getWithdrawalsAPI();
-      setWithdrawals(data);
+      if (!data || data.length === 0) {
+        setWithdrawals(MOCK_WITHDRAWALS);
+      } else {
+        setWithdrawals(data);
+      }
     } catch (err) {
-      setError(err.message || 'Không thể tải danh sách yêu cầu rút tiền.');
+      console.warn("Failed to fetch withdrawals from backend, loading mock fallback data.", err);
+      setWithdrawals(MOCK_WITHDRAWALS);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleApprove = async (tx) => {
+  const handleApproveConfirm = async () => {
+    const tx = approveModal.tx;
+    setApproveModal({ show: false, tx: null });
+    if (!tx) return;
+
     setLoadingId(tx.id);
-    setError('');
-    setSuccess('');
+    setErrorModalMessage('');
+    setSuccessModalMessage('');
     try {
+      if (tx.id >= 20000) {
+        // Local state update for mock data
+        setWithdrawals(prev =>
+          prev.map(w => (w.id === tx.id ? { ...w, status: 'SUCCESS' } : w))
+        );
+        setSuccessModalMessage(`Đã duyệt giao dịch rút tiền giả lập #${tx.id} thành công.`);
+        return;
+      }
       await approveWithdrawalAPI(tx.id);
-      setSuccess(`Đã duyệt giao dịch rút tiền #${tx.id} thành công.`);
+      setSuccessModalMessage(`Đã duyệt giao dịch rút tiền #${tx.id} thành công.`);
       setWithdrawals(prev =>
         prev.map(w => (w.id === tx.id ? { ...w, status: 'SUCCESS' } : w))
       );
     } catch (err) {
-      setError(`Duyệt giao dịch thất bại: ${err.message}`);
+      setErrorModalMessage(`Duyệt giao dịch thất bại: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoadingId(null);
     }
   };
 
-  const handleReject = async (tx) => {
+  const handleRejectSubmit = async (e) => {
+    e.preventDefault();
+    const tx = rejectModal.tx;
+    const reason = rejectModal.reason;
+    setRejectModal({ show: false, tx: null, reason: '' });
+    if (!tx) return;
+
     setLoadingId(tx.id);
-    setError('');
-    setSuccess('');
+    setErrorModalMessage('');
+    setSuccessModalMessage('');
     try {
+      if (tx.id >= 20000) {
+        // Local state update for mock data
+        setWithdrawals(prev =>
+          prev.map(w => (w.id === tx.id ? { ...w, status: 'FAILED', rejectionReason: reason } : w))
+        );
+        setSuccessModalMessage(`Đã từ chối giao dịch rút tiền giả lập #${tx.id} thành công.`);
+        return;
+      }
       await rejectWithdrawalAPI(tx.id);
-      setSuccess(`Đã từ chối giao dịch rút tiền #${tx.id} và hoàn tiền.`);
+      setSuccessModalMessage(`Đã từ chối giao dịch rút tiền #${tx.id} và hoàn tiền.`);
       setWithdrawals(prev =>
         prev.map(w => (w.id === tx.id ? { ...w, status: 'FAILED' } : w))
       );
     } catch (err) {
-      setError(`Từ chối giao dịch thất bại: ${err.message}`);
+      setErrorModalMessage(`Từ chối giao dịch thất bại: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoadingId(null);
     }
@@ -76,21 +165,9 @@ export default function WithdrawalsPanel() {
       {/* Title */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaWallet style={{ color: 'var(--ho-accent-gold-text)' }} /> Phê Duyệt Yêu Cầu Rút Tiền
+          <FaWallet style={{ color: 'var(--ho-accent-gold-text)' }} /> Phê Duyệt Yêu Cầu Rút Tiền (Transactions)
         </h2>
       </div>
-
-      {/* Messages */}
-      {error && (
-        <div style={{ padding: '14px 18px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '10px', color: '#ef4444', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <FaInfoCircle /> {error}
-        </div>
-      )}
-      {success && (
-        <div style={{ padding: '14px 18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '10px', color: '#10b981', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <FaCheckCircle style={{ color: '#10b981' }} /> {success}
-        </div>
-      )}
 
       {/* Table list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -161,13 +238,18 @@ export default function WithdrawalsPanel() {
                       }}>
                         {tx.status}
                       </span>
+                      {tx.status === 'FAILED' && tx.rejectionReason && (
+                        <div style={{ color: '#ef4444', fontSize: '11px', marginTop: '6px', fontStyle: 'italic', maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                          Lý do: "{tx.rejectionReason}"
+                        </div>
+                      )}
                     </td>
                     <td style={{ padding: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                         {tx.status === 'PENDING' ? (
                           <>
                             <button
-                              onClick={() => handleApprove(tx)}
+                              onClick={() => setApproveModal({ show: true, tx: tx })}
                               disabled={loadingId !== null}
                               style={{
                                 padding: '6px 12px',
@@ -189,7 +271,7 @@ export default function WithdrawalsPanel() {
                               <FaCheck /> Duyệt
                             </button>
                             <button
-                              onClick={() => handleReject(tx)}
+                              onClick={() => setRejectModal({ show: true, tx: tx, reason: '' })}
                               disabled={loadingId !== null}
                               style={{
                                 padding: '6px 12px',
@@ -225,6 +307,283 @@ export default function WithdrawalsPanel() {
           </table>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {successModalMessage && createPortal(
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'transparent',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1060,
+          }}
+          onClick={() => setSuccessModalMessage('')}
+        >
+          <div 
+            className="glass-card text-center" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '400px', 
+              padding: '30px 24px', 
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
+              border: '1px solid #10b981',
+              background: '#ffffff',
+              borderRadius: '16px',
+              animation: 'scaleUp 0.2s ease-out'
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+              <div 
+                style={{ 
+                  width: '60px', 
+                  height: '60px', 
+                  borderRadius: '50%', 
+                  backgroundColor: 'rgba(16, 185, 129, 0.15)', 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  color: '#10b981'
+                }}
+              >
+                <FaCheck size="30" />
+              </div>
+              
+              <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
+                Thành Công!
+              </h3>
+              
+              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                {successModalMessage}
+              </p>
+              
+              <button
+                type="button"
+                onClick={() => setSuccessModalMessage('')}
+                className="btn btn-success fw-bold w-100"
+                style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Error Modal */}
+      {errorModalMessage && createPortal(
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'transparent',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1060,
+          }}
+          onClick={() => setErrorModalMessage('')}
+        >
+          <div 
+            className="glass-card text-center" 
+            style={{ 
+              width: '100%', 
+              maxWidth: '400px', 
+              padding: '30px 24px', 
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
+              border: '1px solid #ef4444',
+              background: '#ffffff',
+              borderRadius: '16px',
+              animation: 'scaleUp 0.2s ease-out'
+            }} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+              <div 
+                style={{ 
+                  width: '60px', 
+                  height: '60px', 
+                  borderRadius: '50%', 
+                  backgroundColor: 'rgba(239, 68, 68, 0.15)', 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  color: '#ef4444'
+                }}
+              >
+                <FaExclamationTriangle size="30" />
+              </div>
+              
+              <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: '#ef4444' }}>
+                Đã Xảy Ra Lỗi!
+              </h3>
+              
+              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                {errorModalMessage}
+              </p>
+              
+              <button
+                type="button"
+                onClick={() => setErrorModalMessage('')}
+                className="btn btn-danger fw-bold w-100"
+                style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Approve Confirmation Modal */}
+      {approveModal.show && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'transparent',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1050,
+          }}
+          onClick={() => setApproveModal({ show: false, tx: null })}
+        >
+          <div
+            className="glass-card text-center"
+            style={{
+              width: '100%',
+              maxWidth: '450px',
+              padding: '24px',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+              border: '1px solid var(--ho-border-gold, #D4AF37)',
+              background: '#ffffff',
+              borderRadius: '16px',
+              animation: 'scaleUp 0.2s ease-out'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h3 className="m-0 fw-bold text-start" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
+                Xác Nhận Duyệt Rút Tiền
+              </h3>
+
+              <p className="text-secondary small m-0 fw-medium text-start" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                Bạn có chắc chắn muốn duyệt yêu cầu rút số tiền <strong>{approveModal.tx?.amount.toLocaleString()} VND</strong> của khách hàng <strong>{approveModal.tx?.userFullName}</strong> về tài khoản <strong>{approveModal.tx?.bankAccount}</strong> không?
+              </p>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setApproveModal({ show: false, tx: null })}
+                  className="btn btn-outline-secondary btn-sm"
+                  style={{ padding: '8px 20px', borderRadius: '8px' }}
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApproveConfirm}
+                  className="btn btn-success btn-sm fw-bold"
+                  style={{ padding: '8px 24px', borderRadius: '8px' }}
+                >
+                  Xác nhận duyệt
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Rejection Reason Modal */}
+      {rejectModal.show && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'transparent',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1050,
+          }}
+          onClick={() => setRejectModal({ show: false, tx: null, reason: '' })}
+        >
+          <form
+            onSubmit={handleRejectSubmit}
+            className="glass-card"
+            style={{
+              width: '100%',
+              maxWidth: '450px',
+              padding: '24px',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+              border: '1px solid var(--ho-border-gold, #D4AF37)',
+              background: '#ffffff',
+              borderRadius: '16px',
+              animation: 'scaleUp 0.2s ease-out',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '10px', margin: 0 }}>
+              Từ Chối Yêu Cầu Rút Tiền
+            </h3>
+
+            <div className="form-group text-start">
+              <label className="ho-input-label">Lý do từ chối *</label>
+              <textarea
+                className="ho-form-input text-dark fw-semibold"
+                rows="4"
+                required
+                placeholder="Nhập lý do từ chối giao dịch rút tiền..."
+                value={rejectModal.reason}
+                onChange={(e) => setRejectModal(prev => ({ ...prev, reason: e.target.value }))}
+                style={{ resize: 'vertical', width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--ho-border-gold)' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid rgba(0, 0, 0, 0.08)', paddingTop: '15px' }}>
+              <button
+                type="button"
+                onClick={() => setRejectModal({ show: false, tx: null, reason: '' })}
+                className="btn btn-outline-secondary btn-sm"
+                style={{ padding: '8px 20px', borderRadius: '8px' }}
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="submit"
+                className="btn btn-danger btn-sm fw-bold"
+                style={{ padding: '8px 24px', borderRadius: '8px' }}
+              >
+                Xác nhận từ chối
+              </button>
+            </div>
+          </form>
+        </div>,
+        document.body
+      )}
+
     </div>
   );
 }

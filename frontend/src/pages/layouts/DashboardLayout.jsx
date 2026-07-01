@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import DashboardHeader from './DashboardHeader';
@@ -10,35 +10,79 @@ import './DashboardLayout.css';
 export default function DashboardLayout({ navLinks, profile, children }) {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN';
 
   if (isAdmin) {
     return (
       <div className="admin-layout-container d-flex flex-column min-vh-100 w-100" style={{ backgroundColor: 'var(--ho-bg-cream, #f6f3f2)' }}>
-        {/* Admin Header */}
-        <AdminHeader 
-          user={user} 
-          profile={profile} 
-          navLinks={navLinks} 
-          logout={logout} 
-        />
+        {/* Admin Header (Mobile only, hidden on Desktop via d-xl-none) */}
+        <div className="d-xl-none">
+          <AdminHeader 
+            user={user} 
+            profile={profile} 
+            navLinks={navLinks} 
+            logout={logout} 
+          />
+        </div>
 
         <div className="d-flex flex-grow-1 w-100 position-relative">
           {/* Left Sidebar for Admin (Desktop only) */}
-          <aside className="admin-sidebar d-none d-xl-flex flex-column py-4 flex-shrink-0" style={{ width: '260px', height: 'calc(100vh - 80px)', position: 'sticky', top: '80px' }}>
+          <aside 
+            className="admin-sidebar d-none d-xl-flex flex-column py-4 flex-shrink-0" 
+            style={{ 
+              width: isSidebarCollapsed ? '80px' : '260px', 
+              height: '100vh', 
+              position: 'sticky', 
+              top: 0,
+              transition: 'width 0.3s ease'
+            }}
+          >
             {/* Logo / Branding in Sidebar */}
-            <div className="px-4 mb-3 pb-3 border-bottom admin-sidebar-brand-wrapper">
-              <h1 
-                className="ho-font-epilogue fs-5 fw-extrabold m-0 cursor-pointer admin-sidebar-logo" 
-                style={{ cursor: 'pointer' }}
-                onClick={() => navigate('/')}
+            <div className={`px-3 mb-3 pb-3 border-bottom admin-sidebar-brand-wrapper d-flex align-items-center ${isSidebarCollapsed ? 'justify-content-center' : 'justify-content-between'}`}>
+              {!isSidebarCollapsed && (
+                <div className="d-flex flex-column">
+                  <h1 
+                    className="ho-font-epilogue fs-5 fw-extrabold m-0 cursor-pointer admin-sidebar-logo" 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navigate('/')}
+                  >
+                    EquineElite <span className="admin-sidebar-logo-accent">Pro</span>
+                  </h1>
+                  <span className="ho-font-grotesk fw-bold text-uppercase admin-sidebar-sublabel" style={{ fontSize: '9px', letterSpacing: '0.05em' }}>
+                    Admin Control Panel
+                  </span>
+                </div>
+              )}
+              {isSidebarCollapsed && (
+                <span 
+                  className="ho-font-epilogue fw-extrabold cursor-pointer text-white"
+                  style={{ fontSize: '18px', cursor: 'pointer' }}
+                  onClick={() => navigate('/')}
+                  title="EquineElite Pro"
+                >
+                  E<span style={{ color: 'var(--ho-accent-gold)' }}>E</span>
+                </span>
+              )}
+              
+              {/* Collapse/Expand Toggle Button */}
+              <button
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className="btn btn-sm text-white p-1 border-0 d-flex align-items-center justify-content-center"
+                style={{ 
+                  background: 'rgba(255, 255, 255, 0.08)', 
+                  borderRadius: '6px', 
+                  width: '28px', 
+                  height: '28px',
+                  marginLeft: isSidebarCollapsed ? '0' : '8px'
+                }}
+                title={isSidebarCollapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
               >
-                EquineElite <span className="admin-sidebar-logo-accent">Pro</span>
-              </h1>
-              <span className="ho-font-grotesk fw-bold text-uppercase admin-sidebar-sublabel" style={{ fontSize: '9px', letterSpacing: '0.05em' }}>
-                Admin Control Panel
-              </span>
+                <span className="material-symbols-outlined fs-5" style={{ margin: 0 }}>
+                  {isSidebarCollapsed ? 'chevron_right' : 'chevron_left'}
+                </span>
+              </button>
             </div>
 
             {/* Navigation Links */}
@@ -48,29 +92,62 @@ export default function DashboardLayout({ navLinks, profile, children }) {
                   key={link.path}
                   to={link.path}
                   className={({ isActive }) => 
-                    `sidebar-nav-link ${isActive ? 'sidebar-nav-link-active' : 'sidebar-nav-link-inactive'}`
+                    `sidebar-nav-link ${isActive ? 'sidebar-nav-link-active' : 'sidebar-nav-link-inactive'} ${isSidebarCollapsed ? 'justify-content-center' : ''}`
                   }
+                  title={isSidebarCollapsed ? link.label : undefined}
+                  style={{ padding: isSidebarCollapsed ? '12px 0' : '12px 18px' }}
                 >
                   {link.icon && <span className="material-symbols-outlined fs-5">{link.icon}</span>}
-                  <span>{link.label}</span>
+                  {!isSidebarCollapsed && <span>{link.label}</span>}
                 </NavLink>
               ))}
             </div>
 
-            {/* Logout button at the bottom */}
-            <div className="px-3 mt-auto pt-3 border-top admin-sidebar-footer">
-              <button 
-                className="btn btn-outline-danger btn-sm text-start d-flex align-items-center gap-2 p-2 w-100 rounded-3 admin-sidebar-logout-btn"
-                onClick={logout}
+            {/* Profile info in Sidebar (since Header is removed on Desktop) */}
+            <div 
+              className={`px-3 mb-2 mt-auto border-top pt-3 d-flex align-items-center gap-3 ${isSidebarCollapsed ? 'justify-content-center' : ''}`} 
+              style={{ borderColor: 'rgba(255,255,255,0.12)' }}
+            >
+              <div 
+                className="rounded-circle overflow-hidden border d-flex align-items-center justify-content-center flex-shrink-0" 
+                style={{ width: '36px', height: '36px', borderColor: 'var(--ho-accent-gold, #D4AF37)', cursor: 'pointer' }}
+                onClick={() => navigate('/admin/dashboard')}
+                title={isSidebarCollapsed ? (profile?.fullName || user?.fullName || 'System Admin') : undefined}
               >
-                <span className="material-symbols-outlined fs-5">logout</span>
-                Logout
+                <img
+                  alt="User Profile Avatar"
+                  className="w-100 h-100 object-fit-cover"
+                  src={profile?.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80"}
+                />
+              </div>
+              {!isSidebarCollapsed && (
+                <div className="d-flex flex-column overflow-hidden text-start">
+                  <span className="fs-7 fw-bold lh-sm text-white text-truncate" style={{ fontSize: '13px' }}>
+                    {profile?.fullName || user?.fullName || 'System Admin'}
+                  </span>
+                  <span className="ho-font-grotesk fw-bold text-uppercase" style={{ fontSize: '9px', letterSpacing: '0.05em', color: 'var(--ho-primary-light, #95d4ac)' }}>
+                    {user?.role || 'ADMIN'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Logout button at the bottom */}
+            <div className="px-3 pt-2 admin-sidebar-footer">
+              <button 
+                className={`btn btn-outline-danger btn-sm text-start d-flex align-items-center gap-2 p-2 w-100 rounded-3 admin-sidebar-logout-btn ${isSidebarCollapsed ? 'justify-content-center' : ''}`}
+                onClick={logout}
+                title={isSidebarCollapsed ? "Đăng xuất" : undefined}
+                style={{ padding: isSidebarCollapsed ? '10px 0' : '8px 12px' }}
+              >
+                <span className="material-symbols-outlined fs-5" style={{ margin: 0 }}>logout</span>
+                {!isSidebarCollapsed && <span>Logout</span>}
               </button>
             </div>
           </aside>
 
           {/* Right side container: Main Content + Footer */}
-          <div className="d-flex flex-column flex-grow-1 position-relative" style={{ overflowX: 'hidden', minHeight: 'calc(100vh - 80px)' }}>
+          <div className="d-flex flex-column flex-grow-1 position-relative" style={{ overflowX: 'hidden', minHeight: '100vh' }}>
             <main className="flex-grow-1 p-4 p-md-5" style={{ overflowX: 'hidden' }}>
               {children || <Outlet />}
             </main>

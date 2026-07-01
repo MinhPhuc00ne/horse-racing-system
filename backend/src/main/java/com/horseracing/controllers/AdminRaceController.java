@@ -26,6 +26,7 @@ import com.horseracing.dto.response.TournamentResponse;
 import com.horseracing.dto.response.TrackResponse;
 import com.horseracing.dto.response.UserResponse;
 import com.horseracing.entities.enums.Role;
+import com.horseracing.entities.RaceTrack;
 import com.horseracing.repositories.RaceTrackRepository;
 import com.horseracing.repositories.UserRepository;
 import com.horseracing.services.RaceRegistrationService;
@@ -65,6 +66,25 @@ public class AdminRaceController {
                 .map(TrackResponse::fromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(tracks);
+    }
+
+    @PostMapping("/tracks")
+    public ResponseEntity<?> createTrack(@RequestBody RaceTrack track) {
+        try {
+            if (track.getName() == null || track.getName().isBlank()) {
+                return ResponseEntity.badRequest().body(new ErrorResponse(400, "Tên sân đua là bắt buộc"));
+            }
+            if (track.getLocation() == null || track.getLocation().isBlank()) {
+                return ResponseEntity.badRequest().body(new ErrorResponse(400, "Khu vực tổ chức là bắt buộc"));
+            }
+            if (track.getSurfaceCondition() == null || track.getSurfaceCondition().isBlank()) {
+                track.setSurfaceCondition("Good");
+            }
+            RaceTrack saved = raceTrackRepository.save(track);
+            return ResponseEntity.status(HttpStatus.CREATED).body(TrackResponse.fromEntity(saved));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
     }
 
     @PostMapping("/tournaments")
