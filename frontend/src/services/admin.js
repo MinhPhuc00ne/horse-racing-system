@@ -56,6 +56,16 @@ export async function getTracksAPI() {
   }
 }
 
+export async function createTrackAPI(data) {
+  try {
+    const response = await axiosClient.post('/admin/tracks', data);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể tạo sân thi đấu mới.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
 export async function createTournamentAPI(data) {
   try {
     const response = await axiosClient.post('/admin/tournaments', data);

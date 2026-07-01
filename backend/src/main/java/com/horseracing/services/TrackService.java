@@ -16,14 +16,19 @@ public class TrackService {
 
     @Transactional
     public TrackResponse createTrack(TrackRequest request) {
-        if (!"STRAIGHT".equalsIgnoreCase(request.getShape()) && !"OVAL".equalsIgnoreCase(request.getShape())) {
+        String shape = request.getShape();
+        if (shape == null || shape.isBlank()) {
+            shape = "OVAL";
+        }
+
+        if (!"STRAIGHT".equalsIgnoreCase(shape) && !"OVAL".equalsIgnoreCase(shape)) {
             throw new RuntimeException("Shape must be STRAIGHT or OVAL");
         }
 
         RaceTrack track = RaceTrack.builder()
                 .name(request.getName())
                 .location(request.getLocation())
-                .shape(request.getShape().toUpperCase())
+                .shape(shape.toUpperCase())
                 .build();
 
         return TrackResponse.fromEntity(raceTrackRepository.save(track));

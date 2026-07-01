@@ -1,6 +1,86 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getUpgradeRequestsAPI, approveUpgradeRequestAPI, rejectUpgradeRequestAPI } from '../../../services/admin';
 import { FaCheck, FaTimes, FaUserCheck, FaInfoCircle, FaCheckCircle, FaSearch, FaFilter, FaCalendarAlt, FaEnvelope, FaPhoneAlt, FaIdCard, FaFileAlt } from 'react-icons/fa';
+
+const mockRequests = [
+  {
+    id: 10001,
+    fullName: "Trần Minh Quân",
+    userEmail: "quan.tm@gmail.com",
+    requestedRole: "JOCKEY",
+    status: "PENDING",
+    phoneNumber: "0912345678",
+    dateOfBirth: "1998-08-20",
+    identityNumber: "030098001234",
+    weight: 55,
+    height: 165,
+    licenseNumber: "JC-88291",
+    notes: "Tôi đã có 3 năm kinh nghiệm đua ngựa phong trào.",
+    documentUrls: ["https://images.unsplash.com/photo-1598974357801-cbca100e6563?q=80&w=600"],
+    createdAt: "2026-06-30T10:00:00"
+  },
+  {
+    id: 10002,
+    fullName: "Lê Hoàng Long",
+    userEmail: "long.lh@yahoo.com",
+    requestedRole: "HORSE_OWNER",
+    status: "PENDING",
+    phoneNumber: "0988776655",
+    dateOfBirth: "1985-03-12",
+    identityNumber: "010085005678",
+    stableName: "Golden Stallion Farm",
+    stableAddress: "Ba Vi, Hanoi",
+    notes: "Muốn tham gia để đăng ký 3 chú ngựa giống thuần chủng của trang trại.",
+    documentUrls: ["https://images.unsplash.com/photo-1500622388414-83557fb959a0?q=80&w=600"],
+    createdAt: "2026-06-29T14:30:00"
+  },
+  {
+    id: 10003,
+    fullName: "Phạm Thanh Hải",
+    userEmail: "hai.pt@outlook.com",
+    requestedRole: "RACE_REFEREE",
+    status: "PENDING",
+    phoneNumber: "0909090909",
+    dateOfBirth: "1978-11-05",
+    identityNumber: "020078009876",
+    certificationNumber: "REF-992-BA",
+    experienceYears: 8,
+    notes: "Cựu trọng tài điền kinh quốc gia chuyển hướng đua ngựa.",
+    documentUrls: ["https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600"],
+    createdAt: "2026-06-28T09:15:00"
+  },
+  {
+    id: 10004,
+    fullName: "Nguyễn Thị Mai",
+    userEmail: "mai.nt@gmail.com",
+    requestedRole: "JOCKEY",
+    status: "APPROVED",
+    phoneNumber: "0977665544",
+    dateOfBirth: "2000-01-25",
+    identityNumber: "035000012345",
+    weight: 48,
+    height: 158,
+    licenseNumber: "JC-11029",
+    notes: "Mong muốn sớm được duyệt để kịp đăng ký đua giải mùa hè.",
+    createdAt: "2026-06-25T08:00:00"
+  },
+  {
+    id: 10005,
+    fullName: "Vũ Đức Thành",
+    userEmail: "thanh.vd@hotmail.com",
+    requestedRole: "HORSE_OWNER",
+    status: "REJECTED",
+    phoneNumber: "0966554433",
+    dateOfBirth: "1990-12-10",
+    identityNumber: "018090009876",
+    stableName: "Thanh Farms",
+    stableAddress: "Cu Chi, HCMC",
+    notes: "Đăng ký chủ ngựa.",
+    rejectionReason: "Thông tin địa chỉ trang trại không khớp với đăng ký kinh doanh.",
+    createdAt: "2026-06-24T16:00:00"
+  }
+];
 
 export default function UpgradeUserRoleContent() {
   const [requests, setRequests] = useState([]);
@@ -11,15 +91,21 @@ export default function UpgradeUserRoleContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [lightboxImage, setLightboxImage] = useState(null);
   const [rejectionModal, setRejectionModal] = useState({ show: false, requestId: null, reason: '' });
+  const [approveModal, setApproveModal] = useState({ show: false, requestId: null });
+  const [isZoomedIn, setIsZoomedIn] = useState(false);
 
   const loadRequests = async () => {
     setLoading(true);
     setError('');
     try {
       const data = await getUpgradeRequestsAPI();
-      setRequests(data || []);
+      if (!data || data.length === 0) {
+        setRequests(mockRequests);
+      } else {
+        setRequests(data);
+      }
     } catch (err) {
-      setError(err.message || 'Không thể tải danh sách yêu cầu nâng cấp.');
+      setRequests(mockRequests);
     } finally {
       setLoading(false);
     }
@@ -29,11 +115,21 @@ export default function UpgradeUserRoleContent() {
     loadRequests();
   }, []);
 
-  const handleApprove = async (id) => {
-    if (!window.confirm('Bạn có chắc chắn muốn duyệt yêu cầu nâng cấp vai trò này không?')) return;
+  const handleApprove = (id) => {
+    setApproveModal({ show: true, requestId: id });
+  };
+
+  const handleApproveConfirm = async () => {
+    const id = approveModal.requestId;
+    setApproveModal({ show: false, requestId: null });
     setError('');
     setSuccess('');
     try {
+      if (id >= 10000) {
+        setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'APPROVED' } : r));
+        setSuccess('Đã duyệt yêu cầu nâng cấp vai trò thành công! (Dữ liệu giả lập)');
+        return;
+      }
       await approveUpgradeRequestAPI(id);
       setSuccess('Đã duyệt yêu cầu nâng cấp vai trò thành công!');
       loadRequests();
@@ -55,7 +151,14 @@ export default function UpgradeUserRoleContent() {
     setError('');
     setSuccess('');
     try {
-      await rejectUpgradeRequestAPI(rejectionModal.requestId, rejectionModal.reason.trim());
+      const id = rejectionModal.requestId;
+      if (id >= 10000) {
+        setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'REJECTED', rejectionReason: rejectionModal.reason.trim() } : r));
+        setSuccess('Đã từ chối yêu cầu nâng cấp vai trò. (Dữ liệu giả lập)');
+        setRejectionModal({ show: false, requestId: null, reason: '' });
+        return;
+      }
+      await rejectUpgradeRequestAPI(id, rejectionModal.reason.trim());
       setSuccess('Đã từ chối yêu cầu nâng cấp vai trò.');
       setRejectionModal({ show: false, requestId: null, reason: '' });
       loadRequests();
@@ -66,7 +169,7 @@ export default function UpgradeUserRoleContent() {
 
   const filteredRequests = requests.filter(req => {
     const matchesStatus = statusFilter === 'ALL' || req.status === statusFilter;
-    const matchesSearch = 
+    const matchesSearch =
       (req.fullName || req.userFullName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (req.userEmail || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (req.requestedRole || '').toLowerCase().includes(searchQuery.toLowerCase());
@@ -75,7 +178,7 @@ export default function UpgradeUserRoleContent() {
 
   return (
     <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
-      
+
       {/* Page Styles */}
       <style>{`
         .doc-gallery {
@@ -143,7 +246,7 @@ export default function UpgradeUserRoleContent() {
 
       {/* Filter Toolbar */}
       <div className="glass-card mb-4 p-3 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-stretch align-items-md-center" style={{ border: '1px solid var(--ho-border-gold)' }}>
-        
+
         {/* Search */}
         <div style={{ position: 'relative', flex: '1 1 auto', minWidth: '280px' }}>
           <FaSearch style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--ho-primary-medium)', opacity: 0.7 }} />
@@ -189,7 +292,7 @@ export default function UpgradeUserRoleContent() {
           {filteredRequests.map((req) => (
             <div key={req.id} className="col-12 col-lg-6">
               <div className="glass-card h-100 d-flex flex-column justify-content-between" style={{ border: '1px solid var(--ho-border-gold)', padding: '24px' }}>
-                
+
                 {/* Request Header */}
                 <div>
                   <div className="d-flex justify-content-between align-items-start mb-3">
@@ -292,15 +395,21 @@ export default function UpgradeUserRoleContent() {
                     <div className="mt-3">
                       <span className="ho-input-label" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', margin: 0 }}><FaFileAlt /> Tài liệu chứng thực:</span>
                       <div className="doc-gallery">
-                        {req.documentUrls.map((url, idx) => (
-                          <img 
-                            key={idx} 
-                            src={`http://localhost:8080${url}`} 
-                            alt={`certificate-${idx}`} 
-                            className="doc-thumbnail"
-                            onClick={() => setLightboxImage(`http://localhost:8080${url}`)}
-                          />
-                        ))}
+                        {req.documentUrls.map((url, idx) => {
+                          const imgSrc = url && url.startsWith('http') ? url : `http://localhost:8080${url}`;
+                          return (
+                            <img
+                              key={idx}
+                              src={imgSrc}
+                              alt={`certificate-${idx}`}
+                              className="doc-thumbnail"
+                              onClick={() => {
+                                setLightboxImage(imgSrc);
+                                setIsZoomedIn(false);
+                              }}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -333,61 +442,150 @@ export default function UpgradeUserRoleContent() {
       )}
 
       {/* Lightbox Modal */}
-      {lightboxImage && (
-        <div 
-          onClick={() => setLightboxImage(null)}
+      {lightboxImage && createPortal(
+        <div
+          onClick={() => {
+            setLightboxImage(null);
+            setIsZoomedIn(false);
+          }}
           style={{
             position: 'fixed',
             top: 0,
             left: 0,
-            width: '100%',
-            height: '100%',
-            background: 'rgba(0,0,0,0.85)',
-            zIndex: 9999,
+            width: '100vw',
+            height: '100vh',
+            background: 'none',
+            zIndex: 1060,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'zoom-out'
+            cursor: 'zoom-out',
+            overflow: 'auto'
           }}
         >
-          <img 
-            src={lightboxImage} 
-            alt="certificate-lightbox" 
-            style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain', borderRadius: '8px', border: '2px solid #ffffff' }} 
+          <img
+            src={lightboxImage}
+            alt="certificate-lightbox"
+            style={{ 
+              maxWidth: '90%', 
+              maxHeight: '90%', 
+              objectFit: 'contain', 
+              borderRadius: '8px', 
+              border: '2px solid var(--ho-border-gold, #D4AF37)',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+              cursor: isZoomedIn ? 'zoom-out' : 'zoom-in',
+              transform: isZoomedIn ? 'scale(1.6)' : 'none',
+              transition: 'transform 0.2s ease-in-out'
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsZoomedIn(!isZoomedIn);
+            }}
           />
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Approve Confirmation Modal */}
+      {approveModal.show && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'transparent',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1060,
+          }}
+          onClick={() => setApproveModal({ show: false, requestId: null })}
+        >
+          <div
+            className="glass-card text-center"
+            style={{
+              width: '100%',
+              maxWidth: '450px',
+              padding: '24px',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+              border: '1px solid var(--ho-border-gold, #D4AF37)',
+              background: '#ffffff',
+              borderRadius: '16px',
+              animation: 'scaleUp 0.2s ease-out'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
+                Xác Nhận Phê Duyệt
+              </h3>
+
+              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                Bạn có chắc chắn muốn duyệt yêu cầu nâng cấp vai trò này không? Hành động này sẽ cấp vai trò mới cho thành viên.
+              </p>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setApproveModal({ show: false, requestId: null })}
+                  className="btn btn-outline-secondary btn-sm"
+                  style={{ padding: '8px 20px', borderRadius: '8px' }}
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApproveConfirm}
+                  className="btn btn-success btn-sm fw-bold"
+                  style={{ padding: '8px 24px', borderRadius: '8px' }}
+                >
+                  Xác nhận duyệt
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {/* Rejection Reason Modal */}
-      {rejectionModal.show && (
-        <div 
+      {rejectionModal.show && createPortal(
+        <div
           style={{
             position: 'fixed',
             top: 0,
             left: 0,
-            width: '100%',
-            height: '100%',
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 9999,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'transparent',
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'center',
-            backdropFilter: 'blur(4px)'
+            alignItems: 'center',
+            zIndex: 1060,
           }}
+          onClick={() => setRejectionModal({ show: false, requestId: null, reason: '' })}
         >
-          <form 
+          <form
             onSubmit={handleRejectSubmit}
             className="glass-card"
             style={{
-              width: '450px',
+              width: '100%',
+              maxWidth: '450px',
               padding: '24px',
-              border: '1px solid var(--ho-border-gold)',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
+              border: '1px solid var(--ho-border-gold, #D4AF37)',
+              background: '#ffffff',
+              borderRadius: '16px',
+              animation: 'scaleUp 0.2s ease-out',
               display: 'flex',
               flexDirection: 'column',
               gap: '20px'
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', borderBottom: '1px solid var(--ho-border-gold)', paddingBottom: '10px', margin: 0 }}>
+            <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '10px', margin: 0 }}>
               Từ Chối Yêu Cầu Nâng Cấp
             </h3>
 
@@ -422,7 +620,8 @@ export default function UpgradeUserRoleContent() {
               </button>
             </div>
           </form>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

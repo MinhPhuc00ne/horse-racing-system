@@ -27,6 +27,7 @@ import com.horseracing.dto.response.TournamentResponse;
 import com.horseracing.dto.response.TrackResponse;
 import com.horseracing.dto.response.UserResponse;
 import com.horseracing.entities.enums.Role;
+import com.horseracing.entities.RaceTrack;
 import com.horseracing.repositories.RaceTrackRepository;
 import com.horseracing.repositories.UserRepository;
 import com.horseracing.services.RaceRegistrationService;
