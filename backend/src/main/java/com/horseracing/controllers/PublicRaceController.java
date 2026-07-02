@@ -2,11 +2,13 @@ package com.horseracing.controllers;
 
 import com.horseracing.dto.response.*;
 import com.horseracing.repositories.RaceParticipantRepository;
+import com.horseracing.services.LiveRaceService;
 import com.horseracing.services.RaceService;
 import com.horseracing.services.TournamentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +21,7 @@ public class PublicRaceController {
     private final TournamentService tournamentService;
     private final RaceService raceService;
     private final RaceParticipantRepository raceParticipantRepository;
+    private final LiveRaceService liveRaceService;
 
     @GetMapping("/tournaments")
     public ResponseEntity<List<TournamentResponse>> getAllTournaments() {
@@ -56,5 +59,10 @@ public class PublicRaceController {
                 .map(ParticipantResponse::fromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(participants);
+    }
+
+    @GetMapping(value = "/races/{id}/live-stream", produces = org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter subscribeToLiveRace(@PathVariable Integer id) {
+        return liveRaceService.subscribe(id);
     }
 }

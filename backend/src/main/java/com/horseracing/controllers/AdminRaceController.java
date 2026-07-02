@@ -27,7 +27,6 @@ import com.horseracing.dto.response.TournamentResponse;
 import com.horseracing.dto.response.TrackResponse;
 import com.horseracing.dto.response.UserResponse;
 import com.horseracing.entities.enums.Role;
-import com.horseracing.entities.RaceTrack;
 import com.horseracing.repositories.RaceTrackRepository;
 import com.horseracing.repositories.UserRepository;
 import com.horseracing.services.RaceRegistrationService;
@@ -38,11 +37,13 @@ import com.horseracing.services.TrackService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
+@Slf4j
 public class AdminRaceController {
 
     private final RaceTrackRepository raceTrackRepository;
@@ -210,7 +211,7 @@ public class AdminRaceController {
                 return ResponseEntity.badRequest().body(new ErrorResponse(400, "Invalid status. Must be FINISHED or CANCELLED"));
             }
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            log.error("Error setting race status: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }
     }

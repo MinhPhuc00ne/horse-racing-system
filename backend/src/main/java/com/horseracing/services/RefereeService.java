@@ -45,6 +45,7 @@ public class RefereeService {
     private final PrizeDistributionRepository prizeDistributionRepository;
     private final PlatformTransactionManager transactionManager;
     private final NotificationService notificationService;
+    private final LiveRaceService liveRaceService;
 
     private TransactionTemplate transactionTemplate;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
@@ -430,10 +431,10 @@ public class RefereeService {
     private void startSimulation(Integer simulationId) {
         ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(() -> {
             try {
-                Boolean isFinished = transactionTemplate.execute(status -> {
+                Object tickPayload = transactionTemplate.execute(status -> {
                     RaceSimulation sim = raceSimulationRepository.findById(simulationId).orElse(null);
                     if (sim == null || !"RUNNING".equals(sim.getStatus())) {
-                        return true; // Stop task
+                        return null; // Stop task
                     }
 
                     sim.setCurrentTick(sim.getCurrentTick() + 1);
@@ -443,9 +444,18 @@ public class RefereeService {
                     List<SimulationHorseState> states = simulationHorseStateRepository.findBySimulationId(simulationId);
                     
                     boolean allFinishedOrDisqualified = true;
+                    List<Map<String, Object>> horseStates = new ArrayList<>();
 
                     for (SimulationHorseState state : states) {
                         if ("FINISHED".equals(state.getStatus()) || "DISQUALIFIED".equals(state.getStatus())) {
+                            Map<String, Object> hState = new HashMap<>();
+                            hState.put("horseId", state.getHorse().getId());
+                            hState.put("horseName", state.getHorse().getName());
+                            hState.put("currentPosition", state.getCurrentPosition());
+                            hState.put("speed", state.getSpeed());
+                            hState.put("stamina", state.getStamina());
+                            hState.put("status", state.getStatus());
+                            horseStates.add(hState);
                             continue;
                         }
 
@@ -458,6 +468,15 @@ public class RefereeService {
                         if (part == null || "DISQUALIFIED".equals(part.getStatus())) {
                             state.setStatus("DISQUALIFIED");
                             simulationHorseStateRepository.save(state);
+                            
+                            Map<String, Object> hState = new HashMap<>();
+                            hState.put("horseId", horse.getId());
+                            hState.put("horseName", horse.getName());
+                            hState.put("currentPosition", state.getCurrentPosition());
+                            hState.put("speed", state.getSpeed());
+                            hState.put("stamina", state.getStamina());
+                            hState.put("status", "DISQUALIFIED");
+                            horseStates.add(hState);
                             continue;
                         }
 
@@ -493,7 +512,21 @@ public class RefereeService {
                         }
 
                         simulationHorseStateRepository.save(state);
+
+                        Map<String, Object> hState = new HashMap<>();
+                        hState.put("horseId", horse.getId());
+                        hState.put("horseName", horse.getName());
+                        hState.put("currentPosition", newPos);
+                        hState.put("speed", speed);
+                        hState.put("stamina", currentStamina);
+                        hState.put("status", state.getStatus());
+                        horseStates.add(hState);
                     }
+
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("raceId", race.getId());
+                    response.put("currentTick", sim.getCurrentTick());
+                    response.put("horses", horseStates);
 
                     if (allFinishedOrDisqualified) {
                         sim.setStatus("FINISHED");
@@ -517,11 +550,19 @@ public class RefereeService {
 
                         rankInfos.sort(Comparator.comparingInt(a -> a.finalTime));
 
+                        List<Map<String, Object>> results = new ArrayList<>();
                         for (int rank = 0; rank < rankInfos.size(); rank++) {
                             RaceParticipant p = rankInfos.get(rank).participant;
                             p.setFinalRank(rank + 1);
                             p.setStatus("FINISHED");
                             raceParticipantRepository.save(p);
+
+                            Map<String, Object> rMap = new HashMap<>();
+                            rMap.put("rank", rank + 1);
+                            rMap.put("horseName", p.getHorse().getName());
+                            rMap.put("jockeyName", p.getJockey().getUser().getFullName());
+                            rMap.put("time", p.getFinishTime());
+                            results.add(rMap);
                         }
 
                         int nextRank = rankInfos.size() + 1;
@@ -532,13 +573,26 @@ public class RefereeService {
                             }
                         }
 
-                        return true;
+                        response.put("status", "FINISHED");
+                        response.put("results", results);
+                        return response;
                     }
 
-                    return false;
+                    response.put("status", "RUNNING");
+                    return response;
                 });
 
-                if (isFinished) {
+                if (tickPayload != null) {
+                    Map<String, Object> payloadMap = (Map<String, Object>) tickPayload;
+                    Integer raceId = (Integer) payloadMap.get("raceId");
+                    
+                    if ("FINISHED".equals(payloadMap.get("status"))) {
+                        liveRaceService.broadcastEnd(raceId, payloadMap);
+                        cancelSimulation(simulationId);
+                    } else {
+                        liveRaceService.broadcastTick(raceId, payloadMap);
+                    }
+                } else {
                     cancelSimulation(simulationId);
                 }
             } catch (RuntimeException e) {
