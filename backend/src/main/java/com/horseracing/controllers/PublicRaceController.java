@@ -2,11 +2,13 @@ package com.horseracing.controllers;
 
 import com.horseracing.dto.response.*;
 import com.horseracing.repositories.RaceParticipantRepository;
+import com.horseracing.services.LiveRaceService;
 import com.horseracing.services.RaceService;
 import com.horseracing.services.TournamentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +22,7 @@ public class PublicRaceController {
     private final RaceService raceService;
     private final RaceParticipantRepository raceParticipantRepository;
     private final com.horseracing.services.RefereeService refereeService;
+    private final LiveRaceService liveRaceService;
 
     @GetMapping("/tournaments")
     public ResponseEntity<List<TournamentResponse>> getAllTournaments() {
@@ -59,12 +62,8 @@ public class PublicRaceController {
         return ResponseEntity.ok(participants);
     }
 
-    @GetMapping("/races/{id}/simulation-state")
-    public ResponseEntity<?> getRaceSimulationState(@PathVariable Integer id) {
-        try {
-            return ResponseEntity.ok(refereeService.getSimulationState(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    @GetMapping(value = "/races/{id}/live-stream", produces = "text/event-stream")
+    public SseEmitter streamLiveRace(@PathVariable Integer id) {
+        return liveRaceService.subscribe(id);
     }
 }

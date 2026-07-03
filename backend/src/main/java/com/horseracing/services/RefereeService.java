@@ -49,6 +49,7 @@ public class RefereeService {
     private final PlatformTransactionManager transactionManager;
     private final NotificationService notificationService;
     private final TournamentRepository tournamentRepository;
+    private final LiveRaceService liveRaceService;
 
     private TransactionTemplate transactionTemplate;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
@@ -72,7 +73,7 @@ public class RefereeService {
             if (status == null || status.isBlank()) {
                 matches = true;
             } else if ("upcoming".equalsIgnoreCase(status) || "preparation".equalsIgnoreCase(status)) {
-                matches = "Upcoming".equalsIgnoreCase(r.getStatus()) 
+                matches = "Upcoming".equalsIgnoreCase(r.getStatus())
                         || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
                         || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
                         || "LOCKED_LIST".equalsIgnoreCase(r.getStatus());
@@ -360,7 +361,7 @@ public class RefereeService {
             }
 
         List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
-        
+
         // Validate all participants have been inspected (not in PENDING_INSPECTION status)
         boolean hasPendingInspection = participants.stream()
                 .anyMatch(p -> "PENDING_INSPECTION".equalsIgnoreCase(p.getStatus()));
@@ -444,10 +445,10 @@ public class RefereeService {
     private void startSimulation(Integer simulationId) {
         ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(() -> {
             try {
-                Boolean isFinished = transactionTemplate.execute(status -> {
+                Object tickPayload = transactionTemplate.execute(status -> {
                     RaceSimulation sim = raceSimulationRepository.findById(simulationId).orElse(null);
                     if (sim == null || !"RUNNING".equals(sim.getStatus())) {
-                        return true; // Stop task
+                        return null; // Stop task
                     }
 
                     sim.setCurrentTick(sim.getCurrentTick() + 1);
@@ -455,11 +456,20 @@ public class RefereeService {
 
                     Race race = sim.getRace();
                     List<SimulationHorseState> states = simulationHorseStateRepository.findBySimulationId(simulationId);
-                    
+
                     boolean allFinishedOrDisqualified = true;
+                    List<Map<String, Object>> horseStates = new ArrayList<>();
 
                     for (SimulationHorseState state : states) {
                         if ("FINISHED".equals(state.getStatus()) || "DISQUALIFIED".equals(state.getStatus())) {
+                            Map<String, Object> hState = new HashMap<>();
+                            hState.put("horseId", state.getHorse().getId());
+                            hState.put("horseName", state.getHorse().getName());
+                            hState.put("currentPosition", state.getCurrentPosition());
+                            hState.put("speed", state.getSpeed());
+                            hState.put("stamina", state.getStamina());
+                            hState.put("status", state.getStatus());
+                            horseStates.add(hState);
                             continue;
                         }
 
@@ -468,7 +478,7 @@ public class RefereeService {
                         Horse horse = state.getHorse();
                         RaceParticipant part = raceParticipantRepository.findByRaceIdAndHorseId(race.getId(), horse.getId())
                                 .orElse(null);
-                        
+
                         if (part == null || "DISQUALIFIED".equals(part.getStatus())) {
                             state.setStatus("DISQUALIFIED");
                             simulationHorseStateRepository.save(state);
@@ -507,7 +517,21 @@ public class RefereeService {
                         }
 
                         simulationHorseStateRepository.save(state);
+
+                        Map<String, Object> hState = new HashMap<>();
+                        hState.put("horseId", horse.getId());
+                        hState.put("horseName", horse.getName());
+                        hState.put("currentPosition", newPos);
+                        hState.put("speed", speed);
+                        hState.put("stamina", currentStamina);
+                        hState.put("status", state.getStatus());
+                        horseStates.add(hState);
                     }
+
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("raceId", race.getId());
+                    response.put("currentTick", sim.getCurrentTick());
+                    response.put("horses", horseStates);
 
                     if (allFinishedOrDisqualified) {
                         sim.setStatus("FINISHED");
@@ -525,17 +549,25 @@ public class RefereeService {
                             int finishTime = ft != null ? ft : 9999;
                             int finalTime = finishTime + (int)(flags * 3);
                             p.setFinishTime(finalTime);
-                            
+
                             rankInfos.add(new ParticipantRankInfo(p, finalTime));
                         }
 
                         rankInfos.sort(Comparator.comparingInt(a -> a.finalTime));
 
+                        List<Map<String, Object>> results = new ArrayList<>();
                         for (int rank = 0; rank < rankInfos.size(); rank++) {
                             RaceParticipant p = rankInfos.get(rank).participant;
                             p.setFinalRank(rank + 1);
                             p.setStatus("FINISHED");
                             raceParticipantRepository.save(p);
+
+                            Map<String, Object> rMap = new HashMap<>();
+                            rMap.put("rank", rank + 1);
+                            rMap.put("horseName", p.getHorse().getName());
+                            rMap.put("jockeyName", p.getJockey().getUser().getFullName());
+                            rMap.put("time", p.getFinishTime());
+                            results.add(rMap);
                         }
 
                         int nextRank = rankInfos.size() + 1;
@@ -546,7 +578,9 @@ public class RefereeService {
                             }
                         }
 
-                        return true;
+                        response.put("status", "FINISHED");
+                        response.put("results", results);
+                        return response;
                     }
 
                     return false;
@@ -875,7 +909,7 @@ public class RefereeService {
 
         // 2. Betting Payout (Pari-Mutuel Option 1: Split-Pools)
         List<Bet> bets = betRepository.findByRaceId(raceId);
-        
+
         BigDecimal totalWinPool = BigDecimal.ZERO;
         BigDecimal totalPlacePool = BigDecimal.ZERO;
         BigDecimal totalShowPool = BigDecimal.ZERO;
@@ -1198,7 +1232,7 @@ public class RefereeService {
             map.put("jockeyName", pd.getParticipant().getJockey().getUser().getFullName());
             map.put("ownerName", pd.getParticipant().getHorse().getOwner().getUser().getFullName());
             map.put("totalPrize", pd.getTotalPrize());
-            
+
             RaceRegistration reg = raceRegistrationRepository
                     .findFirstByRaceIdAndHorseId(raceId, pd.getParticipant().getHorse().getId())
                     .orElse(null);
@@ -1209,7 +1243,7 @@ public class RefereeService {
                 map.put("jockeySharePercent", 0.0);
                 map.put("ownerSharePercent", 100.0);
             }
-            
+
             map.put("jockeyAmount", pd.getJockeyAmount());
             map.put("ownerAmount", pd.getOwnerAmount());
             map.put("distributedAt", pd.getDistributedAt());
@@ -1226,16 +1260,16 @@ public class RefereeService {
         // 1. Get all RefereeFlags
         List<RefereeFlag> flags = refereeFlagRepository.findAll();
         for (RefereeFlag flag : flags) {
-            String dateStr = flag.getCreatedAt() != null 
-                    ? flag.getCreatedAt().toLocalDate().toString() 
+            String dateStr = flag.getCreatedAt() != null
+                    ? flag.getCreatedAt().toLocalDate().toString()
                     : "";
-            
+
             String raceName = flag.getSimulation() != null && flag.getSimulation().getRace() != null
                     ? flag.getSimulation().getRace().getRaceName()
                     : "N/A";
-            
+
             String horseName = flag.getHorse() != null ? flag.getHorse().getName() : "N/A";
-            
+
             String jockeyName = "N/A";
             if (flag.getSimulation() != null && flag.getSimulation().getRace() != null && flag.getHorse() != null) {
                 Optional<RaceParticipant> partOpt = raceParticipantRepository.findByRaceIdAndHorseId(
@@ -1261,8 +1295,8 @@ public class RefereeService {
         // 2. Get all Blacklist entries
         List<Blacklist> blacklists = blacklistRepository.findAll();
         for (Blacklist bl : blacklists) {
-            String dateStr = bl.getCreatedAt() != null 
-                    ? bl.getCreatedAt().toLocalDate().toString() 
+            String dateStr = bl.getCreatedAt() != null
+                    ? bl.getCreatedAt().toLocalDate().toString()
                     : (bl.getStartDate() != null ? bl.getStartDate().toString() : "");
 
             String raceName = "N/A";
@@ -1274,7 +1308,7 @@ public class RefereeService {
                 if (horseOpt.isPresent()) {
                     Horse horse = horseOpt.get();
                     horseName = horse.getName();
-                    
+
                     List<RaceParticipant> participants = raceParticipantRepository.findByHorseId(horse.getId());
                     if (!participants.isEmpty()) {
                         participants.sort((p1, p2) -> p2.getId().compareTo(p1.getId()));
@@ -1292,7 +1326,7 @@ public class RefereeService {
                 if (userOpt.isPresent()) {
                     User user = userOpt.get();
                     jockeyName = user.getFullName();
-                    
+
                     Optional<JockeyProfile> jockeyOpt = jockeyProfileRepository.findByUserId(user.getId());
                     if (jockeyOpt.isPresent()) {
                         List<RaceParticipant> participants = raceParticipantRepository.findByJockeyUserEmailAndStatusNot(user.getEmail(), "DUMMY_STATUS_THAT_NOT_EXIST");

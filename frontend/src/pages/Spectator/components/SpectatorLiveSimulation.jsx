@@ -1342,7 +1342,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
             const imgW = horseImg.width;
             const imgH = horseImg.height;
             const imgRatio = imgW / imgH;
-            
+
             let sx = 0, sy = 0, sw = imgW, sh = imgH;
             if (imgRatio > 1) {
               sw = imgH;
@@ -1736,12 +1736,11 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                         </span>
                       </div>
                       <div className="text-end">
-                        <span className={`badge ${
-                          bet.status === 'WON' ? 'bg-success' :
-                          bet.status === 'LOST' ? 'bg-danger' :
-                          bet.status === 'REFUNDED' ? 'bg-secondary' :
-                          'bg-warning text-dark'
-                        } text-uppercase mb-1`} style={{ fontSize: '8px', display: 'block' }}>
+                        <span className={`badge ${bet.status === 'WON' ? 'bg-success' :
+                            bet.status === 'LOST' ? 'bg-danger' :
+                              bet.status === 'REFUNDED' ? 'bg-secondary' :
+                                'bg-warning text-dark'
+                          } text-uppercase mb-1`} style={{ fontSize: '8px', display: 'block' }}>
                           {bet.status === 'WON' ? 'Thắng cược' : bet.status === 'LOST' ? 'Thua cược' : bet.status === 'REFUNDED' ? 'Hoàn tiền' : 'Đang cược'}
                         </span>
                         {bet.status === 'WON' && (
