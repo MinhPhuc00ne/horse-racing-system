@@ -8,11 +8,12 @@ import '../Horse-Owner/HorseOwner.css';
 // Import Referee Components
 import PreRaceCheck from './PreRaceCheck';
 import LiveSimulation from './LiveSimulation';
-
 import Violations from './Violations';
+import AssignedTournaments from './AssignedTournaments';
 
 const refereeNavLinks = [
   { path: '/referee/home', label: 'Trang Chủ', icon: 'home' },
+  { path: '/referee/assigned-tournaments', label: 'Giải Đấu Của Tôi', icon: 'assignment' },
   { path: '/referee/pre-race-check', label: 'Kiểm Tra Trước Trận', icon: 'fact_check' },
   { path: '/referee/live-simulation', label: 'Mô Phỏng Trực Tiếp', icon: 'sports_score' },
   { path: '/referee/violations', label: 'Cảnh Cáo & Vi Phạm', icon: 'gavel' }
@@ -24,6 +25,7 @@ export default function RefereePage() {
       <Routes>
         <Route index element={<Navigate to="pre-race-check" replace />} />
         <Route path="home" element={<Home />} />
+        <Route path="assigned-tournaments" element={<AssignedTournaments />} />
         <Route path="pre-race-check" element={<PreRaceCheck />} />
         <Route path="live-simulation" element={<LiveSimulation />} />
         <Route path="live simulation" element={<LiveSimulation />} />
@@ -32,3 +34,4 @@ export default function RefereePage() {
     </DashboardLayout>
   );
 }
+

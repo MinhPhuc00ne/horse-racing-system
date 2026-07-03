@@ -11,15 +11,16 @@ export default function StatusBadge({ status, customClass = '', iconOnly = false
   let color = '#333';
   let icon = 'info';
 
-  if (normalizedStatus.includes('READY') || normalizedStatus === 'COMPLETED' || normalizedStatus === 'SUCCESS' || normalizedStatus === 'PRIZE' || normalizedStatus === 'WINNINGS') {
+  if (normalizedStatus.includes('READY') || normalizedStatus === 'COMPLETED' || normalizedStatus === 'SUCCESS' || normalizedStatus === 'PRIZE' || normalizedStatus === 'WINNINGS' || normalizedStatus === 'APPROVED') {
     bgColor = 'rgba(16, 185, 129, 0.15)'; // Green
     color = '#047857';
     icon = 'check_circle';
-  } else if (normalizedStatus.includes('SICK') || normalizedStatus.includes('FAILED') || normalizedStatus === 'CLOSED' || normalizedStatus === 'CANCELLED') {
+  } else if (normalizedStatus.includes('SICK') || normalizedStatus.includes('FAILED') || normalizedStatus === 'CLOSED' || normalizedStatus === 'CANCELLED' || normalizedStatus === 'REJECTED') {
     bgColor = 'rgba(239, 68, 68, 0.15)'; // Red
     color = '#b91c1c';
     icon = 'error';
   } else if (normalizedStatus.includes('TRAINING') || normalizedStatus.includes('PENDING')) {
+
     bgColor = 'rgba(245, 158, 11, 0.15)'; // Orange
     color = '#b45309';
     icon = 'sync';

@@ -6,6 +6,9 @@ import com.horseracing.dto.request.UpdateConditionsRequest;
 import com.horseracing.dto.response.FlagResponse;
 import com.horseracing.dto.response.PreCheckResponse;
 import com.horseracing.dto.response.RefereeRaceResponse;
+import com.horseracing.dto.response.TournamentResponse;
+import com.horseracing.dto.response.ViolationResponse;
+import com.horseracing.dto.response.RaceSimulationStateResponse;
 import com.horseracing.entities.*;
 import com.horseracing.repositories.*;
 import jakarta.annotation.PostConstruct;
@@ -45,6 +48,7 @@ public class RefereeService {
     private final PrizeDistributionRepository prizeDistributionRepository;
     private final PlatformTransactionManager transactionManager;
     private final NotificationService notificationService;
+    private final TournamentRepository tournamentRepository;
 
     private TransactionTemplate transactionTemplate;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
@@ -87,6 +91,16 @@ public class RefereeService {
             }
         }
         return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<TournamentResponse> getAssignedTournaments(String refereeEmail) {
+        User referee = userRepository.findByEmail(refereeEmail)
+                .orElseThrow(() -> new RuntimeException("Referee not found"));
+
+        return tournamentRepository.findByRefereeId(referee.getId()).stream()
+                .map(TournamentResponse::fromEntity)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -1203,6 +1217,170 @@ public class RefereeService {
         }
         result.sort(Comparator.comparing(m -> (Integer) m.getOrDefault("rank", 999)));
         return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ViolationResponse> getViolations() {
+        List<ViolationResponse> list = new ArrayList<>();
+
+        // 1. Get all RefereeFlags
+        List<RefereeFlag> flags = refereeFlagRepository.findAll();
+        for (RefereeFlag flag : flags) {
+            String dateStr = flag.getCreatedAt() != null 
+                    ? flag.getCreatedAt().toLocalDate().toString() 
+                    : "";
+            
+            String raceName = flag.getSimulation() != null && flag.getSimulation().getRace() != null
+                    ? flag.getSimulation().getRace().getRaceName()
+                    : "N/A";
+            
+            String horseName = flag.getHorse() != null ? flag.getHorse().getName() : "N/A";
+            
+            String jockeyName = "N/A";
+            if (flag.getSimulation() != null && flag.getSimulation().getRace() != null && flag.getHorse() != null) {
+                Optional<RaceParticipant> partOpt = raceParticipantRepository.findByRaceIdAndHorseId(
+                        flag.getSimulation().getRace().getId(),
+                        flag.getHorse().getId()
+                );
+                if (partOpt.isPresent() && partOpt.get().getJockey() != null && partOpt.get().getJockey().getUser() != null) {
+                    jockeyName = partOpt.get().getJockey().getUser().getFullName();
+                }
+            }
+
+            list.add(ViolationResponse.builder()
+                    .id(flag.getId())
+                    .date(dateStr)
+                    .raceName(raceName)
+                    .horseName(horseName)
+                    .jockeyName(jockeyName)
+                    .violationType(flag.getViolationType())
+                    .status("FLAGGED")
+                    .build());
+        }
+
+        // 2. Get all Blacklist entries
+        List<Blacklist> blacklists = blacklistRepository.findAll();
+        for (Blacklist bl : blacklists) {
+            String dateStr = bl.getCreatedAt() != null 
+                    ? bl.getCreatedAt().toLocalDate().toString() 
+                    : (bl.getStartDate() != null ? bl.getStartDate().toString() : "");
+
+            String raceName = "N/A";
+            String horseName = "N/A";
+            String jockeyName = "N/A";
+
+            if ("HORSE".equalsIgnoreCase(bl.getTargetType())) {
+                Optional<Horse> horseOpt = horseRepository.findById(bl.getTargetId());
+                if (horseOpt.isPresent()) {
+                    Horse horse = horseOpt.get();
+                    horseName = horse.getName();
+                    
+                    List<RaceParticipant> participants = raceParticipantRepository.findByHorseId(horse.getId());
+                    if (!participants.isEmpty()) {
+                        participants.sort((p1, p2) -> p2.getId().compareTo(p1.getId()));
+                        RaceParticipant recent = participants.get(0);
+                        if (recent.getRace() != null) {
+                            raceName = recent.getRace().getRaceName();
+                        }
+                        if (recent.getJockey() != null && recent.getJockey().getUser() != null) {
+                            jockeyName = recent.getJockey().getUser().getFullName();
+                        }
+                    }
+                }
+            } else if ("USER".equalsIgnoreCase(bl.getTargetType())) {
+                Optional<User> userOpt = userRepository.findById(bl.getTargetId());
+                if (userOpt.isPresent()) {
+                    User user = userOpt.get();
+                    jockeyName = user.getFullName();
+                    
+                    Optional<JockeyProfile> jockeyOpt = jockeyProfileRepository.findByUserId(user.getId());
+                    if (jockeyOpt.isPresent()) {
+                        List<RaceParticipant> participants = raceParticipantRepository.findByJockeyUserEmailAndStatusNot(user.getEmail(), "DUMMY_STATUS_THAT_NOT_EXIST");
+                        if (!participants.isEmpty()) {
+                            participants.sort((p1, p2) -> p2.getId().compareTo(p1.getId()));
+                            RaceParticipant recent = participants.get(0);
+                            if (recent.getRace() != null) {
+                                raceName = recent.getRace().getRaceName();
+                            }
+                            if (recent.getHorse() != null) {
+                                horseName = recent.getHorse().getName();
+                            }
+                        }
+                    }
+                }
+            }
+
+            list.add(ViolationResponse.builder()
+                    .id(bl.getId())
+                    .date(dateStr)
+                    .raceName(raceName)
+                    .horseName(horseName)
+                    .jockeyName(jockeyName)
+                    .violationType(bl.getReason())
+                    .status("BLACKLISTED")
+                    .build());
+        }
+
+        // Sort by date descending, then id descending
+        list.sort((v1, v2) -> {
+            int dateCompare = v2.getDate().compareTo(v1.getDate());
+            if (dateCompare != 0) return dateCompare;
+            return v2.getId().compareTo(v1.getId());
+        });
+
+        return list;
+    }
+
+    @Transactional(readOnly = true)
+    public RaceSimulationStateResponse getSimulationState(Integer raceId) {
+        Race race = raceRepository.findById(raceId)
+                .orElseThrow(() -> new RuntimeException("Race not found"));
+
+        List<RaceSimulation> simulations = raceSimulationRepository.findByRaceId(raceId);
+        if (simulations.isEmpty()) {
+            return RaceSimulationStateResponse.builder()
+                    .simulationId(null)
+                    .raceId(raceId)
+                    .status("NOT_STARTED")
+                    .currentTick(0)
+                    .distance(race.getDistance() != null ? race.getDistance() : 1200.0)
+                    .horseStates(new ArrayList<>())
+                    .build();
+        }
+
+        // Get the latest simulation
+        simulations.sort((s1, s2) -> s2.getId().compareTo(s1.getId()));
+        RaceSimulation sim = simulations.get(0);
+
+        List<SimulationHorseState> states = simulationHorseStateRepository.findBySimulationId(sim.getId());
+        List<RaceSimulationStateResponse.HorseStateDto> horseStates = new ArrayList<>();
+
+        for (SimulationHorseState state : states) {
+            String jockeyName = "N/A";
+            Optional<RaceParticipant> partOpt = raceParticipantRepository.findByRaceIdAndHorseId(raceId, state.getHorse().getId());
+            if (partOpt.isPresent() && partOpt.get().getJockey() != null && partOpt.get().getJockey().getUser() != null) {
+                jockeyName = partOpt.get().getJockey().getUser().getFullName();
+            }
+
+            horseStates.add(RaceSimulationStateResponse.HorseStateDto.builder()
+                    .horseId(state.getHorse().getId())
+                    .horseName(state.getHorse().getName())
+                    .jockeyName(jockeyName)
+                    .currentPosition(state.getCurrentPosition())
+                    .speed(state.getSpeed())
+                    .stamina(state.getStamina())
+                    .status(state.getStatus())
+                    .build());
+        }
+
+        return RaceSimulationStateResponse.builder()
+                .simulationId(sim.getId())
+                .raceId(raceId)
+                .status(sim.getStatus())
+                .currentTick(sim.getCurrentTick())
+                .distance(race.getDistance() != null ? race.getDistance() : 1200.0)
+                .horseStates(horseStates)
+                .build();
     }
 
     private static class ParticipantRankInfo {

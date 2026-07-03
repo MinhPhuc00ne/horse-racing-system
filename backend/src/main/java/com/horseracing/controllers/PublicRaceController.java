@@ -19,6 +19,7 @@ public class PublicRaceController {
     private final TournamentService tournamentService;
     private final RaceService raceService;
     private final RaceParticipantRepository raceParticipantRepository;
+    private final com.horseracing.services.RefereeService refereeService;
 
     @GetMapping("/tournaments")
     public ResponseEntity<List<TournamentResponse>> getAllTournaments() {
@@ -56,5 +57,14 @@ public class PublicRaceController {
                 .map(ParticipantResponse::fromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(participants);
+    }
+
+    @GetMapping("/races/{id}/simulation-state")
+    public ResponseEntity<?> getRaceSimulationState(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(refereeService.getSimulationState(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
     }
 }

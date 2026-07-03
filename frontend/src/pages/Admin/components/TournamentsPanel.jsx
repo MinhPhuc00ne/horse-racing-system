@@ -44,6 +44,7 @@ export default function TournamentsPanel() {
   const [newTrackName, setNewTrackName] = useState('');
   const [newTrackRegion, setNewTrackRegion] = useState('');
   const [newTrackSurface, setNewTrackSurface] = useState('Grass');
+  const [newTrackShape, setNewTrackShape] = useState('STRAIGHT');
 
   // Form State
   const [isEditing, setIsEditing] = useState(false);
@@ -163,6 +164,7 @@ export default function TournamentsPanel() {
       const newTrack = await createTrackAPI({
         name: newTrackName.trim(),
         location: newTrackRegion.trim(),
+        shape: newTrackShape,
         surfaceCondition: 'Good'
       });
       // Add new track to local list
@@ -1230,6 +1232,19 @@ export default function TournamentsPanel() {
                     className="ho-form-input text-dark fw-semibold"
                     placeholder="Nhập khu vực (VD: Da Nang)"
                   />
+                </div>
+
+                <div className="form-group">
+                  <label className="ho-input-label">Hình dạng đường đua *</label>
+                  <select
+                    value={newTrackShape}
+                    onChange={(e) => setNewTrackShape(e.target.value)}
+                    required
+                    className="ho-form-input text-dark fw-semibold"
+                  >
+                    <option value="STRAIGHT">STRAIGHT (Đường thẳng)</option>
+                    <option value="OVAL">OVAL (Đường tròn/oval)</option>
+                  </select>
                 </div>
               </div>
 

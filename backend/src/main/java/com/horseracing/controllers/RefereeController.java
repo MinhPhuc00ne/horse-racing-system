@@ -34,6 +34,14 @@ public class RefereeController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/tournaments")
+    public ResponseEntity<List<TournamentResponse>> getAssignedTournaments(Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        List<TournamentResponse> response = refereeService.getAssignedTournaments(userDetails.getUsername());
+        return ResponseEntity.ok(response);
+    }
+
+
     @GetMapping("/inspect/horses")
     public ResponseEntity<List<Map<String, Object>>> getHorsesToInspect(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -154,5 +162,10 @@ public class RefereeController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }
+    }
+
+    @GetMapping("/violations")
+    public ResponseEntity<List<ViolationResponse>> getViolations() {
+        return ResponseEntity.ok(refereeService.getViolations());
     }
 }
