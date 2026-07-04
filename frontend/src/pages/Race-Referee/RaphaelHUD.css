@@ -12,6 +12,13 @@
     color: white;
 }
 
+.raphael-hud-overlay.is-movie-screen-mode {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+}
+
 @property --angle {
     syntax: '<angle>';
     inherits: false;

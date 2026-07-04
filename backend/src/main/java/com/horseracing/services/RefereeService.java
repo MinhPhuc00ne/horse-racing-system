@@ -65,7 +65,22 @@ public class RefereeService {
         User referee = userRepository.findByEmail(refereeEmail)
                 .orElseThrow(() -> new RuntimeException("Referee not found"));
 
-        List<Race> races = raceRepository.findByRefereeId(referee.getId());
+        List<Race> races = new ArrayList<>(raceRepository.findByRefereeId(referee.getId()));
+        
+        // Auto-assign the demo race to the current referee so any logged-in referee can run it
+        try {
+            raceRepository.findAll().stream()
+                    .filter(r -> "Trận Giả Lập 4 Ngựa (Demo)".equalsIgnoreCase(r.getRaceName()))
+                    .filter(r -> races.stream().noneMatch(existing -> existing.getId().equals(r.getId())))
+                    .forEach(r -> {
+                        r.setReferee(referee);
+                        raceRepository.save(r);
+                        races.add(r);
+                    });
+        } catch (Exception e) {
+            // Ignore if transactional flush is pending
+        }
+
         List<RefereeRaceResponse> result = new ArrayList<>();
 
         for (Race r : races) {
@@ -496,14 +511,19 @@ public class RefereeService {
                         }
 
                         double currentStamina = state.getStamina();
-                        currentStamina = Math.max(0.0, currentStamina - 2.0);
+                        if (sim.getCurrentTick() > 5) {
+                            currentStamina = Math.max(0.0, currentStamina - 2.0);
+                        }
                         state.setStamina(currentStamina);
 
                         double staminaFactor = currentStamina < 30.0 ? 0.8 : 1.0;
                         double variation = (ThreadLocalRandom.current().nextDouble() - 0.5) * 1.5;
 
-                        double speed = (baseSpeed + variation) * staminaFactor;
-                        if (speed < 5.0) speed = 5.0;
+                        double speed = 0.0;
+                        if (sim.getCurrentTick() > 5) {
+                            speed = (baseSpeed + variation) * staminaFactor;
+                            if (speed < 5.0) speed = 5.0;
+                        }
 
                         state.setSpeed(speed);
 
@@ -583,11 +603,21 @@ public class RefereeService {
                         return response;
                     }
 
-                    return false;
+                    return response;
                 });
 
-                if (isFinished) {
+                if (tickPayload == null) {
                     cancelSimulation(simulationId);
+                } else if (tickPayload instanceof Map) {
+                    Map<?, ?> map = (Map<?, ?>) tickPayload;
+                    Integer raceId = (Integer) map.get("raceId");
+                    boolean finished = "FINISHED".equals(map.get("status"));
+                    if (finished) {
+                        cancelSimulation(simulationId);
+                        liveRaceService.broadcastEnd(raceId, map);
+                    } else {
+                        liveRaceService.broadcastTick(raceId, map);
+                    }
                 }
             } catch (RuntimeException e) {
                 log.error("Error occurred during race simulation for simulation ID: {}", simulationId, e);

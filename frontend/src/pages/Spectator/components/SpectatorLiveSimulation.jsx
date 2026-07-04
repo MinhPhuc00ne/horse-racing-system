@@ -155,23 +155,45 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
       try {
         setLoadingBets(true);
         // Load participants
-        const participants = await getRaceParticipantsAPI(race.id);
-        const mappedHorses = (participants || []).map((p, idx) => ({
-          id: p.gateNumber || (idx + 1),
-          participantId: p.id,
-          horseId: p.horseId,
-          name: p.horseName,
-          jockeyName: p.jockeyName,
-          ownerName: 'Chủ ngựa liên kết',
-          weight: (450 + Math.random() * 50).toFixed(1),
-          progress: 0,
-          color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea', '#f472b6', '#3b82f6'][idx % 7],
-          flaggedPositions: [],
-          isDisqualified: p.status === 'DISQUALIFIED',
-          imageUrl: p.horseImageUrl
-        }));
+        let participants = await getRaceParticipantsAPI(race.id);
+        if (!participants || participants.length === 0) {
+          participants = [
+            { id: 1, participantId: 1, horseId: 101, horseName: "Xích Thố (Red Hare)", jockeyName: "Ryan Moore", gateNumber: 1, status: "READY" },
+            { id: 2, participantId: 2, horseId: 102, horseName: "Đầu Rồng (Dragon Head)", jockeyName: "William Buick", gateNumber: 2, status: "READY" },
+            { id: 3, participantId: 3, horseId: 103, horseName: "Hắc Mã (Black Beauty)", jockeyName: "Lafitt Dettori", gateNumber: 3, status: "READY" },
+            { id: 4, participantId: 4, horseId: 104, horseName: "Bạch Long (White Dragon)", jockeyName: "Zac Purton", gateNumber: 4, status: "READY" }
+          ];
+        }
+        const startTimeStr = localStorage.getItem('demo_race_start_time');
+        let initialProgress = 0;
+        if (startTimeStr && (race.id === 999 || race.id === '999')) {
+          const elapsedMs = Date.now() - parseInt(startTimeStr);
+          initialProgress = Math.min(100, (elapsedMs / 400) * 1.0);
+        }
+
+        if (initialProgress > 2 && racePhase === 'IDLE') {
+          setRacePhase('RUNNING');
+        }
+
+        const mappedHorses = participants.map((p, idx) => {
+          const horseProgress = initialProgress > 0 ? Math.min(99.5, initialProgress + (p.participantId * 1.5 - 3)) : 0;
+          return {
+            id: p.gateNumber || (idx + 1),
+            participantId: p.id,
+            horseId: p.horseId,
+            name: p.horseName,
+            jockeyName: p.jockeyName,
+            ownerName: 'Chủ ngựa liên kết',
+            weight: (450 + Math.random() * 50).toFixed(1),
+            progress: horseProgress,
+            color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea', '#f472b6', '#3b82f6'][idx % 7],
+            flaggedPositions: [],
+            isDisqualified: p.status === 'DISQUALIFIED',
+            imageUrl: p.horseImageUrl
+          };
+        });
         setHorses(mappedHorses);
-        visualHorses.current = mappedHorses.map(h => ({ ...h, visualProgress: 0, trail: [], bubbleText: '', bubbleTimer: 0 }));
+        visualHorses.current = mappedHorses.map(h => ({ ...h, visualProgress: h.progress, trail: [], bubbleText: '', bubbleTimer: 0 }));
 
         // Load spectator bets for this race
         const bets = await getMyBetsAPI();
@@ -196,73 +218,180 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
     };
   }, [race.id]);
 
-  // Handle simulation timer
+  const racePhaseRef = useRef(racePhase);
   useEffect(() => {
-    let interval;
-    if (racePhase === 'RUNNING') {
-      interval = setInterval(() => {
-        setHorses(prev => {
-          let allFinished = true;
-          const nextHorses = prev.map(h => {
-            if (h.isDisqualified) return { ...h, speed: 0 };
-            if (h.progress < 100) {
-              const advance = 0.5 + Math.random() * 1.5;
-              const newProgress = Math.min(100, h.progress + advance);
-              if (newProgress < 100) allFinished = false;
-
-              let finishedTime = h.finishedTime;
-              if (newProgress === 100 && !h.finishedTime) {
-                finishedTime = Date.now();
-                triggerConfetti();
-                shakeIntensity.current = 12;
-
-                const alreadyFinished = prev.some(other => other.progress >= 100 && other.id !== h.id);
-                if (!alreadyFinished) {
-                  audioManager.setSfxVolume('crowd', 0.95);
-                  commentaryText.current = `🏆 CHIẾN THẮNG! Chiến mã số ${h.id} (${h.name}) đã xuất sắc cán đích đầu tiên!`;
-                  lastCommentaryChange.current = Date.now() + 8000;
-                }
-              }
-              const currentSpeed = newProgress >= 100 ? 0 : Math.round(55 + Math.random() * 20);
-              return { ...h, progress: newProgress, finishedTime, speed: currentSpeed };
-            }
-            return { ...h, speed: 0 };
-          });
-
-          allFinished = nextHorses.length > 0 && nextHorses.every(h => h.progress >= 100 || h.isDisqualified);
-          if (allFinished) {
-            setRacePhase('FINISHED');
-            const sorted = [...nextHorses].sort((a, b) => {
-              if (a.isDisqualified && b.isDisqualified) return 0;
-              if (a.isDisqualified) return 1;
-              if (b.isDisqualified) return -1;
-              return (a.finishedTime || 0) - (b.finishedTime || 0);
-            });
-            const results = sorted.map((h, index) => ({
-              rank: h.isDisqualified ? 'DSQ' : index + 1,
-              horseName: h.name,
-              jockeyName: h.jockeyName,
-              time: h.isDisqualified ? 'Disqualified' : `1m ${15 + index * 2}s`
-            }));
-            setFinalPodium(results);
-            setShowResultsSummary(true);
-
-            const winner = sorted.find(h => !h.isDisqualified);
-            if (winner) {
-              commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Chiến thắng thuộc về ${winner.name} (Số ${winner.id})!`;
-            } else {
-              commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Tất cả chiến mã đều phạm quy!`;
-            }
-            lastCommentaryChange.current = Date.now() + 999999;
-          } else {
-            updateLiveCommentary(nextHorses);
-          }
-          return nextHorses;
-        });
-      }, 400);
-    }
-    return () => clearInterval(interval);
+    racePhaseRef.current = racePhase;
   }, [racePhase]);
+
+  // Handle real-time synchronization with backend via SSE (or mock local timer for demo race 999)
+  useEffect(() => {
+    if (race.id === 999 || race.id === '999') {
+      // Local timer fallback for Demo/Mock mode
+      let interval;
+      if (racePhase === 'RUNNING') {
+        interval = setInterval(() => {
+          setHorses(prev => {
+            let allFinished = true;
+            const nextHorses = prev.map(h => {
+              if (h.isDisqualified) return { ...h, speed: 0 };
+              if (h.progress < 100) {
+                const advance = 0.5 + Math.random() * 1.5;
+                const newProgress = Math.min(100, h.progress + advance);
+                if (newProgress < 100) allFinished = false;
+
+                let finishedTime = h.finishedTime;
+                if (newProgress === 100 && !h.finishedTime) {
+                  finishedTime = Date.now();
+                  triggerConfetti();
+                  shakeIntensity.current = 12;
+
+                  const alreadyFinished = prev.some(other => other.progress >= 100 && other.id !== h.id);
+                  if (!alreadyFinished) {
+                    audioManager.setSfxVolume('crowd', 0.95);
+                    commentaryText.current = `🏆 CHIẾN THẮNG! Chiến mã số ${h.id} (${h.name}) đã xuất sắc cán đích đầu tiên!`;
+                    lastCommentaryChange.current = Date.now() + 8000;
+                  }
+                }
+                const currentSpeed = newProgress >= 100 ? 0 : Math.round(55 + Math.random() * 20);
+                return { ...h, progress: newProgress, finishedTime, speed: currentSpeed };
+              }
+              return { ...h, speed: 0 };
+            });
+
+            allFinished = nextHorses.length > 0 && nextHorses.every(h => h.progress >= 100 || h.isDisqualified);
+            if (allFinished) {
+              setRacePhase('FINISHED');
+              const sorted = [...nextHorses].sort((a, b) => {
+                if (a.isDisqualified && b.isDisqualified) return 0;
+                if (a.isDisqualified) return 1;
+                if (b.isDisqualified) return -1;
+                return (a.finishedTime || 0) - (b.finishedTime || 0);
+              });
+              const results = sorted.map((h, index) => ({
+                rank: h.isDisqualified ? 'DSQ' : index + 1,
+                horseName: h.name,
+                jockeyName: h.jockeyName,
+                time: h.isDisqualified ? 'Disqualified' : `1m ${15 + index * 2}s`
+              }));
+              setFinalPodium(results);
+              setShowResultsSummary(true);
+
+              const winner = sorted.find(h => !h.isDisqualified);
+              if (winner) {
+                commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Chiến thắng thuộc về ${winner.name} (Số ${winner.id})!`;
+              } else {
+                commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Tất cả chiến mã đều phạm quy!`;
+              }
+              lastCommentaryChange.current = Date.now() + 999999;
+            } else {
+              updateLiveCommentary(nextHorses);
+            }
+            return nextHorses;
+          });
+        }, 400);
+      }
+      return () => clearInterval(interval);
+    } else {
+      // Connect to real-time SSE stream
+      const sseUrl = `http://localhost:8080/api/races/${race.id}/live-stream`;
+      console.log(`[SSE-Simulation] Connecting to live race stream: ${race.id}`);
+      const eventSource = new EventSource(sseUrl);
+
+      eventSource.addEventListener('RACE_TICK', (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          console.log('[SSE-Simulation] Received tick:', payload);
+          const currentPhase = racePhaseRef.current;
+
+          // If backend is already running (tick > 2), skip Raphael intro and countdown to sync immediately
+          if (payload.currentTick > 2 && (currentPhase === 'IDLE' || currentPhase === 'RAPHAEL' || currentPhase === 'PRE_RACE')) {
+            setRacePhase('RUNNING');
+          }
+
+          if (currentPhase === 'RUNNING' || payload.currentTick > 2) {
+            setHorses(prev => {
+              const backendHorses = payload.horses || [];
+              const nextHorses = prev.map(h => {
+                const match = backendHorses.find(bh => bh.horseId === h.horseId || bh.horseName === h.name);
+                if (match) {
+                  const oldProgress = h.progress;
+                  const newProgress = Math.min(100, (match.currentPosition / race.distance) * 100);
+                  
+                  let finishedTime = h.finishedTime;
+                  if (newProgress >= 100 && oldProgress < 100 && !h.finishedTime) {
+                    finishedTime = Date.now();
+                    triggerConfetti();
+                    shakeIntensity.current = 12;
+
+                    const alreadyFinished = prev.some(other => other.progress >= 100 && other.id !== h.id);
+                    if (!alreadyFinished) {
+                      audioManager.setSfxVolume('crowd', 0.95);
+                      commentaryText.current = `🏆 CHIẾN THẮNG! Chiến mã số ${h.id} (${h.name}) đã xuất sắc cán đích đầu tiên!`;
+                      lastCommentaryChange.current = Date.now() + 8000;
+                    }
+                  }
+
+                  return {
+                    ...h,
+                    progress: newProgress,
+                    speed: Math.round(match.speed),
+                    stamina: match.stamina,
+                    isDisqualified: match.status === 'DISQUALIFIED',
+                    finishedTime
+                  };
+                }
+                return h;
+              });
+
+              updateLiveCommentary(nextHorses);
+              return nextHorses;
+            });
+          }
+        } catch (err) {
+          console.error('[SSE-Simulation] Failed to parse race tick payload:', err);
+        }
+      });
+
+      eventSource.addEventListener('RACE_FINISHED', (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          console.log('[SSE-Simulation] Race finished event received:', payload);
+          
+          setRacePhase('FINISHED');
+          
+          // Map backend results to podium format
+          const mappedResults = (payload.results || []).map(r => ({
+            rank: r.rank,
+            horseName: r.horseName,
+            jockeyName: r.jockeyName,
+            time: r.time ? `${r.time}s` : 'N/A'
+          }));
+          
+          setFinalPodium(mappedResults);
+          setShowResultsSummary(true);
+
+          const winner = mappedResults.find(r => r.rank === 1);
+          if (winner) {
+            commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Chiến thắng thuộc về ${winner.horseName}!`;
+          } else {
+            commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC!`;
+          }
+          lastCommentaryChange.current = Date.now() + 999999;
+        } catch (err) {
+          console.error('[SSE-Simulation] Failed to parse race finished payload:', err);
+        }
+      });
+
+      eventSource.onerror = (err) => {
+        console.log('[SSE-Simulation] SSE connection closed/error:', err);
+      };
+
+      return () => {
+        console.log('[SSE-Simulation] Closing live race stream...');
+        eventSource.close();
+      };
+    }
+  }, [race.id]);
 
   // Pre-Race Sequence
   useEffect(() => {
@@ -1809,6 +1938,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
           horses={horses}
           environment={environment}
           onComplete={handleRaphaelComplete}
+          isMovieScreenMode={true}
         />
       )}
     </>

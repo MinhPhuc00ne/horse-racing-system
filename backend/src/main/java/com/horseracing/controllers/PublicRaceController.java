@@ -66,4 +66,9 @@ public class PublicRaceController {
     public SseEmitter streamLiveRace(@PathVariable Integer id) {
         return liveRaceService.subscribe(id);
     }
+
+    @GetMapping("/races/active")
+    public ResponseEntity<List<RaceResponse>> getActiveRaces() {
+        return ResponseEntity.ok(raceService.getActiveRaces());
+    }
 }

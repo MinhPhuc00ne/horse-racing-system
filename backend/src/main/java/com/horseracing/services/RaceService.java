@@ -118,4 +118,12 @@ public class RaceService {
                 .orElseThrow(() -> new RuntimeException("Race not found"));
         return RaceResponse.fromEntity(race);
     }
+
+    @Transactional(readOnly = true)
+    public List<RaceResponse> getActiveRaces() {
+        return raceRepository.findAll().stream()
+                .filter(r -> "RUNNING".equalsIgnoreCase(r.getStatus()) || "LOCKED_LIST".equalsIgnoreCase(r.getStatus()) || "ACTIVE".equalsIgnoreCase(r.getStatus()))
+                .map(RaceResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
 }

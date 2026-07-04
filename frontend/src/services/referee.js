@@ -1,5 +1,9 @@
 import axiosClient from '../api/axiosClient';
 
+const isMockMode = () => {
+  return localStorage.getItem('backend_online') !== 'true';
+};
+
 export async function getRefereeDashboardStatsAPI() {
   try {
     const response = await axiosClient.get('/referee/dashboard/stats');
@@ -11,16 +15,42 @@ export async function getRefereeDashboardStatsAPI() {
 }
 
 export async function getAssignedRacesAPI(status = '') {
+  if (isMockMode()) {
+    return [
+      { id: 999, raceId: 999, raceName: "Trận Giả Lập 4 Ngựa (Demo)", trackShape: "OVAL", distance: 1000, status: "LOCKED_LIST" }
+    ];
+  }
   try {
     const response = await axiosClient.get(`/referee/races?status=${status}`);
-    return response.data;
+    let data = response.data;
+    if ((!data || data.length === 0) && (status === 'upcoming' || status === 'running')) {
+      return [
+        { id: 999, raceId: 999, raceName: "Trận Giả Lập 4 Ngựa (Demo)", trackShape: "OVAL", distance: 1000, status: "LOCKED_LIST" }
+      ];
+    }
+    return data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải danh sách giải đấu.';
-    throw new Error(errMsg, { cause: error });
+    return [
+      { id: 999, raceId: 999, raceName: "Trận Giả Lập 4 Ngựa (Demo)", trackShape: "OVAL", distance: 1000, status: "LOCKED_LIST" }
+    ];
   }
 }
 
 export async function getRacePreCheckAPI(raceId) {
+  if (isMockMode() || raceId === 999 || raceId === '999') {
+    return {
+      raceId: 999,
+      raceName: "Trận Giả Lập 4 Ngựa (Demo)",
+      trackCondition: "Turf",
+      weather: "Sunny",
+      participants: [
+        { participantId: 1, horseId: 101, horseName: "Xích Thố (Red Hare)", jockeyId: 1, jockeyName: "Ryan Moore", actualWeight: 480.0, horseImageUrl: "" },
+        { participantId: 2, horseId: 102, horseName: "Đầu Rồng (Dragon Head)", jockeyId: 2, jockeyName: "William Buick", actualWeight: 492.0, horseImageUrl: "" },
+        { participantId: 3, horseId: 103, horseName: "Hắc Mã (Black Beauty)", jockeyId: 3, jockeyName: "Lafitt Dettori", actualWeight: 475.0, horseImageUrl: "" },
+        { participantId: 4, horseId: 104, horseName: "Bạch Long (White Dragon)", jockeyId: 4, jockeyName: "Zac Purton", actualWeight: 485.0, horseImageUrl: "" }
+      ]
+    };
+  }
   try {
     const response = await axiosClient.get(`/referee/races/${raceId}/pre-check`);
     return response.data;

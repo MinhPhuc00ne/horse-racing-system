@@ -97,7 +97,7 @@ const transitionStyles = `
 }
 `;
 
-export default function RaphaelHUD({ horses, environment, onComplete }) {
+export default function RaphaelHUD({ horses, environment, onComplete, isMovieScreenMode }) {
     const noticeContainerRef = useRef(null);
     const mcWrapperRef = useRef(null);
     const fgHorseRef = useRef(null);
@@ -310,7 +310,7 @@ export default function RaphaelHUD({ horses, environment, onComplete }) {
     }, [horses, environment, onComplete]);
 
     return (
-        <div className="raphael-hud-overlay">
+        <div className={`raphael-hud-overlay ${isMovieScreenMode ? 'is-movie-screen-mode' : ''}`}>
             <style dangerouslySetInnerHTML={{ __html: transitionStyles }} />
             
             {showTransitionLogo && (
