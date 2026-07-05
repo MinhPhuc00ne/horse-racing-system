@@ -491,3 +491,112 @@
     background-color: #0c1524;
 }
 
+/* Movie Screen Mode (Constrained inside TV card) Overrides */
+.raphael-hud-overlay.is-movie-screen-mode .mc-wrapper {
+    width: 150% !important;
+    height: 150% !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .core-horse {
+    width: 12% !important;
+    height: 12% !important;
+    margin-top: -6% !important;
+    margin-left: -6% !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .fg-horse {
+    width: 45% !important;
+    height: 80% !important;
+    left: 25% !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .horse-name-tag {
+    font-size: 24px !important;
+    top: -30px !important;
+    letter-spacing: 2px !important;
+}
+
+@keyframes movieSlideDown {
+    from {
+        top: -50px;
+    }
+    to {
+        top: -30px;
+    }
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .fg-horse.show-horse .horse-name-tag {
+    animation: movieSlideDown 0.5s forwards !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .info-container {
+    right: 3% !important;
+    gap: 10px !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .info-panel {
+    width: 250px !important;
+    padding: 10px 15px !important;
+    border-width: 1px !important;
+    border-left-width: 5px !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .panel-title {
+    font-size: 13px !important;
+    margin-bottom: 6px !important;
+    letter-spacing: 1px !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .panel-data {
+    font-size: 12px !important;
+    margin: 4px 0 !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .highlight {
+    font-size: 14px !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .highlight-supreme {
+    font-size: 20px !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .system-text {
+    font-size: 13px !important;
+    padding: 8px 20px !important;
+    min-width: 280px !important;
+    bottom: 5% !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .hud-logo-icon-img {
+    height: 80px !important;
+    margin-bottom: 10px !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .hud-logo-title {
+    font-size: 26px !important;
+    letter-spacing: 6px !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .hud-logo-subtitle {
+    font-size: 13px !important;
+    letter-spacing: 4px !important;
+    margin-top: 8px !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .hud-glow-line {
+    width: 100px !important;
+    height: 2px !important;
+    margin-top: 15px !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .notice-diamond {
+    width: 120px !important;
+    height: 120px !important;
+    border-width: 4px !important;
+}
+
+.raphael-hud-overlay.is-movie-screen-mode .notice-text {
+    font-size: 44px !important;
+    text-shadow: 0 0 10px #ff8800 !important;
+}
+

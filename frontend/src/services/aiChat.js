@@ -5,19 +5,10 @@ import axiosClient from '../api/axiosClient';
  */
 
 const isMockMode = () => {
-  return localStorage.getItem('backend_online') !== 'true';
+  return false;
 };
 
 export async function sendChatMessageAPI(message, image = null) {
-  if (isMockMode()) {
-    // Mock response with slight delay
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(`Đây là phản hồi giả lập từ AI cho tin nhắn: "${message}"`);
-      }, 1000);
-    });
-  }
-
   try {
     const response = await axiosClient.post('/v1/chat', { message, image });
     // Dựa vào AiChatController, có thể trả về plain string hoặc object
@@ -29,12 +20,6 @@ export async function sendChatMessageAPI(message, image = null) {
 }
 
 export async function getChatHistoryAPI() {
-  if (isMockMode()) {
-    return [
-      { sender: 'AI', message: 'Xin chào! Tôi có thể giúp gì cho bạn hôm nay?', createdAt: new Date().toISOString() }
-    ];
-  }
-
   try {
     const response = await axiosClient.get('/v1/chat/history');
     return response.data;
@@ -49,10 +34,6 @@ export async function getChatHistoryAPI() {
 }
 
 export async function clearChatHistoryAPI() {
-  if (isMockMode()) {
-    return { message: 'Đã xóa lịch sử chat (mock).' };
-  }
-
   try {
     const response = await axiosClient.delete('/v1/chat/history');
     return response.data;

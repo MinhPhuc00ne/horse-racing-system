@@ -42,6 +42,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
   const fireworks = useRef([]);
   const crowdBubbles = useRef([]);
   const horseImagesRef = useRef({});
+  const wasPresentAtStart = useRef(null);
 
   const triggerConfetti = () => {
     const colors = ['#fbbf24', '#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#ec4899', '#8b5cf6'];
@@ -156,13 +157,8 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
         setLoadingBets(true);
         // Load participants
         let participants = await getRaceParticipantsAPI(race.id);
-        if (!participants || participants.length === 0) {
-          participants = [
-            { id: 1, participantId: 1, horseId: 101, horseName: "Xích Thố (Red Hare)", jockeyName: "Ryan Moore", gateNumber: 1, status: "READY" },
-            { id: 2, participantId: 2, horseId: 102, horseName: "Đầu Rồng (Dragon Head)", jockeyName: "William Buick", gateNumber: 2, status: "READY" },
-            { id: 3, participantId: 3, horseId: 103, horseName: "Hắc Mã (Black Beauty)", jockeyName: "Lafitt Dettori", gateNumber: 3, status: "READY" },
-            { id: 4, participantId: 4, horseId: 104, horseName: "Bạch Long (White Dragon)", jockeyName: "Zac Purton", gateNumber: 4, status: "READY" }
-          ];
+        if (!participants) {
+          participants = [];
         }
         const startTimeStr = localStorage.getItem('demo_race_start_time');
         let initialProgress = 0;
@@ -223,24 +219,45 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
     racePhaseRef.current = racePhase;
   }, [racePhase]);
 
-  // Handle real-time synchronization with backend via SSE (or mock local timer for demo race 999)
+  // Handle real-time synchronization with backend via SSE
   useEffect(() => {
-    if (race.id === 999 || race.id === '999') {
-      // Local timer fallback for Demo/Mock mode
-      let interval;
-      if (racePhase === 'RUNNING') {
-        interval = setInterval(() => {
+    // Connect to real-time SSE stream
+    const sseUrl = `http://localhost:8080/api/races/${race.id}/live-stream`;
+    console.log(`[SSE-Simulation] Connecting to live race stream: ${race.id}`);
+    const eventSource = new EventSource(sseUrl);
+
+    eventSource.addEventListener('RACE_TICK', (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        console.log('[SSE-Simulation] Received tick:', payload);
+        const currentPhase = racePhaseRef.current;
+
+        if (wasPresentAtStart.current === null) {
+          wasPresentAtStart.current = payload.currentTick <= 2;
+        }
+
+        // If backend is already running and we joined late, skip intro to sync immediately
+        if (wasPresentAtStart.current === false && (currentPhase === 'IDLE' || currentPhase === 'RAPHAEL' || currentPhase === 'PRE_RACE')) {
+          setRacePhase('RUNNING');
+        }
+
+        if (currentPhase === 'RUNNING' || wasPresentAtStart.current === false) {
+          // Sync POV
+          if (payload.povHorseId !== undefined) {
+            const match = payload.povHorseId ? horsesRef.current.find(h => h.horseId === payload.povHorseId || h.id === payload.povHorseId) : null;
+            setPovHorse(match);
+          }
+
           setHorses(prev => {
-            let allFinished = true;
+            const backendHorses = payload.horses || [];
             const nextHorses = prev.map(h => {
-              if (h.isDisqualified) return { ...h, speed: 0 };
-              if (h.progress < 100) {
-                const advance = 0.5 + Math.random() * 1.5;
-                const newProgress = Math.min(100, h.progress + advance);
-                if (newProgress < 100) allFinished = false;
+              const match = backendHorses.find(bh => bh.horseId === h.horseId || bh.horseName === h.name);
+              if (match) {
+                const oldProgress = h.progress;
+                const newProgress = Math.min(100, (match.currentPosition / race.distance) * 100);
 
                 let finishedTime = h.finishedTime;
-                if (newProgress === 100 && !h.finishedTime) {
+                if (newProgress >= 100 && oldProgress < 100 && !h.finishedTime) {
                   finishedTime = Date.now();
                   triggerConfetti();
                   shakeIntensity.current = 12;
@@ -252,145 +269,67 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                     lastCommentaryChange.current = Date.now() + 8000;
                   }
                 }
-                const currentSpeed = newProgress >= 100 ? 0 : Math.round(55 + Math.random() * 20);
-                return { ...h, progress: newProgress, finishedTime, speed: currentSpeed };
+
+                return {
+                  ...h,
+                  progress: newProgress,
+                  speed: Math.round(match.speed),
+                  stamina: match.stamina,
+                  isDisqualified: match.status === 'DISQUALIFIED',
+                  finishedTime,
+                  flaggedPositions: match.flaggedPositions || []
+                };
               }
-              return { ...h, speed: 0 };
+              return h;
             });
 
-            allFinished = nextHorses.length > 0 && nextHorses.every(h => h.progress >= 100 || h.isDisqualified);
-            if (allFinished) {
-              setRacePhase('FINISHED');
-              const sorted = [...nextHorses].sort((a, b) => {
-                if (a.isDisqualified && b.isDisqualified) return 0;
-                if (a.isDisqualified) return 1;
-                if (b.isDisqualified) return -1;
-                return (a.finishedTime || 0) - (b.finishedTime || 0);
-              });
-              const results = sorted.map((h, index) => ({
-                rank: h.isDisqualified ? 'DSQ' : index + 1,
-                horseName: h.name,
-                jockeyName: h.jockeyName,
-                time: h.isDisqualified ? 'Disqualified' : `1m ${15 + index * 2}s`
-              }));
-              setFinalPodium(results);
-              setShowResultsSummary(true);
-
-              const winner = sorted.find(h => !h.isDisqualified);
-              if (winner) {
-                commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Chiến thắng thuộc về ${winner.name} (Số ${winner.id})!`;
-              } else {
-                commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Tất cả chiến mã đều phạm quy!`;
-              }
-              lastCommentaryChange.current = Date.now() + 999999;
-            } else {
-              updateLiveCommentary(nextHorses);
-            }
+            updateLiveCommentary(nextHorses);
             return nextHorses;
           });
-        }, 400);
+        }
+      } catch (err) {
+        console.error('[SSE-Simulation] Failed to parse race tick payload:', err);
       }
-      return () => clearInterval(interval);
-    } else {
-      // Connect to real-time SSE stream
-      const sseUrl = `http://localhost:8080/api/races/${race.id}/live-stream`;
-      console.log(`[SSE-Simulation] Connecting to live race stream: ${race.id}`);
-      const eventSource = new EventSource(sseUrl);
+    });
 
-      eventSource.addEventListener('RACE_TICK', (event) => {
-        try {
-          const payload = JSON.parse(event.data);
-          console.log('[SSE-Simulation] Received tick:', payload);
-          const currentPhase = racePhaseRef.current;
+    eventSource.addEventListener('RACE_FINISHED', (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        console.log('[SSE-Simulation] Race finished event received:', payload);
 
-          // If backend is already running (tick > 2), skip Raphael intro and countdown to sync immediately
-          if (payload.currentTick > 2 && (currentPhase === 'IDLE' || currentPhase === 'RAPHAEL' || currentPhase === 'PRE_RACE')) {
-            setRacePhase('RUNNING');
-          }
+        setRacePhase('FINISHED');
 
-          if (currentPhase === 'RUNNING' || payload.currentTick > 2) {
-            setHorses(prev => {
-              const backendHorses = payload.horses || [];
-              const nextHorses = prev.map(h => {
-                const match = backendHorses.find(bh => bh.horseId === h.horseId || bh.horseName === h.name);
-                if (match) {
-                  const oldProgress = h.progress;
-                  const newProgress = Math.min(100, (match.currentPosition / race.distance) * 100);
-                  
-                  let finishedTime = h.finishedTime;
-                  if (newProgress >= 100 && oldProgress < 100 && !h.finishedTime) {
-                    finishedTime = Date.now();
-                    triggerConfetti();
-                    shakeIntensity.current = 12;
+        // Map backend results to podium format
+        const mappedResults = (payload.results || []).map(r => ({
+          rank: r.rank,
+          horseName: r.horseName,
+          jockeyName: r.jockeyName,
+          time: r.time ? `${r.time}s` : 'N/A'
+        }));
 
-                    const alreadyFinished = prev.some(other => other.progress >= 100 && other.id !== h.id);
-                    if (!alreadyFinished) {
-                      audioManager.setSfxVolume('crowd', 0.95);
-                      commentaryText.current = `🏆 CHIẾN THẮNG! Chiến mã số ${h.id} (${h.name}) đã xuất sắc cán đích đầu tiên!`;
-                      lastCommentaryChange.current = Date.now() + 8000;
-                    }
-                  }
+        setFinalPodium(mappedResults);
+        setShowResultsSummary(true);
 
-                  return {
-                    ...h,
-                    progress: newProgress,
-                    speed: Math.round(match.speed),
-                    stamina: match.stamina,
-                    isDisqualified: match.status === 'DISQUALIFIED',
-                    finishedTime
-                  };
-                }
-                return h;
-              });
-
-              updateLiveCommentary(nextHorses);
-              return nextHorses;
-            });
-          }
-        } catch (err) {
-          console.error('[SSE-Simulation] Failed to parse race tick payload:', err);
+        const winner = mappedResults.find(r => r.rank === 1);
+        if (winner) {
+          commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Chiến thắng thuộc về ${winner.horseName}!`;
+        } else {
+          commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC!`;
         }
-      });
+        lastCommentaryChange.current = Date.now() + 999999;
+      } catch (err) {
+        console.error('[SSE-Simulation] Failed to parse race finished payload:', err);
+      }
+    });
 
-      eventSource.addEventListener('RACE_FINISHED', (event) => {
-        try {
-          const payload = JSON.parse(event.data);
-          console.log('[SSE-Simulation] Race finished event received:', payload);
-          
-          setRacePhase('FINISHED');
-          
-          // Map backend results to podium format
-          const mappedResults = (payload.results || []).map(r => ({
-            rank: r.rank,
-            horseName: r.horseName,
-            jockeyName: r.jockeyName,
-            time: r.time ? `${r.time}s` : 'N/A'
-          }));
-          
-          setFinalPodium(mappedResults);
-          setShowResultsSummary(true);
+    eventSource.onerror = (err) => {
+      console.log('[SSE-Simulation] SSE connection closed/error:', err);
+    };
 
-          const winner = mappedResults.find(r => r.rank === 1);
-          if (winner) {
-            commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Chiến thắng thuộc về ${winner.horseName}!`;
-          } else {
-            commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC!`;
-          }
-          lastCommentaryChange.current = Date.now() + 999999;
-        } catch (err) {
-          console.error('[SSE-Simulation] Failed to parse race finished payload:', err);
-        }
-      });
-
-      eventSource.onerror = (err) => {
-        console.log('[SSE-Simulation] SSE connection closed/error:', err);
-      };
-
-      return () => {
-        console.log('[SSE-Simulation] Closing live race stream...');
-        eventSource.close();
-      };
-    }
+    return () => {
+      console.log('[SSE-Simulation] Closing live race stream...');
+      eventSource.close();
+    };
   }, [race.id]);
 
   // Pre-Race Sequence
@@ -493,6 +432,286 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
       const Vx = W / 2;
 
       ctx.clearRect(0, 0, W, H);
+
+      const themeConfigs = {
+        sunset: {
+          skyColors: ['#10375c', '#1a5f7a', '#f9d976'],
+          sunColor: 'rgba(253, 186, 116, 0.8)',
+          sunRadius: 45,
+          grassColor: '#194d33',
+          trackColor: '#654321',
+          fenceColor: '#ffffff',
+          laneLineColor: 'rgba(255, 255, 255, 0.4)',
+          gridColor: 'rgba(0, 0, 0, 0.18)',
+          dustColor: 'rgba(180, 150, 110, 0.35)',
+          postColor: '#f8fafc'
+        },
+        cyber: {
+          skyColors: ['#020408', '#050a12', '#0a192f'],
+          sunColor: 'rgba(0, 242, 254, 0.15)',
+          sunRadius: 70,
+          grassColor: '#030d1a',
+          trackColor: '#0a0f1d',
+          fenceColor: '#00f2fe',
+          laneLineColor: 'rgba(0, 242, 254, 0.25)',
+          gridColor: 'rgba(0, 242, 254, 0.08)',
+          dustColor: 'rgba(0, 242, 254, 0.15)',
+          postColor: '#00f2fe'
+        },
+        sunny: {
+          skyColors: ['#38bdf8', '#7dd3fc', '#bae6fd'],
+          sunColor: 'rgba(253, 224, 71, 0.95)',
+          sunRadius: 35,
+          grassColor: '#16a34a',
+          trackColor: '#15803d',
+          fenceColor: '#ffffff',
+          laneLineColor: 'rgba(255, 255, 255, 0.55)',
+          gridColor: 'rgba(255, 255, 255, 0.15)',
+          dustColor: 'rgba(255, 255, 255, 0.25)',
+          postColor: '#ffffff'
+        },
+        snow: {
+          skyColors: ['#475569', '#64748b', '#94a3b8'],
+          sunColor: 'rgba(255, 255, 255, 0.4)',
+          sunRadius: 50,
+          grassColor: '#cbd5e1',
+          trackColor: '#f1f5f9',
+          fenceColor: '#78350f',
+          laneLineColor: 'rgba(71, 85, 105, 0.25)',
+          gridColor: 'rgba(71, 85, 105, 0.08)',
+          dustColor: 'rgba(255, 255, 255, 0.5)',
+          postColor: '#78350f'
+        },
+        rain: {
+          skyColors: ['#2b323a', '#44515c', '#606c76'],
+          sunColor: 'rgba(255, 255, 255, 0)',
+          sunRadius: 0,
+          grassColor: '#123524',
+          trackColor: '#3d2b1f',
+          fenceColor: '#a0aec0',
+          laneLineColor: 'rgba(255, 255, 255, 0.3)',
+          gridColor: 'rgba(0, 0, 0, 0.25)',
+          dustColor: 'rgba(60, 40, 30, 0.4)',
+          postColor: '#e2e8f0'
+        }
+      };
+
+      const config = themeConfigs[environment] || themeConfigs.sunset;
+
+      if (race?.trackShape === 'OVAL') {
+        const skyGrd = ctx.createLinearGradient(0, 0, 0, H * 0.4);
+        skyGrd.addColorStop(0, config.skyColors[0]);
+        skyGrd.addColorStop(0.5, config.skyColors[1]);
+        skyGrd.addColorStop(1, config.skyColors[2]);
+        ctx.fillStyle = skyGrd;
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.save();
+        if (shakeIntensity.current > 0) {
+          ctx.translate((Math.random() - 0.5) * shakeIntensity.current, (Math.random() - 0.5) * shakeIntensity.current);
+          shakeIntensity.current *= 0.88;
+          if (shakeIntensity.current < 0.2) shakeIntensity.current = 0;
+        }
+
+        const activePov = povHorseRef.current;
+        const followedVisualHorse = activePov ? visualHorses.current.find(h => h.id === activePov.id) : null;
+        const povProgress = followedVisualHorse ? followedVisualHorse.visualProgress : (activePov ? activePov.progress : 0);
+
+        const outerRx = W * 0.85;
+        const trackWidth = Math.max(W, H) * 0.22;
+        const innerRx = outerRx - trackWidth;
+
+        let camX = 0;
+        let camY = 0;
+        if (activePov) {
+          const angle = -Math.PI / 2 + (povProgress / 100) * (Math.PI * 2);
+          const laneOffset = ((activePov.id - 1) + 0.5) * trackWidth / numLanes;
+          const currentRx = innerRx + laneOffset;
+          camX = -(Math.cos(angle) * currentRx);
+          camY = -(Math.sin(angle) * currentRx * 0.45);
+        }
+
+        ctx.translate(W / 2 + camX, H / 2 + 100 + camY);
+
+        ctx.save();
+        ctx.scale(1, 0.45);
+
+        ctx.fillStyle = config.grassColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, outerRx + 800, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = environment === 'cyber' ? '#111827' : '#334155';
+        ctx.beginPath();
+        ctx.arc(0, 0, outerRx + 180, 0, Math.PI * 2);
+        ctx.arc(0, 0, outerRx, 0, Math.PI * 2, true);
+        ctx.fill();
+
+        ctx.fillStyle = config.trackColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, outerRx, 0, Math.PI * 2);
+        ctx.arc(0, 0, innerRx, 0, Math.PI * 2, true);
+        ctx.fill();
+
+        ctx.fillStyle = config.grassColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, innerRx, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = config.fenceColor;
+        ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.arc(0, 0, outerRx, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, 0, innerRx, 0, Math.PI * 2); ctx.stroke();
+
+        ctx.strokeStyle = config.laneLineColor;
+        ctx.lineWidth = 3;
+        ctx.setLineDash([20, 20]);
+        for (let i = 1; i < numLanes; i++) {
+          ctx.beginPath();
+          ctx.arc(0, 0, innerRx + (trackWidth * i) / numLanes, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.moveTo(0, -outerRx);
+        ctx.lineTo(0, -innerRx);
+        ctx.stroke();
+
+        const timeSec = Date.now() * 0.005;
+        const crowdColors = ['#f87171', '#60a5fa', '#34d399', '#fbbf24', '#f472b6', '#e2e8f0', '#a78bfa'];
+        for (let a = 0; a < Math.PI * 2; a += 0.02) {
+          const standR = outerRx + 20 + Math.random() * 140;
+          const cx = Math.cos(a) * standR;
+          const cy = Math.sin(a) * standR;
+
+          if (Math.abs(cx + camX) > W / 0.7 || Math.abs((cy * 0.45) + camY) > H / 0.7) continue;
+
+          const size = 5 + Math.random() * 5;
+          ctx.fillStyle = crowdColors[Math.floor(Math.random() * crowdColors.length)];
+          ctx.beginPath();
+          ctx.arc(cx, cy, size, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (racePhase === 'RUNNING' && Math.random() < 0.015) {
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        ctx.restore();
+
+        if (racePhase === 'PRE_RACE') {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+          ctx.fillRect(-W * 2, -H * 2, W * 4, H * 4);
+        }
+
+        if (racePhase === 'PRE_RACE' || racePhase === 'RUNNING' || racePhase === 'FINISHED') {
+          const horsesToDraw = [];
+          visualHorses.current.forEach((vHorse, laneIndex) => {
+            if (racePhase === 'PRE_RACE' && laneIndex >= spawnedCount) return;
+            const stateHorse = horsesRef.current.find(h => h.id === vHorse.id);
+            const targetProgress = stateHorse ? stateHorse.progress : 0;
+            vHorse.visualProgress += (targetProgress - vHorse.visualProgress) * 0.08;
+
+            const angle = -Math.PI / 2 + (vHorse.visualProgress / 100) * (Math.PI * 2);
+            const currentRx = innerRx + ((laneIndex + 0.5) * trackWidth / numLanes);
+
+            const horseX = Math.cos(angle) * currentRx;
+            const horseY = Math.sin(angle) * currentRx * 0.45;
+
+            horsesToDraw.push({ vHorse, x: horseX, y: horseY, laneIndex, angle });
+          });
+
+          horsesToDraw.sort((a, b) => a.y - b.y);
+
+          horsesToDraw.forEach(hData => {
+            const { vHorse, x, y } = hData;
+            const isActivePOV = activePov && activePov.id === vHorse.id;
+
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 12, 22, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            const size = isActivePOV ? 42 : 32;
+
+            if (horseImagesRef.current[vHorse.id]) {
+              ctx.save();
+              if (isActivePOV) {
+                ctx.shadowColor = '#ff8800';
+                ctx.shadowBlur = 15;
+                ctx.beginPath(); ctx.arc(x, y - size / 2, size * 0.7, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,136,0,0.3)'; ctx.fill();
+              }
+              ctx.beginPath();
+              ctx.arc(x, y - size / 2, size / 2, 0, Math.PI * 2);
+              ctx.clip();
+              ctx.drawImage(horseImagesRef.current[vHorse.id], x - size / 2, y - size, size, size);
+              ctx.restore();
+              ctx.strokeStyle = isActivePOV ? '#ff8800' : (vHorse.color || '#ffffff');
+              ctx.lineWidth = isActivePOV ? 4 : 2;
+              ctx.beginPath();
+              ctx.arc(x, y - size / 2, size / 2, 0, Math.PI * 2);
+              ctx.stroke();
+            } else {
+              ctx.fillStyle = vHorse.color || '#00f2fe';
+              ctx.beginPath();
+              ctx.roundRect(x - size / 2, y - size, size, size, 8);
+              ctx.fill();
+              ctx.strokeStyle = isActivePOV ? '#ff8800' : '#ffffff';
+              ctx.lineWidth = isActivePOV ? 4 : 2;
+              ctx.stroke();
+
+              ctx.fillStyle = darkenColor(vHorse.color || '#00f2fe', 0.5);
+              ctx.beginPath();
+              ctx.arc(x, y - size - 8, size / 3, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(vHorse.id, x, y - size - 12);
+
+            ctx.fillStyle = 'rgba(0,0,0,0.8)';
+            ctx.fillRect(x - 35, y - size - 40, 70, 18);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '12px sans-serif';
+            ctx.fillText(vHorse.name, x, y - size - 30);
+          });
+        }
+
+        ctx.restore();
+
+        if (environment === 'rain' || environment === 'snow') {
+          ctx.fillStyle = environment === 'rain' ? 'rgba(173, 216, 230, 0.4)' : 'rgba(255, 255, 255, 0.7)';
+          const particles = environment === 'rain' ? rainDrops : snowFlakes;
+          particles.forEach(p => {
+            ctx.beginPath();
+            if (environment === 'rain') {
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p.x - p.speedX * 2, p.y + p.l);
+              ctx.strokeStyle = ctx.fillStyle;
+              ctx.lineWidth = 1.5;
+              ctx.stroke();
+            } else {
+              ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            p.x -= p.speedX;
+            p.y += p.speedY;
+            if (p.y > H) { p.y = -10; p.x = Math.random() * W; }
+          });
+        }
+
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
 
       const activePov = povHorseRef.current;
       const followedVisualHorse = activePov ? visualHorses.current.find(h => h.id === activePov.id) : null;
@@ -709,70 +928,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
         ctx.restore();
       };
 
-      const themeConfigs = {
-        sunset: {
-          skyColors: ['#10375c', '#1a5f7a', '#f9d976'],
-          sunColor: 'rgba(253, 186, 116, 0.8)',
-          sunRadius: 45,
-          grassColor: '#194d33',
-          trackColor: '#654321',
-          fenceColor: '#ffffff',
-          laneLineColor: 'rgba(255, 255, 255, 0.4)',
-          gridColor: 'rgba(0, 0, 0, 0.18)',
-          dustColor: 'rgba(180, 150, 110, 0.35)',
-          postColor: '#f8fafc'
-        },
-        cyber: {
-          skyColors: ['#020408', '#050a12', '#0a192f'],
-          sunColor: 'rgba(0, 242, 254, 0.15)',
-          sunRadius: 70,
-          grassColor: '#030d1a',
-          trackColor: '#0a0f1d',
-          fenceColor: '#00f2fe',
-          laneLineColor: 'rgba(0, 242, 254, 0.25)',
-          gridColor: 'rgba(0, 242, 254, 0.08)',
-          dustColor: 'rgba(0, 242, 254, 0.15)',
-          postColor: '#00f2fe'
-        },
-        sunny: {
-          skyColors: ['#38bdf8', '#7dd3fc', '#bae6fd'],
-          sunColor: 'rgba(253, 224, 71, 0.95)',
-          sunRadius: 35,
-          grassColor: '#16a34a',
-          trackColor: '#15803d',
-          fenceColor: '#ffffff',
-          laneLineColor: 'rgba(255, 255, 255, 0.55)',
-          gridColor: 'rgba(255, 255, 255, 0.15)',
-          dustColor: 'rgba(255, 255, 255, 0.25)',
-          postColor: '#ffffff'
-        },
-        snow: {
-          skyColors: ['#475569', '#64748b', '#94a3b8'],
-          sunColor: 'rgba(255, 255, 255, 0.4)',
-          sunRadius: 50,
-          grassColor: '#cbd5e1',
-          trackColor: '#f1f5f9',
-          fenceColor: '#78350f',
-          laneLineColor: 'rgba(71, 85, 105, 0.25)',
-          gridColor: 'rgba(71, 85, 105, 0.08)',
-          dustColor: 'rgba(255, 255, 255, 0.5)',
-          postColor: '#78350f'
-        },
-        rain: {
-          skyColors: ['#2b323a', '#44515c', '#606c76'],
-          sunColor: 'rgba(255, 255, 255, 0)',
-          sunRadius: 0,
-          grassColor: '#123524',
-          trackColor: '#3d2b1f',
-          fenceColor: '#a0aec0',
-          laneLineColor: 'rgba(255, 255, 255, 0.3)',
-          gridColor: 'rgba(0, 0, 0, 0.25)',
-          dustColor: 'rgba(60, 40, 30, 0.4)',
-          postColor: '#e2e8f0'
-        }
-      };
 
-      const config = themeConfigs[environment] || themeConfigs.sunset;
 
       const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
       skyGrad.addColorStop(0, config.skyColors[0]);
@@ -1769,10 +1925,15 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                     <span className="material-symbols-outlined text-warning animate-pulse">videocam</span>
                     <span>Theo dõi POV: <strong>{povHorse.name}</strong> (Làn {povHorse.id})</span>
                   </div>
-                  <button className="pov-exit-btn" onClick={() => setPovHorse(null)}>
-                    Thoát POV
-                  </button>
                 </div>
+              )}
+              {racePhase === 'RAPHAEL' && (
+                <RaphaelHUD
+                  horses={horses}
+                  environment={environment}
+                  onComplete={handleRaphaelComplete}
+                  isMovieScreenMode={true}
+                />
               )}
             </div>
             <div className="text-center mt-3 text-secondary small">
@@ -1817,23 +1978,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                           </span>
                         )}
                         <div className="leaderboard-progress">{Math.round(horse.progress)}%</div>
-                        {racePhase === 'RUNNING' && !horse.isDisqualified && (
-                          <button
-                            className={`btn-pov-action me-1 ${povHorse?.id === horse.id ? 'active' : ''}`}
-                            onClick={() => {
-                              if (povHorse?.id === horse.id) {
-                                setPovHorse(null);
-                              } else {
-                                setPovHorse(horse);
-                              }
-                            }}
-                            title={povHorse?.id === horse.id ? "Thoát POV" : "Theo dõi nài ngựa"}
-                          >
-                            <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>
-                              {povHorse?.id === horse.id ? 'videocam_off' : 'videocam'}
-                            </span>
-                          </button>
-                        )}
+                        {/* POV is referee-only, spectators cannot change POV */}
                       </div>
                     </div>
                   );
@@ -1866,9 +2011,9 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                       </div>
                       <div className="text-end">
                         <span className={`badge ${bet.status === 'WON' ? 'bg-success' :
-                            bet.status === 'LOST' ? 'bg-danger' :
-                              bet.status === 'REFUNDED' ? 'bg-secondary' :
-                                'bg-warning text-dark'
+                          bet.status === 'LOST' ? 'bg-danger' :
+                            bet.status === 'REFUNDED' ? 'bg-secondary' :
+                              'bg-warning text-dark'
                           } text-uppercase mb-1`} style={{ fontSize: '8px', display: 'block' }}>
                           {bet.status === 'WON' ? 'Thắng cược' : bet.status === 'LOST' ? 'Thua cược' : bet.status === 'REFUNDED' ? 'Hoàn tiền' : 'Đang cược'}
                         </span>
@@ -1933,14 +2078,6 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
         </div>
       )}
 
-      {racePhase === 'RAPHAEL' && (
-        <RaphaelHUD
-          horses={horses}
-          environment={environment}
-          onComplete={handleRaphaelComplete}
-          isMovieScreenMode={true}
-        />
-      )}
     </>
   );
 }

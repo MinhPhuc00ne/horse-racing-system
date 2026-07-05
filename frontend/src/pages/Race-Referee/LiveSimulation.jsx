@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAssignedRacesAPI, getRacePreCheckAPI, getCompletedRacesAPI, reportViolationAPI, saveSimulatedRaceAPI, startRaceAPI } from '../../services/referee';
+import { getAssignedRacesAPI, getRacePreCheckAPI, getCompletedRacesAPI, reportViolationAPI, saveSimulatedRaceAPI, startRaceAPI, updatePovAPI } from '../../services/referee';
 import RaphaelHUD from './RaphaelHUD';
 import './LiveSimulation.css';
 import { audioManager } from './audioHelper';
@@ -60,6 +60,7 @@ export default function LiveSimulation() {
   const fireworks = useRef([]);
   const crowdBubbles = useRef([]);
   const horseImagesRef = useRef({});
+  const wasPresentAtStart = useRef(null);
 
   const triggerConfetti = () => {
     const colors = ['#fbbf24', '#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#ec4899', '#8b5cf6'];
@@ -178,71 +179,13 @@ export default function LiveSimulation() {
   // Handle simulation timer / SSE sync for Referee
   useEffect(() => {
     if (!actualRaceId || actualRaceId === 999) {
-      // Local timer fallback for Demo/Mock mode
-      let interval;
-      if (racePhase === 'RUNNING') {
-        interval = setInterval(() => {
-          setHorses(prev => {
-            let allFinished = true;
-            const nextHorses = prev.map(h => {
-              if (h.isDisqualified) return { ...h, speed: 0 };
-              if (h.progress < 100) {
-                const advance = 0.5 + Math.random() * 1.5;
-                const newProgress = Math.min(100, h.progress + advance);
-                if (newProgress < 100) allFinished = false;
+      return;
+    }
 
-                let finishedTime = h.finishedTime;
-                if (newProgress === 100 && !h.finishedTime) {
-                  const penalty = (h.flaggedPositions?.length || 0) * 4000;
-                  finishedTime = Date.now() + penalty;
-                  triggerConfetti();
-                  shakeIntensity.current = 12;
-
-                  const alreadyFinished = prev.some(other => other.progress >= 100 && other.id !== h.id);
-                  if (!alreadyFinished) {
-                    audioManager.setSfxVolume('crowd', 0.95);
-                    commentaryText.current = `🏆 CHIẾN THẮNG! Chiến mã số ${h.id} (${h.name}) đã xuất sắc cán đích đầu tiên!`;
-                    lastCommentaryChange.current = Date.now() + 8000;
-                  }
-                }
-                const currentSpeed = newProgress >= 100 ? 0 : Math.round(55 + Math.random() * 20);
-                return { ...h, progress: newProgress, finishedTime, speed: currentSpeed };
-              }
-              return { ...h, speed: 0 };
-            });
-
-            allFinished = nextHorses.length > 0 && nextHorses.every(h => h.progress >= 100 || h.isDisqualified);
-            if (allFinished) {
-              setRacePhase('FINISHED');
-              if (actualRaceId === 999) {
-                localStorage.setItem('demo_race_status', 'FINISHED');
-              }
-              const sorted = [...nextHorses].sort((a, b) => {
-                if (a.isDisqualified && b.isDisqualified) return 0;
-                if (a.isDisqualified) return 1;
-                if (b.isDisqualified) return -1;
-                return (a.finishedTime || 0) - (b.finishedTime || 0);
-              });
-              const winner = sorted.find(h => !h.isDisqualified);
-              if (winner) {
-                commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Chiến thắng chung cuộc thuộc về ${winner.name} (Số ${winner.id})!`;
-              } else {
-                commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Tất cả chiến mã đều phạm quy và bị truất quyền thi đấu!`;
-              }
-              lastCommentaryChange.current = Date.now() + 999999;
-            } else {
-              updateLiveCommentary(nextHorses);
-            }
-            return nextHorses;
-          });
-        }, 400);
-      }
-      return () => clearInterval(interval);
-    } else {
-      // Connect to real-time SSE stream for real races
-      const sseUrl = `http://localhost:8080/api/races/${actualRaceId}/live-stream`;
-      console.log(`[SSE-Referee] Connecting to live race stream: ${actualRaceId}`);
-      const eventSource = new EventSource(sseUrl);
+    // Connect to real-time SSE stream for real races
+    const sseUrl = `http://localhost:8080/api/races/${actualRaceId}/live-stream`;
+    console.log(`[SSE-Referee] Connecting to live race stream: ${actualRaceId}`);
+    const eventSource = new EventSource(sseUrl);
 
       eventSource.addEventListener('RACE_TICK', (event) => {
         try {
@@ -250,12 +193,16 @@ export default function LiveSimulation() {
           console.log('[SSE-Referee] Received tick:', payload);
           const currentPhase = racePhaseRef.current;
 
-          // If backend is already running (tick > 2), skip Raphael intro and countdown to sync immediately
-          if (payload.currentTick > 2 && (currentPhase === 'IDLE' || currentPhase === 'RAPHAEL' || currentPhase === 'PRE_RACE')) {
+          if (wasPresentAtStart.current === null) {
+            wasPresentAtStart.current = payload.currentTick <= 2;
+          }
+
+          // If backend is already running and we joined late, skip intro to sync immediately
+          if (wasPresentAtStart.current === false && (currentPhase === 'IDLE' || currentPhase === 'RAPHAEL' || currentPhase === 'PRE_RACE')) {
             setRacePhase('RUNNING');
           }
 
-          if (currentPhase === 'RUNNING' || payload.currentTick > 2) {
+          if (currentPhase === 'RUNNING' || wasPresentAtStart.current === false) {
             setHorses(prev => {
               const backendHorses = payload.horses || [];
               const nextHorses = prev.map(h => {
@@ -263,7 +210,7 @@ export default function LiveSimulation() {
                 if (match) {
                   const oldProgress = h.progress;
                   const newProgress = Math.min(100, (match.currentPosition / raceDistance) * 100);
-                  
+
                   let finishedTime = h.finishedTime;
                   if (newProgress >= 100 && oldProgress < 100 && !h.finishedTime) {
                     finishedTime = Date.now();
@@ -304,16 +251,16 @@ export default function LiveSimulation() {
         try {
           const payload = JSON.parse(event.data);
           console.log('[SSE-Referee] Race finished event received:', payload);
-          
+
           setRacePhase('FINISHED');
-          
+
           const mappedResults = (payload.results || []).map(r => ({
             rank: r.rank,
             horseName: r.horseName,
             jockeyName: r.jockeyName,
             time: r.time ? `${r.time}s` : 'N/A'
           }));
-          
+
           setFinalPodium(mappedResults);
           setShowResultsSummary(true);
 
@@ -337,7 +284,6 @@ export default function LiveSimulation() {
         console.log('[SSE-Referee] Closing live race stream...');
         eventSource.close();
       };
-    }
   }, [actualRaceId, racePhase, raceDistance]);
 
   // Pre-Race Sequence
@@ -402,14 +348,6 @@ export default function LiveSimulation() {
 
           const preCheck = await getRacePreCheckAPI(rId);
           let participants = preCheck?.participants || [];
-          if (participants.length === 0) {
-            participants = [
-              { participantId: 1, horseId: 101, horseName: "Xích Thố (Red Hare)", jockeyName: "Ryan Moore", actualWeight: 480.0 },
-              { participantId: 2, horseId: 102, horseName: "Đầu Rồng (Dragon Head)", jockeyName: "William Buick", actualWeight: 492.0 },
-              { participantId: 3, horseId: 103, horseName: "Hắc Mã (Black Beauty)", jockeyName: "Lafitt Dettori", actualWeight: 475.0 },
-              { participantId: 4, horseId: 104, horseName: "Bạch Long (White Dragon)", jockeyName: "Zac Purton", actualWeight: 485.0 }
-            ];
-          }
 
           const fetchedHorses = participants.map((p, idx) => ({
             id: p.participantId,
@@ -2584,6 +2522,7 @@ export default function LiveSimulation() {
     fireworks.current = [];
     crowdBubbles.current = [];
     setPovHorse(null);
+    wasPresentAtStart.current = null;
 
     if (racePhase === 'FINISHED') {
       // Refresh real data if any
@@ -2627,15 +2566,9 @@ export default function LiveSimulation() {
         await startRaceAPI(actualRaceId);
       } catch (err) {
         console.error("Could not start race API", err);
-        // Fallback to local demo simulation mode if real race start fails
-        console.log("Falling back to local demo mode for testing.");
-        setActualRaceId(999);
-        localStorage.setItem('demo_race_status', 'RUNNING');
-        localStorage.removeItem('demo_race_start_time');
+        alert("Không thể bắt đầu trận đấu: " + (err.message || err));
+        return;
       }
-    } else if (actualRaceId === 999) {
-      localStorage.setItem('demo_race_status', 'RUNNING');
-      localStorage.removeItem('demo_race_start_time');
     }
     setRacePhase('RAPHAEL');
   };
@@ -2856,7 +2789,7 @@ export default function LiveSimulation() {
                     <option value="rain">🌧️ Rainy Storm</option>
                   </select>
                 </div>
-                <span className="stat-pill">Dist: <strong>2300m</strong></span>
+                <span className="stat-pill">Dist: <strong>{raceDistance}m</strong></span>
                 <span className="stat-pill">Track: <strong className="text-success">{environment === 'snow' ? 'SNOW' : environment === 'rain' ? 'MUD' : 'TURF'}</strong></span>
                 <span className="stat-pill">Weather: <strong className={environment === 'snow' ? 'text-info' : environment === 'rain' ? 'text-primary' : environment === 'sunny' ? 'text-warning' : 'text-success'}>
                   {environment === 'snow' ? 'SNOWING' : environment === 'rain' ? 'RAINING' : environment === 'sunny' ? 'SUNNY' : 'CLEAR'}
@@ -2879,7 +2812,12 @@ export default function LiveSimulation() {
                     <span className="material-symbols-outlined text-warning animate-pulse">videocam</span>
                     <span>Jockey POV: <strong>{povHorse.name}</strong> (Lane {povHorse.id})</span>
                   </div>
-                  <button className="pov-exit-btn" onClick={() => setPovHorse(null)}>
+                  <button className="pov-exit-btn" onClick={() => {
+                    setPovHorse(null);
+                    if (actualRaceId && actualRaceId !== 999) {
+                      updatePovAPI(actualRaceId, null);
+                    }
+                  }}>
                     Exit POV
                   </button>
                 </div>
@@ -2931,8 +2869,14 @@ export default function LiveSimulation() {
                           onClick={() => {
                             if (povHorse?.id === horse.id) {
                               setPovHorse(null);
+                              if (actualRaceId && actualRaceId !== 999) {
+                                updatePovAPI(actualRaceId, null);
+                              }
                             } else {
                               setPovHorse(horse);
+                              if (actualRaceId && actualRaceId !== 999) {
+                                updatePovAPI(actualRaceId, horse.horseId);
+                              }
                             }
                           }}
                           title={povHorse?.id === horse.id ? "Exit POV" : "Jockey POV"}

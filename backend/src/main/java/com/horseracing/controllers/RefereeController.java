@@ -109,6 +109,15 @@ public class RefereeController {
         return ResponseEntity.ok(new MessageResponse("Race has started. Betting window closed."));
     }
 
+    @PutMapping("/races/{raceId}/pov")
+    public ResponseEntity<MessageResponse> updatePov(
+            @PathVariable Integer raceId,
+            @RequestBody Map<String, Integer> body) {
+        Integer horseId = body.get("horseId");
+        refereeService.updatePov(raceId, horseId);
+        return ResponseEntity.ok(new MessageResponse("POV updated successfully."));
+    }
+
     @PostMapping("/races/{raceId}/flags")
     public ResponseEntity<FlagResponse> addFlag(
             @PathVariable Integer raceId,

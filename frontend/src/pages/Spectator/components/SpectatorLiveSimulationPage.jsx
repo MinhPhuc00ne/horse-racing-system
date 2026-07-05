@@ -6,7 +6,7 @@ import SpectatorLiveSimulation from './SpectatorLiveSimulation';
 import '../Spectator.css';
 
 const isMockMode = () => {
-  return localStorage.getItem('backend_online') !== 'true';
+  return false;
 };
 
 export default function SpectatorLiveSimulationPage() {
@@ -42,7 +42,7 @@ export default function SpectatorLiveSimulationPage() {
       try {
         const activeRace = await findActiveLiveRace();
         if (isCancelled) return;
-        
+
         if (activeRace) {
           // Only update if it changed or not set
           if (!activeSimulationRace || activeSimulationRace.id !== activeRace.id || activeSimulationRace.status !== activeRace.status) {
@@ -80,8 +80,8 @@ export default function SpectatorLiveSimulationPage() {
 
   if (activeSimulationRace) {
     return (
-      <SpectatorLiveSimulation 
-        race={activeSimulationRace} 
+      <SpectatorLiveSimulation
+        race={activeSimulationRace}
         onClose={() => {
           // Clear demo status if closing demo race
           if (activeSimulationRace.id === 999) {
@@ -89,7 +89,7 @@ export default function SpectatorLiveSimulationPage() {
             localStorage.removeItem('demo_race_start_time');
           }
           setActiveSimulationRace(null);
-        }} 
+        }}
       />
     );
   }
@@ -111,10 +111,10 @@ export default function SpectatorLiveSimulationPage() {
 
       <div className="sim-container">
         <div className="glass-sim-card w-100 p-0 overflow-hidden" style={{ minHeight: '520px', background: '#0a0d14', border: '1px solid rgba(255,255,255,0.05)', position: 'relative', borderRadius: '16px' }}>
-          
+
           {/* TV Screen Placeholder */}
           <div className="d-flex flex-column align-items-center justify-content-center text-center text-white p-5" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(135deg, #090c13 0%, #151b26 100%)' }}>
-            
+
             {/* Retro Static/Noise lines background layer */}
             <div style={{
               position: 'absolute',
@@ -136,11 +136,11 @@ export default function SpectatorLiveSimulationPage() {
             <span className="material-symbols-outlined text-muted mb-3 animate-pulse" style={{ fontSize: '72px', color: 'rgba(255,255,255,0.15)' }}>
               live_tv
             </span>
-            
+
             <h4 className="fw-bold ho-font-epilogue mb-2 text-uppercase text-secondary tracking-widest" style={{ fontSize: '18px', color: 'rgba(255,255,255,0.7)', letterSpacing: '4px' }}>
               HỆ THỐNG LIVE TV - CHƯA CÓ TRẬN ĐẤU ĐANG DIỄN RA
             </h4>
-            
+
             <p className="text-secondary small px-4 mb-4" style={{ maxWidth: '500px', color: '#6b7280', fontSize: '13px', lineHeight: '1.6' }}>
               Hiện chưa có cuộc đua nào trực tuyến. Khi Ban tổ chức / Trọng tài bắt đầu chuẩn bị một trận đấu mới, màn hình này sẽ tự động kết nối và phát trực tiếp sa bàn cuộc đua trong thời gian thực.
             </p>
@@ -151,7 +151,7 @@ export default function SpectatorLiveSimulationPage() {
               <span>Đang lắng nghe tín hiệu từ Trọng tài...</span>
             </div>
           </div>
-          
+
         </div>
       </div>
     </div>

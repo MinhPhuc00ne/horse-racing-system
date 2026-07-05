@@ -122,7 +122,7 @@ public class RaceService {
     @Transactional(readOnly = true)
     public List<RaceResponse> getActiveRaces() {
         return raceRepository.findAll().stream()
-                .filter(r -> "RUNNING".equalsIgnoreCase(r.getStatus()) || "LOCKED_LIST".equalsIgnoreCase(r.getStatus()) || "ACTIVE".equalsIgnoreCase(r.getStatus()))
+                .filter(r -> "RUNNING".equalsIgnoreCase(r.getStatus()))
                 .map(RaceResponse::fromEntity)
                 .collect(Collectors.toList());
     }

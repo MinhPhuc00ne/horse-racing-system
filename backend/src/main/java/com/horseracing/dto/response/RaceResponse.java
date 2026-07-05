@@ -27,6 +27,7 @@ public class RaceResponse {
     private String surfaceType;
     private String weather;
     private String status;
+    private String trackShape;
 
     private Integer refereeId;
     private String refereeName;
@@ -49,6 +50,7 @@ public class RaceResponse {
                 .surfaceType(r.getSurfaceType())
                 .weather(r.getWeather())
                 .status(r.getStatus())
+                .trackShape(r.getRaceTrack() != null ? r.getRaceTrack().getShape() : null)
                 .refereeId(r.getReferee() != null ? r.getReferee().getId() : null)
                 .refereeName(r.getReferee() != null ? r.getReferee().getFullName() : null)
                 .build();

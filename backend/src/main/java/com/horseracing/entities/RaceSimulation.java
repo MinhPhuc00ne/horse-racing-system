@@ -36,6 +36,9 @@ public class RaceSimulation {
     @Column(name = "current_tick")
     private Integer currentTick = 0;
 
+    @Column(name = "pov_horse_id")
+    private Integer povHorseId;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

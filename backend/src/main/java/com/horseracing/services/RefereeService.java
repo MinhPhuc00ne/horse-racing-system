@@ -476,6 +476,20 @@ public class RefereeService {
                     List<Map<String, Object>> horseStates = new ArrayList<>();
 
                     for (SimulationHorseState state : states) {
+                        List<RefereeFlag> flags = refereeFlagRepository.findBySimulationIdAndHorseId(simulationId, state.getHorse().getId());
+                        List<Integer> flaggedPositions = new ArrayList<>();
+                        for (RefereeFlag flag : flags) {
+                            try {
+                                String desc = flag.getDescription();
+                                if (desc != null && desc.contains("at ") && desc.contains("%")) {
+                                    String numStr = desc.substring(desc.indexOf("at ") + 3, desc.indexOf("%")).trim();
+                                    flaggedPositions.add(Integer.parseInt(numStr));
+                                }
+                            } catch (Exception e) {
+                                // Ignore
+                            }
+                        }
+
                         if ("FINISHED".equals(state.getStatus()) || "DISQUALIFIED".equals(state.getStatus())) {
                             Map<String, Object> hState = new HashMap<>();
                             hState.put("horseId", state.getHorse().getId());
@@ -484,6 +498,7 @@ public class RefereeService {
                             hState.put("speed", state.getSpeed());
                             hState.put("stamina", state.getStamina());
                             hState.put("status", state.getStatus());
+                            hState.put("flaggedPositions", flaggedPositions);
                             horseStates.add(hState);
                             continue;
                         }
@@ -545,6 +560,7 @@ public class RefereeService {
                         hState.put("speed", speed);
                         hState.put("stamina", currentStamina);
                         hState.put("status", state.getStatus());
+                        hState.put("flaggedPositions", flaggedPositions);
                         horseStates.add(hState);
                     }
 
@@ -552,6 +568,7 @@ public class RefereeService {
                     response.put("raceId", race.getId());
                     response.put("currentTick", sim.getCurrentTick());
                     response.put("horses", horseStates);
+                    response.put("povHorseId", sim.getPovHorseId());
 
                     if (allFinishedOrDisqualified) {
                         sim.setStatus("FINISHED");
@@ -633,6 +650,14 @@ public class RefereeService {
         if (future != null) {
             future.cancel(true);
         }
+    }
+
+    @Transactional
+    public void updatePov(Integer raceId, Integer horseId) {
+        RaceSimulation simulation = raceSimulationRepository.findFirstByRaceIdAndStatus(raceId, "RUNNING")
+                .orElseThrow(() -> new RuntimeException("No running simulation found"));
+        simulation.setPovHorseId(horseId);
+        raceSimulationRepository.save(simulation);
     }
 
     @Transactional
