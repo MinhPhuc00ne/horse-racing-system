@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { getRefereesAPI } from '../../../services/admin';
-import DataTable from '../../../components/DataTable';
+import { getAllUsersAPI, createUserAPI, updateUserAPI, deleteUserAPI, toggleUserStatusAPI } from '../../../services/admin';
+import DataTable from '../../../components/ui/DataTable';
 import { FaSearch, FaFilter, FaToggleOn, FaToggleOff, FaUserCircle, FaPlus, FaEdit, FaTrash, FaInfoCircle, FaCheckCircle } from 'react-icons/fa';
 
 export default function UserManagementContent() {
-  const [referees, setReferees] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -30,43 +29,20 @@ export default function UserManagementContent() {
   };
   const [formData, setFormData] = useState(initialFormState);
 
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const users = await getAllUsersAPI();
+      setUsersList(users);
+    } catch (err) {
+      console.error('Lỗi khi tải danh sách người dùng:', err);
+      setError('Không thể tải dữ liệu người dùng từ máy chủ.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const refList = await getRefereesAPI().catch(() => []);
-        setReferees(refList);
-
-        // Predefined mock users representing various roles in the system
-        const mockUsers = [
-          { id: 1, username: 'owner1', email: 'owner1@test.com', fullName: 'Test HORSE_OWNER 1', phone: '0123400021', role: 'HORSE_OWNER', enabled: true },
-          { id: 2, username: 'owner2', email: 'owner2@test.com', fullName: 'Test HORSE_OWNER 2', phone: '0123400022', role: 'HORSE_OWNER', enabled: true },
-          { id: 3, username: 'jockey1', email: 'jockey1@test.com', fullName: 'Test JOCKEY 1', phone: '0123400031', role: 'JOCKEY', enabled: true },
-          { id: 4, username: 'jockey2', email: 'jockey2@test.com', fullName: 'Test JOCKEY 2', phone: '0123400032', role: 'JOCKEY', enabled: true },
-          { id: 5, username: 'spectator1', email: 'spectator1@test.com', fullName: 'Test SPECTATOR 1', phone: '0123400011', role: 'SPECTATOR', enabled: true },
-          { id: 6, username: 'spectator2', email: 'spectator2@test.com', fullName: 'Test SPECTATOR 2', phone: '0123400012', role: 'SPECTATOR', enabled: true },
-          { id: 7, username: 'admin', email: 'admin@gmail.com', fullName: 'System Administrator', phone: '0987654321', role: 'ADMIN', enabled: true },
-          { id: 8, username: 'nguyennhutai', email: 'tainnse170563@fpt.edu.vn', fullName: 'nguyennhutai(k17hcm)', phone: '0854498305', role: 'SPECTATOR', enabled: true }
-        ];
-
-        // Format backend referees to match
-        const formattedReferees = refList.map((ref, idx) => ({
-          id: 100 + idx,
-          username: ref.username || 'referee_' + ref.id,
-          email: ref.email,
-          fullName: ref.fullName || 'Default Referee',
-          phone: ref.phone || 'N/A',
-          role: 'RACE_REFEREE',
-          enabled: ref.enabled
-        }));
-
-        setUsersList([...mockUsers, ...formattedReferees]);
-      } catch (err) {
-        console.error('Lỗi khi tải trọng tài:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadUsers();
   }, []);
 
@@ -78,17 +54,16 @@ export default function UserManagementContent() {
     }));
   };
 
-  const handleToggleStatus = (id) => {
-    setUsersList(prev =>
-      prev.map(user => {
-        if (user.id === id) {
-          const newStatus = !user.enabled;
-          setSuccess(`Đã thay đổi trạng thái của tài khoản @${user.username} thành ${newStatus ? 'Hoạt động' : 'Tạm khóa'}.`);
-          return { ...user, enabled: newStatus };
-        }
-        return user;
-      })
-    );
+  const handleToggleStatus = async (id) => {
+    try {
+      const userToToggle = usersList.find(u => u.id === id);
+      const newStatus = !userToToggle.enabled;
+      await toggleUserStatusAPI(id, newStatus);
+      setSuccess(`Đã thay đổi trạng thái của tài khoản @${userToToggle.username} thành ${newStatus ? 'Hoạt động' : 'Tạm khóa'}.`);
+      loadUsers(); // Refresh list
+    } catch (err) {
+      setError(err.message || 'Lỗi khi thay đổi trạng thái.');
+    }
   };
 
   const resetForm = () => {
@@ -98,7 +73,7 @@ export default function UserManagementContent() {
     setShowForm(false);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -109,7 +84,7 @@ export default function UserManagementContent() {
       return;
     }
 
-    // Check duplicate username or email
+    // Check duplicate username or email locally before sending
     const isDuplicate = usersList.some(u => 
       u.id !== editId && 
       (u.username.toLowerCase() === formData.username.trim().toLowerCase() ||
@@ -121,28 +96,21 @@ export default function UserManagementContent() {
       return;
     }
 
-    if (isEditing) {
-      // Update
-      setUsersList(prev =>
-        prev.map(u => (u.id === editId ? { ...formData, id: editId, username: formData.username.trim(), email: formData.email.trim(), fullName: formData.fullName.trim() } : u))
-      );
-      const msg = `Cập nhật tài khoản @${formData.username} thành công!`;
-      setSuccessModalMessage(msg);
-    } else {
-      // Create
-      const newUser = {
-        ...formData,
-        id: Date.now(),
-        username: formData.username.trim(),
-        email: formData.email.trim(),
-        fullName: formData.fullName.trim()
-      };
-      setUsersList(prev => [newUser, ...prev]);
-      const msg = `Tạo mới tài khoản @${formData.username} thành công!`;
-      setSuccessModalMessage(msg);
+    try {
+      if (isEditing) {
+        await updateUserAPI(editId, formData);
+        const msg = `Cập nhật tài khoản @${formData.username} thành công!`;
+        setSuccessModalMessage(msg);
+      } else {
+        await createUserAPI(formData);
+        const msg = `Tạo mới tài khoản @${formData.username} thành công!`;
+        setSuccessModalMessage(msg);
+      }
+      resetForm();
+      loadUsers(); // Refresh list
+    } catch (err) {
+      setError(err.message || 'Đã xảy ra lỗi khi lưu thông tin người dùng.');
     }
-
-    resetForm();
   };
 
   const handleEditClick = (user) => {
@@ -159,14 +127,20 @@ export default function UserManagementContent() {
     setShowForm(true);
   };
 
-  const handleDeleteClick = (user) => {
+  const handleDeleteClick = async (user) => {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa tài khoản @${user.username} không? Hành động này không thể hoàn tác.`)) {
       return;
     }
     setError('');
     setSuccess('');
-    setUsersList(prev => prev.filter(u => u.id !== user.id));
-    setSuccess(`Đã xóa thành công tài khoản @${user.username}.`);
+    
+    try {
+      await deleteUserAPI(user.id);
+      setSuccess(`Đã xóa thành công tài khoản @${user.username}.`);
+      loadUsers(); // Refresh list
+    } catch (err) {
+      setError(err.message || 'Lỗi khi xóa người dùng.');
+    }
   };
 
   const filteredUsers = usersList.filter(u => {

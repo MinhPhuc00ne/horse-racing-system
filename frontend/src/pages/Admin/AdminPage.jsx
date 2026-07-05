@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
-import DashboardLayout from '../layouts/DashboardLayout';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import '../Horse-Owner/HorseOwner.css'; // Reuses HorseOwner premium CSS variables and styles
 
 // Import Admin content panels
-import AdminDashboardContent from './components/AdminDashboardContent';
+import AdminDashboardContent from '../../components/Admin/AdminDashboardContent';
 import UserManagementContent from './components/UserManagementContent';
 import UpgradeUserRoleContent from './components/UpgradeUserRoleContent';
 import TournamentsPanel from './components/TournamentsPanel';
@@ -13,6 +13,7 @@ import BreedsPanel from './components/BreedsPanel';
 import WithdrawalsPanel from './components/WithdrawalsPanel';
 import RacesPanel from './components/RacesPanel';
 import FeedbacksPanel from './components/FeedbacksPanel';
+import SpectatorWallet from '../../components/Spectator/SpectatorWallet';
 
 const adminNavLinks = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -20,7 +21,8 @@ const adminNavLinks = [
   { path: '/admin/upgradeuserrole', label: 'Upgrade User Role', icon: 'manage_accounts' },
   { path: '/admin/tournamentmanagement', label: 'Tournament Management', icon: 'emoji_events' },
   { path: '/admin/tournamentregistrations', label: 'Tournament Registrations', icon: 'flag' },
-  { path: '/admin/transactions', label: 'Transactions', icon: 'account_balance_wallet' },
+  { path: '/admin/transactions', label: 'Transactions (Admin)', icon: 'account_balance' },
+  { path: '/admin/my-wallet', label: 'My Wallet', icon: 'payments' },
   { path: '/admin/feedbacks', label: 'Feedbacks', icon: 'rate_review' }
 ];
 
@@ -41,6 +43,7 @@ export default function AdminPage() {
         <Route path="upgradeuserrole" element={<UpgradeUserRoleContent />} />
         <Route path="tournamentmanagement" element={<TournamentsPanel />} />
         <Route path="transactions" element={<WithdrawalsPanel />} />
+        <Route path="my-wallet" element={<SpectatorWallet />} />
         <Route path="tournamentregistrations" element={<RacesPanel />} />
         <Route path="feedbacks" element={<FeedbacksPanel />} />
         {/* Catch-all redirect */}

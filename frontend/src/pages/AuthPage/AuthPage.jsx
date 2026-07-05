@@ -1,8 +1,8 @@
 import { useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
-import LoginForm from './components/LoginForm';
-import SignupForm from './components/SignupForm';
+import LoginForm from '../../components/Auth/LoginForm';
+import SignupForm from '../../components/Auth/SignupForm';
 import horseImage from '../../assets/horse_racing_statue.png';
 import horseSignupImage from '../../assets/horse_racing_action.png';
 import './AuthPage.css';
@@ -34,10 +34,12 @@ export default function AuthPage({ view }) {
         {/* Left Side Form Column - Login */}
         <div className="auth-form-column login-column">
           <div className="auth-form-wrapper">
-            <div className="auth-header-content">
-              <h1 className="auth-title-brand">Hourse Racing</h1>
-              <p className="auth-subtitle">The pinnacle of tournament excellence.</p>
-            </div>
+            <Link to="/" style={{ textDecoration: 'none', display: 'block', cursor: 'pointer' }} className="auth-header-link">
+              <div className="auth-header-content">
+                <h1 className="auth-title-brand">Horse Racing</h1>
+                <p className="auth-subtitle">The pinnacle of tournament excellence.</p>
+              </div>
+            </Link>
             <LoginForm />
           </div>
         </div>
@@ -45,10 +47,12 @@ export default function AuthPage({ view }) {
         {/* Right Side Form Column - Signup */}
         <div className="auth-form-column signup-column">
           <div className="auth-form-wrapper">
-            <div className="auth-header-content">
-              <h1 className="auth-title-brand">Join the Elite</h1>
-              <p className="auth-subtitle">Start your legacy in equine management.</p>
-            </div>
+            <Link to="/" style={{ textDecoration: 'none', display: 'block', cursor: 'pointer' }} className="auth-header-link">
+              <div className="auth-header-content">
+                <h1 className="auth-title-brand">Join the Elite</h1>
+                <p className="auth-subtitle">Start your legacy in equine management.</p>
+              </div>
+            </Link>
             <SignupForm />
           </div>
         </div>

@@ -36,8 +36,14 @@ const processQueue = (error, token = null) => {
 };
 
 axiosClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    localStorage.setItem('backend_online', 'true');
+    return response;
+  },
   async (error) => {
+    if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+      localStorage.setItem('backend_online', 'false');
+    }
     const originalRequest = error.config;
 
     // Avoid infinite loop if refresh API fails, or request was already retried

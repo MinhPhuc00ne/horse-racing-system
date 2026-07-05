@@ -1,21 +1,21 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { HorseOwnerProvider, useHorseOwner } from './HorseOwnerContext';
-import DashboardLayout from '../layouts/DashboardLayout';
+import { HorseOwnerProvider, useHorseOwner } from '../../contexts/HorseOwnerContext';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import Home from '../Home/Home';
 import './HorseOwner.css';
 
 // Import subviews locally
-import DashboardContent from './DashboardContent';
-import StableContent from './StableContent';
-import RaceEntriesContent from './RaceEntriesContent';
-import ConnectionsContent from './ConnectionsContent';
-import FinancialsContent from './FinancialsContent';
-import ProfileContent from './ProfileContent';
+import DashboardContent from '../../components/HorseOwner/DashboardContent';
+import StableContent from '../../components/HorseOwner/StableContent';
+import RaceEntriesContent from '../../components/HorseOwner/RaceEntriesContent';
+import ConnectionsContent from '../../components/HorseOwner/ConnectionsContent';
+import FinancialsContent from '../../components/HorseOwner/FinancialsContent';
+import ProfileContent from '../../components/HorseOwner/ProfileContent';
 
 // Import Spectator components for Horse Owner integration
-import SpectatorTournaments from '../Spectator/components/SpectatorTournaments';
-import SpectatorLiveSimulationPage from '../Spectator/components/SpectatorLiveSimulationPage';
-import SpectatorWallet from '../Spectator/components/SpectatorWallet';
+import SpectatorTournaments from '../../components/Spectator/SpectatorTournaments';
+import SpectatorLiveSimulationPage from '../../components/Spectator/SpectatorLiveSimulationPage';
+import SpectatorWallet from '../../components/Spectator/SpectatorWallet';
 
 const ownerNavLinks = [
   { path: '/owner/dashboard', label: 'Dashboard', icon: 'dashboard' },

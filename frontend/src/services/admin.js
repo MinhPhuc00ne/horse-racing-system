@@ -215,3 +215,54 @@ export async function getAdminDashboardStatsAPI() {
     throw new Error(errMsg, { cause: error });
   }
 }
+
+// User Management APIs
+export async function getAllUsersAPI() {
+  try {
+    const response = await axiosClient.get('/admin/users');
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách người dùng.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function createUserAPI(data) {
+  try {
+    const response = await axiosClient.post('/admin/users', data);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể tạo mới người dùng.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function updateUserAPI(id, data) {
+  try {
+    const response = await axiosClient.put(`/admin/users/${id}`, data);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể cập nhật người dùng.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function deleteUserAPI(id) {
+  try {
+    const response = await axiosClient.delete(`/admin/users/${id}`);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể xóa người dùng.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function toggleUserStatusAPI(id, enabled) {
+  try {
+    const response = await axiosClient.put(`/admin/users/${id}/status`, { enabled });
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể cập nhật trạng thái tài khoản.';
+    throw new Error(errMsg, { cause: error });
+  }
+}

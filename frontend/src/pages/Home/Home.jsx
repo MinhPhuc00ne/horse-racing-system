@@ -1,9 +1,12 @@
 
+import React, { useContext } from 'react';
+import { Navigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
 import './Home.css';
-import HeroSection from './components/HeroSection';
-import StatsSection from './components/StatsSection';
-import TournamentsSection from './components/TournamentsSection';
-import RankingBoard from './components/RankingBoard';
+import HeroSection from '../../components/Home/HeroSection';
+import StatsSection from '../../components/Home/StatsSection';
+import TournamentsSection from '../../components/Home/TournamentsSection';
+import RankingBoard from '../../components/Home/RankingBoard';
 
 const horseRankings = [
   {
@@ -62,6 +65,16 @@ const jockeyRankings = [
 ];
 
 const Home = () => {
+  const { isAuthenticated, user } = useContext(AuthContext);
+
+  if (isAuthenticated && user) {
+    if (user.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
+    if (user.role === 'HORSE_OWNER') return <Navigate to="/owner" replace />;
+    if (user.role === 'JOCKEY') return <Navigate to="/jockey" replace />;
+    if (user.role === 'RACE_REFEREE') return <Navigate to="/referee" replace />;
+    return <Navigate to="/spectator" replace />;
+  }
+
   return (
     <div className="home-page-wrapper">
       <main className="home-canvas">

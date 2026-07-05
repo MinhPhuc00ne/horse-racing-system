@@ -1,15 +1,15 @@
 import React, { useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
-import DashboardLayout from '../layouts/DashboardLayout';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import Home from '../Home/Home';
 
 // Import Spectator components
-import SpectatorDashboardContent from './components/SpectatorDashboardContent';
-import SpectatorTournaments from './components/SpectatorTournaments';
-import SpectatorWallet from './components/SpectatorWallet';
-import SpectatorUpgradeRole from './components/SpectatorUpgradeRole';
-import SpectatorLiveSimulationPage from './components/SpectatorLiveSimulationPage';
+import SpectatorDashboardContent from '../../components/Spectator/SpectatorDashboardContent';
+import SpectatorTournaments from '../../components/Spectator/SpectatorTournaments';
+import SpectatorWallet from '../../components/Spectator/SpectatorWallet';
+import SpectatorUpgradeRole from '../../components/Spectator/SpectatorUpgradeRole';
+import SpectatorLiveSimulationPage from '../../components/Spectator/SpectatorLiveSimulationPage';
 
 import './Spectator.css';
 
@@ -35,8 +35,6 @@ export default function SpectatorPage() {
   if (user?.role && user.role !== 'SPECTATOR') {
     if (user.role === 'RACE_REFEREE') {
       dynamicNavLinks = [
-        { path: '/referee/home', label: 'Home', icon: 'home' },
-        { path: '/referee/dashboard', label: 'Dashboard', icon: 'dashboard' },
         { path: '/referee/pre-race-check', label: 'Pre-Race Check', icon: 'fact_check' },
         { path: '/referee/live-simulation', label: 'Live Simulation', icon: 'sports_score' },
         { path: '/referee/violations', label: 'Violations & Flags', icon: 'gavel' },

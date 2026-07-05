@@ -1,6 +1,6 @@
 import axiosClient from '../api/axiosClient';
-import { initialJockeyTransactions } from '../pages/Jockey/mockData';
-import { initialTransactions } from '../pages/Horse-Owner/mockData';
+import { initialJockeyTransactions } from '../mocks/jockeyMockData';
+import { initialTransactions } from '../mocks/ownerMockData';
 
 const isMockMode = () => {
   return localStorage.getItem('backend_online') !== 'true';
@@ -180,6 +180,30 @@ export async function checkDepositStatusAPI(orderCode) {
     return response.data; // { orderCode, status }
   } catch (error) {
     const errMsg = error.response?.data?.message || 'Không thể kiểm tra trạng thái giao dịch.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function exportTransactionsPdfAPI() {
+  try {
+    const response = await axiosClient.get('/wallets/transactions/export/pdf', {
+      responseType: 'blob', // Important for file download
+    });
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Lỗi khi tải PDF giao dịch.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function exportTransactionsExcelAPI() {
+  try {
+    const response = await axiosClient.get('/wallets/transactions/export/excel', {
+      responseType: 'blob', // Important for file download
+    });
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Lỗi khi tải Excel giao dịch.';
     throw new Error(errMsg, { cause: error });
   }
 }

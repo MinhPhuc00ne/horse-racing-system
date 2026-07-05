@@ -1,16 +1,16 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { JockeyProvider, useJockey } from './JockeyContext';
-import DashboardLayout from '../layouts/DashboardLayout';
+import { JockeyProvider, useJockey } from '../../contexts/JockeyContext';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import Home from '../Home/Home';
 import '../Horse-Owner/HorseOwner.css'; // Reuse premium theme variables, buttons, forms, and timeline classes
 
 // Import Jockey content views
-import JockeyDashboardContent from './JockeyDashboardContent';
-import JockeyRacesContent from './JockeyRacesContent';
-import JockeyInvitationsContent from './JockeyInvitationsContent';
-import JockeyProfileContent from './JockeyProfileContent';
-import JockeyFinancialsContent from './JockeyFinancialsContent';
-import SpectatorLiveSimulationPage from '../Spectator/components/SpectatorLiveSimulationPage';
+import JockeyDashboardContent from '../../components/Jockey/JockeyDashboardContent';
+import JockeyRacesContent from '../../components/Jockey/JockeyRacesContent';
+import JockeyInvitationsContent from '../../components/Jockey/JockeyInvitationsContent';
+import JockeyProfileContent from '../../components/Jockey/JockeyProfileContent';
+import JockeyFinancialsContent from '../../components/Jockey/JockeyFinancialsContent';
+import SpectatorLiveSimulationPage from '../../components/Spectator/SpectatorLiveSimulationPage';
 
 const jockeyNavLinks = [
   { path: '/jockey/dashboard', label: 'Dashboard', icon: 'dashboard' },

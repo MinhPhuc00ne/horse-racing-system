@@ -1,5 +1,5 @@
 import axiosClient from '../api/axiosClient';
-import { initialJockeyDirectory } from '../pages/Jockey/mockData';
+import { initialJockeyDirectory } from '../mocks/jockeyMockData';
 
 /**
  * Connections API services connecting to Spring Boot Backend with Mock Mode fallback

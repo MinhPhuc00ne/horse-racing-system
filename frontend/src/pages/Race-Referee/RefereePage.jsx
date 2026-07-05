@@ -1,18 +1,15 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import DashboardLayout from '../layouts/DashboardLayout';
-import Home from '../Home/Home';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import '../Dashboard.css';
 import '../Horse-Owner/HorseOwner.css';
 
 // Import Referee Components
-import PreRaceCheck from './PreRaceCheck';
-import LiveSimulation from './LiveSimulation';
-
-import Violations from './Violations';
+import PreRaceCheck from '../../components/RaceReferee/PreRaceCheck';
+import LiveSimulation from '../../components/RaceReferee/LiveSimulation';
+import Violations from '../../components/RaceReferee/Violations';
 
 const refereeNavLinks = [
-  { path: '/referee/home', label: 'Trang Chủ', icon: 'home' },
   { path: '/referee/pre-race-check', label: 'Kiểm Tra Trước Trận', icon: 'fact_check' },
   { path: '/referee/live-simulation', label: 'Mô Phỏng Trực Tiếp', icon: 'sports_score' },
   { path: '/referee/violations', label: 'Cảnh Cáo & Vi Phạm', icon: 'gavel' }
@@ -23,7 +20,6 @@ export default function RefereePage() {
     <DashboardLayout navLinks={refereeNavLinks}>
       <Routes>
         <Route index element={<Navigate to="pre-race-check" replace />} />
-        <Route path="home" element={<Home />} />
         <Route path="pre-race-check" element={<PreRaceCheck />} />
         <Route path="live-simulation" element={<LiveSimulation />} />
         <Route path="live simulation" element={<LiveSimulation />} />

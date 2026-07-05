@@ -68,10 +68,6 @@ export default function WithdrawalsPanel() {
     reason: ''
   });
 
-  useEffect(() => {
-    fetchWithdrawals();
-  }, []);
-
   const fetchWithdrawals = async () => {
     setLoading(true);
     try {
@@ -88,6 +84,10 @@ export default function WithdrawalsPanel() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchWithdrawals();
+  }, []);
 
   const handleApproveConfirm = async () => {
     const tx = approveModal.tx;
