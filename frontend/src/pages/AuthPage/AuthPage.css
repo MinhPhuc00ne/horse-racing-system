@@ -42,6 +42,16 @@
   margin-bottom: 1.25rem;
 }
 
+.auth-header-link {
+  text-decoration: none !important;
+  color: inherit !important;
+  display: block;
+}
+
+.auth-header-link:hover .auth-title-brand {
+  opacity: 0.85;
+}
+
 .auth-title-brand {
   font-size: 2.25rem;
   font-weight: 700;

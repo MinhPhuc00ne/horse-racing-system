@@ -1,14 +1,14 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import DashboardLayout from '../layouts/DashboardLayout';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import Home from '../Home/Home';
 import '../Dashboard.css';
 import '../Horse-Owner/HorseOwner.css';
 
 // Import Referee Components
-import PreRaceCheck from './PreRaceCheck';
-import LiveSimulation from './LiveSimulation';
-import Violations from './Violations';
+import PreRaceCheck from '../../components/RaceReferee/PreRaceCheck';
+import LiveSimulation from '../../components/RaceReferee/LiveSimulation';
+import Violations from '../../components/RaceReferee/Violations';
 import AssignedTournaments from './AssignedTournaments';
 
 const refereeNavLinks = [

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { verifyAccountAPI } from '../../services/auth';
-import Input from '../../components/Input/Input';
-import Button from '../../components/Button/Button';
+import Input from '../../components/ui/Input/Input';
+import Button from '../../components/ui/Button/Button';
 import horseImage from '../../assets/horse_racing_statue.png';
 import './AuthPage.css';
 
@@ -20,12 +20,6 @@ export default function VerifyAccountPage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  useEffect(() => {
-    if (token) {
-      handleVerify(null, token);
-    }
-  }, [token]);
-
   const handleVerify = async (e, forceToken = null) => {
     if (e) e.preventDefault();
     const tokenToVerify = forceToken || otp.trim();
@@ -40,7 +34,7 @@ export default function VerifyAccountPage() {
     setSuccess(null);
 
     try {
-      const res = await verifyAccountAPI(otp.trim());
+      const res = await verifyAccountAPI(tokenToVerify);
       setSuccess(res.message || 'Tài khoản đã được kích hoạt thành công!');
       // Sau khi thành công, tự động chuyển về trang login sau 3s
       setTimeout(() => {
@@ -52,6 +46,12 @@ export default function VerifyAccountPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (token) {
+      handleVerify(null, token);
+    }
+  }, [token]);
 
   return (
     <div className="auth-container mode-login">

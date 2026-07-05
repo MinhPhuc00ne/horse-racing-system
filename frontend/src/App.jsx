@@ -1,12 +1,13 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import ProtectedRoute from './routes/ProtectedRoute';
-import Header from './components/Header/Header'; 
-import Footer from './components/Footer/Footer';
-import FloatingAiChat from './components/FloatingAiChat/FloatingAiChat';
-import PageTransition from './components/PageTransition/PageTransition';
+import Header from './components/layout/Header/Header'; 
+import Footer from './components/layout/Footer/Footer';
+import FloatingAiChat from './components/layout/FloatingAiChat/FloatingAiChat';
+import PageTransition from './components/layout/PageTransition/PageTransition';
 
 // Lazy load Page Components
 const AuthPage = lazy(() => import('./pages/AuthPage/AuthPage'));
@@ -23,15 +24,24 @@ const PaymentCallback = lazy(() => import('./pages/Payment/PaymentCallback'));
 
 const MainLayout = () => {
   return (
-    <div className="app-layout" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className="app-layout">
       <Header /> 
-      <main style={{ flex: 1 }}>
+      <main className="app-main">
         <Outlet /> 
       </main>
       <Footer /> 
     </div>
   );
 };
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 function App() {
   const [customAlert, setCustomAlert] = useState(null);
@@ -43,13 +53,14 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <NotificationProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <NotificationProvider>
         <BrowserRouter>
           <PageTransition>
             <Suspense fallback={
               <PageTransition initialLoading={true}>
-                <div style={{ minHeight: '100vh', background: '#02050a' }} />
+                <div className="app-layout" style={{ background: '#02050a' }} />
               </PageTransition>
             }>
               <Routes>
@@ -152,6 +163,7 @@ function App() {
         </BrowserRouter>
       </NotificationProvider>
     </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
