@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAssignedTournamentsAPI, createRefereeChangeRequestAPI, getRefereeChangeRequestsAPI } from '../../services/referee';
-import DataTable from '../../components/DataTable';
-import StatusBadge from '../../components/StatusBadge';
+import DataTable from '../../components/ui/DataTable';
+import StatusBadge from '../../components/ui/StatusBadge';
 
 export default function AssignedTournaments() {
   const [tournaments, setTournaments] = useState([]);
