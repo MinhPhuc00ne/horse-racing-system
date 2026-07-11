@@ -10,7 +10,7 @@
 
   background: #fbfaf7;
   color: var(--home-green);
-  font-family: var(--font-family, Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+  font-family: var(--font-family);
   min-height: 100%;
   overflow-x: hidden;
 }

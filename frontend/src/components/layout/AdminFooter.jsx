@@ -9,7 +9,7 @@ export default function AdminFooter() {
         backgroundColor: '#ffffff',
         color: '#718096',
         fontSize: '0.75rem',
-        fontFamily: "'Hanken Grotesk', 'Inter', sans-serif"
+        fontFamily: 'var(--font-family)'
       }}
     >
       <div className="container-fluid px-4">

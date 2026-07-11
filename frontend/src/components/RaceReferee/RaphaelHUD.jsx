@@ -50,7 +50,7 @@ const transitionStyles = `
   flex-direction: column;
   animation: slideFromOutside 3.4s cubic-bezier(0.08, 0.82, 0.17, 1) forwards;
   color: #ffffff;
-  font-family: 'Epilogue', 'Inter', sans-serif;
+  font-family: var(--font-family);
   text-align: center;
 }
 

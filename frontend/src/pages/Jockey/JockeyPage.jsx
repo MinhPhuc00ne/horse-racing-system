@@ -33,7 +33,7 @@ function JockeyRoutesBridge() {
         alignItems: 'center',
         minHeight: '80vh',
         color: 'var(--ho-primary-dark)',
-        fontFamily: 'sans-serif'
+        fontFamily: 'var(--font-family)'
       }}>
         <div className="spinner-border text-success mb-3" role="status">
           <span className="visually-hidden">Loading...</span>
