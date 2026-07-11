@@ -31,7 +31,7 @@ public class User {
     @Column(length = 255)
     private String password;
 
-    @Column(name = "full_name", nullable = false, length = 255)
+    @Column(name = "full_name", nullable = false, length = 255, columnDefinition = "nvarchar(255)")
     private String fullName;
 
     @Column(name = "phone", length = 20)

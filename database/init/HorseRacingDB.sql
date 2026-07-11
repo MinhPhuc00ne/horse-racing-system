@@ -705,7 +705,7 @@ CREATE TABLE [dbo].[users](
 	[username] [varchar](255) NULL,
 	[email] [varchar](255) NULL,
 	[password] [varchar](255) NOT NULL,
-	[full_name] [varchar](255) NULL,
+	[full_name] [nvarchar](255) NULL,
 	[phone] [varchar](20) NULL,
 	[avatar_url] [varchar](255) NULL,
 	[created_at] [datetime2](6) NULL,

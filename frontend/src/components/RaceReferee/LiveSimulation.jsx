@@ -561,7 +561,9 @@ export default function LiveSimulation() {
         let camY = 0;
         if (activePov) {
           const angle = -Math.PI / 2 + (povProgress / 100) * (Math.PI * 2);
-          const laneOffset = ((activePov.id - 1) + 0.5) * trackWidth / numLanes;
+          const povIndex = visualHorses.current.findIndex(h => h.id === activePov.id);
+          const targetIndex = povIndex !== -1 ? povIndex : 0;
+          const laneOffset = (targetIndex + 0.5) * trackWidth / numLanes;
           const currentRx = innerRx + laneOffset;
           camX = -(Math.cos(angle) * currentRx);
           camY = -(Math.sin(angle) * currentRx * 0.45);
@@ -660,13 +662,13 @@ export default function LiveSimulation() {
             const horseX = Math.cos(angle) * currentRx;
             const horseY = Math.sin(angle) * currentRx * 0.45;
 
-            horsesToDraw.push({ vHorse, x: horseX, y: horseY, laneIndex, angle });
+            horsesToDraw.push({ vHorse, x: horseX, y: horseY, laneIndex, angle, stateHorse });
           });
 
           horsesToDraw.sort((a, b) => a.y - b.y);
 
           horsesToDraw.forEach(hData => {
-            const { vHorse, x, y } = hData;
+            const { vHorse, x, y, laneIndex, stateHorse } = hData;
             const isActivePOV = activePov && activePov.id === vHorse.id;
 
             ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -694,18 +696,26 @@ export default function LiveSimulation() {
               ctx.arc(x, y - size / 2, size / 2, 0, Math.PI * 2);
               ctx.stroke();
             } else {
-              ctx.fillStyle = vHorse.color || '#00f2fe';
+              // Draw a beautiful circle with vHorse.color ring
+              ctx.save();
+              ctx.fillStyle = '#1e293b';
               ctx.beginPath();
-              ctx.roundRect(x - size / 2, y - size, size, size, 8);
+              ctx.arc(x, y - size / 2, size / 2, 0, Math.PI * 2);
               ctx.fill();
-              ctx.strokeStyle = isActivePOV ? '#ff8800' : '#ffffff';
+
+              ctx.strokeStyle = isActivePOV ? '#ff8800' : (vHorse.color || '#ffffff');
               ctx.lineWidth = isActivePOV ? 4 : 2;
+              ctx.beginPath();
+              ctx.arc(x, y - size / 2, size / 2, 0, Math.PI * 2);
               ctx.stroke();
 
-              ctx.fillStyle = darkenColor(vHorse.color || '#00f2fe', 0.5);
-              ctx.beginPath();
-              ctx.arc(x, y - size - 8, size / 3, 0, Math.PI * 2);
-              ctx.fill();
+              // Draw horse emoji
+              ctx.fillStyle = '#ffffff';
+              ctx.font = `${Math.round(size * 0.55)}px Arial`;
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('🏇', x, y - size / 2);
+              ctx.restore();
             }
 
             ctx.fillStyle = '#ffffff';
@@ -719,6 +729,26 @@ export default function LiveSimulation() {
             ctx.fillStyle = '#ffffff';
             ctx.font = '12px sans-serif';
             ctx.fillText(vHorse.name, x, y - size - 30);
+
+            // Draw Flags for OVAL track
+            if (stateHorse && stateHorse.flaggedPositions && stateHorse.flaggedPositions.length > 0) {
+              stateHorse.flaggedPositions.forEach(flagProg => {
+                const flagAngle = -Math.PI / 2 + (flagProg / 100) * (Math.PI * 2);
+                const currentRx = innerRx + ((laneIndex + 0.5) * trackWidth / numLanes);
+                const flagX = Math.cos(flagAngle) * currentRx;
+                const flagY = Math.sin(flagAngle) * currentRx * 0.45;
+
+                ctx.save();
+                ctx.fillStyle = '#ef4444';
+                ctx.font = '22px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.shadowColor = '#000';
+                ctx.shadowBlur = 4;
+                ctx.fillText('🚩', flagX, flagY - 5);
+                ctx.restore();
+              });
+            }
           });
         }
 
@@ -745,6 +775,22 @@ export default function LiveSimulation() {
           });
         }
 
+        // Draw Countdown Text
+        if (countdown) {
+          ctx.save();
+          ctx.fillStyle = countdown === 'GO!' ? '#10b981' : '#ff8800';
+          ctx.font = `bold 120px 'Arial Black', sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowColor = '#ffffff';
+          ctx.shadowBlur = 20;
+          const pulse = 1 + Math.sin(Date.now() * 0.01) * 0.05;
+          ctx.translate(W / 2, H / 2);
+          ctx.scale(pulse, pulse);
+          ctx.fillText(countdown, 0, 0);
+          ctx.restore();
+        }
+
         animationFrameId = requestAnimationFrame(render);
         return;
       }
@@ -756,13 +802,15 @@ export default function LiveSimulation() {
       const followedVisualHorse = activePov ? visualHorses.current.find(h => h.id === activePov.id) : null;
       const povProgress = followedVisualHorse ? followedVisualHorse.visualProgress : (activePov ? activePov.progress : 0);
 
-      const targetLaneIndex = activePov ? activePov.id - 1 : 0;
+      const povIndex = activePov ? visualHorses.current.findIndex(h => h.id === activePov.id) : 0;
+      const targetLaneIndex = povIndex !== -1 ? povIndex : 0;
       const laneHorizonCenterX = Vx - 18 + (targetLaneIndex + 0.5) * 36 / numLanes;
       const laneBottomCenterX = startX + (targetLaneIndex + 0.5) * (endX - startX) / numLanes;
 
       const getShiftX = (t) => {
         if (!activePov) return 0;
-        const laneCenterX = laneHorizonCenterX + (laneBottomCenterX - laneHorizonCenterX) * t;
+        const tSq = t * t;
+        const laneCenterX = laneHorizonCenterX + (laneBottomCenterX - laneHorizonCenterX) * tSq;
         return Vx - laneCenterX;
       };
 
@@ -1629,7 +1677,7 @@ export default function LiveSimulation() {
 
           const t = val;
           const laneStartX = startX + (laneIndex + 0.5) * (endX - startX) / numLanes;
-          const horseX = Vx + (laneStartX - Vx) * t;
+          const horseX = Vx + (laneStartX - Vx) * (t * t);
           const baseHorseY = horizonY + (H - horizonY) * (t * t);
 
           const gallopFreq = 0.02 + 0.03 * (laneIndex % 3);
@@ -1847,7 +1895,7 @@ export default function LiveSimulation() {
             stateHorse.flaggedPositions.forEach(flagProg => {
               const ft = getPovT(flagProg);
               if (ft < 0) return;
-              const flagX = Vx + (laneStartX - Vx) * ft;
+              const flagX = Vx + (laneStartX - Vx) * (ft * ft);
               const flagX_shifted = tx(flagX, ft);
               const flagY = horizonY + (H - horizonY) * (ft * ft);
 
@@ -2276,7 +2324,8 @@ export default function LiveSimulation() {
         ctx.save();
 
         // Dynamic gallop bobbing effect based on the horse's speed/stride
-        const targetLaneIndex = activePov.id - 1;
+        const povIndex = visualHorses.current.findIndex(h => h.id === activePov.id);
+        const targetLaneIndex = povIndex !== -1 ? povIndex : 0;
         const povGallopFreq = 0.02 + 0.03 * (targetLaneIndex % 3);
         const bobY = (racePhase === 'RUNNING') && povProgress < 100
           ? Math.sin(Date.now() * povGallopFreq) * 8
@@ -2810,7 +2859,7 @@ export default function LiveSimulation() {
                 <div className="pov-exit-hud">
                   <div className="d-flex align-items-center gap-2">
                     <span className="material-symbols-outlined text-warning animate-pulse">videocam</span>
-                    <span>Jockey POV: <strong>{povHorse.name}</strong> (Lane {povHorse.id})</span>
+                    <span>Jockey POV: <strong>{povHorse.name}</strong> (Lane {povHorse.gateNumber})</span>
                   </div>
                   <button className="pov-exit-btn" onClick={() => {
                     setPovHorse(null);

@@ -66,7 +66,7 @@ public class RefereeService {
                 .orElseThrow(() -> new RuntimeException("Referee not found"));
 
         List<Race> races = new ArrayList<>(raceRepository.findByRefereeId(referee.getId()));
-        
+
         // Auto-assign the demo race to the current referee so any logged-in referee can run it
         try {
             raceRepository.findAll().stream()
@@ -93,9 +93,7 @@ public class RefereeService {
                         || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
                         || "LOCKED_LIST".equalsIgnoreCase(r.getStatus());
             } else if ("running".equalsIgnoreCase(status) || "ongoing".equalsIgnoreCase(status)) {
-                boolean hasFinishedSim = raceSimulationRepository.findByRaceId(r.getId()).stream()
-                        .anyMatch(sim -> "FINISHED".equalsIgnoreCase(sim.getStatus()));
-                matches = "RUNNING".equalsIgnoreCase(r.getStatus()) && !hasFinishedSim;
+                matches = "RUNNING".equalsIgnoreCase(r.getStatus());
             } else if ("finished".equalsIgnoreCase(status) || "completed".equalsIgnoreCase(status)) {
                 boolean hasFinishedSim = raceSimulationRepository.findByRaceId(r.getId()).stream()
                         .anyMatch(sim -> "FINISHED".equalsIgnoreCase(sim.getStatus()));
@@ -371,9 +369,23 @@ public class RefereeService {
         Race race = raceRepository.findById(raceId)
                 .orElseThrow(() -> new RuntimeException("Race not found"));
 
-        if (!"LOCKED_LIST".equalsIgnoreCase(race.getStatus())) {
-                throw new RuntimeException("Race must be LOCKED_LIST to start");
-            }
+        if (!"LOCKED_LIST".equalsIgnoreCase(race.getStatus()) 
+                && !"RUNNING".equalsIgnoreCase(race.getStatus()) 
+                && !"FINISHED".equalsIgnoreCase(race.getStatus())) {
+            throw new RuntimeException("Race must be LOCKED_LIST, RUNNING, or FINISHED to start");
+        }
+
+        // Clean up previous simulations and horse states for this race if any exist
+        List<RaceSimulation> oldSims = raceSimulationRepository.findByRaceId(raceId);
+        for (RaceSimulation oldSim : oldSims) {
+            List<RefereeFlag> flags = refereeFlagRepository.findBySimulationId(oldSim.getId());
+            refereeFlagRepository.deleteAll(flags);
+            
+            List<SimulationHorseState> states = simulationHorseStateRepository.findBySimulationId(oldSim.getId());
+            simulationHorseStateRepository.deleteAll(states);
+            
+            raceSimulationRepository.delete(oldSim);
+        }
 
         List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
 
@@ -386,7 +398,9 @@ public class RefereeService {
 
         // Validate we have at least one approved participant to start the race simulation
         long approvedCount = participants.stream()
-                .filter(p -> "APPROVED".equalsIgnoreCase(p.getStatus()))
+                .filter(p -> "APPROVED".equalsIgnoreCase(p.getStatus()) 
+                        || "FINISHED".equalsIgnoreCase(p.getStatus()) 
+                        || "RACING".equalsIgnoreCase(p.getStatus()))
                 .count();
         if (approvedCount == 0) {
             throw new RuntimeException("Cannot start race. No approved participants in this race.");
@@ -437,8 +451,12 @@ public class RefereeService {
         simulation = raceSimulationRepository.save(simulation);
 
         for (RaceParticipant p : participants) {
-            if ("APPROVED".equalsIgnoreCase(p.getStatus())) {
+            if ("APPROVED".equalsIgnoreCase(p.getStatus()) 
+                    || "FINISHED".equalsIgnoreCase(p.getStatus()) 
+                    || "RACING".equalsIgnoreCase(p.getStatus())) {
                 p.setStatus("RACING");
+                p.setFinishTime(null);
+                p.setFinalRank(null);
                 raceParticipantRepository.save(p);
 
                 SimulationHorseState state = SimulationHorseState.builder()
