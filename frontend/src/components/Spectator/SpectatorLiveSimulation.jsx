@@ -1794,6 +1794,176 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
         ctx.restore();
       }
 
+      // Draw Jockey POV Cockpit Overlay (Horse Head, Neck, Ears, Reins & Gloves) for all roles when POV is active
+      if (activePov) {
+        ctx.save();
+
+        // Dynamic gallop bobbing effect based on the horse's speed/stride
+        const povIndex = visualHorses.current.findIndex(h => h.id === activePov.id);
+        const targetLaneIndex = povIndex !== -1 ? povIndex : 0;
+        const povGallopFreq = 0.02 + 0.03 * (targetLaneIndex % 3);
+        const bobY = (racePhase === 'RUNNING') && povProgress < 100
+          ? Math.sin(Date.now() * povGallopFreq) * 8
+          : 0;
+        const bobX = (racePhase === 'RUNNING') && povProgress < 100
+          ? Math.cos(Date.now() * povGallopFreq) * 2.5
+          : 0;
+
+        const cx = W / 2 + bobX;
+        const cy = H + bobY;
+
+        const mainColor = activePov.color || '#654321';
+
+        // Shadow under the horse neck for depth
+        const ambientGrad = ctx.createRadialGradient(cx, cy - 50, 20, cx, cy - 50, 150);
+        ambientGrad.addColorStop(0, 'rgba(0,0,0,0.35)');
+        ambientGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = ambientGrad;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 120, 60, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw Neck
+        const neckGrad = ctx.createLinearGradient(cx, cy, cx, cy - 110);
+        neckGrad.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
+        neckGrad.addColorStop(0.3, mainColor);
+        neckGrad.addColorStop(1, mainColor);
+
+        ctx.fillStyle = neckGrad;
+        ctx.beginPath();
+        ctx.moveTo(cx - 45, cy + 10);
+        ctx.quadraticCurveTo(cx - 30, cy - 60, cx - 18, cy - 110);
+        ctx.lineTo(cx + 18, cy - 110);
+        ctx.quadraticCurveTo(cx + 30, cy - 60, cx + 45, cy + 10);
+        ctx.closePath();
+        ctx.fill();
+
+        // Draw Mane (Bờm ngựa) blowing in the wind
+        ctx.fillStyle = '#1e293b'; // dark mane
+        const windShift = (racePhase === 'RUNNING') ? Math.sin(Date.now() * 0.05) * 4 : 0;
+        ctx.beginPath();
+        ctx.moveTo(cx - 3, cy - 110);
+        for (let i = 0; i < 6; i++) {
+          const my = cy - 100 + i * 16;
+          const mx = cx + (i % 2 === 0 ? -4 : 4) + windShift;
+          ctx.lineTo(mx, my);
+          ctx.lineTo(cx - 2, my + 8);
+        }
+        ctx.lineTo(cx - 15, cy);
+        ctx.closePath();
+        ctx.fill();
+
+        // Draw Head (Back of Head / Snout)
+        ctx.fillStyle = mainColor;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy - 110, 22, 28, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Darker snout overlay at the top (extends down/forward)
+        const snoutGrad = ctx.createLinearGradient(cx, cy - 110, cx, cy - 85);
+        snoutGrad.addColorStop(0, mainColor);
+        snoutGrad.addColorStop(1, 'rgba(0, 0, 0, 0.35)');
+        ctx.fillStyle = snoutGrad;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy - 98, 16, 20, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ears twitching effect for a more lifelike feel
+        const leftEarTwitch = Math.sin(Date.now() * 0.003) * 0.08;
+        const rightEarTwitch = Math.cos(Date.now() * 0.004) * 0.08;
+
+        // Left Ear
+        ctx.save();
+        ctx.translate(cx - 13, cy - 128);
+        ctx.rotate(leftEarTwitch);
+        ctx.fillStyle = mainColor;
+        ctx.beginPath();
+        ctx.moveTo(-7, 10);
+        ctx.quadraticCurveTo(-11, -12, 0, -25);
+        ctx.quadraticCurveTo(8, -12, 5, 10);
+        ctx.closePath();
+        ctx.fill();
+        // Inner Left Ear (Pinkish details)
+        ctx.fillStyle = '#fda4af';
+        ctx.beginPath();
+        ctx.moveTo(-3, 6);
+        ctx.quadraticCurveTo(-6, -6, 0, -18);
+        ctx.quadraticCurveTo(4, -6, 2, 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Right Ear
+        ctx.save();
+        ctx.translate(cx + 13, cy - 128);
+        ctx.rotate(rightEarTwitch);
+        ctx.fillStyle = mainColor;
+        ctx.beginPath();
+        ctx.moveTo(-5, 10);
+        ctx.quadraticCurveTo(-8, -12, 0, -25);
+        ctx.quadraticCurveTo(11, -12, 7, 10);
+        ctx.closePath();
+        ctx.fill();
+        // Inner Right Ear (Pinkish details)
+        ctx.fillStyle = '#fda4af';
+        ctx.beginPath();
+        ctx.moveTo(-2, 6);
+        ctx.quadraticCurveTo(-4, -6, 0, -18);
+        ctx.quadraticCurveTo(6, -6, 3, 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Reins (Dây cương)
+        ctx.strokeStyle = '#2d1e10'; // Leather brown
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+
+        // Left Rein
+        ctx.beginPath();
+        ctx.moveTo(cx - 15, cy - 98);
+        ctx.bezierCurveTo(cx - 60, cy - 70, cx - 180, cy - 20, cx - 160, cy);
+        ctx.stroke();
+
+        // Right Rein
+        ctx.beginPath();
+        ctx.moveTo(cx + 15, cy - 98);
+        ctx.bezierCurveTo(cx + 60, cy - 70, cx + 180, cy - 20, cx + 160, cy);
+        ctx.stroke();
+
+        // Hands / Gloves holding reins at the bottom corners
+        const drawGlove = (gx, gy, isLeft) => {
+          ctx.save();
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = 'rgba(0,0,0,0.4)';
+
+          // Glove body (colored cyber/slate depending on the theme)
+          ctx.fillStyle = environment === 'cyber' ? '#00f2fe' : '#475569';
+          ctx.beginPath();
+          ctx.arc(gx, gy, 14, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Sleeve cuff
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(gx - 16, gy, 32, 12);
+
+          // Gold knuckle guards/protectors
+          ctx.fillStyle = '#d4af37';
+          ctx.beginPath();
+          ctx.arc(gx + (isLeft ? 4 : -4), gy - 4, 6, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+        };
+
+        if (racePhase === 'RUNNING' || racePhase === 'FINISHED' || racePhase === 'PRE_RACE') {
+          drawGlove(cx - 110, H - 15, true);
+          drawGlove(cx + 110, H - 15, false);
+        }
+
+        ctx.restore();
+      }
+
       ctx.restore();
       animationFrameId = requestAnimationFrame(render);
     };
