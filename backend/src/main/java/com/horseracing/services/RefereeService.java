@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.stereotype.Service;
 import com.horseracing.entities.enums.NotificationType;
+import com.horseracing.entities.enums.Role;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -369,10 +370,14 @@ public class RefereeService {
         Race race = raceRepository.findById(raceId)
                 .orElseThrow(() -> new RuntimeException("Race not found"));
 
-        if (!"LOCKED_LIST".equalsIgnoreCase(race.getStatus()) 
-                && !"RUNNING".equalsIgnoreCase(race.getStatus()) 
-                && !"FINISHED".equalsIgnoreCase(race.getStatus())) {
-            throw new RuntimeException("Race must be LOCKED_LIST, RUNNING, or FINISHED to start");
+        String status = race.getStatus();
+        boolean isValidStatus = "OPEN_FOR_REGISTER".equalsIgnoreCase(status)
+                || "CLOSED_FOR_REGISTER".equalsIgnoreCase(status)
+                || "LOCKED_LIST".equalsIgnoreCase(status)
+                || "RUNNING".equalsIgnoreCase(status)
+                || "FINISHED".equalsIgnoreCase(status);
+        if (!isValidStatus) {
+            throw new RuntimeException("Trạng thái cuộc đua phải là OPEN_FOR_REGISTER, CLOSED_FOR_REGISTER, LOCKED_LIST, RUNNING hoặc FINISHED để bắt đầu");
         }
 
         // Clean up previous simulations and horse states for this race if any exist
@@ -849,6 +854,14 @@ public class RefereeService {
         raceRepository.save(race);
 
         Tournament tournament = race.getTournament();
+        if (tournament != null) {
+            List<Race> races = raceRepository.findByTournamentId(tournament.getId());
+            boolean allFinished = races.stream()
+                    .allMatch(r -> "FINISHED".equalsIgnoreCase(r.getStatus()) || r.getId().equals(raceId));
+            if (allFinished) {
+                tournament.setTournamentStatus("Finished");
+            }
+        }
 
         // 1. Refund bets on disqualified/rejected participants
         List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
@@ -1187,6 +1200,39 @@ public class RefereeService {
                             NotificationType.RACE_STATUS
                     );
                 }
+            }
+        }
+
+        // Calculate and transfer betting revenue to Admin
+        BigDecimal totalBetAmount = totalWinPool.add(totalPlacePool).add(totalShowPool);
+        BigDecimal totalPayout = BigDecimal.ZERO;
+        for (Bet bet : bets) {
+            if ("WON".equals(bet.getStatus())) {
+                totalPayout = totalPayout.add(bet.getPayoutAmount() != null ? bet.getPayoutAmount() : BigDecimal.ZERO);
+            }
+        }
+
+        BigDecimal adminBetRevenue = totalBetAmount.subtract(totalPayout);
+        if (adminBetRevenue.compareTo(BigDecimal.ZERO) > 0) {
+            User admin = userRepository.findByRole(Role.ADMIN).stream().findFirst().orElse(null);
+            if (admin != null) {
+                Wallet adminWallet = walletRepository.findByUserId(admin.getId())
+                        .orElseGet(() -> {
+                            Wallet w = Wallet.builder().user(admin).balance(BigDecimal.ZERO).build();
+                            return walletRepository.save(w);
+                        });
+                adminWallet.setBalance(adminWallet.getBalance().add(adminBetRevenue));
+                walletRepository.save(adminWallet);
+
+                WalletTransaction adminTx = WalletTransaction.builder()
+                        .wallet(adminWallet)
+                        .transactionType("ADMIN_REVENUE")
+                        .amount(adminBetRevenue)
+                        .status("SUCCESS")
+                        .referenceType("RACE")
+                        .referenceId(raceId)
+                        .build();
+                walletTransactionRepository.save(adminTx);
             }
         }
     }

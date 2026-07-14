@@ -66,10 +66,13 @@ public class BetService {
             }
         }
 
-        // Betting is only allowed when race status is LOCKED_LIST
+        // Betting is allowed when race is open for register, closed for register, or locked list (before running)
         String status = race.getStatus();
-        if (!"LOCKED_LIST".equalsIgnoreCase(status)) {
-            throw new BusinessException("Cổng đặt cược đã đóng. Đặt cược chỉ khả dụng khi danh sách đã được chốt và công bố.", HttpStatus.BAD_REQUEST);
+        boolean isBettingAllowedStatus = "OPEN_FOR_REGISTER".equalsIgnoreCase(status)
+                || "CLOSED_FOR_REGISTER".equalsIgnoreCase(status)
+                || "LOCKED_LIST".equalsIgnoreCase(status);
+        if (!isBettingAllowedStatus) {
+            throw new BusinessException("Cổng đặt cược hiện đang đóng cho trận đấu này.", HttpStatus.BAD_REQUEST);
         }
 
         // Block placing bets if the simulation has already finished

@@ -168,9 +168,14 @@ export function HorseOwnerProvider({ children }) {
                 .filter((p) => horsesData.some((myH) => myH.id === p.horseId))
                 .map((p) => p.horseName);
 
-              const apiRegistered = registrationsData
-                .filter((reg) => (reg.raceId === r.id || reg.tournamentId === r.id) && reg.status !== 'REJECTED')
-                .map((reg) => reg.horseName);
+              const myRegistration = registrationsData.find(
+                (reg) =>
+                  (reg.raceId === r.id || reg.tournamentId === r.id) &&
+                  reg.status !== 'REJECTED' &&
+                  reg.status !== 'CANCELLED'
+              );
+
+              const apiRegistered = myRegistration ? [myRegistration.horseName] : [];
 
               const savedLocal = localStorage.getItem('owner_registered_races') || '[]';
               const localList = JSON.parse(savedLocal);
@@ -199,6 +204,7 @@ export function HorseOwnerProvider({ children }) {
                 status: displayStatus, // Use tournament status for displaying to Owner
                 allowedClasses: t.allowedClasses,
                 registeredHorses: Array.from(registeredHorsesSet),
+                myRegistration: myRegistration,
                 entryFee: t.entryFee,
                 refereeName: t.refereeName || 'Chưa phân công',
               });

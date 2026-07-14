@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import DataCard from '../ui/DataCard';
 import StatusBadge from '../ui/StatusBadge';
 import { useHorseOwner } from '../../contexts/HorseOwnerContext';
-import { submitRaceRegistrationAPI } from '../../services/owner';
+import { submitRaceRegistrationAPI, updateRaceRegistrationAPI, cancelRaceRegistrationAPI } from '../../services/owner';
 
 export default function RaceEntriesContent() {
   const { horses = [], systemUsers = [], tournaments = [], setTournaments, refreshData } = useHorseOwner();
@@ -18,6 +18,8 @@ export default function RaceEntriesContent() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateRegId, setUpdateRegId] = useState(null);
 
   // Filter only READY horses (case-insensitive)
   const readyHorses = horses.filter(h => h.status && h.status.toUpperCase() === 'READY');
@@ -26,6 +28,8 @@ export default function RaceEntriesContent() {
 
   const handleRegisterClick = (race) => {
     setSelectedRace(race);
+    setIsUpdating(false);
+    setUpdateRegId(null);
     
     // Filter eligible horses by race allowedClasses
     const allowed = race.allowedClasses ? race.allowedClasses.split(',').map(s => s.trim().toUpperCase()) : [];
@@ -43,9 +47,69 @@ export default function RaceEntriesContent() {
     setShowModal(true);
   };
 
+  const handleUpdateClick = (race) => {
+    setSelectedRace(race);
+    setIsUpdating(true);
+    setUpdateRegId(race.myRegistration.id);
+
+    const allowed = race.allowedClasses ? race.allowedClasses.split(',').map(s => s.trim().toUpperCase()) : [];
+    const eligibleHorses = readyHorses.filter(h => {
+      if (allowed.length === 0) return true;
+      return h.breed && allowed.includes(h.breed.trim().toUpperCase());
+    });
+
+    // Find currently registered horse if present in user stable, else fallback to first eligible
+    const currentHorse = horses.find(h => h.name === race.myRegistration.horseName);
+    const horseIdVal = currentHorse ? currentHorse.id : (eligibleHorses.length > 0 ? eligibleHorses[0].id : '');
+
+    // Find currently registered jockey if present in friends list
+    const currentJockey = systemUsers.find(u => u.fullName === race.myRegistration.jockeyName);
+    const jockeyIdVal = currentJockey ? currentJockey.id : (friendJockeys.length > 0 ? friendJockeys[0].id : '');
+
+    setFormData({
+      horseId: horseIdVal,
+      jockeyId: jockeyIdVal,
+      ownerShare: race.myRegistration.ownerSharePercent || 90,
+      jockeyShare: race.myRegistration.jockeySharePercent || 10,
+    });
+    setShowModal(true);
+  };
+
+  const handleCancelClick = async (reg) => {
+    const isApproved = reg.status === 'APPROVED';
+    const warningMsg = isApproved 
+      ? 'CẢNH BÁO: Đăng ký này đã được phê duyệt. Theo quy định, nếu bạn RÚT LUI lúc này, bạn sẽ KHÔNG được hoàn lệ phí tham gia.\n\nBạn có chắc chắn muốn rút lui?'
+      : 'Bạn có chắc chắn muốn hủy đăng ký này không? Lệ phí tham gia sẽ được hoàn lại 100% vào ví của bạn.';
+
+    if (!window.confirm(warningMsg)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await cancelRaceRegistrationAPI(reg.id);
+
+      // Clean local storage
+      const savedLocal = localStorage.getItem('owner_registered_races') || '[]';
+      const localList = JSON.parse(savedLocal).filter(l => l.raceId !== reg.raceId);
+      localStorage.setItem('owner_registered_races', JSON.stringify(localList));
+
+      await refreshData();
+      
+      setSuccessMsg(isApproved 
+        ? 'Rút lui thành công! Lệ phí thi đấu không được hoàn lại theo điều lệ.'
+        : 'Hủy đăng ký và hoàn lại lệ phí thi đấu thành công!');
+      setShowSuccessModal(true);
+    } catch (err) {
+      alert("Hủy đăng ký thất bại: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleConfirm = async () => {
     if (!formData.horseId || !formData.jockeyId) {
-      alert("Please select both a horse and a jockey.");
+      alert("Vui lòng chọn cả ngựa và nài ngựa.");
       return;
     }
     
@@ -53,36 +117,37 @@ export default function RaceEntriesContent() {
     const jockeyS = parseFloat(formData.jockeyShare);
 
     if (isNaN(ownerS) || isNaN(jockeyS) || Math.abs((ownerS + jockeyS) - 100) > 0.001) {
-      alert("Total profit sharing ratio must equal 100%.");
+      alert("Tổng tỷ lệ chia lợi nhuận phải bằng 100%.");
       return;
     }
 
     try {
       setLoading(true);
-      await submitRaceRegistrationAPI({
+
+      const requestPayload = {
         tournamentId: selectedRace.tournamentId,
         horseId: parseInt(formData.horseId),
         jockeyId: parseInt(formData.jockeyId),
         ownerSharePercent: ownerS,
         jockeySharePercent: jockeyS,
-      });
+      };
 
-      const selectedHorseObj = readyHorses.find(h => h.id === parseInt(formData.horseId));
-      const selectedJockeyObj = friendJockeys.find(j => j.id === parseInt(formData.jockeyId));
+      if (isUpdating) {
+        await updateRaceRegistrationAPI(updateRegId, requestPayload);
+      } else {
+        await submitRaceRegistrationAPI(requestPayload);
+      }
 
-      // Add horse to the registered list for this tournament in local state
-      setTournaments(prevTournaments => 
-        prevTournaments.map(t => 
-          t.id === selectedRace.id 
-            ? { ...t, registeredHorses: [...(t.registeredHorses || []), selectedHorseObj.name] }
-            : t
-        )
-      );
+      const selectedHorseObj = horses.find(h => h.id === parseInt(formData.horseId));
+      const selectedJockeyObj = systemUsers.find(j => j.id === parseInt(formData.jockeyId));
 
       // Save locally to local storage for persistence across reloads
       const savedLocal = localStorage.getItem('owner_registered_races') || '[]';
-      const localList = JSON.parse(savedLocal);
-      localList.push({ raceId: selectedRace.id, horseName: selectedHorseObj.name });
+      let localList = JSON.parse(savedLocal);
+      if (isUpdating) {
+        localList = localList.filter(l => l.raceId !== selectedRace.id);
+      }
+      localList.push({ raceId: selectedRace.id, horseName: selectedHorseObj?.name || '' });
       localStorage.setItem('owner_registered_races', JSON.stringify(localList));
 
       try {
@@ -91,11 +156,16 @@ export default function RaceEntriesContent() {
         console.error(e);
       }
 
-      setSuccessMsg(`Successfully registered horse ${selectedHorseObj.name} with Jockey ${selectedJockeyObj.fullName} for tournament ${selectedRace.tournamentName}!`);
+      setSuccessMsg(isUpdating
+        ? `Cập nhật đăng ký thành công cho ngựa ${selectedHorseObj?.name} và Jockey ${selectedJockeyObj?.fullName}!`
+        : `Đăng ký thành công ngựa ${selectedHorseObj?.name} với Jockey ${selectedJockeyObj?.fullName} cho giải đấu ${selectedRace.tournamentName}!`);
+      
       setShowModal(false);
       setShowSuccessModal(true);
+      setIsUpdating(false);
+      setUpdateRegId(null);
     } catch (err) {
-      alert("Race registration failed: " + err.message);
+      alert((isUpdating ? "Cập nhật" : "Đăng ký") + " thất bại: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -155,7 +225,7 @@ export default function RaceEntriesContent() {
                   </div>
                   <div className="d-flex justify-content-between py-1 align-items-center mb-2">
                     <span className="fw-bold text-dark">Status:</span>
-                    <StatusBadge status={isRegistered ? 'READY' : race.status} />
+                    <StatusBadge status={race.myRegistration ? (race.myRegistration.status === 'APPROVED' ? 'READY' : race.myRegistration.status) : race.status} />
                   </div>
                   <div className="p-2 rounded mt-1" style={{ background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.3)' }}>
                     <div className="d-flex align-items-center gap-2 mb-1">
@@ -170,20 +240,65 @@ export default function RaceEntriesContent() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleRegisterClick(race)}
-                  className={`ho-btn ${isRegistered ? 'ho-btn-dark-green' : (race.status === 'Active' || race.status === 'OPEN_FOR_REGISTER') ? 'ho-btn-gold-solid' : 'btn-secondary'} w-100 py-2 fw-bold`}
-                  disabled={isRegistered || (race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER')}
-                  style={(!isRegistered && race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER') ? { backgroundColor: '#cccccc', color: '#666666', border: '1px solid #bbbbbb', cursor: 'not-allowed' } : {}}
-                >
-                  {isRegistered 
-                    ? `Registered: ${userRegisteredHorses.map(h => h.name).join(', ')}` 
-                    : (race.status === 'Active' || race.status === 'OPEN_FOR_REGISTER')
-                      ? 'Register for Race' 
+                {race.myRegistration ? (
+                  <div className="d-flex flex-column gap-2 w-100">
+                    <div className="p-2 rounded border" style={{ backgroundColor: 'rgba(0,0,0,0.02)', fontSize: '13px', borderColor: 'var(--ho-border-gold)' }}>
+                      <div className="d-flex justify-content-between mb-1">
+                        <span className="text-secondary fw-semibold">Chiến mã:</span>
+                        <span className="fw-bold text-dark">{race.myRegistration.horseName}</span>
+                      </div>
+                      <div className="d-flex justify-content-between mb-1">
+                        <span className="text-secondary fw-semibold">Jockey:</span>
+                        <span className="fw-bold text-dark">{race.myRegistration.jockeyName}</span>
+                      </div>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span className="text-secondary fw-semibold">Trạng thái:</span>
+                        <span className="badge" style={{
+                          backgroundColor: race.myRegistration.status === 'APPROVED' ? 'rgba(16, 185, 129, 0.15)' : race.myRegistration.status === 'PENDING' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                          color: race.myRegistration.status === 'APPROVED' ? '#10b981' : race.myRegistration.status === 'PENDING' ? '#f59e0b' : '#3b82f6',
+                          border: `1px solid ${race.myRegistration.status === 'APPROVED' ? 'rgba(16, 185, 129, 0.3)' : race.myRegistration.status === 'PENDING' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(59, 130, 246, 0.3)'}`,
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          padding: '4px 8px',
+                          borderRadius: '4px'
+                        }}>
+                          {race.myRegistration.status === 'APPROVED' ? 'Đã phê duyệt' : race.myRegistration.status === 'PENDING' ? 'Chờ Admin duyệt' : 'Chờ Jockey xác nhận'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="d-flex gap-2 w-100">
+                      <button
+                        onClick={() => handleUpdateClick(race)}
+                        className="ho-btn ho-btn-outline-dark-green w-50 py-2 fw-bold"
+                        style={{ border: '1px solid var(--ho-primary-dark)', borderRadius: '8px', color: 'var(--ho-primary-dark)', background: 'transparent' }}
+                        disabled={race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER'}
+                      >
+                        Đổi thông tin
+                      </button>
+                      <button
+                        onClick={() => handleCancelClick(race.myRegistration)}
+                        className="btn btn-danger w-50 py-2 fw-bold text-white"
+                        style={{ borderRadius: '8px', backgroundColor: '#ef4444', border: 'none' }}
+                        disabled={race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER'}
+                      >
+                        Rút lui
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleRegisterClick(race)}
+                    className={`ho-btn ${(race.status === 'Active' || race.status === 'OPEN_FOR_REGISTER') ? 'ho-btn-gold-solid' : 'btn-secondary'} w-100 py-2 fw-bold`}
+                    disabled={race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER'}
+                    style={(race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER') ? { backgroundColor: '#cccccc', color: '#666666', border: '1px solid #bbbbbb', cursor: 'not-allowed' } : {}}
+                  >
+                    {(race.status === 'Active' || race.status === 'OPEN_FOR_REGISTER')
+                      ? 'Đăng ký tham gia' 
                       : race.status === 'Upcoming'
-                        ? 'Registration Not Open'
-                        : 'Registration Closed'}
-                </button>
+                        ? 'Chưa mở đăng ký'
+                        : 'Đã đóng đăng ký'}
+                  </button>
+                )}
               </DataCard>
             </div>
           );
@@ -195,7 +310,7 @@ export default function RaceEntriesContent() {
         <div className="modal-overlay" style={{ zIndex: 1050 }} onClick={() => !loading && setShowModal(false)}>
           <div className="modal-content-custom animate-scale-up" onClick={(e) => e.stopPropagation()}>
             <h3 className="ho-font-epilogue fs-4 fw-bold mb-4" style={{ color: 'var(--ho-primary-dark)' }}>
-              Register for {selectedRace?.tournamentName}
+              {isUpdating ? 'Cập nhật đăng ký cho' : 'Đăng ký tham gia'} {selectedRace?.tournamentName}
             </h3>
             
             <div className="d-flex flex-column gap-4 mb-4">
@@ -283,19 +398,19 @@ export default function RaceEntriesContent() {
             {/* Actions */}
             <div className="d-flex justify-content-end gap-3 align-items-center">
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => { setShowModal(false); setIsUpdating(false); setUpdateRegId(null); }}
                 className="ho-btn-link text-uppercase tracking-wider small fw-bold"
                 style={{ textDecoration: 'none' }}
                 disabled={loading}
               >
-                Cancel
+                Hủy
               </button>
               <button
                 onClick={handleConfirm}
                 className="ho-btn ho-btn-gold-solid py-2 px-4 fw-bold"
                 disabled={loading || readyHorses.length === 0 || friendJockeys.length === 0}
               >
-                {loading ? 'Processing...' : 'Confirm Registration'}
+                {loading ? 'Đang xử lý...' : (isUpdating ? 'Xác nhận thay đổi' : 'Xác nhận đăng ký')}
               </button>
             </div>
           </div>

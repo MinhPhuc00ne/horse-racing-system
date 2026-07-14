@@ -168,7 +168,7 @@ export default function SpectatorTournaments() {
       case 'UPCOMING': return 'Sắp mở cược';
       case 'OPEN_FOR_REGISTER': return 'Đang mở cược';
       case 'CLOSED_FOR_REGISTER': return 'Đóng cược';
-      case 'ACTIVE': return 'Đóng cược';
+      case 'ACTIVE': return 'Đang cược';
       case 'FINISHED': return 'Đã trả thưởng';
       default: return status || 'Không rõ';
     }
@@ -188,10 +188,7 @@ export default function SpectatorTournaments() {
     ? myBets.filter(b => b.raceId === selectedRace.id || b.raceId === parseInt(selectedRace.id))
     : [];
 
-  const isBettingClosed = !selectedRace || (() => {
-    const t = tournaments.find(x => x.id === expandedTournament);
-    return t?.tournamentStatus !== 'OPEN_FOR_REGISTER';
-  })();
+  const isBettingClosed = !selectedRace || !['OPEN_FOR_REGISTER', 'CLOSED_FOR_REGISTER', 'LOCKED_LIST'].includes(selectedRace.status?.toUpperCase());
 
   // If active simulation is set, render the simulator directly
   if (activeSimulationRace) {

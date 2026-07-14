@@ -25,7 +25,8 @@ Tài liệu này giải thích chi tiết mục đích của các công cụ (Pa
 - Mở một tab Terminal / PowerShell mới.
 - Chạy lệnh sau:
   ```bash
-  ssh -o StrictHostKeyChecking=no -R 80:localhost:8080 nokey@localhost.run
+  ngrok http 8080
+
   ```
 /api/payments/payos/webhook
 

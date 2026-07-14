@@ -10,12 +10,14 @@ import PreRaceCheck from '../../components/RaceReferee/PreRaceCheck';
 import LiveSimulation from '../../components/RaceReferee/LiveSimulation';
 import Violations from '../../components/RaceReferee/Violations';
 import AssignedTournaments from './AssignedTournaments';
+import ConfirmResults from '../../components/RaceReferee/ConfirmResults';
 
 const refereeNavLinks = [
   { path: '/referee/home', label: 'Trang Chủ', icon: 'home' },
   { path: '/referee/assigned-tournaments', label: 'Giải Đấu Của Tôi', icon: 'assignment' },
   { path: '/referee/pre-race-check', label: 'Kiểm Tra Trước Trận', icon: 'fact_check' },
   { path: '/referee/live-simulation', label: 'Mô Phỏng Trực Tiếp', icon: 'sports_score' },
+  { path: '/referee/confirm-results', label: 'Xác Nhận Kết Quả', icon: 'verified' },
   { path: '/referee/violations', label: 'Cảnh Cáo & Vi Phạm', icon: 'gavel' }
 ];
 
@@ -29,6 +31,7 @@ export default function RefereePage() {
         <Route path="pre-race-check" element={<PreRaceCheck />} />
         <Route path="live-simulation" element={<LiveSimulation />} />
         <Route path="live simulation" element={<LiveSimulation />} />
+        <Route path="confirm-results" element={<ConfirmResults />} />
         <Route path="violations" element={<Violations />} />
       </Routes>
     </DashboardLayout>
