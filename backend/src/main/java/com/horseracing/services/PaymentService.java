@@ -106,8 +106,8 @@ public class PaymentService {
             response.putNull("data");
             return response;
             
-        } catch (PayOSException | IllegalArgumentException e) {
-            log.error("Webhook processing error: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("Webhook processing error: {}", e.getMessage(), e);
             // PayOS requires { "error": 0, "message": "Ok" } even when setting up the webhook URL 
             // where the signature might be invalid or a dummy payload is sent.
             response.put("error", 0);
