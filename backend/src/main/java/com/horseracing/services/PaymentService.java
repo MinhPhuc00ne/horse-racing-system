@@ -1,5 +1,12 @@
 package com.horseracing.services;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.horseracing.entities.User;
@@ -7,22 +14,17 @@ import com.horseracing.entities.Wallet;
 import com.horseracing.entities.WalletTransaction;
 import com.horseracing.repositories.WalletRepository;
 import com.horseracing.repositories.WalletTransactionRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import vn.payos.PayOS;
-import vn.payos.exception.PayOSException;
-import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
-import vn.payos.model.v2.paymentRequests.PaymentLinkItem;
 import vn.payos.model.v2.paymentRequests.CreatePaymentLinkRequest;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
+import vn.payos.model.v2.paymentRequests.PaymentLink;
+import vn.payos.model.v2.paymentRequests.PaymentLinkItem;
 import vn.payos.model.webhooks.Webhook;
 import vn.payos.model.webhooks.WebhookData;
-import vn.payos.model.v2.paymentRequests.PaymentLink;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+import vn.payos.exception.PayOSException;
 
 @Service
 @RequiredArgsConstructor
@@ -106,7 +108,7 @@ public class PaymentService {
             response.putNull("data");
             return response;
             
-        } catch (Exception e) {
+        } catch (IllegalArgumentException | PayOSException e) {
             log.error("Webhook processing error: {}", e.getMessage(), e);
             // PayOS requires { "error": 0, "message": "Ok" } even when setting up the webhook URL 
             // where the signature might be invalid or a dummy payload is sent.
@@ -179,30 +181,34 @@ public class PaymentService {
                 PaymentLink paymentLinkData = payOS.paymentRequests().get(tx.getPayosOrderCode());
                 String payosStatus = String.valueOf(paymentLinkData.getStatus());
                 
-                if ("PAID".equals(payosStatus)) {
-                    tx.setStatus("SUCCESS");
-                    walletTransactionRepository.save(tx);
+                switch (payosStatus) {
+                    case "PAID" -> {
+                        tx.setStatus("SUCCESS");
+                        walletTransactionRepository.save(tx);
 
-                    Wallet wallet = tx.getWallet();
-                    wallet.setBalance(wallet.getBalance().add(tx.getAmount()));
-                    walletRepository.save(wallet);
-                    log.info("Stuck transaction {} was actually PAID. Updated balance.", tx.getPayosOrderCode());
-                } else if ("CANCELLED".equals(payosStatus) || "EXPIRED".equals(payosStatus)) {
-                    tx.setStatus("FAILED");
-                    walletTransactionRepository.save(tx);
-                    log.info("Stuck transaction {} marked as FAILED based on PayOS status: {}", tx.getPayosOrderCode(), payosStatus);
-                } else {
-                    // Still PENDING on PayOS side, but locally timed out (older than 15 minutes)
-                    // Attempt to cancel payment link on PayOS side and mark as FAILED locally
-                    try {
-                        payOS.paymentRequests().cancel(tx.getPayosOrderCode(), "Transaction timed out after 15 minutes");
-                        log.info("Successfully cancelled payment link on PayOS for order: {}", tx.getPayosOrderCode());
-                    } catch (Exception e) {
-                        log.warn("Failed to cancel payment link on PayOS for order {}: {}", tx.getPayosOrderCode(), e.getMessage());
+                        Wallet wallet = tx.getWallet();
+                        wallet.setBalance(wallet.getBalance().add(tx.getAmount()));
+                        walletRepository.save(wallet);
+                        log.info("Stuck transaction {} was actually PAID. Updated balance.", tx.getPayosOrderCode());
                     }
-                    tx.setStatus("FAILED");
-                    walletTransactionRepository.save(tx);
-                    log.info("Stuck transaction {} timed out locally and marked as FAILED.", tx.getPayosOrderCode());
+                    case "CANCELLED", "EXPIRED" -> {
+                        tx.setStatus("FAILED");
+                        walletTransactionRepository.save(tx);
+                        log.info("Stuck transaction {} marked as FAILED based on PayOS status: {}", tx.getPayosOrderCode(), payosStatus);
+                    }
+                    default -> {
+                        // Still PENDING on PayOS side, but locally timed out (older than 15 minutes)
+                        // Attempt to cancel payment link on PayOS side and mark as FAILED locally
+                        try {
+                            payOS.paymentRequests().cancel(tx.getPayosOrderCode(), "Transaction timed out after 15 minutes");
+                            log.info("Successfully cancelled payment link on PayOS for order: {}", tx.getPayosOrderCode());
+                        } catch (Exception e) {
+                            log.warn("Failed to cancel payment link on PayOS for order {}: {}", tx.getPayosOrderCode(), e.getMessage());
+                        }
+                        tx.setStatus("FAILED");
+                        walletTransactionRepository.save(tx);
+                        log.info("Stuck transaction {} timed out locally and marked as FAILED.", tx.getPayosOrderCode());
+                    }
                 }
             } catch (Exception e) {
                 // If payment link not found or any other PayOS error, mark as FAILED locally

@@ -21,7 +21,6 @@ public class PublicRaceController {
     private final TournamentService tournamentService;
     private final RaceService raceService;
     private final RaceParticipantRepository raceParticipantRepository;
-    private final com.horseracing.services.RefereeService refereeService;
     private final LiveRaceService liveRaceService;
 
     @GetMapping("/tournaments")

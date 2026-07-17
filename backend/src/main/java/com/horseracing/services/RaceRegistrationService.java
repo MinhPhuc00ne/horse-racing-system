@@ -51,10 +51,18 @@ public class RaceRegistrationService {
             java.time.LocalTime startTime = tournament.getOfficialRaceTime() != null ? tournament.getOfficialRaceTime().toLocalTime() : java.time.LocalTime.of(9, 0);
             java.time.LocalTime endTime = startTime.plusHours(1);
 
+            RaceTrack track = null;
+            if (tournament.getLocation() != null) {
+                track = raceTrackRepository.findByName(tournament.getLocation()).orElse(null);
+            }
+            if (track == null) {
+                track = raceTrackRepository.findAll().stream().findFirst().orElse(null);
+            }
+
             race = Race.builder()
                     .raceName(tournament.getTournamentName())
                     .tournament(tournament)
-                    .raceTrack(raceTrackRepository.findByName(tournament.getLocation()).orElse(null))
+                    .raceTrack(track)
                     .raceDate(raceDate)
                     .startTime(startTime)
                     .endTime(endTime)

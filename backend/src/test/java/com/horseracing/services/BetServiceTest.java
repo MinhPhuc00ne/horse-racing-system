@@ -277,7 +277,7 @@ public class BetServiceTest {
         when(raceRepository.findById(10)).thenReturn(Optional.of(race));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Cổng đặt cược đã đóng. Đặt cược chỉ khả dụng khi danh sách đã được chốt và công bố.", exception.getMessage());
+        assertEquals("Cổng đặt cược hiện đang đóng cho trận đấu này.", exception.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
 
