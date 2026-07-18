@@ -1,7 +1,8 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
-import { getWalletBalanceAPI } from '../../services/wallet';
+import { getWalletBalanceAPI, updateBankAccountAPI } from '../../services/wallet';
+import { getProfileAPI } from '../../services/auth';
 import axiosClient from '../../api/axiosClient';
 import '../../pages/Spectator/Spectator.css';
 
@@ -13,6 +14,13 @@ export default function SpectatorDashboardContent() {
   const [loadingBalance, setLoadingBalance] = useState(true);
   const [latestRequest, setLatestRequest] = useState(null);
   const [loadingRequest, setLoadingRequest] = useState(true);
+
+  // Bank states
+  const [bankName, setBankName] = useState('');
+  const [bankBin, setBankBin] = useState('');
+  const [bankAccountNumber, setBankAccountNumber] = useState('');
+  const [bankAccountHolderName, setBankAccountHolderName] = useState('');
+  const [savingBank, setSavingBank] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -37,6 +45,18 @@ export default function SpectatorDashboardContent() {
       } finally {
         setLoadingRequest(false);
       }
+
+      try {
+        const profile = await getProfileAPI();
+        if (profile) {
+          setBankName(profile.bankName || '');
+          setBankBin(profile.bankBin || '');
+          setBankAccountNumber(profile.bankAccountNumber || '');
+          setBankAccountHolderName(profile.bankAccountHolderName || '');
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile bank details", err);
+      }
     }
 
     fetchData();
@@ -53,6 +73,19 @@ export default function SpectatorDashboardContent() {
       });
     } catch {
       return 'N/A';
+    }
+  };
+
+  const handleSaveBank = async (e) => {
+    e.preventDefault();
+    setSavingBank(true);
+    try {
+      await updateBankAccountAPI(bankName, "", bankAccountNumber, "");
+      alert("Cập nhật tài khoản ngân hàng thành công!");
+    } catch (err) {
+      alert("Không thể cập nhật tài khoản ngân hàng: " + err.message);
+    } finally {
+      setSavingBank(false);
     }
   };
 
@@ -140,6 +173,45 @@ export default function SpectatorDashboardContent() {
                 </div>
               </div>
             </div>
+
+            <hr className="my-4" style={{ borderColor: 'var(--ho-border-gold, #cbd5e0)' }} />
+            
+            <h4 className="ho-font-epilogue fs-6 fw-bold text-dark mb-3">
+              <span className="material-symbols-outlined align-middle me-1 text-success" style={{ fontSize: '20px' }}>account_balance</span>
+              Thông Tin Ngân Hàng Thụ Hưởng
+            </h4>
+
+            <form onSubmit={handleSaveBank} className="text-dark">
+              <div className="row g-3">
+                <div className="col-12 col-md-6">
+                  <label className="ho-input-label ho-font-grotesk fw-bold mb-2">Tên Ngân Hàng</label>
+                  <input
+                    type="text"
+                    className="ho-form-input text-dark"
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    placeholder="Ví dụ: MBBank, Techcombank"
+                    required
+                  />
+                </div>
+                <div className="col-12 col-md-6">
+                  <label className="ho-input-label ho-font-grotesk fw-bold mb-2">Số Tài Khoản</label>
+                  <input
+                    type="text"
+                    className="ho-form-input text-dark"
+                    value={bankAccountNumber}
+                    onChange={(e) => setBankAccountNumber(e.target.value)}
+                    placeholder="Nhập số tài khoản"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="text-end mt-4">
+                <button type="submit" className="ho-btn ho-btn-gold-solid py-2 px-5 fw-bold" disabled={savingBank}>
+                  {savingBank ? 'Đang lưu...' : 'Lưu thông tin ngân hàng'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 

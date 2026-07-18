@@ -2,11 +2,20 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJockey } from '../../contexts/JockeyContext';
 import { updateJockeyProfileAPI } from '../../services/jockey';
+import { getProfileAPI } from '../../services/auth';
+import { updateBankAccountAPI } from '../../services/wallet';
 
 export default function JockeyProfileContent() {
   const navigate = useNavigate();
   const { profile, setProfile, refreshData } = useJockey();
   
+  // Bank Account States
+  const [bankName, setBankName] = useState('');
+  const [bankBin, setBankBin] = useState('');
+  const [bankAccountNumber, setBankAccountNumber] = useState('');
+  const [bankAccountHolderName, setBankAccountHolderName] = useState('');
+  const [loadingBank, setLoadingBank] = useState(true);
+
   useEffect(() => {
     const handleRefresh = () => {
       if (refreshData && document.visibilityState === 'visible') {
@@ -14,14 +23,31 @@ export default function JockeyProfileContent() {
       }
     };
 
+    const loadUserBankInfo = async () => {
+      try {
+        const userProfile = await getProfileAPI();
+        if (userProfile) {
+          setBankName(userProfile.bankName || '');
+          setBankBin(userProfile.bankBin || '');
+          setBankAccountNumber(userProfile.bankAccountNumber || '');
+          setBankAccountHolderName(userProfile.bankAccountHolderName || '');
+        }
+      } catch (err) {
+        console.error('Failed to load user bank info for jockey', err);
+      } finally {
+        setLoadingBank(false);
+      }
+    };
+
     window.addEventListener('focus', handleRefresh);
     document.addEventListener('visibilitychange', handleRefresh);
+    loadUserBankInfo();
 
     return () => {
       window.removeEventListener('focus', handleRefresh);
       document.removeEventListener('visibilitychange', handleRefresh);
     };
-  }, []); // Empty array prevents infinite loop
+  }, []);
   
   // Profile form state
   const [formData, setFormData] = useState({
@@ -46,13 +72,19 @@ export default function JockeyProfileContent() {
     }
 
     try {
-      const updated = await updateJockeyProfileAPI(formData);
+      const updated = await updateJockeyProfileAPI({
+        ...formData,
+        bankAccount: `${bankAccountNumber} - ${bankName}`
+      });
       setProfile({
         ...profile,
         ...updated,
         experienceYears: updated.experienceYear || updated.experienceYears || profile.experienceYears,
         avatar: updated.avatarUrl || updated.avatar || profile.avatar
       });
+      
+      await updateBankAccountAPI(bankName, "", bankAccountNumber, "");
+      
       alert("Cập nhật hồ sơ kỵ sĩ thành công!");
     } catch (err) {
       alert("Cập nhật hồ sơ thất bại: " + err.message);
@@ -204,15 +236,29 @@ export default function JockeyProfileContent() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="ho-input-label ho-font-grotesk">Tài khoản ngân hàng liên kết nhận thưởng</label>
-                  <input
-                    type="text"
-                    className="ho-form-input text-dark"
-                    value={formData.bankAccount}
-                    onChange={(e) => setFormData({ ...formData, bankAccount: e.target.value })}
-                    placeholder="Nhập số tài khoản, ngân hàng và chi nhánh..."
-                  />
+                <div className="row g-3">
+                  <div className="col-12 col-md-6">
+                    <label className="ho-input-label ho-font-grotesk">Tên Ngân Hàng</label>
+                    <input
+                      type="text"
+                      className="ho-form-input text-dark"
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
+                      placeholder="Ví dụ: MBBank, Techcombank"
+                      required
+                    />
+                  </div>
+                  <div className="col-12 col-md-6">
+                    <label className="ho-input-label ho-font-grotesk">Số Tài Khoản</label>
+                    <input
+                      type="text"
+                      className="ho-form-input text-dark"
+                      value={bankAccountNumber}
+                      onChange={(e) => setBankAccountNumber(e.target.value)}
+                      placeholder="Nhập số tài khoản"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div>

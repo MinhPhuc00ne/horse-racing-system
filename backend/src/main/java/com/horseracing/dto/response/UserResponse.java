@@ -23,11 +23,25 @@ public class UserResponse {
     private AuthProvider provider;
     private boolean enabled;
     private LocalDateTime createdAt;
+    private String bankName;
+    private String bankBin;
+    private String bankAccountNumber;
+    private String bankAccountHolderName;
 
     public static UserResponse fromEntity(User user) {
-        return UserResponse.builder().id(user.getId()).username(user.getUsername())
-                .email(user.getEmail()).fullName(user.getFullName()).role(user.getRole())
-                .provider(user.getProvider()).enabled(user.isEnabled())
-                .createdAt(user.getCreatedAt()).build();
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .role(user.getRole())
+                .provider(user.getProvider())
+                .enabled(user.isEnabled())
+                .createdAt(user.getCreatedAt())
+                .bankName(user.getBankName())
+                .bankBin(user.getBankBin())
+                .bankAccountNumber(user.getBankAccountNumber())
+                .bankAccountHolderName(user.getBankAccountHolderName())
+                .build();
     }
 }

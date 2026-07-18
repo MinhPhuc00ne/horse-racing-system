@@ -43,6 +43,18 @@ public class WalletTransaction {
     @Column(name = "payos_order_code")
     private Long payosOrderCode;
 
+    @Column(name = "bank_name", length = 100)
+    private String bankName;
+
+    @Column(name = "bank_bin", length = 20)
+    private String bankBin;
+
+    @Column(name = "bank_account_number", length = 50)
+    private String bankAccountNumber;
+
+    @Column(name = "bank_account_holder_name", length = 100, columnDefinition = "nvarchar(100)")
+    private String bankAccountHolderName;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

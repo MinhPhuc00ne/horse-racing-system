@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHorseOwner } from '../../contexts/HorseOwnerContext';
 import { updateOwnerProfileAPI, uploadFilesAPI } from '../../services/owner';
-import { depositAPI, withdrawAPI } from '../../services/wallet';
+import { depositAPI, withdrawAPI, updateBankAccountAPI } from '../../services/wallet';
+import { getProfileAPI } from '../../services/auth';
 
 const presetAvatars = [
   'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80',
@@ -19,6 +20,32 @@ export default function ProfileContent() {
   const [depositAmount, setDepositAmount] = useState('');
   const [showWithdrawQR, setShowWithdrawQR] = useState(false);
   const [qrAmount, setQrAmount] = useState(0);
+
+  // Bank Account States
+  const [bankName, setBankName] = useState('');
+  const [bankBin, setBankBin] = useState('');
+  const [bankAccountNumber, setBankAccountNumber] = useState('');
+  const [bankAccountHolderName, setBankAccountHolderName] = useState('');
+  const [loadingBank, setLoadingBank] = useState(true);
+
+  useEffect(() => {
+    const loadUserBankInfo = async () => {
+      try {
+        const userProfile = await getProfileAPI();
+        if (userProfile) {
+          setBankName(userProfile.bankName || '');
+          setBankBin(userProfile.bankBin || '');
+          setBankAccountNumber(userProfile.bankAccountNumber || '');
+          setBankAccountHolderName(userProfile.bankAccountHolderName || '');
+        }
+      } catch (err) {
+        console.error('Failed to load user bank info for owner', err);
+      } finally {
+        setLoadingBank(false);
+      }
+    };
+    loadUserBankInfo();
+  }, []);
 
   useEffect(() => {
     if (refreshData) {
@@ -58,7 +85,7 @@ export default function ProfileContent() {
         stableName: formData.stableName,
         stableAddress: formData.stableAddress,
         description: formData.description,
-        bankAccount: formData.bankAccount || '',
+        bankAccount: `${bankAccountNumber} - ${bankName}`,
         identityNumber: formData.identityNumber || '',
         dateOfBirth: formData.dateOfBirth,
       });
@@ -75,6 +102,9 @@ export default function ProfileContent() {
         identityNumber: response.identityNumber,
         dateOfBirth: response.dateOfBirth,
       });
+
+      await updateBankAccountAPI(bankName, "", bankAccountNumber, "");
+
       alert('Hồ sơ chuồng ngựa đã được lưu thành công!');
     } catch (err) {
       alert('Cập nhật hồ sơ thất bại: ' + err.message);
@@ -400,6 +430,39 @@ export default function ProfileContent() {
                   className="ho-form-input text-dark"
                   required
                 />
+              </div>
+
+              <div className="border-top pt-3 mt-3">
+                <h3
+                  className="ho-font-epilogue fs-6 fw-bold mb-3"
+                  style={{ color: 'var(--ho-primary-dark)' }}
+                >
+                  Thông Tin Ngân Hàng Thụ Hưởng
+                </h3>
+                <div className="row g-3">
+                  <div className="col-12 col-sm-6">
+                    <label className="ho-input-label ho-font-grotesk">Tên Ngân Hàng</label>
+                    <input
+                      type="text"
+                      className="ho-form-input text-dark"
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
+                      placeholder="Ví dụ: MBBank, Techcombank"
+                      required
+                    />
+                  </div>
+                  <div className="col-12 col-sm-6">
+                    <label className="ho-input-label ho-font-grotesk">Số Tài Khoản</label>
+                    <input
+                      type="text"
+                      className="ho-form-input text-dark"
+                      value={bankAccountNumber}
+                      onChange={(e) => setBankAccountNumber(e.target.value)}
+                      placeholder="Nhập số tài khoản"
+                      required
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="border-top pt-3 mt-3">

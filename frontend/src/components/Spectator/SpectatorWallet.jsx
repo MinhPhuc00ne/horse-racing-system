@@ -8,7 +8,10 @@ import {
   checkDepositStatusAPI,
   exportTransactionsPdfAPI,
   exportTransactionsExcelAPI,
+  updateBankAccountAPI,
+  cancelWithdrawalAPI,
 } from '../../services/wallet';
+import { getProfileAPI } from '../../services/auth';
 import '../../pages/Spectator/Spectator.css';
 
 export default function SpectatorWallet({ hideHeader = false }) {
@@ -33,6 +36,51 @@ export default function SpectatorWallet({ hideHeader = false }) {
   const [showWithdrawQR, setShowWithdrawQR] = useState(false);
   const [qrAmount, setQrAmount] = useState(0);
 
+  // Bank Account States
+  const [selectedBankBin, setSelectedBankBin] = useState('');
+  const [selectedBankName, setSelectedBankName] = useState('');
+  const [bankAccountNumber, setBankAccountNumber] = useState('');
+  const [bankAccountHolderName, setBankAccountHolderName] = useState('');
+
+  // Custom Modal States
+  const [customModal, setCustomModal] = useState({
+    show: false,
+    title: '',
+    message: '',
+    onConfirm: null,
+    isConfirm: false
+  });
+
+  const showCustomAlert = (title, message) => {
+    setCustomModal({
+      show: true,
+      title,
+      message,
+      onConfirm: null,
+      isConfirm: false
+    });
+  };
+
+  const showCustomConfirm = (title, message, onConfirm) => {
+    setCustomModal({
+      show: true,
+      title,
+      message,
+      onConfirm,
+      isConfirm: true
+    });
+  };
+
+  const formatNumberWithCommas = (val) => {
+    if (val === null || val === undefined) return '';
+    // Remove all non-digits
+    const clean = val.toString().replace(/\D/g, '');
+    // Limit to 10 digits max to prevent overflow
+    const truncated = clean.substring(0, 10);
+    // Format with commas
+    return truncated.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
   const fetchWalletData = async () => {
     try {
       const res = await getWalletBalanceAPI();
@@ -55,9 +103,41 @@ export default function SpectatorWallet({ hideHeader = false }) {
     }
   };
 
+  const loadProfileBankDetails = async () => {
+    try {
+      const profile = await getProfileAPI();
+      if (profile) {
+        if (profile.bankBin) setSelectedBankBin(profile.bankBin);
+        if (profile.bankName) setSelectedBankName(profile.bankName);
+        if (profile.bankAccountNumber) setBankAccountNumber(profile.bankAccountNumber);
+        if (profile.bankAccountHolderName) setBankAccountHolderName(profile.bankAccountHolderName);
+      }
+    } catch (err) {
+      console.error('Failed to load profile bank details', err);
+    }
+  };
+
+  const handleCancelWithdrawal = (txId) => {
+    showCustomConfirm(
+      'Xác Nhận Hủy Giao Dịch',
+      'Bạn có chắc chắn muốn hủy yêu cầu rút tiền này?\nTiền sẽ được hoàn trả lại ví của bạn.',
+      async () => {
+        try {
+          await cancelWithdrawalAPI(txId);
+          showCustomAlert('Thành công', 'Đã hủy yêu cầu rút tiền thành công!');
+          await fetchWalletData();
+          await fetchHistoryData();
+        } catch (err) {
+          showCustomAlert('Thất bại', err.message || 'Hủy yêu cầu rút tiền thất bại.');
+        }
+      }
+    );
+  };
+
   useEffect(() => {
     fetchWalletData();
     fetchHistoryData();
+    loadProfileBankDetails();
   }, []);
 
   // Polling for real deposit transaction status
@@ -71,14 +151,14 @@ export default function SpectatorWallet({ hideHeader = false }) {
           clearInterval(intervalId);
           setShowDepositQR(false);
           setDepositQrData(null);
-          alert('Thanh toán thành công! Số tiền đã được cộng vào ví.');
+          showCustomAlert('Thành công', 'Thanh toán thành công! Số tiền đã được cộng vào ví.');
           fetchWalletData();
           fetchHistoryData();
         } else if (res.status === 'CANCELLED' || res.status === 'FAILED') {
           clearInterval(intervalId);
           setShowDepositQR(false);
           setDepositQrData(null);
-          alert('Giao dịch đã bị hủy hoặc thất bại.');
+          showCustomAlert('Thông báo', 'Giao dịch đã bị hủy hoặc thất bại.');
         }
       } catch (err) {
         console.error('Lỗi kiểm tra trạng thái thanh toán:', err);
@@ -90,9 +170,14 @@ export default function SpectatorWallet({ hideHeader = false }) {
 
   const handleDepositSubmit = async (e) => {
     if (e) e.preventDefault();
-    const amountVal = parseFloat(depositAmount);
+    const amountVal = parseFloat(depositAmount.toString().replace(/,/g, ''));
     if (isNaN(amountVal) || amountVal <= 0) {
-      alert('Please enter a valid deposit amount.');
+      showCustomAlert('Thông báo', 'Vui lòng nhập số tiền nạp hợp lệ.');
+      return;
+    }
+
+    if (amountVal > 500000000) {
+      showCustomAlert('Giới hạn giao dịch', 'Số tiền nạp tối đa cho mỗi giao dịch là 500,000,000 VND.');
       return;
     }
 
@@ -110,10 +195,10 @@ export default function SpectatorWallet({ hideHeader = false }) {
         setShowDepositQR(true);
         setDepositAmount('');
       } else {
-        alert('Failed to generate deposit link. Please try again.');
+        showCustomAlert('Lỗi', 'Không thể tạo liên kết thanh toán. Vui lòng thử lại.');
       }
     } catch (err) {
-      alert(err.message || 'Deposit transaction failed.');
+      showCustomAlert('Lỗi', err.message || 'Giao dịch nạp tiền thất bại.');
     } finally {
       setDepositing(false);
     }
@@ -121,35 +206,48 @@ export default function SpectatorWallet({ hideHeader = false }) {
 
   const handleWithdrawSubmit = async (e) => {
     if (e) e.preventDefault();
-    const amountVal = parseFloat(withdrawAmount);
+    const amountVal = parseFloat(withdrawAmount.toString().replace(/,/g, ''));
+
+    if (!selectedBankName || !bankAccountNumber) {
+      showCustomAlert(
+        'Yêu Cầu Thiết Lập Ngân Hàng',
+        'Bạn chưa liên kết thông tin ngân hàng thụ hưởng (Tên ngân hàng, Số tài khoản) trong Hồ Sơ của mình.\n\nVui lòng vào mục Hồ Sơ (Profile) để thiết lập thông tin ngân hàng trước khi thực hiện rút tiền.'
+      );
+      return;
+    }
+
     if (isNaN(amountVal) || amountVal <= 0) {
-      alert('Please enter a valid withdrawal amount.');
+      showCustomAlert('Thông báo', 'Vui lòng nhập số tiền rút hợp lệ.');
+      return;
+    }
+
+    if (amountVal > 500000000) {
+      showCustomAlert('Giới hạn giao dịch', 'Số tiền rút tối đa cho mỗi giao dịch là 500,000,000 VND.');
       return;
     }
 
     if (amountVal > balance) {
-      alert('Insufficient balance for this withdrawal request.');
+      showCustomAlert('Lỗi', 'Số dư ví hiện tại không đủ để thực hiện giao dịch này.');
       return;
     }
 
     setWithdrawing(true);
     try {
-      await withdrawAPI(amountVal);
+      await withdrawAPI(amountVal, selectedBankName, selectedBankBin, bankAccountNumber, bankAccountHolderName);
       setQrAmount(amountVal);
       setShowWithdrawQR(true);
       setWithdrawAmount('');
-      // Refresh wallet & history
       await fetchWalletData();
       await fetchHistoryData();
     } catch (err) {
-      alert(err.message || 'Withdrawal transaction failed.');
+      showCustomAlert('Thất bại', err.message || 'Yêu cầu rút tiền thất bại.');
     } finally {
       setWithdrawing(false);
     }
   };
 
   const selectQuickAmount = (val) => {
-    setDepositAmount(val.toString());
+    setDepositAmount(formatNumberWithCommas(val));
   };
 
   const handleExportPdf = async () => {
@@ -257,13 +355,11 @@ export default function SpectatorWallet({ hideHeader = false }) {
                       </label>
                       <div className="wallet-premium-input-group">
                         <input
-                          type="number"
-                          min="10000"
-                          step="1000"
+                          type="text"
                           className="wallet-premium-input"
-                          placeholder="e.g. 100000"
+                          placeholder="e.g. 100,000"
                           value={depositAmount}
-                          onChange={(e) => setDepositAmount(e.target.value)}
+                          onChange={(e) => setDepositAmount(formatNumberWithCommas(e.target.value))}
                           required
                         />
                         <span className="wallet-premium-input-suffix">VND</span>
@@ -280,7 +376,7 @@ export default function SpectatorWallet({ hideHeader = false }) {
                       </label>
                       <div className="wallet-quick-select-grid">
                         {[50000, 100000, 200000, 500000, 1000000].map((val) => {
-                          const isSelected = depositAmount === val.toString();
+                          const isSelected = depositAmount.toString().replace(/,/g, '') === val.toString();
                           return (
                             <div
                               key={val}
@@ -313,13 +409,11 @@ export default function SpectatorWallet({ hideHeader = false }) {
                       </label>
                       <div className="wallet-premium-input-group">
                         <input
-                          type="number"
-                          min="20000"
-                          step="1000"
+                          type="text"
                           className="wallet-premium-input"
-                          placeholder="e.g. 50000"
+                          placeholder="e.g. 50,000"
                           value={withdrawAmount}
-                          onChange={(e) => setWithdrawAmount(e.target.value)}
+                          onChange={(e) => setWithdrawAmount(formatNumberWithCommas(e.target.value))}
                           required
                         />
                         <span className="wallet-premium-input-suffix">VND</span>
@@ -336,11 +430,11 @@ export default function SpectatorWallet({ hideHeader = false }) {
                       </label>
                       <div className="wallet-quick-select-grid">
                         {[50000, 100000, 200000, 500000, 1000000].map((val) => {
-                          const isSelected = withdrawAmount === val.toString();
+                          const isSelected = withdrawAmount.toString().replace(/,/g, '') === val.toString();
                           return (
                             <div
                               key={val}
-                              onClick={() => setWithdrawAmount(val.toString())}
+                              onClick={() => setWithdrawAmount(formatNumberWithCommas(val))}
                               className={`wallet-quick-select-card ${isSelected ? 'active' : ''}`}
                             >
                               {val >= 1000000 ? `${val / 1000000}M` : `${val / 1000}k`}
@@ -419,6 +513,7 @@ export default function SpectatorWallet({ hideHeader = false }) {
                       <th>Transaction Details</th>
                       <th>Amount</th>
                       <th>Status</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -455,6 +550,24 @@ export default function SpectatorWallet({ hideHeader = false }) {
                                   ? 'Pending'
                                   : 'Failed'}
                             </span>
+                          </td>
+                          <td>
+                            {tx.type === 'WITHDRAW' && tx.status === 'PENDING' && (
+                              <button
+                                onClick={() => handleCancelWithdrawal(tx.id)}
+                                className="btn btn-xs btn-outline-danger"
+                                style={{
+                                  fontSize: '10px',
+                                  padding: '2px 8px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #e53e3e',
+                                  color: '#e53e3e',
+                                  backgroundColor: 'transparent',
+                                }}
+                              >
+                                Hủy
+                              </button>
+                            )}
                           </td>
                         </tr>
                       );
@@ -581,6 +694,42 @@ export default function SpectatorWallet({ hideHeader = false }) {
               Quét mã VietQR dưới đây để nạp{' '}
               <strong>{depositQrData.amount.toLocaleString('en-US')} VND</strong> vào tài khoản.
             </p>
+
+            <div style={{
+              textAlign: 'left',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              marginBottom: '16px',
+              fontSize: '13px',
+              border: '1px solid #edf2f7'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ color: '#718096' }}>Phương thức:</span>
+                <span style={{ fontWeight: '600', color: '#2d3748' }}>
+                  {depositQrData.isMock ? 'VietQR (Giả lập)' : 'Chuyển khoản VietQR'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ color: '#718096' }}>Mã đơn hàng:</span>
+                <span style={{ fontWeight: '600', color: '#2d3748', fontFamily: 'monospace' }}>
+                  {depositQrData.orderCode ? `#${depositQrData.orderCode}` : 'MOCK_TEST'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ color: '#718096' }}>Số tiền nạp:</span>
+                <span style={{ fontWeight: '700', color: 'var(--ho-accent-gold-text, #b58900)' }}>
+                  {depositQrData.amount.toLocaleString('en-US')} VND
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#718096' }}>Trạng thái:</span>
+                <span style={{ fontWeight: '600', color: '#dd6b20' }}>
+                  Chờ quét mã...
+                </span>
+              </div>
+            </div>
+
             <div className="mb-3 d-flex justify-content-center bg-light p-3 rounded">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(
@@ -623,14 +772,14 @@ export default function SpectatorWallet({ hideHeader = false }) {
                       if (statusRes.status === 'SUCCESS') {
                         setShowDepositQR(false);
                         setDepositQrData(null);
-                        alert('Thanh toán thành công! Số tiền đã được cộng vào ví.');
+                        showCustomAlert('Thành công', 'Thanh toán thành công! Số tiền đã được cộng vào ví.');
                         fetchWalletData();
                         fetchHistoryData();
                       } else {
-                        alert(`Trạng thái thanh toán hiện tại: ${statusRes.status === 'PENDING' ? 'Chưa nhận được chuyển khoản' : statusRes.status}`);
+                        showCustomAlert('Thông báo', `Trạng thái thanh toán hiện tại: ${statusRes.status === 'PENDING' ? 'Chưa nhận được chuyển khoản' : statusRes.status}`);
                       }
                     } catch (err) {
-                      alert('Kiểm tra thất bại: ' + err.message);
+                      showCustomAlert('Thất bại', 'Kiểm tra thất bại: ' + err.message);
                     } finally {
                       setCheckingDeposit(false);
                     }
@@ -645,7 +794,7 @@ export default function SpectatorWallet({ hideHeader = false }) {
                 onClick={() => {
                   setShowDepositQR(false);
                   setDepositQrData(null);
-                  alert(`Đã nạp thành công ${depositQrData.amount.toLocaleString('en-US')} VND vào ví (Giả lập)!`);
+                  showCustomAlert('Thành công', `Đã nạp thành công ${depositQrData.amount.toLocaleString('en-US')} VND vào ví (Giả lập)!`);
                   fetchWalletData();
                   fetchHistoryData();
                 }}
@@ -653,6 +802,84 @@ export default function SpectatorWallet({ hideHeader = false }) {
                 Xác nhận đã chuyển khoản (Giả lập)
               </button>
             )}
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {customModal.show && createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 10000,
+          backdropFilter: 'blur(4px)',
+          fontFamily: 'var(--font-family, "Google Sans", sans-serif)'
+        }} onClick={() => setCustomModal(prev => ({ ...prev, show: false }))}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            maxWidth: '440px',
+            width: '90%',
+            color: '#333333',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+            padding: '24px',
+            textAlign: 'center'
+          }} onClick={(e) => e.stopPropagation()}>
+            <h5 className="fw-bold mb-3 text-start" style={{ 
+              fontSize: '18px', 
+              color: 'var(--ho-primary-dark, #003820)',
+              borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+              paddingBottom: '12px'
+            }}>
+              {customModal.title}
+            </h5>
+            
+            <p className="text-secondary small mb-4 text-start" style={{ 
+              fontSize: '14px', 
+              lineHeight: '1.5',
+              whiteSpace: 'pre-line'
+            }}>
+              {customModal.message}
+            </p>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              {customModal.isConfirm ? (
+                <>
+                  <button 
+                    className="btn btn-outline-secondary btn-sm" 
+                    style={{ padding: '8px 20px', borderRadius: '8px' }}
+                    onClick={() => setCustomModal(prev => ({ ...prev, show: false }))}
+                  >
+                    Hủy bỏ
+                  </button>
+                  <button 
+                    className="ho-btn ho-btn-gold-solid py-2 px-4" 
+                    style={{ fontSize: '13px' }}
+                    onClick={() => {
+                      setCustomModal(prev => ({ ...prev, show: false }));
+                      if (customModal.onConfirm) customModal.onConfirm();
+                    }}
+                  >
+                    Xác nhận
+                  </button>
+                </>
+              ) : (
+                <button 
+                  className="ho-btn ho-btn-gold-solid py-2 px-5" 
+                  style={{ fontSize: '13px' }}
+                  onClick={() => setCustomModal(prev => ({ ...prev, show: false }))}
+                >
+                  Đồng ý
+                </button>
+              )}
+            </div>
           </div>
         </div>,
         document.body

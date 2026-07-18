@@ -714,6 +714,10 @@ CREATE TABLE [dbo].[users](
 	[provider] [varchar](20) NOT NULL,
 	[role] [varchar](20) NOT NULL,
 	[enabled] [bit] NOT NULL,
+	[bank_name] [nvarchar](100) NULL,
+	[bank_bin] [varchar](20) NULL,
+	[bank_account_number] [varchar](50) NULL,
+	[bank_account_holder_name] [nvarchar](100) NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
@@ -767,6 +771,10 @@ CREATE TABLE [dbo].[wallet_transactions](
 	[reference_id] [int] NULL,
 	[payos_order_code] [bigint] NULL,
 	[created_at] [datetime] NULL,
+	[bank_name] [nvarchar](100) NULL,
+	[bank_bin] [varchar](20) NULL,
+	[bank_account_number] [varchar](50) NULL,
+	[bank_account_holder_name] [nvarchar](100) NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[id] ASC

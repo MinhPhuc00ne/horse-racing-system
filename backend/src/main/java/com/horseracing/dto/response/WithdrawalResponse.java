@@ -20,5 +20,9 @@ public class WithdrawalResponse {
     private BigDecimal amount;
     private String status;
     private LocalDateTime createdAt;
-    private String bankAccount;
+    private String bankAccount; // Deprecated but kept for backward compatibility
+    private String bankName;
+    private String bankBin;
+    private String bankAccountNumber;
+    private String bankAccountHolderName;
 }

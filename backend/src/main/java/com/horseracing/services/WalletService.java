@@ -53,7 +53,7 @@ public class WalletService {
     }
 
     @Transactional
-    public WalletTransaction requestWithdrawal(User user, BigDecimal amount) {
+    public WalletTransaction requestWithdrawal(User user, BigDecimal amount, String bankName, String bankBin, String bankAccountNumber, String bankAccountHolderName) {
         Wallet wallet = getOrCreateWallet(user);
         
         if (wallet.getBalance().compareTo(amount) < 0) {
@@ -69,6 +69,10 @@ public class WalletService {
                 .transactionType("WITHDRAW")
                 .amount(amount)
                 .status("PENDING")
+                .bankName(bankName)
+                .bankBin(bankBin)
+                .bankAccountNumber(bankAccountNumber)
+                .bankAccountHolderName(bankAccountHolderName)
                 .build();
                 
         return walletTransactionRepository.save(transaction);
@@ -127,7 +131,12 @@ public class WalletService {
         List<WalletTransaction> txs = walletTransactionRepository.findByTransactionTypeOrderByCreatedAtDesc("WITHDRAW");
         return txs.stream().map(tx -> {
             User user = tx.getWallet().getUser();
-            String bankAccount = getBankAccountForUser(user);
+            String bankAccount = tx.getBankAccountNumber();
+            if (bankAccount == null || bankAccount.isBlank()) {
+                bankAccount = getBankAccountForUser(user);
+            } else if (tx.getBankName() != null && !tx.getBankName().isBlank()) {
+                bankAccount = bankAccount + " - " + tx.getBankName();
+            }
             return WithdrawalResponse.builder()
                     .id(tx.getId())
                     .walletId(tx.getWallet().getId())
@@ -137,7 +146,35 @@ public class WalletService {
                     .status(tx.getStatus())
                     .createdAt(tx.getCreatedAt())
                     .bankAccount(bankAccount)
+                    .bankName(tx.getBankName() != null ? tx.getBankName() : "")
+                    .bankBin(tx.getBankBin() != null ? tx.getBankBin() : "")
+                    .bankAccountNumber(tx.getBankAccountNumber() != null ? tx.getBankAccountNumber() : "")
+                    .bankAccountHolderName(tx.getBankAccountHolderName() != null ? tx.getBankAccountHolderName() : "")
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public WalletTransaction cancelWithdrawal(Integer transactionId, User user) {
+        WalletTransaction transaction = walletTransactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+                
+        if (!transaction.getWallet().getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized to cancel this transaction");
+        }
+        
+        if (!"PENDING".equals(transaction.getStatus()) || !"WITHDRAW".equals(transaction.getTransactionType())) {
+            throw new RuntimeException("Only pending withdrawal requests can be cancelled");
+        }
+        
+        transaction.setStatus("CANCELLED");
+        walletTransactionRepository.save(transaction);
+        
+        // Refund balance
+        Wallet wallet = transaction.getWallet();
+        wallet.setBalance(wallet.getBalance().add(transaction.getAmount()));
+        walletRepository.save(wallet);
+        
+        return transaction;
     }
 }

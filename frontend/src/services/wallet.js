@@ -26,15 +26,48 @@ export async function depositAPI(amount) {
   }
 }
 
-export async function withdrawAPI(amount) {
+export async function withdrawAPI(amount, bankName, bankBin, bankAccountNumber, bankAccountHolderName) {
   try {
-    const response = await axiosClient.post('/wallets/withdraw', { amount });
+    const response = await axiosClient.post('/wallets/withdraw', { 
+      amount,
+      bankName,
+      bankBin,
+      bankAccountNumber,
+      bankAccountHolderName
+    });
     return response.data; // WalletTransaction
   } catch (error) {
     const errMsg = error.response?.data?.message || 'Yêu cầu rút tiền thất bại.';
     throw new Error(errMsg, { cause: error });
   }
 }
+
+export async function updateBankAccountAPI(bankName, bankBin, bankAccountNumber, bankAccountHolderName) {
+  try {
+    const response = await axiosClient.put('/wallets/bank-account', {
+      bankName,
+      bankBin,
+      bankAccountNumber,
+      bankAccountHolderName
+    });
+    return response.data; // UserResponse
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Cập nhật tài khoản ngân hàng thất bại.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function cancelWithdrawalAPI(transactionId) {
+  try {
+    const response = await axiosClient.put(`/wallets/transactions/${transactionId}/cancel`);
+    return response.data; // WalletTransaction
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Hủy yêu cầu rút tiền thất bại.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+
 
 export async function getTransactionHistoryAPI() {
   try {
