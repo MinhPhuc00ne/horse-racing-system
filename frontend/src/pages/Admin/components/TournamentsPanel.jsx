@@ -203,6 +203,15 @@ export default function TournamentsPanel() {
     setError('');
     setSuccess('');
 
+    if (parseInt(formData.minSlots) < 3) {
+      setError('Số lượng ngựa tối thiểu tham gia phải từ 3 con trở lên.');
+      return;
+    }
+    if (parseInt(formData.maxSlots) < 3) {
+      setError('Số lượng ngựa tối đa tham gia phải từ 3 con trở lên.');
+      return;
+    }
+
     const baseDateString = formData.officialRaceTime || formData.registrationDeadline;
     const computedDate = baseDateString ? baseDateString.substring(0, 10) : new Date().toISOString().substring(0, 10);
 
@@ -575,7 +584,7 @@ export default function TournamentsPanel() {
                           value={formData.minSlots}
                           onChange={handleInputChange}
                           required
-                          min="2"
+                          min="3"
                           className="ho-form-input text-dark fw-semibold"
                         />
                       </div>

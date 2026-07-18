@@ -207,6 +207,7 @@ export function HorseOwnerProvider({ children }) {
                 myRegistration: myRegistration,
                 entryFee: t.entryFee,
                 refereeName: t.refereeName || 'Chưa phân công',
+                trackShape: r.trackShape || 'STRAIGHT',
               });
             }
           } else {
@@ -225,6 +226,7 @@ export function HorseOwnerProvider({ children }) {
               registeredHorses: [],
               entryFee: t.entryFee,
               refereeName: t.refereeName || 'Chưa phân công',
+              trackShape: 'STRAIGHT',
             });
           }
         }

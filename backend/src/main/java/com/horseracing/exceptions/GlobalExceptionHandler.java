@@ -197,10 +197,10 @@ public class GlobalExceptionHandler {
                 return "Tiền thưởng phải lớn hơn hoặc bằng 0.";
             case "Minimum bet amount must be positive or zero":
                 return "Số tiền đặt cược tối thiểu phải lớn hơn hoặc bằng 0 VNĐ.";
-            case "Maximum slots must be between 2 and 12":
-                return "Số lượng ngựa tối đa tham gia phải từ 2 đến 12 con.";
-            case "Minimum slots must be between 2 and 12":
-                return "Số lượng ngựa tối thiểu tham gia phải từ 2 đến 12 con.";
+            case "Maximum slots must be between 3 and 12":
+                return "Số lượng ngựa tối đa tham gia phải từ 3 đến 12 con.";
+            case "Minimum slots must be between 3 and 12":
+                return "Số lượng ngựa tối thiểu tham gia phải từ 3 đến 12 con.";
             case "Minimum slots cannot be greater than maximum slots":
                 return "Số lượng ngựa tối thiểu không được lớn hơn số lượng tối đa.";
             case "Entry fee must be positive or zero":

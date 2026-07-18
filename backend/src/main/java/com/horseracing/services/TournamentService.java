@@ -46,11 +46,11 @@ public class TournamentService {
         if (request.getMinBetAmount().compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Minimum bet amount must be positive or zero");
         }
-        if (request.getMaxSlots() == null || request.getMaxSlots() < 2 || request.getMaxSlots() > 12) {
-            throw new RuntimeException("Maximum slots must be between 2 and 12");
+        if (request.getMaxSlots() == null || request.getMaxSlots() < 3 || request.getMaxSlots() > 12) {
+            throw new RuntimeException("Maximum slots must be between 3 and 12");
         }
-        if (request.getMinSlots() != null && (request.getMinSlots() < 2 || request.getMinSlots() > 12)) {
-            throw new RuntimeException("Minimum slots must be between 2 and 12");
+        if (request.getMinSlots() != null && (request.getMinSlots() < 3 || request.getMinSlots() > 12)) {
+            throw new RuntimeException("Minimum slots must be between 3 and 12");
         }
         if (request.getMinSlots() != null && request.getMaxSlots() != null && request.getMinSlots() > request.getMaxSlots()) {
             throw new RuntimeException("Minimum slots cannot be greater than maximum slots");
@@ -188,11 +188,11 @@ public class TournamentService {
         if (request.getMinBetAmount().compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Minimum bet amount must be positive or zero");
         }
-        if (request.getMaxSlots() == null || request.getMaxSlots() < 2 || request.getMaxSlots() > 12) {
-            throw new RuntimeException("Maximum slots must be between 2 and 12");
+        if (request.getMaxSlots() == null || request.getMaxSlots() < 3 || request.getMaxSlots() > 12) {
+            throw new RuntimeException("Maximum slots must be between 3 and 12");
         }
-        if (request.getMinSlots() != null && (request.getMinSlots() < 2 || request.getMinSlots() > 12)) {
-            throw new RuntimeException("Minimum slots must be between 2 and 12");
+        if (request.getMinSlots() != null && (request.getMinSlots() < 3 || request.getMinSlots() > 12)) {
+            throw new RuntimeException("Minimum slots must be between 3 and 12");
         }
         if (request.getMinSlots() != null && request.getMaxSlots() != null && request.getMinSlots() > request.getMaxSlots()) {
             throw new RuntimeException("Minimum slots cannot be greater than maximum slots");

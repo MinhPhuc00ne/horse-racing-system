@@ -30,7 +30,7 @@ export default function RaceEntriesContent() {
     setSelectedRace(race);
     setIsUpdating(false);
     setUpdateRegId(null);
-    
+
     // Filter eligible horses by race allowedClasses
     const allowed = race.allowedClasses ? race.allowedClasses.split(',').map(s => s.trim().toUpperCase()) : [];
     const eligibleHorses = readyHorses.filter(h => {
@@ -77,7 +77,7 @@ export default function RaceEntriesContent() {
 
   const handleCancelClick = async (reg) => {
     const isApproved = reg.status === 'APPROVED';
-    const warningMsg = isApproved 
+    const warningMsg = isApproved
       ? 'CẢNH BÁO: Đăng ký này đã được phê duyệt. Theo quy định, nếu bạn RÚT LUI lúc này, bạn sẽ KHÔNG được hoàn lệ phí tham gia.\n\nBạn có chắc chắn muốn rút lui?'
       : 'Bạn có chắc chắn muốn hủy đăng ký này không? Lệ phí tham gia sẽ được hoàn lại 100% vào ví của bạn.';
 
@@ -95,8 +95,8 @@ export default function RaceEntriesContent() {
       localStorage.setItem('owner_registered_races', JSON.stringify(localList));
 
       await refreshData();
-      
-      setSuccessMsg(isApproved 
+
+      setSuccessMsg(isApproved
         ? 'Rút lui thành công! Lệ phí thi đấu không được hoàn lại theo điều lệ.'
         : 'Hủy đăng ký và hoàn lại lệ phí thi đấu thành công!');
       setShowSuccessModal(true);
@@ -112,7 +112,7 @@ export default function RaceEntriesContent() {
       alert("Vui lòng chọn cả ngựa và nài ngựa.");
       return;
     }
-    
+
     const ownerS = parseFloat(formData.ownerShare);
     const jockeyS = parseFloat(formData.jockeyShare);
 
@@ -159,7 +159,7 @@ export default function RaceEntriesContent() {
       setSuccessMsg(isUpdating
         ? `Cập nhật đăng ký thành công cho ngựa ${selectedHorseObj?.name} và Jockey ${selectedJockeyObj?.fullName}!`
         : `Đăng ký thành công ngựa ${selectedHorseObj?.name} với Jockey ${selectedJockeyObj?.fullName} cho giải đấu ${selectedRace.tournamentName}!`);
-      
+
       setShowModal(false);
       setShowSuccessModal(true);
       setIsUpdating(false);
@@ -192,8 +192,8 @@ export default function RaceEntriesContent() {
           const isRegistered = userRegisteredHorses.length > 0;
           return (
             <div key={race.id || i} className="col-12 col-md-4">
-              <DataCard 
-                title={race.tournamentName} 
+              <DataCard
+                title={race.tournamentName}
                 subtitle={`${race.date} at ${race.time}`}
                 interactive={true}
               >
@@ -216,8 +216,8 @@ export default function RaceEntriesContent() {
                     <span className="fw-bold" style={{ color: 'var(--ho-primary-medium)' }}>{race.prizePool}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span className="fw-bold text-dark">Referee:</span>
-                    <span>{race.refereeName || 'Unassigned'}</span>
+                    <span className="fw-bold text-dark">Track Shape:</span>
+                    <span>{String(race.trackShape).toUpperCase() === 'OVAL' ? 'Sân vòng tròn' : 'Sân thẳng'}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 border-bottom border-light">
                     <span className="fw-bold text-dark">Entry Fee:</span>
@@ -293,7 +293,7 @@ export default function RaceEntriesContent() {
                     style={(race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER') ? { backgroundColor: '#cccccc', color: '#666666', border: '1px solid #bbbbbb', cursor: 'not-allowed' } : {}}
                   >
                     {(race.status === 'Active' || race.status === 'OPEN_FOR_REGISTER')
-                      ? 'Đăng ký tham gia' 
+                      ? 'Đăng ký tham gia'
                       : race.status === 'Upcoming'
                         ? 'Chưa mở đăng ký'
                         : 'Đã đóng đăng ký'}
@@ -312,7 +312,7 @@ export default function RaceEntriesContent() {
             <h3 className="ho-font-epilogue fs-4 fw-bold mb-4" style={{ color: 'var(--ho-primary-dark)' }}>
               {isUpdating ? 'Cập nhật đăng ký cho' : 'Đăng ký tham gia'} {selectedRace?.tournamentName}
             </h3>
-            
+
             <div className="d-flex flex-column gap-4 mb-4">
               {/* Select Horse */}
               <div>
@@ -330,7 +330,7 @@ export default function RaceEntriesContent() {
                       if (allowed.length === 0) return true;
                       return h.breed && allowed.includes(h.breed.trim().toUpperCase());
                     });
-                    
+
                     if (eligibleHorses.length === 0) {
                       return <option value="">No eligible horses available (Horses must be in Ready status and match breed {selectedRace?.allowedClasses})</option>;
                     }
@@ -417,7 +417,7 @@ export default function RaceEntriesContent() {
         </div>,
         document.body
       )}
-      
+
       {/* Registration Success Modal Dialog */}
       {showSuccessModal && createPortal(
         <div className="modal-overlay" style={{ zIndex: 1050 }} onClick={() => setShowSuccessModal(false)}>
@@ -431,7 +431,7 @@ export default function RaceEntriesContent() {
             <p className="text-secondary small fw-medium mb-4" style={{ lineHeight: '1.5' }}>
               {successMsg}
             </p>
-            
+
             <div className="d-flex justify-content-center pt-2">
               <button
                 type="button"
