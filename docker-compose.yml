@@ -38,6 +38,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    environment:
+      ACCEPT_EULA: "Y"
     volumes:
       - ./database/init/HorseRacingDB.sql:/init.sql
     entrypoint:

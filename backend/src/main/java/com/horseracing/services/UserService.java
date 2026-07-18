@@ -33,7 +33,7 @@ public class UserService {
         return userRepository.findAll().stream()
                 .filter(user -> role == null || user.getRole() == role)
                 .filter(user -> enabled == null || user.isEnabled() == enabled)
-                .filter(user -> search == null || search.isBlank() || 
+                .filter(user -> search == null || search.isBlank() ||
                         (user.getFullName() != null && user.getFullName().toLowerCase().contains(search.toLowerCase())) ||
                         (user.getEmail() != null && user.getEmail().toLowerCase().contains(search.toLowerCase())) ||
                         (user.getUsername() != null && user.getUsername().toLowerCase().contains(search.toLowerCase())))
