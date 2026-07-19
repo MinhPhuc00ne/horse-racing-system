@@ -1,31 +1,70 @@
 package com.horseracing.services;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+
 import com.horseracing.dto.request.AddBlacklistRequest;
 import com.horseracing.dto.request.AddFlagRequest;
 import com.horseracing.dto.request.UpdateConditionsRequest;
 import com.horseracing.dto.response.FlagResponse;
 import com.horseracing.dto.response.PreCheckResponse;
+import com.horseracing.dto.response.RaceSimulationStateResponse;
 import com.horseracing.dto.response.RefereeRaceResponse;
 import com.horseracing.dto.response.TournamentResponse;
 import com.horseracing.dto.response.ViolationResponse;
-import com.horseracing.dto.response.RaceSimulationStateResponse;
-import com.horseracing.entities.*;
-import com.horseracing.repositories.*;
+import com.horseracing.entities.BanHistory;
+import com.horseracing.entities.Blacklist;
+import com.horseracing.entities.Horse;
+import com.horseracing.entities.JockeyProfile;
+import com.horseracing.entities.PrizeDistribution;
+import com.horseracing.entities.Race;
+import com.horseracing.entities.RaceParticipant;
+import com.horseracing.entities.RaceRegistration;
+import com.horseracing.entities.RaceSimulation;
+import com.horseracing.entities.RefereeFlag;
+import com.horseracing.entities.SimulationHorseState;
+import com.horseracing.entities.Tournament;
+import com.horseracing.entities.User;
+import com.horseracing.entities.Wallet;
+import com.horseracing.entities.WalletTransaction;
+import com.horseracing.entities.enums.NotificationType;
+import com.horseracing.repositories.BanHistoryRepository;
+import com.horseracing.repositories.BlacklistRepository;
+import com.horseracing.repositories.HorseRepository;
+import com.horseracing.repositories.JockeyProfileRepository;
+import com.horseracing.repositories.PrizeDistributionRepository;
+import com.horseracing.repositories.RaceParticipantRepository;
+import com.horseracing.repositories.RaceRegistrationRepository;
+import com.horseracing.repositories.RaceRepository;
+import com.horseracing.repositories.RaceSimulationRepository;
+import com.horseracing.repositories.RefereeFlagRepository;
+import com.horseracing.repositories.SimulationHorseStateRepository;
+import com.horseracing.repositories.TournamentRepository;
+import com.horseracing.repositories.UserRepository;
+import com.horseracing.repositories.WalletRepository;
+import com.horseracing.repositories.WalletTransactionRepository;
+
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.stereotype.Service;
-import com.horseracing.entities.enums.NotificationType;
-import com.horseracing.entities.enums.Role;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +79,6 @@ public class RefereeService {
     private final HorseRepository horseRepository;
     private final WalletRepository walletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
-    private final BetRepository betRepository;
     private final RaceSimulationRepository raceSimulationRepository;
     private final SimulationHorseStateRepository simulationHorseStateRepository;
     private final RefereeFlagRepository refereeFlagRepository;
@@ -51,6 +89,7 @@ public class RefereeService {
     private final NotificationService notificationService;
     private final TournamentRepository tournamentRepository;
     private final LiveRaceService liveRaceService;
+    private final PredictionPayoutService predictionPayoutService;
 
     private TransactionTemplate transactionTemplate;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
@@ -181,37 +220,8 @@ public class RefereeService {
             }
 
             // Refund all spectator bets on this horse in this race
-            List<Bet> bets = betRepository.findByParticipantIdAndStatus(participantId, "PENDING");
-            for (Bet bet : bets) {
-                bet.setStatus("REFUNDED");
-                betRepository.save(bet);
-
-                Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
-                        .orElseGet(() -> {
-                            Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
-                            return walletRepository.save(w);
-                        });
-
-                wallet.setBalance(wallet.getBalance().add(bet.getAmount()));
-                walletRepository.save(wallet);
-
-                WalletTransaction transaction = WalletTransaction.builder()
-                        .wallet(wallet)
-                        .transactionType("REFUND")
-                        .amount(bet.getAmount())
-                        .status("SUCCESS")
-                        .referenceType("BET")
-                        .referenceId(bet.getId())
-                        .build();
-                walletTransactionRepository.save(transaction);
-
-                notificationService.sendNotification(
-                        bet.getUser(),
-                        "Hoàn tiền cược cuộc đua",
-                        "Ngựa " + participant.getHorse().getName() + " không vượt qua vòng kiểm tra trước trận. Hệ thống đã hoàn trả 100% số tiền đặt cược (" + bet.getAmount() + " VNĐ) vào ví của bạn.",
-                        NotificationType.WALLET
-                );
-            }
+            predictionPayoutService.refundBetsForParticipant(participant, reason,
+                    "Ngựa " + participant.getHorse().getName() + " không vượt qua vòng kiểm tra trước trận. Hệ thống đã hoàn trả 100% số tiền đặt cược ({amount} VNĐ) vào ví của bạn.");
         }
     }
 
@@ -332,37 +342,8 @@ public class RefereeService {
         }
 
         // Refund all spectator bets on this horse in this race
-        List<Bet> bets = betRepository.findByParticipantIdAndStatus(participantId, "PENDING");
-        for (Bet bet : bets) {
-            bet.setStatus("REFUNDED");
-            betRepository.save(bet);
-
-            Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
-                    .orElseGet(() -> {
-                        Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
-                        return walletRepository.save(w);
-                    });
-
-            wallet.setBalance(wallet.getBalance().add(bet.getAmount()));
-            walletRepository.save(wallet);
-
-            WalletTransaction transaction = WalletTransaction.builder()
-                    .wallet(wallet)
-                    .transactionType("REFUND")
-                    .amount(bet.getAmount())
-                    .status("SUCCESS")
-                    .referenceType("BET")
-                    .referenceId(bet.getId())
-                    .build();
-            walletTransactionRepository.save(transaction);
-
-            notificationService.sendNotification(
-                    bet.getUser(),
-                    "Hoàn tiền cược cuộc đua",
-                    "Ngựa " + participant.getHorse().getName() + " đã bị loại khỏi vòng đua " + participant.getRace().getRaceName() + " trước giờ chạy. Hệ thống đã hoàn trả 100% số tiền đặt cược (" + bet.getAmount() + " VNĐ) vào ví của bạn.",
-                    NotificationType.WALLET
-            );
-        }
+        predictionPayoutService.refundBetsForParticipant(participant, reason,
+                "Ngựa " + participant.getHorse().getName() + " đã bị loại khỏi vòng đua " + participant.getRace().getRaceName() + " trước giờ chạy. Hệ thống đã hoàn trả 100% số tiền đặt cược ({amount} VNĐ) vào ví của bạn.");
     }
 
     @Transactional
@@ -506,9 +487,9 @@ public class RefereeService {
                                 String desc = flag.getDescription();
                                 if (desc != null && desc.contains("at ") && desc.contains("%")) {
                                     String numStr = desc.substring(desc.indexOf("at ") + 3, desc.indexOf("%")).trim();
-                                    flaggedPositions.add(Integer.parseInt(numStr));
+                                    flaggedPositions.add(Integer.valueOf(numStr));
                                 }
-                            } catch (Exception e) {
+                            } catch (NumberFormatException | IndexOutOfBoundsException e) {
                                 // Ignore
                             }
                         }
@@ -867,49 +848,23 @@ public class RefereeService {
         List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
         for (RaceParticipant p : participants) {
             if ("DISQUALIFIED".equalsIgnoreCase(p.getStatus()) || "REJECTED".equalsIgnoreCase(p.getStatus())) {
-                List<Bet> pendingBets = betRepository.findByParticipantIdAndStatus(p.getId(), "PENDING");
-                for (Bet bet : pendingBets) {
-                    bet.setStatus("REFUNDED");
-                    bet.setPayoutAmount(BigDecimal.ZERO);
-                    betRepository.save(bet);
-
-                    Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
-                            .orElseGet(() -> {
-                                Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
-                                return walletRepository.save(w);
-                            });
-                    wallet.setBalance(wallet.getBalance().add(bet.getAmount()));
-                    walletRepository.save(wallet);
-
-                    WalletTransaction transaction = WalletTransaction.builder()
-                            .wallet(wallet)
-                            .transactionType("REFUND")
-                            .amount(bet.getAmount())
-                            .status("SUCCESS")
-                            .referenceType("BET")
-                            .referenceId(bet.getId())
-                            .build();
-                    walletTransactionRepository.save(transaction);
-
-                    notificationService.sendNotification(
-                            bet.getUser(),
-                            "Hoàn tiền cược cuộc đua",
-                            "Ngựa " + p.getHorse().getName() + " đã bị loại hoặc từ chối kết quả tại vòng đua " + race.getRaceName() + ". Hệ thống đã hoàn trả 100% số tiền đặt cược (" + bet.getAmount() + " VNĐ) vào ví của bạn.",
-                            NotificationType.WALLET
-                    );
-                }
+                predictionPayoutService.refundBetsForParticipant(p, "DISQUALIFIED_OR_REJECTED",
+                        "Ngựa " + p.getHorse().getName() + " đã bị loại hoặc từ chối kết quả tại vòng đua " + race.getRaceName() + ". Hệ thống đã hoàn trả 100% số tiền đặt cược ({amount} VNĐ) vào ví của bạn.");
             }
         }
 
         // 2. Prize Distribution
         for (RaceParticipant p : participants) {
             if (p.getFinalRank() != null && p.getFinalRank() <= 3) {
-                BigDecimal totalPrize = switch (p.getFinalRank()) {
-                    case 1 -> tournament.getPrizeFirst();
-                    case 2 -> tournament.getPrizeSecond();
-                    case 3 -> tournament.getPrizeThird();
-                    default -> BigDecimal.ZERO;
-                };
+                BigDecimal totalPrize = BigDecimal.ZERO;
+                if (tournament != null) {
+                    totalPrize = switch (p.getFinalRank()) {
+                        case 1 -> tournament.getPrizeFirst();
+                        case 2 -> tournament.getPrizeSecond();
+                        case 3 -> tournament.getPrizeThird();
+                        default -> BigDecimal.ZERO;
+                    };
+                }
 
                 if (totalPrize == null) totalPrize = BigDecimal.ZERO;
 
@@ -994,247 +949,7 @@ public class RefereeService {
         }
 
         // 2. Betting Payout (Pari-Mutuel Option 1: Split-Pools)
-        List<Bet> bets = betRepository.findByRaceId(raceId);
-
-        BigDecimal totalWinPool = BigDecimal.ZERO;
-        BigDecimal totalPlacePool = BigDecimal.ZERO;
-        BigDecimal totalShowPool = BigDecimal.ZERO;
-
-        for (Bet bet : bets) {
-            if ("PENDING".equals(bet.getStatus())) {
-                String type = bet.getBetType() != null ? bet.getBetType() : "WIN";
-                if ("WIN".equalsIgnoreCase(type)) {
-                    totalWinPool = totalWinPool.add(bet.getAmount());
-                } else if ("PLACE".equalsIgnoreCase(type)) {
-                    totalPlacePool = totalPlacePool.add(bet.getAmount());
-                } else if ("SHOW".equalsIgnoreCase(type)) {
-                    totalShowPool = totalShowPool.add(bet.getAmount());
-                }
-            }
-        }
-
-        // Net pools after 10% House Edge (payback rate is 90%)
-        BigDecimal netWinPool = totalWinPool.multiply(BigDecimal.valueOf(0.9));
-        BigDecimal netPlacePool = totalPlacePool.multiply(BigDecimal.valueOf(0.9));
-        BigDecimal netShowPool = totalShowPool.multiply(BigDecimal.valueOf(0.9));
-
-        Integer rank1Id = null;
-        Integer rank2Id = null;
-        Integer rank3Id = null;
-
-        for (RaceParticipant p : participants) {
-            Integer rank = p.getFinalRank();
-            if (rank != null) {
-                switch (rank) {
-                    case 1 -> rank1Id = p.getId();
-                    case 2 -> rank2Id = p.getId();
-                    case 3 -> rank3Id = p.getId();
-                }
-            }
-        }
-
-        BigDecimal totalWinOnWinner = BigDecimal.ZERO;
-        BigDecimal totalPlaceOnH1 = BigDecimal.ZERO;
-        BigDecimal totalPlaceOnH2 = BigDecimal.ZERO;
-        BigDecimal totalShowOnH1 = BigDecimal.ZERO;
-        BigDecimal totalShowOnH2 = BigDecimal.ZERO;
-        BigDecimal totalShowOnH3 = BigDecimal.ZERO;
-
-        for (Bet bet : bets) {
-            if ("PENDING".equals(bet.getStatus())) {
-                String type = bet.getBetType() != null ? bet.getBetType() : "WIN";
-                Integer partId = bet.getParticipant().getId();
-
-                if ("WIN".equalsIgnoreCase(type)) {
-                    if (partId.equals(rank1Id)) {
-                        totalWinOnWinner = totalWinOnWinner.add(bet.getAmount());
-                    }
-                } else if ("PLACE".equalsIgnoreCase(type)) {
-                    if (partId.equals(rank1Id)) {
-                        totalPlaceOnH1 = totalPlaceOnH1.add(bet.getAmount());
-                    } else if (partId.equals(rank2Id)) {
-                        totalPlaceOnH2 = totalPlaceOnH2.add(bet.getAmount());
-                    }
-                } else if ("SHOW".equalsIgnoreCase(type)) {
-                    if (partId.equals(rank1Id)) {
-                        totalShowOnH1 = totalShowOnH1.add(bet.getAmount());
-                    } else if (partId.equals(rank2Id)) {
-                        totalShowOnH2 = totalShowOnH2.add(bet.getAmount());
-                    } else if (partId.equals(rank3Id)) {
-                        totalShowOnH3 = totalShowOnH3.add(bet.getAmount());
-                    }
-                }
-            }
-        }
-
-        // Calculate WIN odds
-        BigDecimal oddsWin = BigDecimal.valueOf(1.05);
-        if (totalWinOnWinner.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal computed = netWinPool.divide(totalWinOnWinner, 2, java.math.RoundingMode.HALF_UP);
-            if (computed.compareTo(BigDecimal.valueOf(1.05)) > 0) {
-                oddsWin = computed;
-            }
-        }
-
-        // Calculate PLACE odds
-        BigDecimal oddsPlaceH1 = BigDecimal.valueOf(1.05);
-        BigDecimal oddsPlaceH2 = BigDecimal.valueOf(1.05);
-
-        boolean hasPlaceH1 = totalPlaceOnH1.compareTo(BigDecimal.ZERO) > 0;
-        boolean hasPlaceH2 = totalPlaceOnH2.compareTo(BigDecimal.ZERO) > 0;
-
-        if (hasPlaceH1 && hasPlaceH2) {
-            BigDecimal halfPool = netPlacePool.divide(BigDecimal.valueOf(2), 4, java.math.RoundingMode.HALF_UP);
-            BigDecimal computedH1 = halfPool.divide(totalPlaceOnH1, 2, java.math.RoundingMode.HALF_UP);
-            BigDecimal computedH2 = halfPool.divide(totalPlaceOnH2, 2, java.math.RoundingMode.HALF_UP);
-            if (computedH1.compareTo(BigDecimal.valueOf(1.05)) > 0) oddsPlaceH1 = computedH1;
-            if (computedH2.compareTo(BigDecimal.valueOf(1.05)) > 0) oddsPlaceH2 = computedH2;
-        } else if (hasPlaceH1) {
-            BigDecimal computedH1 = netPlacePool.divide(totalPlaceOnH1, 2, java.math.RoundingMode.HALF_UP);
-            if (computedH1.compareTo(BigDecimal.valueOf(1.05)) > 0) oddsPlaceH1 = computedH1;
-        } else if (hasPlaceH2) {
-            BigDecimal computedH2 = netPlacePool.divide(totalPlaceOnH2, 2, java.math.RoundingMode.HALF_UP);
-            if (computedH2.compareTo(BigDecimal.valueOf(1.05)) > 0) oddsPlaceH2 = computedH2;
-        }
-
-        // Calculate SHOW odds
-        BigDecimal oddsShowH1 = BigDecimal.valueOf(1.05);
-        BigDecimal oddsShowH2 = BigDecimal.valueOf(1.05);
-        BigDecimal oddsShowH3 = BigDecimal.valueOf(1.05);
-
-        int activeShowCount = 0;
-        if (totalShowOnH1.compareTo(BigDecimal.ZERO) > 0) activeShowCount++;
-        if (totalShowOnH2.compareTo(BigDecimal.ZERO) > 0) activeShowCount++;
-        if (totalShowOnH3.compareTo(BigDecimal.ZERO) > 0) activeShowCount++;
-
-        if (activeShowCount > 0) {
-            BigDecimal sharePool = netShowPool.divide(BigDecimal.valueOf(activeShowCount), 4, java.math.RoundingMode.HALF_UP);
-            if (totalShowOnH1.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal computed = sharePool.divide(totalShowOnH1, 2, java.math.RoundingMode.HALF_UP);
-                if (computed.compareTo(BigDecimal.valueOf(1.05)) > 0) oddsShowH1 = computed;
-            }
-            if (totalShowOnH2.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal computed = sharePool.divide(totalShowOnH2, 2, java.math.RoundingMode.HALF_UP);
-                if (computed.compareTo(BigDecimal.valueOf(1.05)) > 0) oddsShowH2 = computed;
-            }
-            if (totalShowOnH3.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal computed = sharePool.divide(totalShowOnH3, 2, java.math.RoundingMode.HALF_UP);
-                if (computed.compareTo(BigDecimal.valueOf(1.05)) > 0) oddsShowH3 = computed;
-            }
-        }
-
-        // Distribute payouts
-        for (Bet bet : bets) {
-            if ("PENDING".equals(bet.getStatus())) {
-                String type = bet.getBetType() != null ? bet.getBetType() : "WIN";
-                Integer partId = bet.getParticipant().getId();
-                boolean isWon = false;
-                BigDecimal odds = BigDecimal.valueOf(1.05);
-
-                if ("WIN".equalsIgnoreCase(type)) {
-                    if (partId.equals(rank1Id)) {
-                        isWon = true;
-                        odds = oddsWin;
-                    }
-                } else if ("PLACE".equalsIgnoreCase(type)) {
-                    if (partId.equals(rank1Id)) {
-                        isWon = true;
-                        odds = oddsPlaceH1;
-                    } else if (partId.equals(rank2Id)) {
-                        isWon = true;
-                        odds = oddsPlaceH2;
-                    }
-                } else if ("SHOW".equalsIgnoreCase(type)) {
-                    if (partId.equals(rank1Id)) {
-                        isWon = true;
-                        odds = oddsShowH1;
-                    } else if (partId.equals(rank2Id)) {
-                        isWon = true;
-                        odds = oddsShowH2;
-                    } else if (partId.equals(rank3Id)) {
-                        isWon = true;
-                        odds = oddsShowH3;
-                    }
-                }
-
-                if (isWon) {
-                    bet.setStatus("WON");
-                    bet.setOdds(odds);
-                    BigDecimal payout = bet.getAmount().multiply(odds);
-                    bet.setPayoutAmount(payout);
-                    betRepository.save(bet);
-
-                    Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
-                            .orElseGet(() -> {
-                                Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
-                                return walletRepository.save(w);
-                            });
-                    wallet.setBalance(wallet.getBalance().add(payout));
-                    walletRepository.save(wallet);
-
-                    WalletTransaction transaction = WalletTransaction.builder()
-                            .wallet(wallet)
-                            .transactionType("PRIZE")
-                            .amount(payout)
-                            .status("SUCCESS")
-                            .referenceType("BET")
-                            .referenceId(bet.getId())
-                            .build();
-                    walletTransactionRepository.save(transaction);
-
-                    notificationService.sendNotification(
-                            bet.getUser(),
-                            "Chúc mừng thắng cược cuộc đua",
-                            "Chúc mừng! Bạn đã thắng cược (" + type + ") tại vòng đua " + race.getRaceName() + " với số tiền thắng cược " + payout + " VNĐ (dựa trên tỷ lệ odds " + odds + " của quỹ chia). Số tiền đã được cộng vào ví.",
-                            NotificationType.WALLET
-                    );
-                } else {
-                    bet.setStatus("LOST");
-                    bet.setPayoutAmount(BigDecimal.ZERO);
-                    betRepository.save(bet);
-
-                    notificationService.sendNotification(
-                            bet.getUser(),
-                            "Kết quả đặt cược cuộc đua",
-                            "Kết quả vòng đua " + race.getRaceName() + " đã được Trọng tài xác nhận. Thật tiếc, vé cược (" + type + ") của bạn vào ngựa " + bet.getParticipant().getHorse().getName() + " không trúng thưởng. Chúc bạn may mắn lần sau!",
-                            NotificationType.RACE_STATUS
-                    );
-                }
-            }
-        }
-
-        // Calculate and transfer betting revenue to Admin
-        BigDecimal totalBetAmount = totalWinPool.add(totalPlacePool).add(totalShowPool);
-        BigDecimal totalPayout = BigDecimal.ZERO;
-        for (Bet bet : bets) {
-            if ("WON".equals(bet.getStatus())) {
-                totalPayout = totalPayout.add(bet.getPayoutAmount() != null ? bet.getPayoutAmount() : BigDecimal.ZERO);
-            }
-        }
-
-        BigDecimal adminBetRevenue = totalBetAmount.subtract(totalPayout);
-        if (adminBetRevenue.compareTo(BigDecimal.ZERO) > 0) {
-            User admin = userRepository.findByRole(Role.ADMIN).stream().findFirst().orElse(null);
-            if (admin != null) {
-                Wallet adminWallet = walletRepository.findByUserId(admin.getId())
-                        .orElseGet(() -> {
-                            Wallet w = Wallet.builder().user(admin).balance(BigDecimal.ZERO).build();
-                            return walletRepository.save(w);
-                        });
-                adminWallet.setBalance(adminWallet.getBalance().add(adminBetRevenue));
-                walletRepository.save(adminWallet);
-
-                WalletTransaction adminTx = WalletTransaction.builder()
-                        .wallet(adminWallet)
-                        .transactionType("ADMIN_REVENUE")
-                        .amount(adminBetRevenue)
-                        .status("SUCCESS")
-                        .referenceType("RACE")
-                        .referenceId(raceId)
-                        .build();
-                walletTransactionRepository.save(adminTx);
-            }
-        }
+        predictionPayoutService.processPayouts(raceId, participants, race);
     }
 
     @Transactional
@@ -1261,39 +976,7 @@ public class RefereeService {
         raceRepository.save(race);
 
         // 2. Refund spectator bets
-        List<Bet> bets = betRepository.findByRaceId(raceId);
-        for (Bet bet : bets) {
-            if ("PENDING".equals(bet.getStatus())) {
-                bet.setStatus("REFUNDED");
-                bet.setPayoutAmount(BigDecimal.ZERO);
-                betRepository.save(bet);
-
-                Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
-                        .orElseGet(() -> {
-                            Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
-                            return walletRepository.save(w);
-                        });
-                wallet.setBalance(wallet.getBalance().add(bet.getAmount()));
-                walletRepository.save(wallet);
-
-                WalletTransaction transaction = WalletTransaction.builder()
-                        .wallet(wallet)
-                        .transactionType("REFUND")
-                        .amount(bet.getAmount())
-                        .status("SUCCESS")
-                        .referenceType("BET")
-                        .referenceId(bet.getId())
-                        .build();
-                walletTransactionRepository.save(transaction);
-
-                notificationService.sendNotification(
-                        bet.getUser(),
-                        "Hoàn tiền cược cuộc đua",
-                        "Cuộc đua " + race.getRaceName() + " đã bị hủy bỏ. Hệ thống đã hoàn trả 100% số tiền đặt cược (" + bet.getAmount() + " VNĐ) vào ví của bạn.",
-                        NotificationType.WALLET
-                );
-            }
-        }
+        predictionPayoutService.refundBetsForRace(race);
 
         // 3. Refund owner entry fees for non-rejected registrations
         List<RaceRegistration> regs = raceRegistrationRepository.findByRaceId(raceId);
@@ -1489,6 +1172,9 @@ public class RefereeService {
         Race race = raceRepository.findById(raceId)
                 .orElseThrow(() -> new RuntimeException("Race not found"));
 
+        Double distanceObj = race.getDistance();
+        double distance = distanceObj != null ? distanceObj : 1200.0;
+
         List<RaceSimulation> simulations = raceSimulationRepository.findByRaceId(raceId);
         if (simulations.isEmpty()) {
             return RaceSimulationStateResponse.builder()
@@ -1496,7 +1182,7 @@ public class RefereeService {
                     .raceId(raceId)
                     .status("NOT_STARTED")
                     .currentTick(0)
-                    .distance(race.getDistance() != null ? race.getDistance() : 1200.0)
+                    .distance(distance)
                     .horseStates(new ArrayList<>())
                     .build();
         }
@@ -1531,7 +1217,7 @@ public class RefereeService {
                 .raceId(raceId)
                 .status(sim.getStatus())
                 .currentTick(sim.getCurrentTick())
-                .distance(race.getDistance() != null ? race.getDistance() : 1200.0)
+                .distance(distance)
                 .horseStates(horseStates)
                 .build();
     }
