@@ -28,7 +28,7 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
 
   const handleFeedbackClick = () => {
     setDropdownOpen(false);
-    alert('Feedback page is under development');
+    navigate('/admin/feedbacks');
   };
 
   const handleLogoutClick = () => {

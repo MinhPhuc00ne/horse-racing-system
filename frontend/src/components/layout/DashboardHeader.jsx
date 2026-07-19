@@ -5,12 +5,16 @@ import { getJockeyInvitationsAPI } from '../../services/jockey';
 import { AuthContext } from '../../contexts/AuthContext';
 import axiosClient from '../../api/axiosClient';
 import logo from '../../assets/logo.png';
+import SendFeedbackModal from '../feedback/SendFeedbackModal';
+import { getMyNotificationsAPI, markAsReadAPI } from '../../services/notification';
 
 export default function DashboardHeader({ user, profile, navLinks, logout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [pendingNotifications, setPendingNotifications] = useState([]);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [feedbackModalInitialTab, setFeedbackModalInitialTab] = useState('CREATE');
   
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
@@ -121,6 +125,28 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
         }
       }
 
+      // 4. Fetch system notifications (feedback response, system alerts)
+      try {
+        const sysNotis = await getMyNotificationsAPI();
+        if (sysNotis && sysNotis.length > 0) {
+          const unreadSysNotis = sysNotis
+            .filter(n => !n.isRead)
+            .map(n => ({
+              id: `SYS_NOTI_${n.id}`,
+              notiId: n.id,
+              senderName: n.title || 'Ban Quản Trị',
+              title: n.title,
+              content: n.content,
+              type: 'SYSTEM_NOTIFICATION',
+              isFeedback: true,
+              createdAt: n.createdAt
+            }));
+          combinedNotifications = [...combinedNotifications, ...unreadSysNotis];
+        }
+      } catch (err) {
+        console.error('Failed to load system notifications:', err);
+      }
+
       setPendingNotifications(combinedNotifications);
     } catch (e) {
       console.error('Error loading notifications:', e);
@@ -159,9 +185,21 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
     };
   }, []);
 
-  const handleNotificationClick = (noti) => {
+  const handleNotificationClick = async (noti) => {
     setNotificationOpen(false);
-    if (noti.type === 'UPGRADE_APPROVED') {
+    if (noti.notiId) {
+      try {
+        await markAsReadAPI(noti.notiId);
+        loadNotifications();
+      } catch (e) {
+        console.error('Failed to mark notification as read:', e);
+      }
+    }
+
+    if (noti.isFeedback || noti.type === 'SYSTEM_NOTIFICATION') {
+      setFeedbackModalInitialTab('MY_FEEDBACKS');
+      setIsFeedbackModalOpen(true);
+    } else if (noti.type === 'UPGRADE_APPROVED') {
       handleActivateRole(noti.requestedRole);
     } else if (noti.type === 'FRIEND_REQUEST') {
       if (user?.role === 'JOCKEY') {
@@ -192,7 +230,13 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
 
   const handleFeedbackClick = () => {
     setDropdownOpen(false);
-    alert('Feedback page is under development');
+    setMobileMenuOpen(false);
+    if (user?.role === 'ADMIN') {
+      navigate('/admin/feedbacks');
+    } else {
+      setFeedbackModalInitialTab('CREATE');
+      setIsFeedbackModalOpen(true);
+    }
   };
 
   const handleLogoutClick = () => {
@@ -305,6 +349,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                   ) : (
                     pendingNotifications.map((noti) => {
                       const isUpgrade = noti.type === 'UPGRADE_APPROVED';
+                      const isSysNoti = noti.type === 'SYSTEM_NOTIFICATION';
                       return (
                         <button 
                           key={noti.id} 
@@ -312,28 +357,30 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                           style={{ 
                             borderBottom: '1px solid #edf2f7', 
                             borderTop: 'none', 
-                            background: isUpgrade ? 'rgba(16, 185, 129, 0.05)' : 'none', 
+                            background: isUpgrade ? 'rgba(16, 185, 129, 0.05)' : isSysNoti ? 'rgba(59, 130, 246, 0.05)' : 'none', 
                             borderRadius: 0 
                           }}
                           onClick={() => handleNotificationClick(noti)}
                         >
                           <div className="d-flex align-items-center gap-2 w-100">
-                            <span className={`material-symbols-outlined ${isUpgrade ? 'text-success' : 'text-warning'}`} style={{ fontSize: '18px' }}>
-                              {isUpgrade ? 'check_circle' : noti.type === 'FRIEND_REQUEST' ? 'person' : 'sports_score'}
+                            <span className={`material-symbols-outlined ${isUpgrade ? 'text-success' : isSysNoti ? 'text-primary' : 'text-warning'}`} style={{ fontSize: '18px' }}>
+                              {isUpgrade ? 'check_circle' : isSysNoti ? 'rate_review' : noti.type === 'FRIEND_REQUEST' ? 'person' : 'sports_score'}
                             </span>
                             <span className="fw-bold text-dark text-truncate" style={{ fontSize: '12.5px', maxWidth: '200px' }}>
                               {noti.senderName || (isUpgrade ? 'System' : 'Invitation')}
                             </span>
-                            <span className={`badge ${isUpgrade ? 'bg-success text-white' : 'bg-warning text-dark'} ms-auto`} style={{ fontSize: '8px', padding: '2px 4px' }}>
-                              {isUpgrade ? 'Activate' : 'New'}
+                            <span className={`badge ${isUpgrade ? 'bg-success text-white' : isSysNoti ? 'bg-primary text-white' : 'bg-warning text-dark'} ms-auto`} style={{ fontSize: '8px', padding: '2px 4px' }}>
+                              {isUpgrade ? 'Activate' : isSysNoti ? 'Feedback' : 'New'}
                             </span>
                           </div>
                           <p className="text-secondary small m-0 text-truncate-2" style={{ fontSize: '11.5px', lineHeight: '1.4', textAlign: 'left', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', whiteSpace: 'normal' }}>
-                            {isUpgrade 
-                              ? `Upgrade request to ${noti.requestedRole.replace('_', ' ')} has been approved. Click here to activate your role!`
-                              : noti.type === 'FRIEND_REQUEST' 
-                                ? 'sent you a connection request.'
-                                : `Invited you to ride ${noti.horseName} at tournament ${noti.tournamentName}`
+                            {noti.content 
+                              ? noti.content 
+                              : isUpgrade 
+                                ? `Upgrade request to ${noti.requestedRole.replace('_', ' ')} has been approved. Click here to activate your role!`
+                                : noti.type === 'FRIEND_REQUEST' 
+                                  ? 'sent you a connection request.'
+                                  : `Invited you to ride ${noti.horseName} at tournament ${noti.tournamentName}`
                             }
                           </p>
                         </button>
@@ -457,6 +504,11 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
           </div>
         </div>
       )}
+      <SendFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        initialTab={feedbackModalInitialTab}
+      />
     </header>
   );
 }

@@ -25,6 +25,7 @@ public class DatabaseInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final RaceTrackRepository raceTrackRepository;
     private final HorseBreedRepository horseBreedRepository;
+    private final com.horseracing.repositories.FeedbackRepository feedbackRepository;
     private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     @Override
@@ -169,6 +170,57 @@ public class DatabaseInitializer implements CommandLineRunner {
             }
         } catch (Exception e) {
             log.error("Failed to ensure demo race: " + e.getMessage(), e);
+        }
+
+        // Initialize sample feedbacks if empty
+        if (feedbackRepository.count() == 0) {
+            try {
+                User jockeyUser = userRepository.findByEmail("tuan.ta@jockey.com").orElseGet(() -> userRepository.save(User.builder()
+                        .username("tuanta").email("tuan.ta@jockey.com").password(passwordEncoder.encode("123456")).fullName("Trần Anh Tuấn").role(Role.JOCKEY).build()));
+
+                User ownerUser = userRepository.findByEmail("vy.nm@owner.com").orElseGet(() -> userRepository.save(User.builder()
+                        .username("vynm").email("vy.nm@owner.com").password(passwordEncoder.encode("123456")).fullName("Nguyễn Minh Vy").role(Role.HORSE_OWNER).build()));
+
+                User refereeUser = userRepository.findByEmail("long.lh@referee.com").orElseGet(() -> userRepository.save(User.builder()
+                        .username("longlh").email("long.lh@referee.com").password(passwordEncoder.encode("123456")).fullName("Lê Hoàng Long").role(Role.RACE_REFEREE).build()));
+
+                User spectatorUser = userRepository.findByEmail("khanh.pv@spectator.com").orElseGet(() -> userRepository.save(User.builder()
+                        .username("khanhpv").email("khanh.pv@spectator.com").password(passwordEncoder.encode("123456")).fullName("Phan Văn Khánh").role(Role.SPECTATOR).build()));
+
+                com.horseracing.entities.Feedback fb1 = com.horseracing.entities.Feedback.builder()
+                        .user(jockeyUser)
+                        .subject("Lệ phí đăng ký thi đấu quá cao")
+                        .content("Lệ phí hiện tại cho các giải đấu hạng mục Classic khá cao đối với các nài ngựa tự do. Đề nghị ban tổ chức xem xét hỗ trợ giảm 10% lệ phí hoặc tăng tỷ lệ chia thưởng cho Jockey lên 40%.")
+                        .status("PENDING")
+                        .build();
+
+                com.horseracing.entities.Feedback fb2 = com.horseracing.entities.Feedback.builder()
+                        .user(ownerUser)
+                        .subject("Sân đua cỏ Mỹ Tho có mặt cỏ không đều")
+                        .content("Tôi vừa cho ngựa thi đấu thử tại sân cỏ Mỹ Tho. Một số khu vực cua rẽ có cỏ mọc không đều và khá trơn khi trời mưa nhẹ. Đề xuất ban quản lý sân thực hiện bảo dưỡng và lu phẳng mặt cỏ để đảm bảo an toàn cho ngựa.")
+                        .status("RESOLVED")
+                        .adminNote("Đã chuyển tiếp ý kiến phản hồi tới ban quản trị sân đua Mỹ Tho. Họ đã xác nhận sẽ bảo dưỡng lại toàn bộ mặt cỏ và báo cáo tiến độ trước ngày 05/07/2026.")
+                        .build();
+
+                com.horseracing.entities.Feedback fb3 = com.horseracing.entities.Feedback.builder()
+                        .user(refereeUser)
+                        .subject("Hệ thống camera giám sát góc hẹp")
+                        .content("Tại vạch đích của trường đua Đại Nam, camera giám sát góc hẹp đôi khi bị khuất bởi biển quảng cáo. Cần điều chỉnh vị trí camera cao lên 1.5 mét để hỗ trợ trọng tài xác định chính xác thứ hạng ngựa khi về đích sát nút.")
+                        .status("PENDING")
+                        .build();
+
+                com.horseracing.entities.Feedback fb4 = com.horseracing.entities.Feedback.builder()
+                        .user(spectatorUser)
+                        .subject("Lỗi hiển thị tỷ lệ cược trực tiếp")
+                        .content("Khi xem livestream giải đấu hôm qua, tỷ lệ cược hiển thị trên màn hình bị đứng hình khoảng 2 phút trước khi cuộc đua bắt đầu. Mong đội ngũ kỹ thuật tối ưu hóa luồng dữ liệu thời gian thực tốt hơn.")
+                        .status("PENDING")
+                        .build();
+
+                feedbackRepository.saveAll(List.of(fb1, fb2, fb3, fb4));
+                log.info("Initialized 4 sample feedbacks in database.");
+            } catch (Exception e) {
+                log.error("Failed to seed sample feedbacks: " + e.getMessage(), e);
+            }
         }
     }
 }
