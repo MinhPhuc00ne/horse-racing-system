@@ -23,6 +23,12 @@ public class AdminDashboardStatsResponse {
     private Map<String, Long> roleDistribution;
     private List<BetVolumeDataPoint> betVolumeData;
 
+    // 4 NEW Metrics for rich charts
+    private Map<String, Long> breedDistribution;
+    private Map<String, Long> raceStatusDistribution;
+    private List<TransactionTrendDataPoint> transactionTrendData;
+    private List<TournamentPrizeDataPoint> tournamentPrizesData;
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -37,5 +43,22 @@ public class AdminDashboardStatsResponse {
     public static class BetVolumeDataPoint {
         private String tournament;
         private long bets;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class TransactionTrendDataPoint {
+        private String month;
+        private BigDecimal deposit;
+        private BigDecimal withdraw;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class TournamentPrizeDataPoint {
+        private String name;
+        private BigDecimal prizePool;
     }
 }

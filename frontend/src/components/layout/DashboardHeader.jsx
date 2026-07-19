@@ -6,7 +6,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 import axiosClient from '../../api/axiosClient';
 import logo from '../../assets/logo.png';
 import SendFeedbackModal from '../feedback/SendFeedbackModal';
-import { getMyNotificationsAPI, markAsReadAPI } from '../../services/notification';
+import { getMyNotificationsAPI, markAsReadAPI, markAllAsReadAPI } from '../../services/notification';
 
 export default function DashboardHeader({ user, profile, navLinks, logout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -185,6 +185,15 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
     };
   }, []);
 
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsReadAPI();
+      loadNotifications();
+    } catch (e) {
+      console.error('Failed to mark all notifications as read:', e);
+    }
+  };
+
   const handleNotificationClick = async (noti) => {
     setNotificationOpen(false);
     if (noti.notiId) {
@@ -337,7 +346,16 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
             {notificationOpen && (
               <div className="avatar-dropdown-menu" style={{ width: '320px', right: 0, paddingBottom: 0 }}>
                 <div className="avatar-dropdown-header d-flex justify-content-between align-items-center">
-                  <span>Notifications ({pendingNotifications.length})</span>
+                  <span className="fw-bold">Notifications ({pendingNotifications.length})</span>
+                  {pendingNotifications.length > 0 && (
+                    <button 
+                      className="btn btn-link p-0 text-decoration-none small text-primary fw-semibold"
+                      style={{ fontSize: '11px', cursor: 'pointer' }}
+                      onClick={handleMarkAllAsRead}
+                    >
+                      Đánh dấu tất cả đã đọc
+                    </button>
+                  )}
                 </div>
                 <div className="avatar-dropdown-divider" style={{ marginBottom: 0 }} />
                 
@@ -377,7 +395,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                             {noti.content 
                               ? noti.content 
                               : isUpgrade 
-                                ? `Upgrade request to ${noti.requestedRole.replace('_', ' ')} has been approved. Click here to activate your role!`
+                                ? `Upgrade request to ${noti.requestedRole ? noti.requestedRole.replace('_', ' ') : 'new role'} has been approved. Click here to activate your role!`
                                 : noti.type === 'FRIEND_REQUEST' 
                                   ? 'sent you a connection request.'
                                   : `Invited you to ride ${noti.horseName} at tournament ${noti.tournamentName}`

@@ -266,3 +266,37 @@ export async function toggleUserStatusAPI(id, enabled) {
     throw new Error(errMsg, { cause: error });
   }
 }
+
+// Blacklist Management APIs
+export async function getAdminBlacklistsAPI(status = 'ALL', targetType = 'ALL') {
+  try {
+    const response = await axiosClient.get('/admin/blacklist', {
+      params: { status, targetType }
+    });
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể tải danh sách Blacklist.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function addAdminBlacklistAPI(data) {
+  try {
+    const response = await axiosClient.post('/admin/blacklist', data);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể đưa đối tượng vào Blacklist.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
+export async function unbanAdminBlacklistAPI(id, reason) {
+  try {
+    const response = await axiosClient.put(`/admin/blacklist/${id}/unban`, { reason });
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể thực hiện gỡ cấm (Unban).';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+

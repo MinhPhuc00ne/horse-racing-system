@@ -13,6 +13,7 @@ import BreedsPanel from './components/BreedsPanel';
 import WithdrawalsPanel from './components/WithdrawalsPanel';
 import RacesPanel from './components/RacesPanel';
 import FeedbacksPanel from './components/FeedbacksPanel';
+import BlacklistPanel from './components/BlacklistPanel';
 import SpectatorWallet from '../../components/Spectator/SpectatorWallet';
 
 const adminNavLinks = [
@@ -23,7 +24,8 @@ const adminNavLinks = [
   { path: '/admin/tournamentregistrations', label: 'Tournament Registrations', icon: 'flag' },
   { path: '/admin/transactions', label: 'Transactions (Admin)', icon: 'account_balance' },
   { path: '/admin/my-wallet', label: 'My Wallet', icon: 'payments' },
-  { path: '/admin/feedbacks', label: 'Feedbacks', icon: 'rate_review' }
+  { path: '/admin/feedbacks', label: 'Feedbacks', icon: 'rate_review' },
+  { path: '/admin/blacklist', label: 'Blacklist Management', icon: 'block' }
 ];
 
 export default function AdminPage() {
@@ -46,6 +48,7 @@ export default function AdminPage() {
         <Route path="my-wallet" element={<SpectatorWallet />} />
         <Route path="tournamentregistrations" element={<RacesPanel />} />
         <Route path="feedbacks" element={<FeedbacksPanel />} />
+        <Route path="blacklist" element={<BlacklistPanel />} />
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
       </Routes>

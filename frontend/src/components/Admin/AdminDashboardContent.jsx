@@ -7,6 +7,10 @@ import DataTable from '../ui/DataTable';
 import RevenueAreaChart from './charts/RevenueAreaChart';
 import RoleDonutChart from './charts/RoleDonutChart';
 import BetVolumeBarChart from './charts/BetVolumeBarChart';
+import BreedPieChart from './charts/BreedPieChart';
+import RaceStatusBarChart from './charts/RaceStatusBarChart';
+import TransactionTrendChart from './charts/TransactionTrendChart';
+import TournamentPrizeChart from './charts/TournamentPrizeChart';
 
 export default function AdminDashboardContent() {
   const navigate = useNavigate();
@@ -38,7 +42,7 @@ export default function AdminDashboardContent() {
 
   const recentRequests = upgradeRequests || [];
 
-  // Default mock data if DB data is empty
+  // Data for charts
   let revenueData = dashboardData?.revenueData || [];
   if (revenueData.length === 0 || revenueData.every(d => d.val === 0)) {
     revenueData = [
@@ -60,10 +64,10 @@ export default function AdminDashboardContent() {
   }
 
   const roleDistribution = dashboardData?.roleDistribution || {};
-
-  const formatVND = (value) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-  };
+  const breedDistribution = dashboardData?.breedDistribution || {};
+  const raceStatusDistribution = dashboardData?.raceStatusDistribution || {};
+  const transactionTrendData = dashboardData?.transactionTrendData || [];
+  const tournamentPrizesData = dashboardData?.tournamentPrizesData || [];
 
   const requestColumns = [
     {
@@ -104,7 +108,7 @@ export default function AdminDashboardContent() {
           Admin Administration System
         </h2>
         <p className="text-secondary small m-0">
-          Overview of tournament statistics, user account management, and withdrawal transactions.
+          Overview of tournament statistics, user account management, and financial charts.
         </p>
       </div>
 
@@ -212,7 +216,7 @@ export default function AdminDashboardContent() {
 
           </div>
 
-          {/* Charts Section */}
+          {/* Primary Charts Section (Row 1) */}
           <div className="row g-4 mb-4">
             {/* Revenue Trend Area Chart */}
             <div className="col-12 col-xl-6">
@@ -257,6 +261,65 @@ export default function AdminDashboardContent() {
 
                 <div className="position-relative mt-3" style={{ height: '220px' }}>
                   <BetVolumeBarChart data={betVolumeData} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Secondary Extended Charts Section (Row 2 - 4 New Charts) */}
+          <div className="row g-4 mb-4">
+            {/* Chart 1: Deposit vs Withdraw Financial Trend */}
+            <div className="col-12 col-md-6 col-xl-3">
+              <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
+                <div>
+                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Nạp & Rút Tiền Ví</h3>
+                  <p className="text-secondary small mb-2">So sánh dòng tiền Nạp vs Rút</p>
+                </div>
+
+                <div className="position-relative mt-2" style={{ height: '230px' }}>
+                  <TransactionTrendChart data={transactionTrendData} />
+                </div>
+              </div>
+            </div>
+
+            {/* Chart 2: Horse Breeds Distribution */}
+            <div className="col-12 col-md-6 col-xl-3">
+              <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
+                <div>
+                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Phân Bổ Giống Ngựa</h3>
+                  <p className="text-secondary small mb-2">Tỷ lệ các giống ngựa trên hệ thống</p>
+                </div>
+
+                <div className="d-flex align-items-center justify-content-center mt-2" style={{ height: '230px' }}>
+                  <BreedPieChart breedDistribution={breedDistribution} />
+                </div>
+              </div>
+            </div>
+
+            {/* Chart 3: Race Status Breakdown */}
+            <div className="col-12 col-md-6 col-xl-3">
+              <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
+                <div>
+                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Trạng Thái Trận Đấu</h3>
+                  <p className="text-secondary small mb-2">Phân bổ trạng thái các vòng đua</p>
+                </div>
+
+                <div className="position-relative mt-2" style={{ height: '230px' }}>
+                  <RaceStatusBarChart raceStatusDistribution={raceStatusDistribution} />
+                </div>
+              </div>
+            </div>
+
+            {/* Chart 4: Top Tournaments by Prize Pool */}
+            <div className="col-12 col-md-6 col-xl-3">
+              <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
+                <div>
+                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Top Giải Thưởng</h3>
+                  <p className="text-secondary small mb-2">Các giải đấu có giải thưởng lớn nhất</p>
+                </div>
+
+                <div className="position-relative mt-2" style={{ height: '230px' }}>
+                  <TournamentPrizeChart data={tournamentPrizesData} />
                 </div>
               </div>
             </div>
