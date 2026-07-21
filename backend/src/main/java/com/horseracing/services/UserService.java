@@ -31,6 +31,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers(String search, Role role, Boolean enabled) {
         return userRepository.findAll().stream()
+                .filter(user -> user.getRole() != Role.ADMIN)
                 .filter(user -> role == null || user.getRole() == role)
                 .filter(user -> enabled == null || user.isEnabled() == enabled)
                 .filter(user -> search == null || search.isBlank() ||
@@ -55,6 +56,10 @@ public class UserService {
         }
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username is already registered");
+        }
+
+        if (request.getRole() == Role.ADMIN) {
+            throw new RuntimeException("Creating account with ADMIN role is not allowed.");
         }
 
         Role role = request.getRole() != null ? request.getRole() : Role.SPECTATOR;
@@ -85,6 +90,10 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
 
+        if (user.getRole() == Role.ADMIN || request.getRole() == Role.ADMIN) {
+            throw new RuntimeException("Modifying account with ADMIN role is not allowed.");
+        }
+
         if (request.getFullName() != null) user.setFullName(request.getFullName());
         if (request.getPhone() != null) user.setPhone(request.getPhone());
         if (request.getAvatarUrl() != null) user.setAvatarUrl(request.getAvatarUrl());
@@ -107,6 +116,10 @@ public class UserService {
     public void deleteUser(Integer id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+
+        if (user.getRole() == Role.ADMIN) {
+            throw new RuntimeException("Deleting account with ADMIN role is not allowed.");
+        }
 
         try {
             // Delete associated profiles first to avoid simple FK violations
