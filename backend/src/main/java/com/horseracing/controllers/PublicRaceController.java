@@ -1,12 +1,16 @@
 package com.horseracing.controllers;
 
 import com.horseracing.dto.response.*;
+import com.horseracing.entities.User;
 import com.horseracing.repositories.RaceParticipantRepository;
+import com.horseracing.repositories.UserRepository;
 import com.horseracing.services.LiveRaceService;
 import com.horseracing.services.RaceService;
 import com.horseracing.services.TournamentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -22,10 +26,15 @@ public class PublicRaceController {
     private final RaceService raceService;
     private final RaceParticipantRepository raceParticipantRepository;
     private final LiveRaceService liveRaceService;
+    private final UserRepository userRepository;
 
     @GetMapping("/tournaments")
-    public ResponseEntity<List<TournamentResponse>> getAllTournaments() {
-        return ResponseEntity.ok(tournamentService.getAllTournaments());
+    public ResponseEntity<List<TournamentResponse>> getAllTournaments(Authentication authentication) {
+        User user = null;
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+        }
+        return ResponseEntity.ok(tournamentService.getAllTournaments(user));
     }
 
     @GetMapping("/tournaments/{id}")

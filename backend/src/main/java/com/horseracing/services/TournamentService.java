@@ -16,12 +16,15 @@ import com.horseracing.entities.User;
 import com.horseracing.entities.enums.Role;
 import com.horseracing.entities.Race;
 import com.horseracing.entities.RaceTrack;
+import com.horseracing.repositories.BetRepository;
 import com.horseracing.repositories.RaceParticipantRepository;
 import com.horseracing.repositories.RaceRegistrationRepository;
 import com.horseracing.repositories.RaceRepository;
 import com.horseracing.repositories.RaceTrackRepository;
 import com.horseracing.repositories.TournamentRepository;
 import com.horseracing.repositories.UserRepository;
+import java.util.Collections;
+import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,6 +38,7 @@ public class TournamentService {
     private final RaceTrackRepository raceTrackRepository;
     private final RaceRegistrationRepository raceRegistrationRepository;
     private final RaceParticipantRepository raceParticipantRepository;
+    private final BetRepository betRepository;
 
     @Transactional
     public TournamentResponse createTournament(CreateTournamentRequest request) {
@@ -158,7 +162,31 @@ public class TournamentService {
 
     @Transactional(readOnly = true)
     public List<TournamentResponse> getAllTournaments() {
-        return tournamentRepository.findAll().stream()
+        return getAllTournaments(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TournamentResponse> getAllTournaments(User user) {
+        List<Tournament> tournaments = tournamentRepository.findAll();
+
+        if (user != null && (user.getRole() == Role.ADMIN || user.getRole() == Role.RACE_REFEREE)) {
+            return tournaments.stream()
+                    .map(TournamentResponse::fromEntity)
+                    .collect(Collectors.toList());
+        }
+
+        Set<Integer> userBetTournamentIds = (user != null)
+                ? betRepository.findTournamentIdsByUserId(user.getId())
+                : Collections.emptySet();
+
+        return tournaments.stream()
+                .filter(t -> {
+                    String status = t.getTournamentStatus();
+                    if (!"Cancelled".equalsIgnoreCase(status)) {
+                        return true;
+                    }
+                    return userBetTournamentIds.contains(t.getId());
+                })
                 .map(TournamentResponse::fromEntity)
                 .collect(Collectors.toList());
     }
