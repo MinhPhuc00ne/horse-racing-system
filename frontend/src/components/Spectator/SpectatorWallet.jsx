@@ -482,16 +482,7 @@ export default function SpectatorWallet({ hideHeader = false }) {
                 <span className="material-symbols-outlined text-success">history</span>
                 Transaction History
               </h3>
-              <div className="d-flex gap-2">
-                <button onClick={handleExportPdf} className="btn btn-sm btn-outline-danger d-flex align-items-center shadow-sm" style={{ fontSize: '12px' }}>
-                  <span className="material-symbols-outlined me-1" style={{ fontSize: '16px' }}>picture_as_pdf</span>
-                  PDF
-                </button>
-                <button onClick={handleExportExcel} className="btn btn-sm btn-outline-success d-flex align-items-center shadow-sm" style={{ fontSize: '12px' }}>
-                  <span className="material-symbols-outlined me-1" style={{ fontSize: '16px' }}>table_view</span>
-                  Excel
-                </button>
-              </div>
+
             </div>
 
             {loadingHistory ? (

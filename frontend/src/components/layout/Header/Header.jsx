@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 import { Navbar, Nav, Container, Badge, NavDropdown, Dropdown } from 'react-bootstrap';
 import { FiBell, FiSettings, FiLogOut, FiCheckSquare, FiAlertCircle, FiInfo, FiPlusCircle, FiTrendingUp, FiCreditCard } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,36 @@ const Header = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useContext(NotificationContext);
   const navigate = useNavigate();
   const username = user?.fullName || user?.name || user?.username || user?.email || '';
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profileHover, setProfileHover] = useState(false);
+  const [logoutHover, setLogoutHover] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleProfileClick = () => {
+    setDropdownOpen(false);
+    if (user?.role === 'HORSE_OWNER') {
+      navigate('/owner/profile');
+    } else if (user?.role === 'JOCKEY') {
+      navigate('/jockey/profile');
+    } else if (user?.role === 'SPECTATOR') {
+      navigate('/spectators/profile');
+    } else if (user?.role === 'ADMIN') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/spectators/profile');
+    }
+  };
 
   const getNotificationIcon = (type) => {
     switch (type) {
@@ -174,45 +204,97 @@ const Header = () => {
                 {/* Cài đặt */}
                 <FiSettings size={20} className="text-white-50 cursor-pointer hover-white" />
 
-                {/* PHẦN USER: HIỂN THỊ ĐỘNG TÊN TỪ DATABASE/GOOGLE */}
-                <div className="d-flex align-items-center gap-2 ms-2 ps-3 border-start border-secondary">
-                  <div className="text-end d-none d-sm-block">
-                    <div className="text-white-50" style={{ fontSize: '0.7rem' }}>
-                      Welcome back,
+                {/* PHẦN USER ĐỒNG BỘ VỚI PROFILE NAVBAR */}
+                <div className="d-flex align-items-center gap-2 ms-2 ps-3 border-start border-secondary position-relative" ref={dropdownRef}>
+                  <div 
+                    className="d-flex align-items-center gap-3 cursor-pointer" 
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                  >
+                    <div className="d-flex flex-column text-end d-none d-sm-flex">
+                      <span className="fs-7 fw-bold text-white lh-sm">
+                        {user?.fullName || 'User Profile'}
+                      </span>
+                      <span className="fw-bold text-white-50 text-uppercase" style={{ fontSize: '9px', letterSpacing: '0.05em' }}>
+                        {user?.role || 'User'}
+                      </span>
                     </div>
-                    <div className="text-white fw-bold" style={{ fontSize: '0.85rem' }}>
-                      {username}
+                    <div className="rounded-circle overflow-hidden border d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', borderColor: 'rgba(255,255,255,0.2)' }}>
+                      <img
+                        alt="User Profile Avatar"
+                        className="w-100 h-100 object-fit-cover"
+                        src={user?.avatarUrl || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80"}
+                      />
                     </div>
                   </div>
 
-                  {/* Avatar hình tròn chứa chữ cái đầu */}
-                  <NavDropdown
-                    title={
-                      <div 
-                        className="d-flex align-items-center justify-content-center rounded-circle fw-bold shadow-sm"
-                        style={{ 
-                          width: '38px', 
-                          height: '38px', 
-                          background: 'linear-gradient(135deg, #198754 0%, #ffc107 100%)',
-                          color: '#fff',
-                          fontSize: '1rem',
-                          border: '2px solid rgba(255,255,255,0.1)'
+                  {dropdownOpen && (
+                    <div 
+                      className="position-absolute" 
+                      style={{
+                        top: 'calc(100% + 10px)',
+                        right: 0,
+                        width: '220px',
+                        backgroundColor: '#ffffff',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+                        border: '1px solid rgba(0, 0, 0, 0.08)',
+                        padding: '12px 0',
+                        zIndex: 1060,
+                        animation: 'fadeInDown 0.2s ease-out'
+                      }}
+                    >
+                      <div style={{ padding: '4px 16px 8px 16px', fontSize: '12px', fontWeight: '600', color: '#718096' }}>
+                        Account Actions
+                      </div>
+                      <button 
+                        onClick={handleProfileClick} 
+                        onMouseEnter={() => setProfileHover(true)}
+                        onMouseLeave={() => setProfileHover(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          width: '100%',
+                          padding: '10px 16px',
+                          fontSize: '14.5px',
+                          fontWeight: '500',
+                          color: profileHover ? '#1a202c' : '#2d3748',
+                          backgroundColor: profileHover ? '#f7fafc' : 'transparent',
+                          border: 'none',
+                          background: 'none',
+                          textAlign: 'left',
+                          cursor: 'pointer'
                         }}
                       >
-                        {getAvatarLetter(username || 'G')}
-                      </div>
-                    }
-                    id="user-dropdown"
-                    align="end"
-                    className="no-caret"
-                  >
-                    <NavDropdown.Header>Account Actions</NavDropdown.Header>
-                    <NavDropdown.Item href="#profile">My Profile</NavDropdown.Item>
-                    <NavDropdown.Divider />
-                    <NavDropdown.Item onClick={handleLogout} className="text-danger d-flex align-items-center gap-2">
-                      <FiLogOut /> Logout
-                    </NavDropdown.Item>
-                  </NavDropdown>
+                        <span className="material-symbols-outlined me-2" style={{ fontSize: '18px' }}>person</span>
+                        My Profile
+                      </button>
+                      
+                      <div style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '8px 0' }} />
+                      
+                      <button 
+                        onClick={handleLogout} 
+                        onMouseEnter={() => setLogoutHover(true)}
+                        onMouseLeave={() => setLogoutHover(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          width: '100%',
+                          padding: '10px 16px',
+                          fontSize: '14.5px',
+                          fontWeight: '500',
+                          color: '#dc3545',
+                          backgroundColor: logoutHover ? '#fff5f5' : 'transparent',
+                          border: 'none',
+                          background: 'none',
+                          textAlign: 'left',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <span className="material-symbols-outlined me-2 text-danger" style={{ fontSize: '18px' }}>logout</span>
+                        Logout
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             ) : (

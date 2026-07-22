@@ -238,7 +238,7 @@ export default function AdminDashboardContent() {
             </div>
 
             {/* Active User Distribution Donut Chart */}
-            <div className="col-12 col-md-6 col-xl-3">
+            <div className="col-12 col-md-6 col-xl-6">
               <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
                 <div>
                   <h3 className="ho-font-epilogue fs-5 fw-bold m-0 text-dark">User Breakdown</h3>
@@ -247,20 +247,6 @@ export default function AdminDashboardContent() {
 
                 <div className="d-flex align-items-center justify-content-center" style={{ height: '220px' }}>
                   <RoleDonutChart roleDistribution={roleDistribution} />
-                </div>
-              </div>
-            </div>
-
-            {/* Betting Activity Volume Column Chart */}
-            <div className="col-12 col-md-6 col-xl-3">
-              <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
-                <div>
-                  <h3 className="ho-font-epilogue fs-5 fw-bold m-0 text-dark">Betting Volume</h3>
-                  <p className="text-secondary small mb-3">Total placed bets per tournament</p>
-                </div>
-
-                <div className="position-relative mt-3" style={{ height: '220px' }}>
-                  <BetVolumeBarChart data={betVolumeData} />
                 </div>
               </div>
             </div>
@@ -386,9 +372,7 @@ export default function AdminDashboardContent() {
                   </div>
                 </div>
 
-                <div className="mt-4 p-3 rounded bg-light border text-center text-secondary small">
-                  Current system account is operating in local development mode (**LOCAL_DEV**).
-                </div>
+
               </div>
             </div>
 

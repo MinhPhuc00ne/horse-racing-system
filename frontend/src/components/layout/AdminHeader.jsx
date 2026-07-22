@@ -72,7 +72,7 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
             </h1>
             <div
               className="d-flex align-items-center d-xl-none cursor-pointer"
-              onClick={() => navigate('/admin/dashboard')}
+              onClick={() => navigate('/')}
               style={{ cursor: 'pointer' }}
             >
               <img src={logo} alt="EquineElite Logo" style={{ height: '48px', width: 'auto' }} />
