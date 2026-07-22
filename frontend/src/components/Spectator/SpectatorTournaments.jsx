@@ -115,23 +115,23 @@ export default function SpectatorTournaments() {
   const handlePlaceBet = async (e) => {
     if (e) e.preventDefault();
     if (!user) {
-      alert("Vui lòng đăng nhập để đặt cược.");
+      alert("Please log in to place a bet.");
       sessionStorage.setItem('postLoginRedirect', '/tournaments');
       navigate('/login?redirect=/tournaments');
       return;
     }
     if (!selectedParticipant) {
-      alert("Vui lòng chọn ngựa và nài ngựa để đặt cược.");
+      alert("Please select a horse and jockey to place a bet.");
       return;
     }
     const amountVal = parseFloat(betAmount);
     if (isNaN(amountVal) || amountVal <= 0) {
-      alert("Vui lòng nhập số tiền đặt cược hợp lệ.");
+      alert("Please enter a valid bet amount.");
       return;
     }
 
     if (amountVal > walletBalance) {
-      alert("Số dư ví không đủ để đặt cược. Vui lòng nạp thêm tiền.");
+      alert("Insufficient wallet balance. Please deposit more funds.");
       return;
     }
 
@@ -143,12 +143,12 @@ export default function SpectatorTournaments() {
         amount: amountVal,
         betType: betType
       });
-      alert("Đặt cược thành công!");
+      alert("Bet placed successfully!");
       setBetAmount('');
       setSelectedParticipant(null);
       await loadWalletAndBets();
     } catch (err) {
-      alert(err.message || "Đặt cược thất bại. Vui lòng thử lại.");
+      alert(err.message || "Failed to place bet. Please try again.");
     } finally {
       setPlacingBet(false);
     }
@@ -174,19 +174,19 @@ export default function SpectatorTournaments() {
 
   const translateStatus = (status) => {
     switch (status?.toUpperCase()) {
-      case 'UPCOMING': return 'Sắp mở cược';
-      case 'OPEN_FOR_REGISTER': return 'Đang mở cược';
-      case 'CLOSED_FOR_REGISTER': return 'Đóng cược';
-      case 'ACTIVE': return 'Đang cược';
-      case 'FINISHED': return 'Đã trả thưởng';
-      default: return status || 'Không rõ';
+      case 'UPCOMING': return 'Upcoming';
+      case 'OPEN_FOR_REGISTER': return 'Open';
+      case 'CLOSED_FOR_REGISTER': return 'Closed';
+      case 'ACTIVE': return 'Active';
+      case 'FINISHED': return 'Finished';
+      default: return status || 'Unknown';
     }
   };
 
   const translateBetType = (type) => {
     switch (type) {
-      case 'WIN': return 'Hạng 1 (WIN)';
-      case 'PLACE': return 'Hạng 1 hoặc Hạng 2 (PLACE)';
+      case 'WIN': return '1st Place (WIN)';
+      case 'PLACE': return '1st or 2nd Place (PLACE)';
       case 'SHOW': return 'Top 3 (SHOW)';
       default: return type;
     }
@@ -219,16 +219,16 @@ export default function SpectatorTournaments() {
       {/* Title */}
       <div className="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-          <h2 className="fs-3 fw-bold text-dark mb-1">Giải Đấu & Vòng Đua</h2>
-          <p className="text-secondary small m-0">Tra cứu thông tin các giải đua đang diễn ra, đặt cược Pari-Mutuel và theo dõi giả lập trực tiếp.</p>
+          <h2 className="fs-3 fw-bold text-dark mb-1">Tournaments & Races</h2>
+          <p className="text-secondary small m-0">Look up ongoing tournaments, place Pari-Mutuel bets, and watch live simulations.</p>
         </div>
         
         {/* Wallet balance pill */}
         <div className="d-flex align-items-center gap-2 bg-white px-3 py-2 rounded shadow-sm border border-warning-subtle">
           <span className="material-symbols-outlined text-warning" style={{ fontSize: '20px' }}>account_balance_wallet</span>
           <div>
-            <span className="text-secondary d-block" style={{ fontSize: '10px', lineHeight: 1 }}>Số dư khả dụng</span>
-            <strong className="text-success small">{walletBalance.toLocaleString('vi-VN')} VNĐ</strong>
+            <span className="text-secondary d-block" style={{ fontSize: '10px', lineHeight: 1 }}>Available Balance</span>
+            <strong className="text-success small">{walletBalance.toLocaleString('en-US')} VND</strong>
           </div>
         </div>
       </div>
@@ -246,7 +246,7 @@ export default function SpectatorTournaments() {
                 <input 
                   type="text" 
                   className="header-search-input w-100" 
-                  placeholder="Tìm tên giải đấu, địa điểm..."
+                  placeholder="Search tournament name, location..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -260,11 +260,11 @@ export default function SpectatorTournaments() {
                   style={{ borderRadius: '20px', border: '1px solid #e0e0e0', padding: '8px 16px', color: '#495057', fontSize: '14px' }}
                 >
                   <span className="text-truncate text-start fw-medium d-flex align-items-center gap-2" style={{flex: 1}}>
-                    {statusFilter === '' && 'Tất cả trạng thái'}
-                    {statusFilter === 'UPCOMING' && <><span className="d-inline-block rounded-circle bg-warning" style={{width:'8px',height:'8px'}}></span> Sắp mở cược</>}
-                    {statusFilter === 'OPEN_FOR_REGISTER' && <><span className="d-inline-block rounded-circle bg-success" style={{width:'8px',height:'8px'}}></span> Đang mở cược</>}
-                    {statusFilter === 'ACTIVE' && <><span className="d-inline-block rounded-circle bg-danger" style={{width:'8px',height:'8px'}}></span> Đóng cược</>}
-                    {statusFilter === 'FINISHED' && <><span className="d-inline-block rounded-circle bg-secondary" style={{width:'8px',height:'8px'}}></span> Đã trả thưởng</>}
+                    {statusFilter === '' && 'All Statuses'}
+                    {statusFilter === 'UPCOMING' && <><span className="d-inline-block rounded-circle bg-warning" style={{width:'8px',height:'8px'}}></span> Upcoming</>}
+                    {statusFilter === 'OPEN_FOR_REGISTER' && <><span className="d-inline-block rounded-circle bg-success" style={{width:'8px',height:'8px'}}></span> Open</>}
+                    {statusFilter === 'ACTIVE' && <><span className="d-inline-block rounded-circle bg-danger" style={{width:'8px',height:'8px'}}></span> Closed</>}
+                    {statusFilter === 'FINISHED' && <><span className="d-inline-block rounded-circle bg-secondary" style={{width:'8px',height:'8px'}}></span> Finished</>}
                   </span>
                   <span className="material-symbols-outlined text-muted" style={{fontSize: '20px'}}>expand_more</span>
                 </button>
@@ -275,31 +275,31 @@ export default function SpectatorTournaments() {
                       <li>
                         <button className={`dropdown-item rounded mb-1 d-flex align-items-center py-2 ${statusFilter === '' ? 'bg-light text-dark fw-bold' : ''}`} type="button" onClick={() => { setStatusFilter(''); setIsStatusDropdownOpen(false); }}>
                           <span className="d-inline-block rounded-circle me-2" style={{width:'8px',height:'8px'}}></span>
-                          Tất cả trạng thái
+                          All Statuses
                         </button>
                       </li>
                       <li>
                         <button className={`dropdown-item rounded mb-1 d-flex align-items-center py-2 ${statusFilter === 'UPCOMING' ? 'bg-light text-dark fw-bold' : ''}`} type="button" onClick={() => { setStatusFilter('UPCOMING'); setIsStatusDropdownOpen(false); }}>
                           <span className="d-inline-block rounded-circle bg-warning me-2" style={{width:'8px',height:'8px'}}></span>
-                          Sắp mở cược
+                          Upcoming
                         </button>
                       </li>
                       <li>
                         <button className={`dropdown-item rounded mb-1 d-flex align-items-center py-2 ${statusFilter === 'OPEN_FOR_REGISTER' ? 'bg-light text-dark fw-bold' : ''}`} type="button" onClick={() => { setStatusFilter('OPEN_FOR_REGISTER'); setIsStatusDropdownOpen(false); }}>
                           <span className="d-inline-block rounded-circle bg-success me-2" style={{width:'8px',height:'8px'}}></span>
-                          Đang mở cược
+                          Open
                         </button>
                       </li>
                       <li>
                         <button className={`dropdown-item rounded mb-1 d-flex align-items-center py-2 ${statusFilter === 'ACTIVE' ? 'bg-light text-dark fw-bold' : ''}`} type="button" onClick={() => { setStatusFilter('ACTIVE'); setIsStatusDropdownOpen(false); }}>
                           <span className="d-inline-block rounded-circle bg-danger me-2" style={{width:'8px',height:'8px'}}></span>
-                          Đóng cược
+                          Closed
                         </button>
                       </li>
                       <li>
                         <button className={`dropdown-item rounded d-flex align-items-center py-2 ${statusFilter === 'FINISHED' ? 'bg-light text-dark fw-bold' : ''}`} type="button" onClick={() => { setStatusFilter('FINISHED'); setIsStatusDropdownOpen(false); }}>
                           <span className="d-inline-block rounded-circle bg-secondary me-2" style={{width:'8px',height:'8px'}}></span>
-                          Đã trả thưởng
+                          Finished
                         </button>
                       </li>
                     </ul>
@@ -312,19 +312,19 @@ export default function SpectatorTournaments() {
             {loading ? (
               <div className="text-center py-5">
                 <div className="spinner-border text-success" role="status"></div>
-                <p className="text-secondary mt-2 small">Đang tải danh sách giải đấu...</p>
+                <p className="text-secondary mt-2 small">Loading tournament list...</p>
               </div>
             ) : filteredTournaments.length === 0 ? (
-              <div className="text-center py-5 text-secondary small">Không tìm thấy giải đấu nào phù hợp.</div>
+              <div className="text-center py-5 text-secondary small">No matching tournaments found.</div>
             ) : (
               <div className="table-responsive">
                 <table className="table ho-table">
                   <thead>
                     <tr>
-                      <th>Giải Đấu</th>
-                      <th>Địa Điểm</th>
-                      <th>Tổng Giải Thưởng</th>
-                      <th>Trạng Thái</th>
+                      <th>Tournament</th>
+                      <th>Location</th>
+                      <th>Total Prize</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -338,7 +338,7 @@ export default function SpectatorTournaments() {
                             </td>
                             <td>{t.location}</td>
                             <td className="fw-bold text-success">
-                              {t.totalPrize ? `${(t.totalPrize / 1000000).toLocaleString('vi-VN')}M` : '0M'}
+                              {t.totalPrize ? `${(t.totalPrize / 1000000).toLocaleString('en-US')}M` : '0M'}
                             </td>
                             <td>
                               <span className={`badge-custom ${getStatusBadgeClass(t.tournamentStatus)}`}>
@@ -365,25 +365,25 @@ export default function SpectatorTournaments() {
               <div className="animate-fade-in d-flex flex-column h-100">
                 <h3 className="form-section-title">
                   <span className="material-symbols-outlined text-success">flag</span>
-                  {selectedRace.raceTrackName || 'Chi tiết giải đấu'}
+                  {selectedRace.raceTrackName || 'Tournament Details'}
                 </h3>
 
                 {/* Race Quick Info */}
                 <div className="row g-2 mb-3 p-3 rounded" style={{ background: '#f8f9fa', border: '1px solid #e9ecef' }}>
                   <div className="col-6">
-                    <span className="small text-secondary me-1">Ngày đua:</span>
-                    <span className="fw-bold text-dark small">{selectedRace.raceDate || 'Chưa định ngày'}</span>
+                    <span className="small text-secondary me-1">Race Date:</span>
+                    <span className="fw-bold text-dark small">{selectedRace.raceDate || 'Undecided'}</span>
                   </div>
                   <div className="col-6">
-                    <span className="small text-secondary me-1">Giờ bắt đầu:</span>
-                    <span className="fw-bold text-dark small">{selectedRace.startTime || selectedRace.raceTime || 'Chưa định giờ'}</span>
+                    <span className="small text-secondary me-1">Start Time:</span>
+                    <span className="fw-bold text-dark small">{selectedRace.startTime || selectedRace.raceTime || 'Undecided'}</span>
                   </div>
                   <div className="col-6 mt-2">
-                    <span className="small text-secondary me-1">Khoảng cách:</span>
+                    <span className="small text-secondary me-1">Distance:</span>
                     <span className="fw-bold text-dark small">{selectedRace.distance}m</span>
                   </div>
                   <div className="col-6 mt-2">
-                    <span className="small text-secondary me-1">Bề mặt đường chạy:</span>
+                    <span className="small text-secondary me-1">Surface Type:</span>
                     <span className="fw-bold text-dark small">{selectedRace.surfaceType || 'Turf'}</span>
                   </div>
                 </div>
@@ -404,24 +404,24 @@ export default function SpectatorTournaments() {
                       <span className="material-symbols-outlined">
                         {selectedRace.status === 'FINISHED' ? 'photo_camera' : 'analytics'}
                       </span>
-                      {selectedRace.status === 'FINISHED' ? 'XEM ẢNH VỀ ĐÍCH (PHOTO FINISH)' : 'XEM MÔ PHỎNG TRỰC TIẾP (LIVE SIMULATION)'}
+                      {selectedRace.status === 'FINISHED' ? 'VIEW PHOTO FINISH' : 'VIEW LIVE SIMULATION'}
                     </button>
                   </div>
                 )}
 
                 {/* Participant list */}
-                <h4 className="fs-6 fw-bold text-dark mb-2">Danh sách thi đấu</h4>
+                <h4 className="fs-6 fw-bold text-dark mb-2">Participants</h4>
                 <p className="text-muted block mb-3" style={{ fontSize: '11px' }}>
-                  {isBettingClosed ? '❌ Cổng đặt cược đã đóng cho trận này.' : '👉 Chọn một nài ngựa dưới đây để tiến hành đặt cược:'}
+                  {isBettingClosed ? '❌ Betting is closed for this race.' : '👉 Select a jockey below to place a bet:'}
                 </p>
 
                 {loadingParticipants ? (
                   <div className="text-center py-4 flex-grow-1">
                     <div className="spinner-border spinner-border-sm text-success" role="status"></div>
-                    <p className="text-secondary small mt-2">Đang tải danh sách ngựa đua...</p>
+                    <p className="text-secondary small mt-2">Loading horse list...</p>
                   </div>
                 ) : participants.length === 0 ? (
-                  <div className="text-center py-4 text-secondary small flex-grow-1">Chưa có ngựa đua nào được đăng ký tham gia vòng đua này.</div>
+                  <div className="text-center py-4 text-secondary small flex-grow-1">No horses registered for this race yet.</div>
                 ) : (
                   <div className="d-flex flex-column gap-2 mb-4">
                     {participants.map(p => {
@@ -455,7 +455,7 @@ export default function SpectatorTournaments() {
                             <div>
                               <strong className="text-dark me-2">{p.horseName}</strong>
                               <span className="text-secondary small" style={{ fontSize: '11px' }}>
-                                Nài ngựa: {p.jockeyName}
+                                Jockey: {p.jockeyName}
                               </span>
                             </div>
                           </div>
@@ -470,17 +470,17 @@ export default function SpectatorTournaments() {
                   <div className="p-3 border rounded mb-4 animate-scale-up" style={{ backgroundColor: 'rgba(212, 175, 55, 0.05)', borderColor: 'var(--ho-accent-gold)' }}>
                     <h5 className="fw-bold text-dark fs-6 mb-3 d-flex align-items-center gap-2">
                       <span className="material-symbols-outlined text-warning">local_atm</span>
-                      Phiếu đặt cược Pari-Mutuel
+                      Pari-Mutuel Bet Slip
                     </h5>
                     
                     <div className="mb-2 text-dark small">
-                      Đặt cược cho ngựa: <strong className="text-success">{selectedParticipant.horseName}</strong>
+                      Bet on horse: <strong className="text-success">{selectedParticipant.horseName}</strong>
                     </div>
 
                     <form onSubmit={handlePlaceBet}>
                       <div className="row g-2 mb-3">
                         <div className="col-12">
-                          <label className="ho-input-label mb-1">Loại đặt cược</label>
+                          <label className="ho-input-label mb-1">Bet Type</label>
                           <div className="d-flex flex-column gap-2 mt-1">
                             <div 
                               className={`p-2 border rounded d-flex justify-content-between align-items-center ${betType === 'WIN' ? 'border-success bg-success bg-opacity-10 shadow-sm' : 'border-secondary bg-white opacity-75'}`}
@@ -488,8 +488,8 @@ export default function SpectatorTournaments() {
                               style={{ cursor: 'pointer', transition: 'all 0.2s' }}
                             >
                               <div>
-                                <span className="fw-bold text-dark d-block" style={{fontSize: '12px'}}>WIN (Chỉ Hạng 1)</span>
-                                <span className="text-secondary d-block mt-1" style={{fontSize: '10px'}}>Rủi ro cao • Tiền thưởng lớn nhất</span>
+                                <span className="fw-bold text-dark d-block" style={{fontSize: '12px'}}>WIN (1st Place Only)</span>
+                                <span className="text-secondary d-block mt-1" style={{fontSize: '10px'}}>High risk • Highest payout</span>
                               </div>
                             </div>
                             <div 
@@ -498,8 +498,8 @@ export default function SpectatorTournaments() {
                               style={{ cursor: 'pointer', transition: 'all 0.2s' }}
                             >
                               <div>
-                                <span className="fw-bold text-dark d-block" style={{fontSize: '12px'}}>PLACE (Hạng 1 hoặc 2)</span>
-                                <span className="text-secondary d-block mt-1" style={{fontSize: '10px'}}>Rủi ro vừa • Tiền thưởng trung bình</span>
+                                <span className="fw-bold text-dark d-block" style={{fontSize: '12px'}}>PLACE (1st or 2nd Place)</span>
+                                <span className="text-secondary d-block mt-1" style={{fontSize: '10px'}}>Medium risk • Average payout</span>
                               </div>
                             </div>
                             <div 
@@ -509,27 +509,27 @@ export default function SpectatorTournaments() {
                             >
                               <div>
                                 <span className="fw-bold text-dark d-block" style={{fontSize: '12px'}}>SHOW (Top 3)</span>
-                                <span className="text-secondary d-block mt-1" style={{fontSize: '10px'}}>Rủi ro thấp • Dễ trúng nhất (tiền thưởng ít)</span>
+                                <span className="text-secondary d-block mt-1" style={{fontSize: '10px'}}>Low risk • Easiest to win (low payout)</span>
                               </div>
                             </div>
                           </div>
                         </div>
                         
                         <div className="col-12 mt-2">
-                          <label className="ho-input-label mb-1">Số tiền đặt cược (VNĐ)</label>
+                          <label className="ho-input-label mb-1">Bet Amount (VND)</label>
                           <input 
                             type="number"
                             min="1000"
                             step="1000"
                             className="form-control form-control-sm"
-                            placeholder="Nhập số tiền đặt cược..."
+                            placeholder="Enter bet amount..."
                             value={betAmount}
                             onChange={(e) => setBetAmount(e.target.value)}
                             required
                           />
                           {selectedRace.tournamentMinBet && (
                             <span className="text-muted block mt-1" style={{ fontSize: '9px' }}>
-                              * Số tiền cược tối thiểu: {selectedRace.tournamentMinBet.toLocaleString('vi-VN')} VNĐ
+                              * Minimum bet amount: {selectedRace.tournamentMinBet.toLocaleString('en-US')} VND
                             </span>
                           )}
                         </div>
@@ -541,14 +541,14 @@ export default function SpectatorTournaments() {
                           className="ho-btn ho-btn-outline-secondary py-1 px-3 flex-grow-1 small"
                           onClick={() => setSelectedParticipant(null)}
                         >
-                          Hủy bỏ
+                          Cancel
                         </button>
                         <button 
                           type="submit" 
                           className="ho-btn ho-btn-gold-solid py-1 px-3 flex-grow-1 small"
                           disabled={placingBet || !betAmount}
                         >
-                          {placingBet ? 'Đang gửi...' : 'Xác nhận Đặt cược'}
+                          {placingBet ? 'Submitting...' : 'Confirm Bet'}
                         </button>
                       </div>
                     </form>
@@ -560,7 +560,7 @@ export default function SpectatorTournaments() {
                   <div className="mt-auto border-top pt-3">
                     <h5 className="fw-bold text-dark fs-6 mb-3 d-flex align-items-center gap-2">
                       <span className="material-symbols-outlined text-success" style={{ fontSize: '18px' }}>receipt_long</span>
-                      Vé cược của bạn trong trận này
+                      Your Bets in This Race
                     </h5>
                     
                     <div className="d-flex flex-column gap-2" style={{ maxHeight: '160px', overflowY: 'auto' }}>
@@ -569,7 +569,7 @@ export default function SpectatorTournaments() {
                           <div>
                             <strong className="text-dark small block">{bet.horseName}</strong>
                             <span className="text-secondary block mt-1" style={{ fontSize: '10px' }}>
-                              Cửa: <strong className="text-success">{bet.betType}</strong> | Tiền cược: {bet.amount?.toLocaleString('vi-VN')}đ
+                              Option: <strong className="text-success">{bet.betType}</strong> | Bet: {bet.amount?.toLocaleString('en-US')} VND
                             </span>
                           </div>
                           <div className="text-end">
@@ -579,11 +579,11 @@ export default function SpectatorTournaments() {
                               bet.status === 'REFUNDED' ? 'bg-secondary' :
                               'bg-warning text-dark'
                             } text-uppercase mb-1`} style={{ fontSize: '8px', display: 'block' }}>
-                              {bet.status === 'WON' ? 'Thắng' : bet.status === 'LOST' ? 'Thua' : bet.status === 'REFUNDED' ? 'Hoàn tiền' : 'Đang chờ'}
+                              {bet.status === 'WON' ? 'WON' : bet.status === 'LOST' ? 'LOST' : bet.status === 'REFUNDED' ? 'REFUNDED' : 'PENDING'}
                             </span>
                             {bet.status === 'WON' && (
                               <span className="text-success fw-bold block" style={{ fontSize: '10px' }}>
-                                +{bet.payoutAmount?.toLocaleString('vi-VN')} VNĐ
+                                +{bet.payoutAmount?.toLocaleString('en-US')} VND
                               </span>
                             )}
                           </div>
@@ -599,7 +599,7 @@ export default function SpectatorTournaments() {
                   info
                 </span>
                 <p className="text-secondary small">
-                  Chọn một giải đấu bên trái, bấm vào vòng đua để xem thông tin chi tiết, danh sách thi đấu và tiến hành đặt cược.
+                  Select a tournament on the left, then click a race round to view details, participants, and place bets.
                 </p>
               </div>
             )}
@@ -628,7 +628,7 @@ export default function SpectatorTournaments() {
                     photo_camera
                   </span>
                   <h4 className="fw-bold ho-font-epilogue" style={{ color: 'var(--ho-accent-gold)' }}>OFFICIAL PHOTO FINISH</h4>
-                  <p className="text-secondary text-center px-4">Hình ảnh phân định thắng thua của giải đấu <strong>{selectedRace?.tournamentName}</strong></p>
+                  <p className="text-secondary text-center px-4">Photo finish verification image for tournament <strong>{selectedRace?.tournamentName}</strong></p>
                 </div>
               </div>
             </div>

@@ -70,8 +70,8 @@ const Header = () => {
     return date.toLocaleDateString();
   };
 
-  // Logic xử lý Avatar: Lấy chữ cái đầu của tên
-  // Nếu là "Admin" -> "A", nếu là "Nguyễn Văn An" -> "N"
+  // Avatar logic: Get the first letter of name
+  // If "Admin" -> "A", if "John Doe" -> "J"
   const getAvatarLetter = (name) => {
     if (!name) return "?";
     return name.trim().charAt(0).toUpperCase();
@@ -80,7 +80,7 @@ const Header = () => {
   const handleLogout = () => {
     logout();
     localStorage.removeItem('username');
-    localStorage.removeItem('token'); // Nếu bạn có dùng token
+    localStorage.removeItem('token'); // Clear token if it exists
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     navigate('/login', { replace: true });
@@ -89,7 +89,7 @@ const Header = () => {
   return (
     <Navbar expand="md" variant="dark" className="py-2 shadow-sm" style={{ backgroundColor: '#112211', sticky: 'top', zIndex: 1050 }}>
       <Container fluid="lg">
-        {/* LOGO: Đổi từ Equine Elite Pro sang Horse Racing */}
+        {/* LOGO: Changed from Equine Elite Pro to Horse Racing */}
         <Navbar.Brand href="/" className="fw-bold d-flex align-items-center">
           <img src={logo} alt="EquineElite Logo" style={{ height: '48px', width: 'auto' }} />
         </Navbar.Brand>
@@ -97,7 +97,7 @@ const Header = () => {
         <Navbar.Toggle aria-controls="header-nav" />
 
         <Navbar.Collapse id="header-nav" className="justify-content-between">
-          {/* MENU CHÍNH Ở GIỮA */}
+          {/* MAIN MENU CENTER */}
             <Nav className="mx-auto gap-lg-4 text-uppercase fw-semibold" style={{ fontSize: '0.8rem' }}>
             <Nav.Link onClick={() => navigate('/tournaments')} className="text-white-50 cursor-pointer">Tournaments & Races</Nav.Link>
             <Nav.Link onClick={() => navigate('/live')} className="text-white-50 cursor-pointer">Live Simulation</Nav.Link>
@@ -112,11 +112,11 @@ const Header = () => {
             <Nav.Link href="#rankings" className="text-white-50 cursor-pointer">Ranking</Nav.Link>
           </Nav>
 
-          {/* CỤM TÍNH NĂNG BÊN PHẢI */}
+          {/* FEATURES SECTION RIGHT */}
           <div className="d-flex align-items-center gap-3">
             {user ? (
               <>
-                {/* Chuông thông báo */}
+                {/* Notification Bell */}
                 <Dropdown align="end" className="notification-dropdown">
                   <Dropdown.Toggle as="div" className="position-relative cursor-pointer hover-white d-flex align-items-center">
                     <FiBell size={20} className="text-white-50 hover-white" />
@@ -209,10 +209,10 @@ const Header = () => {
                   </Dropdown.Menu>
                 </Dropdown>
 
-                {/* Cài đặt */}
+                {/* Settings */}
                 <FiSettings size={20} className="text-white-50 cursor-pointer hover-white" />
 
-                {/* PHẦN USER ĐỒNG BỘ VỚI PROFILE NAVBAR */}
+                {/* USER PROFILE DROPDOWN */}
                 <div className="d-flex align-items-center gap-2 ms-2 ps-3 border-start border-secondary position-relative" ref={dropdownRef}>
                   <div 
                     className="d-flex align-items-center gap-3 cursor-pointer" 
@@ -333,7 +333,7 @@ const Header = () => {
         </Navbar.Collapse>
       </Container>
 
-      {/* Thêm một chút CSS inline để xử lý hiệu ứng hover */}
+      {/* Inline CSS helper for custom hover effects */}
       <style>{`
         .nav-link:hover { color: #fff !important; }
         .hover-white:hover { color: #fff !important; transition: 0.3s; }

@@ -111,7 +111,7 @@ public class RefereeService {
         // Auto-assign the demo race to the current referee so any logged-in referee can run it
         try {
             raceRepository.findAll().stream()
-                    .filter(r -> "Trận Giả Lập 4 Ngựa (Demo)".equalsIgnoreCase(r.getRaceName()))
+                    .filter(r -> "4-Horse Simulation Race (Demo)".equalsIgnoreCase(r.getRaceName()))
                     .filter(r -> races.stream().noneMatch(existing -> existing.getId().equals(r.getId())))
                     .forEach(r -> {
                         r.setReferee(referee);
@@ -160,8 +160,16 @@ public class RefereeService {
             throw new RuntimeException("You are not the assigned referee for this tournament");
         }
 
-        if (tournament.getRegistrationDeadline() != null && java.time.LocalDateTime.now().isAfter(tournament.getRegistrationDeadline())) {
-            throw new RuntimeException("Cannot cancel assignment after registration has closed");
+        if (!"Active".equalsIgnoreCase(tournament.getTournamentStatus()) && !"Upcoming".equalsIgnoreCase(tournament.getTournamentStatus())) {
+            throw new RuntimeException("Cannot cancel assignment because the tournament is not in Active/Upcoming state");
+        }
+
+        List<Race> racesToCancel = raceRepository.findByTournamentId(tournamentId);
+        boolean listLocked = racesToCancel.stream().anyMatch(r -> 
+                !"OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) && !"Upcoming".equalsIgnoreCase(r.getStatus()));
+        
+        if (listLocked) {
+            throw new RuntimeException("Cannot cancel assignment because the registration list has already been approved/locked by the Admin");
         }
 
         tournament.setReferee(null);
@@ -407,16 +415,10 @@ public class RefereeService {
             throw new RuntimeException("Race status must be OPEN_FOR_REGISTER, CLOSED_FOR_REGISTER, LOCKED_LIST, RUNNING, or FINISHED to start");
         }
 
-        // Clean up previous simulations and horse states for this race if any exist
+        // Prevent restarting the simulation if it has already been started
         List<RaceSimulation> oldSims = raceSimulationRepository.findByRaceId(raceId);
-        for (RaceSimulation oldSim : oldSims) {
-            List<RefereeFlag> flags = refereeFlagRepository.findBySimulationId(oldSim.getId());
-            refereeFlagRepository.deleteAll(flags);
-            
-            List<SimulationHorseState> states = simulationHorseStateRepository.findBySimulationId(oldSim.getId());
-            simulationHorseStateRepository.deleteAll(states);
-            
-            raceSimulationRepository.delete(oldSim);
+        if (!oldSims.isEmpty()) {
+            throw new RuntimeException("Simulation has already been started for this race. Restarting is not allowed.");
         }
 
         List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);

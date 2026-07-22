@@ -154,10 +154,10 @@ function App() {
             {customAlert && (
               <div className="custom-alert-overlay" onClick={() => setCustomAlert(null)}>
                 <div className="custom-alert-box" onClick={(e) => e.stopPropagation()}>
-                  <h3 className="custom-alert-title">Thông Báo</h3>
+                  <h3 className="custom-alert-title">Notification</h3>
                   <p className="custom-alert-message">{customAlert}</p>
                   <button className="custom-alert-btn" onClick={() => setCustomAlert(null)}>
-                    Đóng
+                    Close
                   </button>
                 </div>
               </div>

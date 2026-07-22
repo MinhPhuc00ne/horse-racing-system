@@ -142,7 +142,7 @@ export function HorseOwnerProvider({ children }) {
         try {
           registrationsData = await getMyRaceRegistrationsAPI();
         } catch (err) {
-          console.error('Không thể lấy danh sách đăng ký thi đấu từ API:', err);
+          console.error('Failed to get race registration list from API:', err);
         }
 
         const tournamentsData = await getTournamentsAPI();
@@ -152,7 +152,7 @@ export function HorseOwnerProvider({ children }) {
           try {
             races = await getTournamentRacesAPI(t.id);
           } catch (e) {
-            console.error('Lỗi khi tải vòng đua:', e);
+            console.error('Error loading tournament races:', e);
           }
 
           if (races && races.length > 0) {
@@ -206,7 +206,7 @@ export function HorseOwnerProvider({ children }) {
                 registeredHorses: Array.from(registeredHorsesSet),
                 myRegistration: myRegistration,
                 entryFee: t.entryFee,
-                refereeName: t.refereeName || 'Chưa phân công',
+                refereeName: t.refereeName || 'Not assigned',
                 trackShape: r.trackShape || 'STRAIGHT',
               });
             }
@@ -216,8 +216,8 @@ export function HorseOwnerProvider({ children }) {
               id: null,
               tournamentId: t.id,
               tournamentName: t.tournamentName,
-              location: t.location || 'Chưa xác định',
-              date: t.startDate || 'Chưa xác định',
+              location: t.location || 'TBD',
+              date: t.startDate || 'TBD',
               time: t.officialRaceTime ? t.officialRaceTime.substring(11, 16) : '09:00',
               trackType: `${t.surfaceType || 'Grass'} • Dist: 1200m`,
               prizePool: `${t.totalPrize ? t.totalPrize.toLocaleString() : '1,000,000'} VND`,
@@ -225,7 +225,7 @@ export function HorseOwnerProvider({ children }) {
               allowedClasses: t.allowedClasses,
               registeredHorses: [],
               entryFee: t.entryFee,
-              refereeName: t.refereeName || 'Chưa phân công',
+              refereeName: t.refereeName || 'Not assigned',
               trackShape: 'STRAIGHT',
             });
           }
@@ -247,7 +247,7 @@ export function HorseOwnerProvider({ children }) {
       // Load Race History
       setRaceHistory(initialRaceHistory);
     } catch (error) {
-      console.error('Lỗi khi tải dữ liệu chủ ngựa:', error);
+      console.error('Error loading horse owner data:', error);
     } finally {
       setLoading(false);
     }

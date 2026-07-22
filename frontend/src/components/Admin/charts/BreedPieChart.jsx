@@ -36,7 +36,7 @@ export default function BreedPieChart({ breedDistribution }) {
           ))}
         </Pie>
         <Tooltip 
-          formatter={(val) => [`${val} con`, 'Số lượng']}
+          formatter={(val) => [`${val}`, 'Count']}
           contentStyle={{ backgroundColor: '#212529', color: '#fff', borderRadius: '6px', fontSize: '11px' }}
         />
         <Legend 

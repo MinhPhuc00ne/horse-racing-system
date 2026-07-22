@@ -6,7 +6,7 @@ import { FaCheck, FaTimes, FaUserCheck, FaInfoCircle, FaCheckCircle, FaSearch, F
 const mockRequests = [
   {
     id: 10001,
-    fullName: "Trần Minh Quân",
+    fullName: "John Chen",
     userEmail: "quan.tm@gmail.com",
     requestedRole: "JOCKEY",
     status: "PENDING",
@@ -16,13 +16,13 @@ const mockRequests = [
     weight: 55,
     height: 165,
     licenseNumber: "JC-88291",
-    notes: "Tôi đã có 3 năm kinh nghiệm đua ngựa phong trào.",
+    notes: "I have 3 years of experience in amateur horse racing.",
     documentUrls: ["https://images.unsplash.com/photo-1598974357801-cbca100e6563?q=80&w=600"],
     createdAt: "2026-06-30T10:00:00"
   },
   {
     id: 10002,
-    fullName: "Lê Hoàng Long",
+    fullName: "Larry Cole",
     userEmail: "long.lh@yahoo.com",
     requestedRole: "HORSE_OWNER",
     status: "PENDING",
@@ -31,13 +31,13 @@ const mockRequests = [
     identityNumber: "010085005678",
     stableName: "Golden Stallion Farm",
     stableAddress: "Ba Vi, Hanoi",
-    notes: "Muốn tham gia để đăng ký 3 chú ngựa giống thuần chủng của trang trại.",
+    notes: "Want to join to register 3 purebred stallions from the farm.",
     documentUrls: ["https://images.unsplash.com/photo-1500622388414-83557fb959a0?q=80&w=600"],
     createdAt: "2026-06-29T14:30:00"
   },
   {
     id: 10003,
-    fullName: "Phạm Thanh Hải",
+    fullName: "Peter Pham",
     userEmail: "hai.pt@outlook.com",
     requestedRole: "RACE_REFEREE",
     status: "PENDING",
@@ -46,13 +46,13 @@ const mockRequests = [
     identityNumber: "020078009876",
     certificationNumber: "REF-992-BA",
     experienceYears: 8,
-    notes: "Cựu trọng tài điền kinh quốc gia chuyển hướng đua ngựa.",
+    notes: "Former national athletics referee switching to horse racing.",
     documentUrls: ["https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600"],
     createdAt: "2026-06-28T09:15:00"
   },
   {
     id: 10004,
-    fullName: "Nguyễn Thị Mai",
+    fullName: "Mary Nguyen",
     userEmail: "mai.nt@gmail.com",
     requestedRole: "JOCKEY",
     status: "APPROVED",
@@ -62,12 +62,12 @@ const mockRequests = [
     weight: 48,
     height: 158,
     licenseNumber: "JC-11029",
-    notes: "Mong muốn sớm được duyệt để kịp đăng ký đua giải mùa hè.",
+    notes: "Hope to be approved soon to register for the summer tournament.",
     createdAt: "2026-06-25T08:00:00"
   },
   {
     id: 10005,
-    fullName: "Vũ Đức Thành",
+    fullName: "Vincent Vu",
     userEmail: "thanh.vd@hotmail.com",
     requestedRole: "HORSE_OWNER",
     status: "REJECTED",
@@ -76,8 +76,8 @@ const mockRequests = [
     identityNumber: "018090009876",
     stableName: "Thanh Farms",
     stableAddress: "Cu Chi, HCMC",
-    notes: "Đăng ký chủ ngựa.",
-    rejectionReason: "Thông tin địa chỉ trang trại không khớp với đăng ký kinh doanh.",
+    notes: "Registering as horse owner.",
+    rejectionReason: "Farm address information does not match business registration.",
     createdAt: "2026-06-24T16:00:00"
   }
 ];
@@ -127,14 +127,14 @@ export default function UpgradeUserRoleContent() {
     try {
       if (id >= 10000) {
         setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'APPROVED' } : r));
-        setSuccess('Đã duyệt yêu cầu nâng cấp vai trò thành công! (Dữ liệu giả lập)');
+        setSuccess('Successfully approved role upgrade request! (Mock Data)');
         return;
       }
       await approveUpgradeRequestAPI(id);
-      setSuccess('Đã duyệt yêu cầu nâng cấp vai trò thành công!');
+      setSuccess('Successfully approved role upgrade request!');
       loadRequests();
     } catch (err) {
-      setError(err.message || 'Không thể duyệt yêu cầu.');
+      setError(err.message || 'Could not approve request.');
     }
   };
 
@@ -145,7 +145,7 @@ export default function UpgradeUserRoleContent() {
   const handleRejectSubmit = async (e) => {
     e.preventDefault();
     if (!rejectionModal.reason.trim()) {
-      alert('Vui lòng nhập lý do từ chối.');
+      alert('Please enter a rejection reason.');
       return;
     }
     setError('');
@@ -154,16 +154,16 @@ export default function UpgradeUserRoleContent() {
       const id = rejectionModal.requestId;
       if (id >= 10000) {
         setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'REJECTED', rejectionReason: rejectionModal.reason.trim() } : r));
-        setSuccess('Đã từ chối yêu cầu nâng cấp vai trò. (Dữ liệu giả lập)');
+        setSuccess('Rejected role upgrade request. (Mock Data)');
         setRejectionModal({ show: false, requestId: null, reason: '' });
         return;
       }
       await rejectUpgradeRequestAPI(id, rejectionModal.reason.trim());
-      setSuccess('Đã từ chối yêu cầu nâng cấp vai trò.');
+      setSuccess('Rejected role upgrade request.');
       setRejectionModal({ show: false, requestId: null, reason: '' });
       loadRequests();
     } catch (err) {
-      setError(err.message || 'Không thể từ chối yêu cầu.');
+      setError(err.message || 'Could not reject request.');
     }
   };
 
@@ -225,10 +225,10 @@ export default function UpgradeUserRoleContent() {
       {/* Title */}
       <div className="mb-4">
         <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaUserCheck style={{ color: 'var(--ho-accent-gold-text)' }} /> Yêu Cầu Nâng Cấp Vai Trò
+          <FaUserCheck style={{ color: 'var(--ho-accent-gold-text)' }} /> Role Upgrade Requests
         </h2>
         <p className="text-secondary small m-0">
-          Xem xét thông tin cá nhân, bằng cấp, chứng chỉ và xử lý duyệt/từ chối nâng cấp vai trò của người chơi.
+          Review personal info, credentials, and approve or reject role upgrade requests.
         </p>
       </div>
 
@@ -253,7 +253,7 @@ export default function UpgradeUserRoleContent() {
           <input
             type="text"
             className="ho-form-input text-dark fw-semibold"
-            placeholder="Tìm kiếm theo tên, email, vai trò..."
+            placeholder="Search by name, email, role..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ paddingLeft: '40px', fontSize: '14px', height: '42px' }}
@@ -263,7 +263,7 @@ export default function UpgradeUserRoleContent() {
         {/* Status Filter */}
         <div className="d-flex align-items-center gap-2" style={{ flex: '0 0 auto' }}>
           <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--ho-primary-dark)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
-            <FaFilter className="me-1" /> Trạng thái:
+            <FaFilter className="me-1" /> Status:
           </span>
           <select
             className="ho-form-input text-dark fw-semibold"
@@ -271,10 +271,10 @@ export default function UpgradeUserRoleContent() {
             onChange={(e) => setStatusFilter(e.target.value)}
             style={{ fontSize: '14px', minWidth: '180px', height: '42px', paddingRight: '24px' }}
           >
-            <option value="PENDING">Chờ xử lý (PENDING)</option>
-            <option value="APPROVED">Đã duyệt (APPROVED)</option>
-            <option value="REJECTED">Bị từ chối (REJECTED)</option>
-            <option value="ALL">Tất cả yêu cầu</option>
+            <option value="PENDING">Pending (PENDING)</option>
+            <option value="APPROVED">Approved (APPROVED)</option>
+            <option value="REJECTED">Rejected (REJECTED)</option>
+            <option value="ALL">All Requests</option>
           </select>
         </div>
 
@@ -282,10 +282,10 @@ export default function UpgradeUserRoleContent() {
 
       {/* Requests Content */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '60px', color: 'var(--ho-text-muted)' }}>Đang tải danh sách yêu cầu nâng cấp...</div>
+        <div style={{ textAlign: 'center', padding: '60px', color: 'var(--ho-text-muted)' }}>Loading upgrade request list...</div>
       ) : filteredRequests.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--ho-border-gold)', borderRadius: '14px', color: 'var(--ho-text-muted)' }}>
-          Không tìm thấy yêu cầu nâng cấp vai trò nào.
+          No role upgrade requests found.
         </div>
       ) : (
         <div className="row g-4">
@@ -297,7 +297,7 @@ export default function UpgradeUserRoleContent() {
                 <div>
                   <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                      <h4 className="ho-font-epilogue fs-5 fw-bold text-dark mb-1">{req.fullName || req.userFullName || 'Thành viên'}</h4>
+                      <h4 className="ho-font-epilogue fs-5 fw-bold text-dark mb-1">{req.fullName || req.userFullName || 'Member'}</h4>
                       <div className="d-flex align-items-center gap-2 text-secondary small">
                         <FaEnvelope size="11" /> <span>{req.userEmail}</span>
                       </div>
@@ -328,52 +328,52 @@ export default function UpgradeUserRoleContent() {
 
                   {/* Details Grid */}
                   <div className="details-grid">
-                    <span className="details-label"><FaPhoneAlt size="11" className="me-1" /> Điện thoại:</span>
+                    <span className="details-label"><FaPhoneAlt size="11" className="me-1" /> Phone:</span>
                     <span className="details-value">{req.phoneNumber || 'N/A'}</span>
 
-                    <span className="details-label"><FaCalendarAlt size="11" className="me-1" /> Ngày sinh:</span>
+                    <span className="details-label"><FaCalendarAlt size="11" className="me-1" /> Date of Birth:</span>
                     <span className="details-value">{req.dateOfBirth || 'N/A'}</span>
 
-                    <span className="details-label"><FaIdCard size="11" className="me-1" /> CCCD/Hộ chiếu:</span>
+                    <span className="details-label"><FaIdCard size="11" className="me-1" /> ID/Passport:</span>
                     <span className="details-value">{req.identityNumber || 'N/A'}</span>
 
                     {/* Conditional Role Details */}
                     {req.requestedRole === 'JOCKEY' && (
                       <>
-                        <span className="details-label">Cân nặng:</span>
+                        <span className="details-label">Weight:</span>
                         <span className="details-value">{req.weight ? `${req.weight} kg` : 'N/A'}</span>
 
-                        <span className="details-label">Chiều cao:</span>
+                        <span className="details-label">Height:</span>
                         <span className="details-value">{req.height ? `${req.height} cm` : 'N/A'}</span>
 
-                        <span className="details-label">Số GP kỵ sĩ:</span>
+                        <span className="details-label">Jockey License:</span>
                         <span className="details-value">{req.licenseNumber || 'N/A'}</span>
                       </>
                     )}
 
                     {req.requestedRole === 'HORSE_OWNER' && (
                       <>
-                        <span className="details-label">Tên trang trại:</span>
+                        <span className="details-label">Stable Name:</span>
                         <span className="details-value">{req.stableName || 'N/A'}</span>
 
-                        <span className="details-label">Địa chỉ trang trại:</span>
+                        <span className="details-label">Stable Address:</span>
                         <span className="details-value">{req.stableAddress || 'N/A'}</span>
                       </>
                     )}
 
                     {req.requestedRole === 'RACE_REFEREE' && (
                       <>
-                        <span className="details-label">Số chứng chỉ:</span>
+                        <span className="details-label">Certificate Number:</span>
                         <span className="details-value">{req.certificationNumber || 'N/A'}</span>
 
-                        <span className="details-label">Kinh nghiệm:</span>
-                        <span className="details-value">{req.experienceYears !== null ? `${req.experienceYears} năm` : 'N/A'}</span>
+                        <span className="details-label">Experience:</span>
+                        <span className="details-value">{req.experienceYears !== null ? `${req.experienceYears} years` : 'N/A'}</span>
                       </>
                     )}
 
                     {req.notes && (
                       <>
-                        <span className="details-label" style={{ gridColumn: 'span 2', borderTop: '1px solid var(--ho-border-muted)', paddingTop: '8px', marginTop: '4px' }}>Ghi chú gửi kèm:</span>
+                        <span className="details-label" style={{ gridColumn: 'span 2', borderTop: '1px solid var(--ho-border-muted)', paddingTop: '8px', marginTop: '4px' }}>Attached Notes:</span>
                         <span className="details-value" style={{ gridColumn: 'span 2', color: 'var(--ho-text-muted)', fontStyle: 'italic', fontSize: '13px' }}>
                           "{req.notes}"
                         </span>
@@ -382,7 +382,7 @@ export default function UpgradeUserRoleContent() {
 
                     {req.rejectionReason && (
                       <>
-                        <span className="details-label text-danger" style={{ gridColumn: 'span 2', borderTop: '1px solid var(--ho-border-muted)', paddingTop: '8px', marginTop: '4px' }}>Lý do từ chối:</span>
+                        <span className="details-label text-danger" style={{ gridColumn: 'span 2', borderTop: '1px solid var(--ho-border-muted)', paddingTop: '8px', marginTop: '4px' }}>Rejection Reason:</span>
                         <span className="details-value text-danger" style={{ gridColumn: 'span 2', fontStyle: 'italic', fontSize: '13px' }}>
                           "{req.rejectionReason}"
                         </span>
@@ -393,7 +393,7 @@ export default function UpgradeUserRoleContent() {
                   {/* Documents & Credentials */}
                   {req.documentUrls && req.documentUrls.length > 0 && (
                     <div className="mt-3">
-                      <span className="ho-input-label" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', margin: 0 }}><FaFileAlt /> Tài liệu chứng thực:</span>
+                      <span className="ho-input-label" style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', margin: 0 }}><FaFileAlt /> Verification Documents:</span>
                       <div className="doc-gallery">
                         {req.documentUrls.map((url, idx) => {
                           const imgSrc = url && url.startsWith('http') ? url : `http://localhost:8080${url}`;
@@ -423,14 +423,14 @@ export default function UpgradeUserRoleContent() {
                       className="btn btn-outline-danger btn-sm fw-bold"
                       style={{ flex: 1, height: '38px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                     >
-                      <FaTimes /> Từ chối
+                      <FaTimes /> Reject
                     </button>
                     <button
                       onClick={() => handleApprove(req.id)}
                       className="btn btn-success btn-sm fw-bold"
                       style={{ flex: 1, height: '38px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                     >
-                      <FaCheck /> Phê duyệt
+                      <FaCheck /> Approve
                     </button>
                   </div>
                 )}
@@ -519,11 +519,11 @@ export default function UpgradeUserRoleContent() {
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
-                Xác Nhận Phê Duyệt
+                Confirm Approval
               </h3>
 
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                Bạn có chắc chắn muốn duyệt yêu cầu nâng cấp vai trò này không? Hành động này sẽ cấp vai trò mới cho thành viên.
+                Are you sure you want to approve this role upgrade request? This action will grant a new role to the member.
               </p>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
@@ -533,7 +533,7 @@ export default function UpgradeUserRoleContent() {
                   className="btn btn-outline-secondary btn-sm"
                   style={{ padding: '8px 20px', borderRadius: '8px' }}
                 >
-                  Hủy bỏ
+                  Cancel
                 </button>
                 <button
                   type="button"
@@ -541,7 +541,7 @@ export default function UpgradeUserRoleContent() {
                   className="btn btn-success btn-sm fw-bold"
                   style={{ padding: '8px 24px', borderRadius: '8px' }}
                 >
-                  Xác nhận duyệt
+                  Confirm Approve
                 </button>
               </div>
             </div>
@@ -586,16 +586,16 @@ export default function UpgradeUserRoleContent() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '10px', margin: 0 }}>
-              Từ Chối Yêu Cầu Nâng Cấp
+              Reject Upgrade Request
             </h3>
 
             <div className="form-group text-start">
-              <label className="ho-input-label">Lý do từ chối *</label>
+              <label className="ho-input-label">Rejection Reason *</label>
               <textarea
                 className="ho-form-input text-dark fw-semibold"
                 rows="4"
                 required
-                placeholder="Nhập lý do chi tiết để thông báo cho người dùng..."
+                placeholder="Enter detailed reason to notify the user..."
                 value={rejectionModal.reason}
                 onChange={(e) => setRejectionModal(prev => ({ ...prev, reason: e.target.value }))}
                 style={{ resize: 'none' }}
@@ -609,14 +609,14 @@ export default function UpgradeUserRoleContent() {
                 onClick={() => setRejectionModal({ show: false, requestId: null, reason: '' })}
                 style={{ padding: '8px 20px', borderRadius: '8px' }}
               >
-                Hủy bỏ
+                Cancel
               </button>
               <button
                 type="submit"
                 className="btn btn-danger btn-sm fw-bold"
                 style={{ padding: '8px 24px', borderRadius: '8px' }}
               >
-                Từ chối đơn
+                Reject Request
               </button>
             </div>
           </form>

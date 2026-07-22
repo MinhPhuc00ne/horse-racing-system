@@ -38,7 +38,7 @@ function JockeyRoutesBridge() {
         <div className="spinner-border text-success mb-3" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
-        <div className="fw-bold fs-5">Đang tải dữ liệu kỵ sĩ...</div>
+        <div className="fw-bold fs-5">Loading Jockey data...</div>
       </div>
     );
   }

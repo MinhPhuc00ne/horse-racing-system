@@ -45,11 +45,11 @@ export default function PreRaceCheck() {
   };
 
   const columns = [
-    { key: 'horseName', label: 'Tên Ngựa', render: (item) => <span className="fw-bold" style={{ color: 'var(--ho-primary-dark)' }}>{item.horseName}</span> },
-    { key: 'breed', label: 'Giống' },
-    { key: 'jockeyName', label: 'Kỵ sĩ' },
-    { key: 'weight', label: 'Trọng lượng', render: (item) => `${item.weight} kg`, align: 'center' },
-    { key: 'raceName', label: 'Giải Đấu' },
+    { key: 'horseName', label: 'Horse Name', render: (item) => <span className="fw-bold" style={{ color: 'var(--ho-primary-dark)' }}>{item.horseName}</span> },
+    { key: 'breed', label: 'Breed' },
+    { key: 'jockeyName', label: 'Jockey' },
+    { key: 'weight', label: 'Weight', render: (item) => `${item.weight} kg`, align: 'center' },
+    { key: 'raceName', label: 'Tournament' },
     { 
       key: 'status', 
       label: 'Status', 
@@ -58,7 +58,7 @@ export default function PreRaceCheck() {
     },
     {
       key: 'actions',
-      label: 'Hành Động',
+      label: 'Actions',
       align: 'center',
       render: (item) => (
         <div className="d-flex justify-content-center gap-2">
@@ -66,7 +66,7 @@ export default function PreRaceCheck() {
             className="ho-btn ho-btn-gold-solid d-flex align-items-center justify-content-center p-2"
             disabled={item.status !== 'PENDING_INSPECTION'}
             onClick={() => handleAction(item.id, 'approve')}
-            title="Phê duyệt"
+            title="Approve"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
           </button>
@@ -74,7 +74,7 @@ export default function PreRaceCheck() {
             className="ho-btn ho-btn-outline-danger d-flex align-items-center justify-content-center p-2"
             disabled={item.status !== 'PENDING_INSPECTION'}
             onClick={() => handleAction(item.id, 'reject')}
-            title="Từ chối"
+            title="Reject"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
           </button>
@@ -87,15 +87,15 @@ export default function PreRaceCheck() {
     <>
       <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
         <div className="mb-4">
-          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>Kiểm Tra Trước Trận</h2>
-          <p className="text-secondary small">Xác minh tình trạng thể lực và kỹ thuật của ngựa đua cùng kỵ sĩ trước khi cho phép thi đấu.</p>
+          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>Pre-Race Check</h2>
+          <p className="text-secondary small">Verify the health and technical condition of horses and jockeys before allowing them to race.</p>
         </div>
 
         <div className="glass-card">
           {loading ? (
-            <div className="p-4 text-secondary text-center">Đang tải dữ liệu...</div>
+            <div className="p-4 text-secondary text-center">Loading data...</div>
           ) : (
-            <DataTable columns={columns} data={horses} emptyMessage="Không có ngựa nào đang chờ kiểm duyệt." />
+            <DataTable columns={columns} data={horses} emptyMessage="No horses pending inspection." />
           )}
         </div>
       </div>

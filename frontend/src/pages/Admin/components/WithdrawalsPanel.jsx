@@ -6,9 +6,9 @@ import { FaCheck, FaTimes, FaWallet, FaInfoCircle, FaCheckCircle, FaExclamationT
 const MOCK_WITHDRAWALS = [
   {
     id: 20001,
-    userFullName: "Nguyễn Văn Hùng",
+    userFullName: "Alex Mercer",
     userEmail: "hung.nv@gmail.com",
-    bankAccount: "MB Bank - 09876543210 - NGUYEN VAN HUNG",
+    bankAccount: "MB Bank - 09876543210 - ALEX MERCER",
     walletId: 501,
     amount: 2500000,
     createdAt: "2026-06-30T08:30:00Z",
@@ -16,9 +16,9 @@ const MOCK_WITHDRAWALS = [
   },
   {
     id: 20002,
-    userFullName: "Trần Thị Mai",
+    userFullName: "Cynthia Ross",
     userEmail: "mai.tt@yahoo.com",
-    bankAccount: "Vietcombank - 1029384756 - TRAN THI MAI",
+    bankAccount: "Vietcombank - 1029384756 - CYNTHIA ROSS",
     walletId: 502,
     amount: 15000000,
     createdAt: "2026-06-29T14:15:00Z",
@@ -26,9 +26,9 @@ const MOCK_WITHDRAWALS = [
   },
   {
     id: 20003,
-    userFullName: "Phạm Quốc Bảo",
+    userFullName: "Bruce Wayne",
     userEmail: "bao.pq@outlook.com",
-    bankAccount: "Techcombank - 1902837465 - PHAM QUOC BAO",
+    bankAccount: "Techcombank - 1902837465 - BRUCE WAYNE",
     walletId: 503,
     amount: 780000,
     createdAt: "2026-07-01T02:00:00Z",
@@ -36,14 +36,14 @@ const MOCK_WITHDRAWALS = [
   },
   {
     id: 20004,
-    userFullName: "Lê Minh Tuấn",
+    userFullName: "David Miller",
     userEmail: "tuan.lm@gmail.com",
-    bankAccount: "Agribank - 4902837465819 - LE MINH TUAN",
+    bankAccount: "Agribank - 4902837465819 - DAVID MILLER",
     walletId: 504,
     amount: 4200000,
     createdAt: "2026-06-28T10:45:00Z",
     status: "FAILED",
-    rejectionReason: "Thông tin tài khoản nhận tiền không chính xác"
+    rejectionReason: "Recipient bank account information is incorrect"
   }
 ];
 
@@ -103,16 +103,16 @@ export default function WithdrawalsPanel() {
         setWithdrawals(prev =>
           prev.map(w => (w.id === tx.id ? { ...w, status: 'SUCCESS' } : w))
         );
-        setSuccessModalMessage(`Đã duyệt giao dịch rút tiền giả lập #${tx.id} thành công.`);
+        setSuccessModalMessage(`Successfully approved mock withdrawal transaction #${tx.id}.`);
         return;
       }
       await approveWithdrawalAPI(tx.id);
-      setSuccessModalMessage(`Đã duyệt giao dịch rút tiền #${tx.id} thành công.`);
+      setSuccessModalMessage(`Successfully approved withdrawal transaction #${tx.id}.`);
       setWithdrawals(prev =>
         prev.map(w => (w.id === tx.id ? { ...w, status: 'SUCCESS' } : w))
       );
     } catch (err) {
-      setErrorModalMessage(`Duyệt giao dịch thất bại: ${err.response?.data?.message || err.message}`);
+      setErrorModalMessage(`Failed to approve transaction: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoadingId(null);
     }
@@ -134,16 +134,16 @@ export default function WithdrawalsPanel() {
         setWithdrawals(prev =>
           prev.map(w => (w.id === tx.id ? { ...w, status: 'FAILED', rejectionReason: reason } : w))
         );
-        setSuccessModalMessage(`Đã từ chối giao dịch rút tiền giả lập #${tx.id} thành công.`);
+        setSuccessModalMessage(`Successfully rejected mock withdrawal transaction #${tx.id}.`);
         return;
       }
       await rejectWithdrawalAPI(tx.id);
-      setSuccessModalMessage(`Đã từ chối giao dịch rút tiền #${tx.id} và hoàn tiền.`);
+      setSuccessModalMessage(`Successfully rejected withdrawal transaction #${tx.id} and refunded wallet.`);
       setWithdrawals(prev =>
         prev.map(w => (w.id === tx.id ? { ...w, status: 'FAILED' } : w))
       );
     } catch (err) {
-      setErrorModalMessage(`Từ chối giao dịch thất bại: ${err.response?.data?.message || err.message}`);
+      setErrorModalMessage(`Failed to reject transaction: ${err.response?.data?.message || err.message}`);
     } finally {
       setLoadingId(null);
     }
@@ -153,7 +153,7 @@ export default function WithdrawalsPanel() {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
         <div className="spinner-border text-success" role="status">
-          <span className="visually-hidden">Đang tải...</span>
+          <span className="visually-hidden">Loading...</span>
         </div>
       </div>
     );
@@ -165,35 +165,35 @@ export default function WithdrawalsPanel() {
       {/* Title */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaWallet style={{ color: 'var(--ho-accent-gold-text)' }} /> Phê Duyệt Yêu Cầu Rút Tiền (Transactions)
+          <FaWallet style={{ color: 'var(--ho-accent-gold-text)' }} /> Approve Withdrawal Requests (Transactions)
         </h2>
       </div>
 
       {/* Table list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: 'var(--ho-primary-dark)', margin: 0 }}>
-          Yêu Cầu Đang Chờ Xử Lý ({withdrawals.filter(w => w.status === 'PENDING').length})
+          Pending Requests ({withdrawals.filter(w => w.status === 'PENDING').length})
         </h3>
 
         <div style={{ overflowX: 'auto', background: '#ffffff', border: '1px solid var(--ho-border-gold)', borderRadius: '12px' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--ho-border-gold)', background: 'rgba(0,56,32,0.04)' }}>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Mã giao dịch</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Khách hàng</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Tài khoản nhận tiền</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Số ví</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Số tiền rút</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Thời gian yêu cầu</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Trạng thái</th>
-                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Hành động</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Transaction ID</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Customer</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Receiving Account</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Wallet ID</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Amount</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Request Time</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Status</th>
+                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {withdrawals.length === 0 ? (
                 <tr>
                   <td colSpan={8} style={{ padding: '24px', textAlign: 'center', color: 'var(--ho-text-muted)' }}>
-                    Chưa phát sinh yêu cầu rút tiền nào.
+                    No withdrawal requests have been made.
                   </td>
                 </tr>
               ) : (
@@ -217,7 +217,7 @@ export default function WithdrawalsPanel() {
                     </td>
                     <td style={{ padding: '16px' }}>
                       <span style={{ color: 'var(--ho-text-dark)', fontWeight: '500', wordBreak: 'break-all' }}>
-                        {tx.bankAccount || <em style={{ color: 'var(--ho-text-muted)', fontStyle: 'italic' }}>Chưa liên kết ngân hàng</em>}
+                        {tx.bankAccount || <em style={{ color: 'var(--ho-text-muted)', fontStyle: 'italic' }}>No bank linked</em>}
                       </span>
                     </td>
                     <td style={{ padding: '16px', color: 'var(--ho-text-dark)', fontWeight: '500' }}>Wallet #{tx.walletId}</td>
@@ -225,7 +225,7 @@ export default function WithdrawalsPanel() {
                       {tx.amount.toLocaleString()} VND
                     </td>
                     <td style={{ padding: '16px', color: 'var(--ho-text-muted)' }}>
-                      {tx.createdAt ? new Date(tx.createdAt).toLocaleString('vi-VN') : ''}
+                      {tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-US') : ''}
                     </td>
                     <td style={{ padding: '16px' }}>
                       <span style={{
@@ -240,7 +240,7 @@ export default function WithdrawalsPanel() {
                       </span>
                       {tx.status === 'FAILED' && tx.rejectionReason && (
                         <div style={{ color: '#ef4444', fontSize: '11px', marginTop: '6px', fontStyle: 'italic', maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                          Lý do: "{tx.rejectionReason}"
+                          Reason: "{tx.rejectionReason}"
                         </div>
                       )}
                     </td>
@@ -268,7 +268,7 @@ export default function WithdrawalsPanel() {
                               onMouseEnter={(e) => { e.currentTarget.style.background = '#10b981'; e.currentTarget.style.color = '#ffffff'; }}
                               onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(16, 185, 129, 0.15)'; e.currentTarget.style.color = '#10b981'; }}
                             >
-                              <FaCheck /> Duyệt
+                              <FaCheck /> Approve
                             </button>
                             <button
                               onClick={() => setRejectModal({ show: true, tx: tx, reason: '' })}
@@ -290,12 +290,12 @@ export default function WithdrawalsPanel() {
                               onMouseEnter={(e) => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#ffffff'; }}
                               onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; e.currentTarget.style.color = '#ef4444'; }}
                             >
-                              <FaTimes /> Từ chối
+                              <FaTimes /> Reject
                             </button>
                           </>
                         ) : (
                           <span style={{ fontSize: '12px', color: 'var(--ho-text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <FaCheckCircle style={{ color: tx.status === 'SUCCESS' ? '#10b981' : '#ef4444' }} /> Hoàn thành
+                            <FaCheckCircle style={{ color: tx.status === 'SUCCESS' ? '#10b981' : '#ef4444' }} /> Completed
                           </span>
                         )}
                       </div>
@@ -356,7 +356,7 @@ export default function WithdrawalsPanel() {
               </div>
               
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
-                Thành Công!
+                Success!
               </h3>
               
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -369,7 +369,7 @@ export default function WithdrawalsPanel() {
                 className="btn btn-success fw-bold w-100"
                 style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
               >
-                Xác nhận
+                Confirm
               </button>
             </div>
           </div>
@@ -425,7 +425,7 @@ export default function WithdrawalsPanel() {
               </div>
               
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: '#ef4444' }}>
-                Đã Xảy Ra Lỗi!
+                An Error Occurred!
               </h3>
               
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -438,7 +438,7 @@ export default function WithdrawalsPanel() {
                 className="btn btn-danger fw-bold w-100"
                 style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>
@@ -479,11 +479,11 @@ export default function WithdrawalsPanel() {
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h3 className="m-0 fw-bold text-start" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
-                Xác Nhận Duyệt Rút Tiền
+                Confirm Withdrawal Approval
               </h3>
 
               <p className="text-secondary small m-0 fw-medium text-start" style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                Bạn có chắc chắn muốn duyệt yêu cầu rút số tiền <strong>{approveModal.tx?.amount.toLocaleString()} VND</strong> của khách hàng <strong>{approveModal.tx?.userFullName}</strong> về tài khoản <strong>{approveModal.tx?.bankAccount}</strong> không?
+                Are you sure you want to approve the withdrawal request of <strong>{approveModal.tx?.amount.toLocaleString()} VND</strong> for customer <strong>{approveModal.tx?.userFullName}</strong> to bank account <strong>{approveModal.tx?.bankAccount}</strong>?
               </p>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
@@ -493,7 +493,7 @@ export default function WithdrawalsPanel() {
                   className="btn btn-outline-secondary btn-sm"
                   style={{ padding: '8px 20px', borderRadius: '8px' }}
                 >
-                  Hủy bỏ
+                  Cancel
                 </button>
                 <button
                   type="button"
@@ -501,7 +501,7 @@ export default function WithdrawalsPanel() {
                   className="btn btn-success btn-sm fw-bold"
                   style={{ padding: '8px 24px', borderRadius: '8px' }}
                 >
-                  Xác nhận duyệt
+                  Confirm Approve
                 </button>
               </div>
             </div>
@@ -546,16 +546,16 @@ export default function WithdrawalsPanel() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '10px', margin: 0 }}>
-              Từ Chối Yêu Cầu Rút Tiền
+              Reject Withdrawal Request
             </h3>
 
             <div className="form-group text-start">
-              <label className="ho-input-label">Lý do từ chối *</label>
+              <label className="ho-input-label">Rejection Reason *</label>
               <textarea
                 className="ho-form-input text-dark fw-semibold"
                 rows="4"
                 required
-                placeholder="Nhập lý do từ chối giao dịch rút tiền..."
+                placeholder="Enter reason for rejecting withdrawal..."
                 value={rejectModal.reason}
                 onChange={(e) => setRejectModal(prev => ({ ...prev, reason: e.target.value }))}
                 style={{ resize: 'vertical', width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--ho-border-gold)' }}
@@ -569,14 +569,14 @@ export default function WithdrawalsPanel() {
                 className="btn btn-outline-secondary btn-sm"
                 style={{ padding: '8px 20px', borderRadius: '8px' }}
               >
-                Hủy bỏ
+                Cancel
               </button>
               <button
                 type="submit"
                 className="btn btn-danger btn-sm fw-bold"
                 style={{ padding: '8px 24px', borderRadius: '8px' }}
               >
-                Xác nhận từ chối
+                Confirm Reject
               </button>
             </div>
           </form>

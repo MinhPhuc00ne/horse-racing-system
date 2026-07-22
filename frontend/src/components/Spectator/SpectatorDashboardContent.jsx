@@ -81,9 +81,9 @@ export default function SpectatorDashboardContent() {
     setSavingBank(true);
     try {
       await updateBankAccountAPI(bankName, "", bankAccountNumber, "");
-      alert("Cập nhật tài khoản ngân hàng thành công!");
+      alert("Bank account updated successfully!");
     } catch (err) {
-      alert("Không thể cập nhật tài khoản ngân hàng: " + err.message);
+      alert("Could not update bank account: " + err.message);
     } finally {
       setSavingBank(false);
     }
@@ -178,37 +178,37 @@ export default function SpectatorDashboardContent() {
             
             <h4 className="ho-font-epilogue fs-6 fw-bold text-dark mb-3">
               <span className="material-symbols-outlined align-middle me-1 text-success" style={{ fontSize: '20px' }}>account_balance</span>
-              Thông Tin Ngân Hàng Thụ Hưởng
+              Beneficiary Bank Information
             </h4>
 
             <form onSubmit={handleSaveBank} className="text-dark">
               <div className="row g-3">
                 <div className="col-12 col-md-6">
-                  <label className="ho-input-label ho-font-grotesk fw-bold mb-2">Tên Ngân Hàng</label>
+                  <label className="ho-input-label ho-font-grotesk fw-bold mb-2">Bank Name</label>
                   <input
                     type="text"
                     className="ho-form-input text-dark"
                     value={bankName}
                     onChange={(e) => setBankName(e.target.value)}
-                    placeholder="Ví dụ: MBBank, Techcombank"
+                    placeholder="e.g. Chase, Bank of America"
                     required
                   />
                 </div>
                 <div className="col-12 col-md-6">
-                  <label className="ho-input-label ho-font-grotesk fw-bold mb-2">Số Tài Khoản</label>
+                  <label className="ho-input-label ho-font-grotesk fw-bold mb-2">Account Number</label>
                   <input
                     type="text"
                     className="ho-form-input text-dark"
                     value={bankAccountNumber}
                     onChange={(e) => setBankAccountNumber(e.target.value)}
-                    placeholder="Nhập số tài khoản"
+                    placeholder="Enter account number"
                     required
                   />
                 </div>
               </div>
               <div className="text-end mt-4">
                 <button type="submit" className="ho-btn ho-btn-gold-solid py-2 px-5 fw-bold" disabled={savingBank}>
-                  {savingBank ? 'Đang lưu...' : 'Lưu thông tin ngân hàng'}
+                  {savingBank ? 'Saving...' : 'Save Bank Details'}
                 </button>
               </div>
             </form>

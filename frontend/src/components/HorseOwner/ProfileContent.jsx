@@ -102,9 +102,9 @@ export default function ProfileContent() {
 
       await updateBankAccountAPI(bankName, "", bankAccountNumber, "");
 
-      alert('Hồ sơ chuồng ngựa đã được lưu thành công!');
+      alert('Horse Owner profile saved successfully!');
     } catch (err) {
-      alert('Cập nhật hồ sơ thất bại: ' + err.message);
+      alert('Failed to update profile: ' + err.message);
     }
   };
 
@@ -129,7 +129,7 @@ export default function ProfileContent() {
       });
       setDepositAmount('');
     } catch (err) {
-      alert('Không thể tạo liên kết thanh toán: ' + err.message);
+      alert('Failed to create payment checkout link: ' + err.message);
     }
   };
 
@@ -155,14 +155,14 @@ export default function ProfileContent() {
         id: `TX00${Date.now()}`,
         date: new Date().toISOString().replace('T', ' ').slice(0, 19),
         type: 'WITHDRAWAL',
-        event: 'Yêu cầu rút tiền về tài khoản ngân hàng liên kết',
+        event: 'Withdrawal request to linked bank account',
         amount: -amt,
       };
       setTransactions((prev) => [newTx, ...prev]);
-      alert(`Yêu cầu rút tiền ${amt.toLocaleString('vi-VN')} VND đã được gửi lên hệ thống. Ban quản trị sẽ kiểm tra và thực hiện chuyển khoản cho bạn.`);
+      alert(`Withdrawal request for ${amt.toLocaleString('en-US')} VND has been submitted. The admin team will review and transfer the funds to you.`);
       setDepositAmount('');
     } catch (err) {
-      alert('Yêu cầu rút tiền thất bại: ' + err.message);
+      alert('Withdrawal request failed: ' + err.message);
     }
   };
 
@@ -186,7 +186,7 @@ export default function ProfileContent() {
           }));
         }
       } catch (err) {
-        alert('Tải ảnh đại diện thất bại: ' + err.message);
+        alert('Failed to upload avatar: ' + err.message);
       } finally {
         setUploading(false);
       }
@@ -433,28 +433,28 @@ export default function ProfileContent() {
                   className="ho-font-epilogue fs-6 fw-bold mb-3"
                   style={{ color: 'var(--ho-primary-dark)' }}
                 >
-                  Thông Tin Ngân Hàng Thụ Hưởng
+                  Recipient Bank Account Information
                 </h3>
                 <div className="row g-3">
                   <div className="col-12 col-sm-6">
-                    <label className="ho-input-label ho-font-grotesk">Tên Ngân Hàng</label>
+                    <label className="ho-input-label ho-font-grotesk">Bank Name</label>
                     <input
                       type="text"
                       className="ho-form-input text-dark"
                       value={bankName}
                       onChange={(e) => setBankName(e.target.value)}
-                      placeholder="Ví dụ: MBBank, Techcombank"
+                      placeholder="e.g., MBBank, Techcombank"
                       required
                     />
                   </div>
                   <div className="col-12 col-sm-6">
-                    <label className="ho-input-label ho-font-grotesk">Số Tài Khoản</label>
+                    <label className="ho-input-label ho-font-grotesk">Account Number</label>
                     <input
                       type="text"
                       className="ho-form-input text-dark"
                       value={bankAccountNumber}
                       onChange={(e) => setBankAccountNumber(e.target.value)}
-                      placeholder="Nhập số tài khoản"
+                      placeholder="Enter account number"
                       required
                     />
                   </div>

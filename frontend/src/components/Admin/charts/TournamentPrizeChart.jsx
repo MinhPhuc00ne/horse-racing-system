@@ -37,7 +37,7 @@ export default function TournamentPrizeChart({ data }) {
           tickLine={false} 
         />
         <Tooltip 
-          formatter={(val) => [formatTooltip(val), 'Tổng giải thưởng']}
+          formatter={(val) => [formatTooltip(val), 'Total Prize Pool']}
           contentStyle={{ backgroundColor: '#212529', color: '#fff', borderRadius: '6px', fontSize: '11px' }}
         />
         <Bar dataKey="prizePool" fill="#ffc107" radius={[0, 4, 4, 0]} barSize={18}>

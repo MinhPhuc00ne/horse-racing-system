@@ -8,7 +8,7 @@ export const initialOwnerProfile = {
   dateOfBirth: "1988-11-24",
   stableName: "",
   stableAddress: "Binh Duong Boulevard, Thu Dau Mot, Binh Duong",
-  description: "Royal Stable chuyên cung cấp các giống ngựa thuần chủng xuất sắc nhất thế giới, định hình tương lai của đua ngựa chuyên nghiệp.",
+  description: "Royal Stable specializes in providing the best purebred horses in the world, shaping the future of professional horse racing.",
   walletBalance: 1250000000, // in VND
   avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80",
   avatarZoom: 1,

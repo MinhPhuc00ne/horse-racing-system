@@ -5,7 +5,7 @@ const isMockMode = () => {
 };
 
 /**
- * Đặt cược mới cho một cặp đấu (Spectator only)
+ * Place new bet for a race matchup (Spectator only)
  * @param {Object} data { raceId, participantId, amount, betType }
  */
 export async function placeBetAPI(data) {
@@ -19,7 +19,7 @@ export async function placeBetAPI(data) {
 }
 
 /**
- * Lấy danh sách vé cược của Spectator đang đăng nhập
+ * Get bet tickets list of logged-in Spectator
  */
 export async function getMyBetsAPI() {
   try {

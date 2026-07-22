@@ -43,7 +43,7 @@ function HorseOwnerRoutesBridge() {
         <div className="spinner-border text-success mb-3" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
-        <div className="fw-bold fs-5">Đang tải dữ liệu chuồng ngựa...</div>
+        <div className="fw-bold fs-5">Loading stable data...</div>
       </div>
     );
   }

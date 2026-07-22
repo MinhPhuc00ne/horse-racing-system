@@ -44,7 +44,7 @@ export default function RaceStatusBarChart({ raceStatusDistribution }) {
         />
         <YAxis tick={{ fontSize: 10, fill: '#718096' }} axisLine={false} tickLine={false} />
         <Tooltip 
-          formatter={(val) => [`${val} trận`, 'Số lượng']}
+          formatter={(val) => [`${val} races`, 'Count']}
           contentStyle={{ backgroundColor: '#212529', color: '#fff', borderRadius: '6px', fontSize: '11px' }}
         />
         <Bar dataKey="count" radius={[4, 4, 0, 0]}>

@@ -43,12 +43,12 @@ export default function TransactionTrendChart({ data }) {
         <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#4a5568', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
         <YAxis tickFormatter={formatVND} tick={{ fontSize: 10, fill: '#718096' }} axisLine={false} tickLine={false} />
         <Tooltip 
-          formatter={(value, name) => [formatTooltip(value), name === 'deposit' ? 'Nạp tiền (Deposit)' : 'Rút tiền (Withdraw)']}
+          formatter={(value, name) => [formatTooltip(value), name === 'deposit' ? 'Deposit' : 'Withdraw']}
           contentStyle={{ backgroundColor: '#212529', color: '#fff', borderRadius: '6px', fontSize: '11px' }}
         />
         <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '5px' }} />
-        <Area type="monotone" name="Nạp tiền" dataKey="deposit" stroke="#198754" strokeWidth={2} fillOpacity={1} fill="url(#depositGrad)" />
-        <Area type="monotone" name="Rút tiền" dataKey="withdraw" stroke="#dc3545" strokeWidth={2} fillOpacity={1} fill="url(#withdrawGrad)" />
+        <Area type="monotone" name="Deposit" dataKey="deposit" stroke="#198754" strokeWidth={2} fillOpacity={1} fill="url(#depositGrad)" />
+        <Area type="monotone" name="Withdraw" dataKey="withdraw" stroke="#dc3545" strokeWidth={2} fillOpacity={1} fill="url(#withdrawGrad)" />
       </AreaChart>
     </ResponsiveContainer>
   );

@@ -72,51 +72,51 @@ export default function UpgradeRequestsPanel({ pendingRequests, onApprove, onRej
 
                 {/* Detailed Applicant Profile Grid */}
                 <div className="details-grid">
-                  <span className="details-label">Số điện thoại:</span>
+                  <span className="details-label">Phone Number:</span>
                   <span className="details-value">{req.phoneNumber || 'N/A'}</span>
 
-                  <span className="details-label">Ngày sinh:</span>
+                  <span className="details-label">Date of Birth:</span>
                   <span className="details-value">{req.dateOfBirth || 'N/A'}</span>
 
-                  <span className="details-label">Số CCCD/Hộ chiếu:</span>
+                  <span className="details-label">ID/Passport Number:</span>
                   <span className="details-value">{req.identityNumber || 'N/A'}</span>
 
                   {req.requestedRole === 'JOCKEY' && (
                     <>
-                      <span className="details-label">Cân nặng:</span>
+                      <span className="details-label">Weight:</span>
                       <span className="details-value">{req.weight ? `${req.weight} kg` : 'N/A'}</span>
 
-                      <span className="details-label">Chiều cao:</span>
+                      <span className="details-label">Height:</span>
                       <span className="details-value">{req.height ? `${req.height} cm` : 'N/A'}</span>
 
-                      <span className="details-label">Số giấy phép:</span>
+                      <span className="details-label">License Number:</span>
                       <span className="details-value">{req.licenseNumber || 'N/A'}</span>
                     </>
                   )}
 
                   {req.requestedRole === 'HORSE_OWNER' && (
                     <>
-                      <span className="details-label">Tên trang trại:</span>
+                      <span className="details-label">Stable Name:</span>
                       <span className="details-value">{req.stableName || 'N/A'}</span>
 
-                      <span className="details-label">Địa chỉ trang trại:</span>
+                      <span className="details-label">Stable Address:</span>
                       <span className="details-value">{req.stableAddress || 'N/A'}</span>
                     </>
                   )}
 
                   {req.requestedRole === 'RACE_REFEREE' && (
                     <>
-                      <span className="details-label">Số chứng chỉ:</span>
+                      <span className="details-label">Certificate Number:</span>
                       <span className="details-value">{req.certificationNumber || 'N/A'}</span>
 
-                      <span className="details-label">Số năm kinh nghiệm:</span>
-                      <span className="details-value">{req.experienceYears !== null ? `${req.experienceYears} năm` : 'N/A'}</span>
+                      <span className="details-label">Years of Experience:</span>
+                      <span className="details-value">{req.experienceYears !== null ? `${req.experienceYears} years` : 'N/A'}</span>
                     </>
                   )}
 
                   {req.notes && (
                     <>
-                      <span className="details-label" style={{ gridColumn: 'span 2', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '8px', marginTop: '4px' }}>Ghi chú:</span>
+                      <span className="details-label" style={{ gridColumn: 'span 2', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '8px', marginTop: '4px' }}>Notes:</span>
                       <span className="details-value" style={{ gridColumn: 'span 2', textAlign: 'left', color: '#a0aec0', fontStyle: 'italic', fontSize: '13px' }}>
                         "{req.notes}"
                       </span>
@@ -127,7 +127,7 @@ export default function UpgradeRequestsPanel({ pendingRequests, onApprove, onRej
                 {/* Certificates & Verification Documents Gallery */}
                 {req.documentUrls && req.documentUrls.length > 0 && (
                   <div style={{ marginTop: '10px' }}>
-                    <span className="profile-label" style={{ display: 'block', marginBottom: '6px', fontSize: '11px' }}>Bằng Cấp & Tài Liệu Xác Minh:</span>
+                    <span className="profile-label" style={{ display: 'block', marginBottom: '6px', fontSize: '11px' }}>Credentials & Verification Documents:</span>
                     <div className="doc-gallery">
                       {req.documentUrls.map((url, idx) => (
                         <img 

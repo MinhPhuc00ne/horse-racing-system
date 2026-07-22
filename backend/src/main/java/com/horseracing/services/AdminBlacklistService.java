@@ -192,7 +192,7 @@ public class AdminBlacklistService {
         Blacklist blacklist = blacklistRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Blacklist record not found with ID: " + id));
 
-        blacklist.setStatus("INACTIVE"); // Change status to INACTIVE (gỡ cấm)
+        blacklist.setStatus("INACTIVE"); // Change status to INACTIVE (unban)
         blacklist = blacklistRepository.save(blacklist);
 
         String note = (unbanRequest != null && unbanRequest.getReason() != null && !unbanRequest.getReason().isBlank())

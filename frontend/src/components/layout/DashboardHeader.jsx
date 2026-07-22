@@ -134,7 +134,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
             .map(n => ({
               id: `SYS_NOTI_${n.id}`,
               notiId: n.id,
-              senderName: n.title || 'Ban Quản Trị',
+              senderName: n.title || 'Admin Panel',
               title: n.title,
               content: n.content,
               type: 'SYSTEM_NOTIFICATION',
@@ -348,7 +348,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                       style={{ fontSize: '11px', cursor: 'pointer' }}
                       onClick={handleMarkAllAsRead}
                     >
-                      Đánh dấu tất cả đã đọc
+                      Mark all as read
                     </button>
                   )}
                 </div>

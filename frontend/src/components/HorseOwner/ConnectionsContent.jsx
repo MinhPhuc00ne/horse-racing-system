@@ -43,7 +43,7 @@ export default function ConnectionsContent() {
       const directory = await getConnectionsDirectoryAPI(searchQuery, roleFilter);
       setDirectoryList(directory);
     } catch (err) {
-      console.error('Lỗi khi tải kết nối:', err);
+      console.error('Error loading connections:', err);
     } finally {
       setLoading(false);
     }
@@ -60,7 +60,7 @@ export default function ConnectionsContent() {
       await refreshData();
       await fetchConnections();
     } catch (err) {
-      alert('Gửi yêu cầu kết bạn thất bại: ' + err.message);
+      alert('Failed to send friend request: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -73,7 +73,7 @@ export default function ConnectionsContent() {
       await refreshData();
       await fetchConnections();
     } catch (err) {
-      alert('Trả lời yêu cầu kết bạn thất bại: ' + err.message);
+      alert('Failed to respond to friend request: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -86,7 +86,7 @@ export default function ConnectionsContent() {
       await refreshData();
       await fetchConnections();
     } catch (err) {
-      alert('Xóa kết nối thất bại: ' + err.message);
+      alert('Failed to delete connection: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -99,10 +99,10 @@ export default function ConnectionsContent() {
       <div className="d-flex justify-content-between align-items-end border-bottom pb-3 mb-4" style={{ borderColor: 'var(--ho-border-muted)' }}>
         <div>
           <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
-            Mạng lưới kết nối
+            Connections Network
           </h2>
           <p className="text-secondary small m-0">
-            Quản lý các kết nối nài ngựa và tương tác với chủ chuồng ngựa khác.
+            Manage jockey connections and interact with other stable owners.
           </p>
         </div>
       </div>
@@ -113,26 +113,26 @@ export default function ConnectionsContent() {
           onClick={() => setActiveSubTab('my-friends')}
           className={`ho-tab-btn ${activeSubTab === 'my-friends' ? 'ho-tab-btn-active' : ''}`}
         >
-          Bạn bè của tôi ({friendsList.length})
+          My Friends ({friendsList.length})
         </button>
         <button
           onClick={() => setActiveSubTab('friend-requests')}
           className={`ho-tab-btn ${activeSubTab === 'friend-requests' ? 'ho-tab-btn-active' : ''}`}
         >
-          Lời mời kết bạn ({incomingRequests.length})
+          Friend Requests ({incomingRequests.length})
         </button>
         <button
           onClick={() => setActiveSubTab('find')}
           className={`ho-tab-btn ${activeSubTab === 'find' ? 'ho-tab-btn-active' : ''}`}
         >
-          Tìm kiếm kết nối
+          Search Connections
         </button>
       </div>
 
       {loading && (
         <div className="text-center py-4 text-success fw-bold">
           <div className="spinner-border spinner-border-sm me-2" role="status"></div>
-          Đang tải dữ liệu...
+          Loading data...
         </div>
       )}
 
@@ -141,7 +141,7 @@ export default function ConnectionsContent() {
         <div className="row g-4">
           {friendsList.length === 0 ? (
             <div className="col-12 text-center py-5 glass-card text-secondary italic">
-              Chưa có bạn bè kết nối. Vui lòng chuyển qua "Tìm kiếm kết nối" để kết bạn.
+              No connected friends yet. Switch to "Search Connections" to send request.
             </div>
           ) : (
             friendsList.map((friend) => (
@@ -176,7 +176,7 @@ export default function ConnectionsContent() {
                       onClick={() => handleDeleteConnection(friend.connectionId)}
                       className="ho-btn ho-btn-outline-danger btn-sm w-100 fw-bold"
                     >
-                      Hủy kết bạn
+                      Unfriend
                     </button>
                   </div>
                 </DataCard>
@@ -191,7 +191,7 @@ export default function ConnectionsContent() {
         <div className="row g-4">
           {incomingRequests.length === 0 ? (
             <div className="col-12 text-center py-5 glass-card text-secondary italic">
-              Không có lời mời kết bạn nào đang chờ duyệt.
+              No pending friend requests.
             </div>
           ) : (
             incomingRequests.map((user) => (
@@ -228,13 +228,13 @@ export default function ConnectionsContent() {
                         onClick={() => handleRespondRequest(user.connectionId, 'ACCEPT')}
                         className="ho-btn ho-btn-dark-green flex-grow-1 fw-bold"
                       >
-                        Đồng ý
+                        Accept
                       </button>
                       <button 
                         onClick={() => handleRespondRequest(user.connectionId, 'REJECT')}
                         className="ho-btn ho-btn-outline-danger px-3 fw-bold"
                       >
-                        Từ chối
+                        Reject
                       </button>
                     </div>
                   </div>
@@ -256,7 +256,7 @@ export default function ConnectionsContent() {
               </span>
               <input
                 type="text"
-                placeholder="Tìm kiếm Nài ngựa/Chủ ngựa theo Tên hoặc ID..."
+                placeholder="Search Jockey/Owner by Name or ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="ho-form-input ps-5 text-dark"
@@ -268,9 +268,9 @@ export default function ConnectionsContent() {
               className="ho-form-input text-dark fw-bold"
               style={{ width: 'auto' }}
             >
-              <option value="ALL">Tất cả vai trò</option>
-              <option value="JOCKEY">Chỉ Nài ngựa</option>
-              <option value="HORSE_OWNER">Chỉ Chủ ngựa</option>
+              <option value="ALL">All Roles</option>
+              <option value="JOCKEY">Jockeys Only</option>
+              <option value="HORSE_OWNER">Owners Only</option>
             </select>
           </div>
 
@@ -278,7 +278,7 @@ export default function ConnectionsContent() {
           <div className="row g-4">
             {directoryList.length === 0 ? (
               <div className="col-12 text-center py-5 glass-card text-secondary italic">
-                Không tìm thấy người dùng nào phù hợp.
+                No matching users found.
               </div>
             ) : (
               directoryList.map((user) => (
@@ -311,16 +311,16 @@ export default function ConnectionsContent() {
 
                     <div className="mt-3" onClick={(e) => e.stopPropagation()}>
                       {user.friendStatus === 'FRIEND' && (
-                        <StatusBadge status="Bạn bè" customClass="w-100 justify-content-center" />
+                        <StatusBadge status="Friend" customClass="w-100 justify-content-center" />
                       )}
 
                       {user.friendStatus === 'PENDING_SENT' && (
                         <button 
                           onClick={() => handleDeleteConnection(user.connectionId)}
                           className="ho-btn ho-btn-outline-secondary w-100 fw-bold"
-                          title="Hủy yêu cầu"
+                          title="Cancel Request"
                         >
-                          Đã gửi yêu cầu
+                          Request Sent
                         </button>
                       )}
 
@@ -330,7 +330,7 @@ export default function ConnectionsContent() {
                             onClick={() => handleRespondRequest(user.connectionId, 'ACCEPT')}
                             className="ho-btn ho-btn-dark-green flex-grow-1 fw-bold"
                           >
-                            Đồng ý
+                            Accept
                           </button>
                           <button 
                             onClick={() => handleRespondRequest(user.connectionId, 'REJECT')}
@@ -346,7 +346,7 @@ export default function ConnectionsContent() {
                           onClick={() => handleAddFriend(user.userId || user.id)}
                           className="ho-btn ho-btn-gold-solid w-100 fw-bold"
                         >
-                          Kết bạn
+                          Add Friend
                         </button>
                       )}
                     </div>
@@ -363,7 +363,7 @@ export default function ConnectionsContent() {
           <div className="modal-content-custom animate-scale-up" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
             <div className="d-flex justify-content-between align-items-start border-bottom pb-3 mb-4" style={{ borderColor: 'var(--ho-border-muted)' }}>
               <h3 className="ho-font-epilogue fs-4 fw-bold m-0" style={{ color: 'var(--ho-primary-dark)' }}>
-                Chi tiết kết nối
+                Connection Details
               </h3>
               <button 
                 onClick={() => setShowFriendModal(false)}
@@ -404,19 +404,19 @@ export default function ConnectionsContent() {
                     <span className="text-secondary">{selectedFriend.email || 'N/A'}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                    <span className="fw-bold text-dark">Số điện thoại:</span>
+                    <span className="fw-bold text-dark">Phone Number:</span>
                     <span className="text-secondary">{selectedFriend.phoneNumber || selectedFriend.phone || 'N/A'}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                    <span className="fw-bold text-dark">Số năm kinh nghiệm:</span>
-                    <span className="text-secondary fw-bold" style={{ color: 'var(--ho-primary-dark)' }}>{selectedFriend.experienceYears} năm</span>
+                    <span className="fw-bold text-dark">Years of Experience:</span>
+                    <span className="text-secondary fw-bold" style={{ color: 'var(--ho-primary-dark)' }}>{selectedFriend.experienceYears} years</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                    <span className="fw-bold text-dark">Số trận đã tham gia:</span>
-                    <span className="text-secondary">{selectedFriend.matchesPlayed} trận</span>
+                    <span className="fw-bold text-dark">Matches Played:</span>
+                    <span className="text-secondary">{selectedFriend.matchesPlayed} matches</span>
                   </div>
                   <div className="d-flex justify-content-between py-1">
-                    <span className="fw-bold text-dark">Số giấy phép (License):</span>
+                    <span className="fw-bold text-dark">License Number:</span>
                     <span className="text-secondary small font-monospace">{selectedFriend.licenseNumber}</span>
                   </div>
                 </>
@@ -428,15 +428,15 @@ export default function ConnectionsContent() {
                     <span className="text-secondary">{selectedFriend.email || 'N/A'}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                    <span className="fw-bold text-dark">Số điện thoại:</span>
+                    <span className="fw-bold text-dark">Phone Number:</span>
                     <span className="text-secondary">{selectedFriend.phoneNumber || selectedFriend.phone || 'N/A'}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                    <span className="fw-bold text-dark">Tên trang trại (Stable):</span>
+                    <span className="fw-bold text-dark">Stable Name:</span>
                     <span className="text-secondary fw-bold" style={{ color: 'var(--ho-primary-dark)' }}>{selectedFriend.stableName || 'N/A'}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1">
-                    <span className="fw-bold text-dark">Địa chỉ trang trại:</span>
+                    <span className="fw-bold text-dark">Stable Address:</span>
                     <span className="text-secondary text-end small" style={{ maxWidth: '240px' }}>{selectedFriend.stableAddress || 'N/A'}</span>
                   </div>
                 </>

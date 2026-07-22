@@ -38,7 +38,7 @@ export function useAdminRequests(pollingIntervalMs = 3000) {
   }, [syncRequests, pollingIntervalMs]);
 
   const approveRequest = async (requestId) => {
-    const confirmApprove = window.confirm("Bạn có chắc chắn muốn DUYỆT yêu cầu nâng cấp này?");
+    const confirmApprove = window.confirm("Are you sure you want to APPROVE this upgrade request?");
     if (!confirmApprove) return false;
     try {
       await approveUpgradeRequestAPI(requestId);
@@ -52,7 +52,7 @@ export function useAdminRequests(pollingIntervalMs = 3000) {
   };
 
   const rejectRequest = async (requestId) => {
-    const reason = prompt("Nhập lý do từ chối yêu cầu:");
+    const reason = prompt("Enter the reason for rejection:");
     if (reason === null) return false; // User clicked Cancel
     try {
       await rejectUpgradeRequestAPI(requestId, reason);

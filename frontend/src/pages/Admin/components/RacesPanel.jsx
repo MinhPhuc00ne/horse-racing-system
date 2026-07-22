@@ -13,12 +13,12 @@ const MOCK_REGISTRATIONS = [
   {
     id: 10001,
     tournamentName: "Royal Ascot Stakes",
-    raceName: "Vòng Chung Kết Gold Cup",
+    raceName: "Gold Cup Final Round",
     raceId: 101,
     horseName: "Shadow Fax",
     horseBreed: "Thoroughbred",
     horseId: 201,
-    jockeyName: "Lê Văn Tiến",
+    jockeyName: "Leo Carter",
     jockeyId: 301,
     jockeySharePercent: 30,
     ownerSharePercent: 70,
@@ -27,12 +27,12 @@ const MOCK_REGISTRATIONS = [
   {
     id: 10002,
     tournamentName: "Grand National Chase",
-    raceName: "Vòng Loại Bảng A",
+    raceName: "Group A Qualifier",
     raceId: 102,
     horseName: "Silver Bullet",
     horseBreed: "Arabian",
     horseId: 202,
-    jockeyName: "Nguyễn Minh Hoàng",
+    jockeyName: "Max Sterling",
     jockeyId: 302,
     jockeySharePercent: 25,
     ownerSharePercent: 75,
@@ -41,12 +41,12 @@ const MOCK_REGISTRATIONS = [
   {
     id: 10003,
     tournamentName: "Melbourne Cup Classic",
-    raceName: "Vòng Bán Kết",
+    raceName: "Semi Final Round",
     raceId: 103,
     horseName: "Thunderbolt",
     horseBreed: "Quarter Horse",
     horseId: 203,
-    jockeyName: "Trần Anh Tuấn",
+    jockeyName: "Marcus Vance",
     jockeyId: 303,
     jockeySharePercent: 40,
     ownerSharePercent: 60,
@@ -55,17 +55,17 @@ const MOCK_REGISTRATIONS = [
   {
     id: 10004,
     tournamentName: "Kentucky Derby Trial",
-    raceName: "Vòng Loại Bảng B",
+    raceName: "Group B Qualifier",
     raceId: 104,
     horseName: "Wind Runner",
     horseBreed: "Appaloosa",
     horseId: 204,
-    jockeyName: "Phạm Minh Đức",
+    jockeyName: "Ethan Hunt",
     jockeyId: 304,
     jockeySharePercent: 35,
     ownerSharePercent: 65,
     status: "REJECTED",
-    rejectionReason: "Ngựa không đủ điều kiện sức khỏe"
+    rejectionReason: "Horse does not meet health requirements"
   }
 ];
 
@@ -127,20 +127,17 @@ export default function RacesPanel() {
     setSuccessModalMessage('');
     try {
       if (regId >= 10000) {
-        // Local state update for mock data
         setRegistrations(prev =>
           prev.map(r => r.id === regId ? { ...r, status: 'APPROVED' } : r)
         );
-        setSuccessModalMessage('Đã duyệt đơn đăng ký đua giả lập thành công!');
+        setSuccessModalMessage('Successfully approved mock race registration!');
         return;
       }
       await approveRaceRegistrationAPI(regId);
       
-      // Fetch latest registrations list
       const regList = await getRaceRegistrationsAPI();
       setRegistrations(regList);
 
-      // Auto-confirm LOCKED_LIST check (Background check)
       if (currentReg) {
         try {
           const tournamentsList = await getTournamentsAPI();
@@ -154,20 +151,19 @@ export default function RacesPanel() {
             const minSlots = tournament.minSlots || 3;
 
             if (approvedCount >= maxSlots || (pendingCount === 0 && approvedCount >= minSlots)) {
-              // Call background confirm registration to automatically transition status to LOCKED_LIST
               await confirmRaceRegistrationsAPI(tournament.id);
-              setSuccessModalMessage('Đã duyệt đơn đăng ký và tự động chốt danh sách giải đấu (LOCKED_LIST) thành công!');
+              setSuccessModalMessage('Successfully approved registration and automatically locked the tournament list!');
               return;
             }
           }
         } catch (autoErr) {
-          console.warn('Lỗi khi tự động chốt danh sách giải đấu:', autoErr);
+          console.warn('Error locking the tournament list:', autoErr);
         }
       }
 
-      setSuccessModalMessage('Đã duyệt đơn đăng ký đua thành công!');
+      setSuccessModalMessage('Successfully approved race registration!');
     } catch (err) {
-      setErrorModalMessage(err.response?.data?.message || err.message || 'Lỗi khi duyệt đơn đăng ký.');
+      setErrorModalMessage(err.response?.data?.message || err.message || 'Error approving registration.');
     }
   };
 
@@ -182,18 +178,17 @@ export default function RacesPanel() {
     setSuccessModalMessage('');
     try {
       if (regId >= 10000) {
-        // Local state update for mock data
         setRegistrations(prev =>
           prev.map(r => r.id === regId ? { ...r, status: 'REJECTED', rejectionReason: reason } : r)
         );
-        setSuccessModalMessage(`Đã từ chối đơn đăng ký đua giả lập!`);
+        setSuccessModalMessage(`Successfully rejected mock race registration!`);
         return;
       }
-      await rejectRaceRegistrationAPI(regId);
-      setSuccessModalMessage('Đã từ chối đơn đăng ký đua!');
+      await rejectRaceRegistrationAPI(regId, reason);
+      setSuccessModalMessage('Successfully rejected race registration!');
       fetchRegistrations();
     } catch (err) {
-      setErrorModalMessage(err.response?.data?.message || err.message || 'Lỗi khi từ chối đơn đăng ký.');
+      setErrorModalMessage(err.response?.data?.message || err.message || 'Error rejecting registration.');
     }
   };
 
@@ -218,7 +213,7 @@ export default function RacesPanel() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaFlag style={{ color: 'var(--ho-accent-gold-text)' }} /> Duyệt Đăng Ký Giải Đấu (Horse Owner & Jockey)
+          <FaFlag style={{ color: 'var(--ho-accent-gold-text)' }} /> Approve Tournament Registrations (Horse Owner & Jockey)
         </h2>
       </div>
 
@@ -227,12 +222,12 @@ export default function RacesPanel() {
         <div className="row g-3">
           {/* Search Term */}
           <div className="col-12 col-md-6">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tìm kiếm đăng ký</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search Registrations</label>
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
                 className="ho-form-input text-dark fw-semibold"
-                placeholder="Tìm theo tên ngựa, nài ngựa, giải đấu, mã đơn..."
+                placeholder="Search by horse, jockey, tournament, request ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ fontSize: '13px', height: '38px', paddingLeft: '35px' }}
@@ -243,17 +238,17 @@ export default function RacesPanel() {
 
           {/* Status Filter */}
           <div className="col-12 col-md-4">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trạng thái đơn</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</label>
             <select
               className="ho-form-input text-dark fw-semibold"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               style={{ fontSize: '13px', height: '38px' }}
             >
-              <option value="">Tất cả trạng thái</option>
-              <option value="PENDING">PENDING (Chờ duyệt)</option>
-              <option value="APPROVED">APPROVED (Đã duyệt)</option>
-              <option value="REJECTED">REJECTED (Từ chối)</option>
+              <option value="">All Statuses</option>
+              <option value="PENDING">PENDING (Pending Approval)</option>
+              <option value="APPROVED">APPROVED (Approved)</option>
+              <option value="REJECTED">REJECTED (Rejected)</option>
             </select>
           </div>
 
@@ -277,27 +272,27 @@ export default function RacesPanel() {
       {/* Main Registrations Section */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: 'var(--ho-primary-dark)', margin: 0 }}>
-          Danh Sách Đơn Đăng Ký ({filteredRegistrations.length})
+          Registration List ({filteredRegistrations.length})
         </h3>
 
         {loadingReg ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ho-text-muted)' }}>Đang tải danh sách đăng ký...</div>
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ho-text-muted)' }}>Loading registration list...</div>
         ) : filteredRegistrations.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--ho-border-gold)', borderRadius: '14px', color: 'var(--ho-text-muted)' }}>
-            Không tìm thấy đơn đăng ký nào khớp với bộ lọc tìm kiếm.
+            No registrations found matching the filters.
           </div>
         ) : (
           <div style={{ overflowX: 'auto', background: '#ffffff', border: '1px solid var(--ho-border-gold)', borderRadius: '12px' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--ho-border-gold)', background: 'rgba(0,56,32,0.04)' }}>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Mã đơn</th>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Giải đấu (Vòng đua)</th>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Ngựa đua</th>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Nài ngựa</th>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Lợi nhuận chia (Jockey / Owner)</th>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Trạng thái</th>
-                  <th style={{ padding: '16px', textAlign: 'center', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Hành động</th>
+                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Request ID</th>
+                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Tournament (Race)</th>
+                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Horse</th>
+                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Jockey</th>
+                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Revenue Split (Jockey / Owner)</th>
+                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Status</th>
+                  <th style={{ padding: '16px', textAlign: 'center', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -305,7 +300,7 @@ export default function RacesPanel() {
                   <tr key={reg.id} style={{ borderBottom: '1px solid var(--ho-border-muted)', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 56, 32, 0.02)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
                     <td style={{ padding: '16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>#{reg.id}</td>
                     <td style={{ padding: '16px' }}>
-                      <span className="fw-bold d-block text-dark">{reg.tournamentName || 'Giải đấu'}</span>
+                      <span className="fw-bold d-block text-dark">{reg.tournamentName || 'Tournament'}</span>
                       <span className="text-secondary small">{reg.raceName} (ID: {reg.raceId})</span>
                     </td>
                     <td style={{ padding: '16px' }}>
@@ -330,7 +325,7 @@ export default function RacesPanel() {
                       </span>
                       {reg.status === 'REJECTED' && reg.rejectionReason && (
                         <div style={{ color: '#ef4444', fontSize: '11px', marginTop: '6px', fontStyle: 'italic', maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                          Lý do: "{reg.rejectionReason}"
+                          Reason: "{reg.rejectionReason}"
                         </div>
                       )}
                     </td>
@@ -360,7 +355,7 @@ export default function RacesPanel() {
                                 gap: '5px'
                               }}
                             >
-                              <FaCheck /> Duyệt
+                              <FaCheck /> Approve
                             </button>
                             <button
                               onClick={() => setRejectModal({
@@ -382,11 +377,11 @@ export default function RacesPanel() {
                                 gap: '5px'
                               }}
                             >
-                              <FaTimes /> Từ chối
+                              <FaTimes /> Reject
                             </button>
                           </>
                         ) : (
-                          <span style={{ fontSize: '12px', color: 'var(--ho-text-muted)', fontStyle: 'italic' }}>Không có hành động</span>
+                          <span style={{ fontSize: '12px', color: 'var(--ho-text-muted)', fontStyle: 'italic' }}>No Actions</span>
                         )}
                       </div>
                     </td>
@@ -446,7 +441,7 @@ export default function RacesPanel() {
               </div>
               
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
-                Thành Công!
+                Success!
               </h3>
               
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -459,7 +454,7 @@ export default function RacesPanel() {
                 className="btn btn-success fw-bold w-100"
                 style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
               >
-                Xác nhận
+                Confirm
               </button>
             </div>
           </div>
@@ -515,7 +510,7 @@ export default function RacesPanel() {
               </div>
               
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: '#ef4444' }}>
-                Đã Xảy Ra Lỗi!
+                An Error Occurred!
               </h3>
               
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -528,7 +523,7 @@ export default function RacesPanel() {
                 className="btn btn-danger fw-bold w-100"
                 style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>
@@ -569,11 +564,11 @@ export default function RacesPanel() {
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <h3 className="m-0 fw-bold text-start" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
-                Xác Nhận Phê Duyệt
+                Confirm Approval
               </h3>
 
               <p className="text-secondary small m-0 fw-medium text-start" style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                Bạn có chắc chắn muốn duyệt đơn đăng ký của ngựa <strong>{approveModal.horseName}</strong> và nài ngựa <strong>{approveModal.jockeyName}</strong> cho giải đấu <strong>{approveModal.tournamentName}</strong> không?
+                Are you sure you want to approve the registration of horse <strong>{approveModal.horseName}</strong> and jockey <strong>{approveModal.jockeyName}</strong> for tournament <strong>{approveModal.tournamentName}</strong>?
               </p>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
@@ -583,7 +578,7 @@ export default function RacesPanel() {
                   className="btn btn-outline-secondary btn-sm"
                   style={{ padding: '8px 20px', borderRadius: '8px' }}
                 >
-                  Hủy bỏ
+                  Cancel
                 </button>
                 <button
                   type="button"
@@ -591,7 +586,7 @@ export default function RacesPanel() {
                   className="btn btn-success btn-sm fw-bold"
                   style={{ padding: '8px 24px', borderRadius: '8px' }}
                 >
-                  Xác nhận duyệt
+                  Confirm Approve
                 </button>
               </div>
             </div>
@@ -636,16 +631,16 @@ export default function RacesPanel() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '10px', margin: 0 }}>
-              Từ Chối Đăng Ký Thi Đấu
+              Reject Race Registration
             </h3>
 
             <div className="form-group text-start">
-              <label className="ho-input-label">Lý do từ chối *</label>
+              <label className="ho-input-label">Rejection Reason *</label>
               <textarea
                 className="ho-form-input text-dark fw-semibold"
                 rows="4"
                 required
-                placeholder="Nhập lý do chi tiết để thông báo cho người dùng..."
+                placeholder="Enter detailed reason to notify the user..."
                 value={rejectModal.reason}
                 onChange={(e) => setRejectModal(prev => ({ ...prev, reason: e.target.value }))}
                 style={{ resize: 'vertical', width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--ho-border-gold)' }}
@@ -659,14 +654,14 @@ export default function RacesPanel() {
                 className="btn btn-outline-secondary btn-sm"
                 style={{ padding: '8px 20px', borderRadius: '8px' }}
               >
-                Hủy bỏ
+                Cancel
               </button>
               <button
                 type="submit"
                 className="btn btn-danger btn-sm fw-bold"
                 style={{ padding: '8px 24px', borderRadius: '8px' }}
               >
-                Xác nhận từ chối
+                Confirm Reject
               </button>
             </div>
           </form>

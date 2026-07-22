@@ -13,26 +13,26 @@ export default function HeroSection() {
 
       <div className="hero-container-inner">
         <div className="hero-text-content">
-          <p className="hero-eyebrow">Hệ thống Bảng điều khiển Giải đấu và Đường đua Quốc gia</p>
+          <p className="hero-eyebrow">National Racetrack and Tournament Dashboard System</p>
           <h1 className="hero-title">
-            Trải nghiệm <span>Đỉnh Cao</span> Đua Ngựa Chuyên Nghiệp
+            Experience <span>Elite</span> Professional Horse Racing
           </h1>
           <p className="hero-description">
-            Quản lý, theo dõi và tham gia các giải đua ngựa độc quyền nhất thế giới theo thời gian thực. Nơi di sản giao thoa cùng công nghệ tối tân.
+            Manage, track, and participate in the world's most exclusive horse racing tournaments in real-time. Where heritage meets state-of-the-art technology.
           </p>
           <div className="hero-btn-group">
             <button className="btn-primary-luxury" type="button" onClick={() => navigate('/live')}>
               <span className="pulse-dot" style={{ display: 'inline-block', marginRight: '8px', width: '8px', height: '8px', backgroundColor: '#fff', borderRadius: '50%' }} /> 
-              Xem Đua Trực Tiếp
+              Watch Live Racing
             </button>
-            <button className="btn-secondary-luxury" type="button" onClick={() => navigate('/tournaments')}>Tham Gia Giải Đấu</button>
+            <button className="btn-secondary-luxury" type="button" onClick={() => navigate('/tournaments')}>Join Tournaments</button>
           </div>
         </div>
 
         <div className="track-preview-card" aria-label="Track preview countdown">
           <div className="track-card-header">
-            <span className="track-label">Đường Đua Sắp Tới: Royal Ascot</span>
-            <span className="live-status"><span className="pulse-dot" /> Mô phỏng 3D</span>
+            <span className="track-label">Next Racetrack: Royal Ascot</span>
+            <span className="live-status"><span className="pulse-dot" /> 3D Simulation</span>
           </div>
           <div className="svg-track-container">
             <span className="track-ring ring-one" />
@@ -40,7 +40,7 @@ export default function HeroSection() {
             <span className="track-ring ring-three" />
             <div className="countdown-box">
               <div className="countdown-time">02:03:08</div>
-              <div className="countdown-sub">Giải Tiếp Theo Bắt Đầu Sau</div>
+              <div className="countdown-sub">Next Tournament Starts In</div>
             </div>
           </div>
         </div>

@@ -55,10 +55,10 @@ export default function FloatingAiChat() {
     } else {
       // Guest: if no local threads, create a default one
       if (loadedThreads.length === 0) {
-        const welcomeText = 'Xin chào! Bạn đang trò chuyện với tư cách Khách. Hãy đăng nhập để lưu lịch sử hội thoại lâu dài. Tôi có thể giúp gì cho bạn hôm nay?';
+        const welcomeText = 'Hello! You are chatting as a Guest. Please log in to save your chat history. How can I help you today?';
         const newTh = {
           id: Date.now().toString(),
-          title: 'Cuộc trò chuyện mới',
+          title: 'New Chat',
           messages: [{ sender: 'AI', text: welcomeText }],
           createdAt: new Date().toISOString()
         };
@@ -82,10 +82,10 @@ export default function FloatingAiChat() {
         text: h.message
       }));
       
-      const welcomeText = 'Xin chào! Tôi là Trợ lý AI Horse Racing. Tôi có thể giúp gì cho bạn?';
+      const welcomeText = 'Hello! I am your Horse Racing AI Assistant. How can I help you?';
       const defaultThread = {
         id: 'db_sync',
-        title: dbMsgs.length > 0 ? (dbMsgs[0].text.substring(0, 25) + '...') : 'Đã đồng bộ hệ thống',
+        title: dbMsgs.length > 0 ? (dbMsgs[0].text.substring(0, 25) + '...') : 'Synced with system',
         messages: dbMsgs.length > 0 ? dbMsgs : [{ sender: 'AI', text: welcomeText }],
         createdAt: new Date().toISOString()
       };
@@ -96,14 +96,14 @@ export default function FloatingAiChat() {
       const storageKey = user ? `ai_threads_${user.id}` : 'ai_threads_guest';
       localStorage.setItem(storageKey, JSON.stringify([defaultThread]));
     } catch (error) {
-      console.error('Không thể tải lịch sử:', error);
+      console.error('Failed to load history:', error);
       const welcomeText = user 
-        ? 'Xin chào! Tôi là Trợ lý AI Horse Racing. Tôi có thể giúp gì cho bạn?'
-        : 'Xin chào! Bạn đang trò chuyện với tư cách Khách. Hãy đăng nhập để lưu lịch sử hội thoại lâu dài. Tôi có thể giúp gì cho bạn hôm nay?';
+        ? 'Hello! I am your Horse Racing AI Assistant. How can I help you?'
+        : 'Hello! You are chatting as a Guest. Please log in to save your chat history. How can I help you today?';
       
       const newTh = {
         id: Date.now().toString(),
-        title: 'Cuộc trò chuyện mới',
+        title: 'New Chat',
         messages: [{ sender: 'AI', text: welcomeText }],
         createdAt: new Date().toISOString()
       };
@@ -116,12 +116,12 @@ export default function FloatingAiChat() {
 
   const handleNewChat = () => {
     const welcomeText = user 
-      ? 'Xin chào! Tôi là Trợ lý AI Horse Racing. Tôi có thể giúp gì cho bạn?'
-      : 'Xin chào! Bạn đang trò chuyện với tư cách Khách. Hãy đăng nhập để lưu lịch sử hội thoại lâu dài. Tôi có thể giúp gì cho bạn hôm nay?';
+      ? 'Hello! I am your Horse Racing AI Assistant. How can I help you?'
+      : 'Hello! You are chatting as a Guest. Please log in to save your chat history. How can I help you today?';
     
     const newTh = {
       id: Date.now().toString(),
-      title: 'Cuộc trò chuyện mới',
+      title: 'New Chat',
       messages: [{ sender: 'AI', text: welcomeText }],
       createdAt: new Date().toISOString()
     };
@@ -140,19 +140,19 @@ export default function FloatingAiChat() {
 
   const handleDeleteThread = (e, id) => {
     e.stopPropagation();
-    if (!window.confirm('Bạn có chắc muốn xóa cuộc trò chuyện này không?')) return;
+    if (!window.confirm('Are you sure you want to delete this chat?')) return;
 
     const updatedThreads = threads.filter(t => t.id !== id);
     const storageKey = user ? `ai_threads_${user.id}` : 'ai_threads_guest';
     
     if (updatedThreads.length === 0) {
       const welcomeText = user 
-        ? 'Xin chào! Tôi là Trợ lý AI Horse Racing. Tôi có thể giúp gì cho bạn?'
-        : 'Xin chào! Bạn đang trò chuyện với tư cách Khách. Hãy đăng nhập để lưu lịch sử hội thoại lâu dài. Tôi có thể giúp gì cho bạn hôm nay?';
+        ? 'Hello! I am your Horse Racing AI Assistant. How can I help you?'
+        : 'Hello! You are chatting as a Guest. Please log in to save your chat history. How can I help you today?';
       
       const newTh = {
         id: Date.now().toString(),
-        title: 'Cuộc trò chuyện mới',
+        title: 'New Chat',
         messages: [{ sender: 'AI', text: welcomeText }],
         createdAt: new Date().toISOString()
       };
@@ -173,7 +173,7 @@ export default function FloatingAiChat() {
     if (!file) return;
 
     if (file.size > 25 * 1024 * 1024) {
-      alert('Kích thước ảnh tối đa là 25MB.');
+      alert('Maximum image size is 25MB.');
       return;
     }
 
@@ -210,7 +210,7 @@ export default function FloatingAiChat() {
     // Create user message object for UI (with local image preview if present)
     const newUserMsg = { 
       sender: 'USER', 
-      text: userMessage || 'Đã gửi hình ảnh', 
+      text: userMessage || 'Sent image', 
       image: imagePreview 
     };
 
@@ -218,10 +218,10 @@ export default function FloatingAiChat() {
     if (!currentActiveThread) return;
 
     let newTitle = currentActiveThread.title;
-    if (currentActiveThread.title === 'Cuộc trò chuyện mới' || currentActiveThread.messages.length <= 1) {
+    if (currentActiveThread.title === 'New Chat' || currentActiveThread.messages.length <= 1) {
       newTitle = userMessage 
         ? (userMessage.length > 22 ? userMessage.substring(0, 22) + '...' : userMessage) 
-        : 'Hình ảnh được gửi';
+        : 'Image sent';
     }
 
     const updatedMessages = [...currentActiveThread.messages, newUserMsg];
@@ -238,7 +238,7 @@ export default function FloatingAiChat() {
     setIsSending(true);
 
     try {
-      const replyStr = await sendChatMessageAPI(userMessage || '[Gửi kèm hình ảnh]', imagePayload);
+      const replyStr = await sendChatMessageAPI(userMessage || '[Image attached]', imagePayload);
       const aiReplyText = typeof replyStr === 'string' 
         ? replyStr 
         : (replyStr.text || replyStr.response || replyStr.message || JSON.stringify(replyStr));
@@ -255,7 +255,7 @@ export default function FloatingAiChat() {
       setThreads(finalThreads);
       localStorage.setItem(storageKey, JSON.stringify(finalThreads));
     } catch (error) {
-      const newAiErrorMsg = { sender: 'AI', text: 'Xin lỗi, đã xảy ra lỗi khi kết nối với AI. Vui lòng thử lại sau.' };
+      const newAiErrorMsg = { sender: 'AI', text: 'Sorry, an error occurred while connecting to the AI. Please try again later.' };
       const finalMessages = [...updatedMessages, newAiErrorMsg];
       const finalThreads = threads.map(t => {
         if (t.id === activeThreadId) {
@@ -291,9 +291,9 @@ export default function FloatingAiChat() {
           {showHistory && (
             <div className="chat-sidebar">
               <div className="sidebar-header">
-                <h5>Đoạn chat gần đây</h5>
-                <button className="new-chat-btn" onClick={handleNewChat} title="Cuộc trò chuyện mới">
-                  <FaPlus size={12} /> Mới
+                <h5>Recent Chats</h5>
+                <button className="new-chat-btn" onClick={handleNewChat} title="New Chat">
+                  <FaPlus size={12} /> New
                 </button>
               </div>
               <div className="threads-list">
@@ -308,7 +308,7 @@ export default function FloatingAiChat() {
                     <button 
                       className="delete-thread-btn" 
                       onClick={(e) => handleDeleteThread(e, t.id)}
-                      title="Xóa đoạn chat"
+                      title="Delete chat"
                     >
                       <FaTimes size={10} />
                     </button>
@@ -317,8 +317,8 @@ export default function FloatingAiChat() {
               </div>
               {!user && (
                 <div className="sidebar-footer">
-                  <p>Đăng nhập để lưu trực tuyến</p>
-                  <button onClick={handleLoginRedirect}>Đăng nhập</button>
+                  <p>Log in to sync history</p>
+                  <button onClick={handleLoginRedirect}>Log In</button>
                 </div>
               )}
             </div>
@@ -329,13 +329,13 @@ export default function FloatingAiChat() {
             <div className="chat-header">
               <h4>
                 <FaRobot className="header-robot-icon" /> 
-                <span>Trợ lý AI</span>
+                <span>AI Assistant</span>
               </h4>
               <div className="chat-header-actions">
                 <button 
                   className={`chat-header-btn history-toggle-btn ${showHistory ? 'active' : ''}`} 
                   onClick={() => setShowHistory(!showHistory)}
-                  title="Lịch sử trò chuyện"
+                  title="Chat History"
                 >
                   <FaHistory />
                 </button>
@@ -366,7 +366,7 @@ export default function FloatingAiChat() {
                           ))
                         )}
                         {msg.image && (
-                          <img src={msg.image} alt="Gửi kèm" className="chat-bubble-image" />
+                          <img src={msg.image} alt="Sent attachment" className="chat-bubble-image" />
                         )}
                       </div>
                     </div>
@@ -389,8 +389,8 @@ export default function FloatingAiChat() {
             {/* IMAGE PREVIEW BAR */}
             {selectedImage && (
               <div className="chat-image-preview-container">
-                <img src={selectedImage.preview} alt="Xem trước" className="chat-image-preview" />
-                <button type="button" className="clear-image-preview-btn" onClick={handleClearImage} title="Xóa ảnh">
+                <img src={selectedImage.preview} alt="Preview" className="chat-image-preview" />
+                <button type="button" className="clear-image-preview-btn" onClick={handleClearImage} title="Remove image">
                   <FaTimes size={10} />
                 </button>
               </div>
@@ -402,7 +402,7 @@ export default function FloatingAiChat() {
                 className="chat-attach-btn" 
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isSending || isLoading}
-                title="Đính kèm hình ảnh"
+                title="Attach image"
               >
                 <FaImage size={16} />
               </button>
@@ -416,7 +416,7 @@ export default function FloatingAiChat() {
               <input 
                 type="text" 
                 className="chat-input"
-                placeholder={selectedImage ? "Nhập câu hỏi về hình ảnh này..." : "Hỏi trợ lý ảo Horse Racing..."} 
+                placeholder={selectedImage ? "Ask a question about this image..." : "Ask the Horse Racing AI Assistant..."} 
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 disabled={isSending || isLoading}
@@ -438,7 +438,7 @@ export default function FloatingAiChat() {
         <button 
           className="floating-chat-button" 
           onClick={() => setIsOpen(true)}
-          title="Trò chuyện với AI"
+          title="Chat with AI"
         >
           <BsChatDotsFill />
         </button>
