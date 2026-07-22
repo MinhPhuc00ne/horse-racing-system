@@ -20,11 +20,11 @@ const stats = [
     note: 'From elite stable systems',
   },
 ];
-
+export default function StatsSection() {
 return (
   <section className="stats-section" aria-label="Race statistics">
     <div className="stats-grid">
-      {statsList.map((stat) => (
+      {stats.map((stat) => (
         <article className="stat-card" key={stat.label}>
           <span className="stat-icon" aria-hidden="true">{stat.icon}</span>
           <p className="stat-label">{stat.label}</p>
