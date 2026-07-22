@@ -7,6 +7,7 @@ import com.horseracing.dto.response.*;
 import com.horseracing.services.RefereeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import java.util.Map;
 @RequestMapping("/api/referee")
 @PreAuthorize("hasRole('RACE_REFEREE')")
 @RequiredArgsConstructor
+@Slf4j
 public class RefereeController {
 
     private final RefereeService refereeService;
@@ -160,8 +162,8 @@ public class RefereeController {
             refereeService.confirmResults(raceId);
             return ResponseEntity.ok(new MessageResponse("Results confirmed. Prize distribution and bet payouts completed successfully."));
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, "Debug error: " + e.getMessage() + " | Cause: " + (e.getCause() != null ? e.getCause().getMessage() : "none")));
+            log.error("Error confirming results for raceId {}: ", raceId, e);
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, "Error confirming results: " + e.getMessage()));
         }
     }
 

@@ -126,7 +126,7 @@ export function useSignup() {
     try {
       const authData = await googleLoginAPI(credentialResponse.credential);
       login(authData);
-      navigate('/'); // Default role is SPECTATOR
+      navigate('/'); // Default redirect after google login
     } catch (err) {
       setError(err.message || 'Google registration failed. Please try again.');
     } finally {

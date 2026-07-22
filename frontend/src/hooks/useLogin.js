@@ -29,6 +29,17 @@ export function useLogin() {
   };
 
   const redirectByRole = (role) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    let redirectUrl = searchParams.get('redirect') || sessionStorage.getItem('postLoginRedirect');
+    
+    if (redirectUrl) {
+      sessionStorage.removeItem('postLoginRedirect');
+      if (role === 'SPECTATOR' && redirectUrl === '/tournaments') {
+          redirectUrl = '/spectator/tournaments';
+      }
+      navigate(redirectUrl);
+      return;
+    }
     if (role === 'ADMIN') navigate('/admin/dashboard');
     else if (role === 'HORSE_OWNER') navigate('/owner');
     else if (role === 'JOCKEY') navigate('/jockey');
@@ -60,7 +71,7 @@ export function useLogin() {
       // Connect to the real backend login API
       const authData = await loginAPI(identifier.trim(), password);
       login(authData);
-      redirectByRole(authData.user.role);
+      redirectByRole(authData.user?.role);
     } catch (err) {
       setError(err.message || 'An error occurred during login. Please try again.');
     } finally {
@@ -88,7 +99,7 @@ export function useLogin() {
         setIsCompletingGoogleProfile(true);
       } else {
         login(authData);
-        redirectByRole(authData.user.role);
+        redirectByRole(authData.user?.role);
       }
     } catch (err) {
       setError(err.message || 'Failed to initiate Google login. Please try again.');
@@ -115,7 +126,7 @@ export function useLogin() {
               const newAuthData = { ...tempAuthData, user: updatedUser };
               login(newAuthData); // update context
               setIsCompletingGoogleProfile(false);
-              redirectByRole(newAuthData.user.role);
+              redirectByRole(newAuthData.user?.role);
           } catch(err) {
               setError(err.message || 'Failed to complete profile. Please try again.');
               setLoading(false);

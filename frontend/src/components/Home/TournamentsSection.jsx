@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import tournament1 from '../../assets/background1.jpg';
 import tournament2 from '../../assets/background2.jpg';
 import tournament3 from '../../assets/background3.jpg';
@@ -28,8 +29,10 @@ const tournaments = [
 ];
 
 export default function TournamentsSection() {
+  const navigate = useNavigate();
+
   return (
-    <section className="tournaments-section" aria-label="Upcoming tournaments">
+    <section id="tournaments" className="tournaments-section" aria-label="Upcoming tournaments">
       <div className="section-header-row">
         <div>
           <h2 className="section-main-title">Upcoming Tournaments</h2>
@@ -52,7 +55,7 @@ export default function TournamentsSection() {
               <p className="tournament-location">{tournament.location}</p>
               <div className="tournament-footer">
                 <span className="pool-amount">{tournament.pool}</span>
-                <button className="details-link-btn" type="button">Details →</button>
+                <button className="details-link-btn" type="button" onClick={() => navigate('/tournaments')}>Bet Now →</button>
               </div>
             </div>
           </article>
