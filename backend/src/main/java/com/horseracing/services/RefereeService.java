@@ -688,13 +688,17 @@ public class RefereeService {
                         liveRaceService.broadcastTick(raceId, map);
                     }
                 }
-            } catch (RuntimeException e) {
-                log.error("Error occurred during race simulation for simulation ID: {}", simulationId, e);
+            } catch (Throwable t) {
+                log.error("Error occurred during race simulation for simulation ID: {}", simulationId, t);
                 cancelSimulation(simulationId);
             }
         }, 1, 1, TimeUnit.SECONDS);
 
-        activeSimulations.put(simulationId, future);
+        // Cancel any pre-existing running future for this simulation ID before storing
+        ScheduledFuture<?> existing = activeSimulations.put(simulationId, future);
+        if (existing != null) {
+            existing.cancel(true);
+        }
     }
 
     private void cancelSimulation(Integer simulationId) {
