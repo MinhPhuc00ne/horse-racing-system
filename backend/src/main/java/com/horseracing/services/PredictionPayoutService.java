@@ -256,7 +256,7 @@ public class PredictionPayoutService {
         if (adminBetRevenue.compareTo(BigDecimal.ZERO) > 0) {
             User admin = userRepository.findByRole(Role.ADMIN).stream().findFirst().orElse(null);
             if (admin != null) {
-                Wallet adminWallet = walletRepository.findByUserId(admin.getId())
+                Wallet adminWallet = walletRepository.findByUserIdWithLock(admin.getId())
                         .orElseGet(() -> {
                             Wallet w = Wallet.builder().user(admin).balance(BigDecimal.ZERO).build();
                             return walletRepository.save(w);
