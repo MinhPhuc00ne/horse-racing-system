@@ -5,7 +5,7 @@ import logo from '../../assets/logo.png';
 export default function AdminHeader({ user, profile, navLinks, logout }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
+
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -37,7 +37,7 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
   };
 
   return (
-    <header 
+    <header
       className="dashboard-layout-header w-100 position-sticky top-0"
       style={{
         backgroundColor: 'var(--ho-primary-dark, #003820)',
@@ -50,10 +50,10 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
       }}
     >
       <div className="container-fluid px-3 px-md-4 d-flex align-items-center justify-content-between h-100">
-        
+
         {/* Brand Title & Hamburger Toggle */}
         <div className="d-flex align-items-center gap-3 flex-shrink-0">
-          <button 
+          <button
             className="d-xl-none btn border-0 p-1 d-flex align-items-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             style={{ color: '#ffffff' }}
@@ -62,15 +62,15 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
               {mobileMenuOpen ? 'close' : 'menu'}
             </span>
           </button>
-          
+
           <>
-            <h1 
-              className="ho-font-epilogue fs-5 fw-extrabold m-0 d-none d-xl-block" 
+            <h1
+              className="ho-font-epilogue fs-5 fw-extrabold m-0 d-none d-xl-block"
               style={{ color: 'var(--ho-accent-gold-hover, #fed65b)' }}
             >
               System Management Console
             </h1>
-            <div 
+            <div
               className="d-flex align-items-center d-xl-none cursor-pointer"
               onClick={() => navigate('/admin/dashboard')}
               style={{ cursor: 'pointer' }}
@@ -117,10 +117,10 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
           <button
             onClick={() => navigate('/admin/dashboard')}
             className="ho-btn-light position-relative d-flex align-items-center justify-content-center"
-            style={{ 
-              width: '36px', 
-              height: '36px', 
-              borderRadius: '50%', 
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
               padding: 0,
               backgroundColor: 'rgba(255, 255, 255, 0.08)',
               border: '1px solid rgba(255, 255, 255, 0.1)'
@@ -128,8 +128,8 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
             title="Notifications"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#ffffff' }}>notifications</span>
-            <span 
-              className="position-absolute bg-warning rounded-circle" 
+            <span
+              className="position-absolute bg-warning rounded-circle"
               style={{ top: '2px', right: '2px', width: '6px', height: '6px' }}
             />
           </button>
@@ -149,8 +149,8 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
                   {user?.role || 'ADMIN'}
                 </span>
               </div>
-              <div 
-                className="rounded-circle overflow-hidden border cursor-pointer d-flex align-items-center justify-content-center" 
+              <div
+                className="rounded-circle overflow-hidden border cursor-pointer d-flex align-items-center justify-content-center"
                 style={{ width: '40px', height: '40px', borderColor: 'var(--ho-accent-gold, #D4AF37)' }}
               >
                 <img
@@ -164,19 +164,19 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
             {dropdownOpen && (
               <div className="avatar-dropdown-menu" style={{ backgroundColor: '#ffffff' }}>
                 <div className="avatar-dropdown-header">Account Actions</div>
-                
+
                 <button className="avatar-dropdown-item" onClick={handleProfileClick}>
                   <span className="material-symbols-outlined avatar-dropdown-icon">person</span>
                   My Profile
                 </button>
-                
+
                 <button className="avatar-dropdown-item" onClick={handleFeedbackClick}>
                   <span className="material-symbols-outlined avatar-dropdown-icon">rate_review</span>
                   Feedback
                 </button>
-                
+
                 <div className="avatar-dropdown-divider" />
-                
+
                 <button className="avatar-dropdown-item logout" onClick={handleLogoutClick}>
                   <span className="material-symbols-outlined avatar-dropdown-icon text-danger">logout</span>
                   Logout
@@ -197,7 +197,7 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
                 key={link.path}
                 to={link.path}
                 onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) => 
+                className={({ isActive }) =>
                   `mobile-nav-link p-2 rounded d-flex align-items-center ${isActive ? 'bg-warning text-dark fw-bold' : 'text-dark'}`
                 }
                 style={{ textDecoration: 'none' }}
@@ -207,7 +207,7 @@ export default function AdminHeader({ user, profile, navLinks, logout }) {
               </NavLink>
             ))}
             <hr className="my-2" />
-            <button 
+            <button
               className="btn btn-outline-danger btn-sm text-start d-flex align-items-center gap-2 p-2 w-100"
               onClick={() => {
                 setMobileMenuOpen(false);

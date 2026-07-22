@@ -46,6 +46,7 @@ import com.horseracing.entities.User;
 import com.horseracing.entities.Wallet;
 import com.horseracing.entities.WalletTransaction;
 import com.horseracing.entities.enums.NotificationType;
+import com.horseracing.entities.enums.Role;
 import com.horseracing.repositories.BanHistoryRepository;
 import com.horseracing.repositories.BlacklistRepository;
 import com.horseracing.repositories.HorseRepository;
@@ -172,6 +173,23 @@ public class RefereeService {
                 race.setReferee(null);
                 raceRepository.save(race);
             }
+        }
+
+        // Notify all ADMIN users about referee cancellation
+        try {
+            List<User> adminUsers = userRepository.findByRole(Role.ADMIN);
+            String title = "Trọng tài từ chối / hủy phân công";
+            String refereeName = referee.getFullName() != null ? referee.getFullName() : referee.getUsername();
+            String content = String.format("Trọng tài %s đã hủy phân công tham gia giải đấu '%s' (Mã: #%d). Vui lòng phân công trọng tài khác.",
+                    refereeName,
+                    tournament.getTournamentName(),
+                    tournament.getId());
+
+            for (User admin : adminUsers) {
+                notificationService.sendNotification(admin, title, content, NotificationType.SYSTEM_ALERT);
+            }
+        } catch (Exception e) {
+            log.error("Failed to send notification to admin users on referee cancel assignment: {}", e.getMessage());
         }
     }
 
