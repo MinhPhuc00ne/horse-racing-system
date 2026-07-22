@@ -113,7 +113,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             jdbcTemplate.update("INSERT INTO wallets (user_id, balance, created_at) " +
                     "SELECT u.id, 50000.00, GETDATE() FROM users u " +
                     "LEFT JOIN wallets w ON u.id = w.user_id WHERE w.id IS NULL");
-        } catch (Exception e) {
+        } catch (org.springframework.dao.DataAccessException e) {
             log.warn("Wallet verification check: {}", e.getMessage());
         }
     }
@@ -225,7 +225,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             seedHorsesIfMissing();
 
             log.info("Successfully seeded Tensura test dataset for local DB environment.");
-        } catch (Exception e) {
+        } catch (org.springframework.dao.DataAccessException e) {
             log.error("Failed to seed Tensura test dataset: {}", e.getMessage(), e);
         }
     }
@@ -257,15 +257,15 @@ public class DatabaseInitializer implements CommandLineRunner {
                 if (horseCount != null && horseCount > 0) continue;
 
                 for (String[] ht : horseTemplates) {
-                    Double spd = ht[6] != null ? Double.parseDouble(ht[6]) : null;
-                    Integer stm = ht[7] != null ? Integer.parseInt(ht[7]) : null;
-                    Integer gate = ht[8] != null ? Integer.parseInt(ht[8]) : null;
+                    Double spd = ht[6] != null ? Double.valueOf(ht[6]) : null;
+                    Integer stm = ht[7] != null ? Integer.valueOf(ht[7]) : null;
+                    Integer gate = ht[8] != null ? Integer.valueOf(ht[8]) : null;
 
                     jdbcTemplate.update("INSERT INTO horses (owner_id, breed_id, name, age, gender, training_status, health_status, status, speed_rating, stamina_rating, gate_performance_rating, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                             ownerId, breedId, ht[0], Integer.parseInt(ht[1]), ht[2], ht[3], ht[4], ht[5], spd, stm, gate, ht[9]);
                 }
             }
-        } catch (Exception e) {
+        } catch (org.springframework.dao.DataAccessException e) {
             log.warn("Seed horses check warning: {}", e.getMessage());
         }
     }
