@@ -33,7 +33,7 @@ export function useLogin() {
     else if (role === 'HORSE_OWNER') navigate('/owner');
     else if (role === 'JOCKEY') navigate('/jockey');
     else if (role === 'RACE_REFEREE') navigate('/referee');
-    else navigate('/spectator');
+    else navigate('/');
   };
 
   const handleSubmit = async (e) => {

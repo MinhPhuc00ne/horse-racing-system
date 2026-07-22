@@ -11,8 +11,8 @@ export default function UserManagementContent() {
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [successModalMessage, setSuccessModalMessage] = useState('');
+  const [feedbackModal, setFeedbackModal] = useState({ show: false, type: 'success', message: '' });
+  const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null });
 
   // Form & CRUD States
   const [showForm, setShowForm] = useState(false);
@@ -54,16 +54,34 @@ export default function UserManagementContent() {
     }));
   };
 
-  const handleToggleStatus = async (id) => {
-    try {
-      const userToToggle = usersList.find(u => u.id === id);
-      const newStatus = !userToToggle.enabled;
-      await toggleUserStatusAPI(id, newStatus);
-      setSuccess(`Đã thay đổi trạng thái của tài khoản @${userToToggle.username} thành ${newStatus ? 'Hoạt động' : 'Tạm khóa'}.`);
-      loadUsers(); // Refresh list
-    } catch (err) {
-      setError(err.message || 'Lỗi khi thay đổi trạng thái.');
-    }
+  const handleToggleStatus = (id) => {
+    const userToToggle = usersList.find(u => u.id === id);
+    const newStatus = !userToToggle.enabled;
+    setConfirmModal({
+      show: true,
+      title: 'Xác nhận thay đổi trạng thái',
+      message: `Bạn có chắc chắn muốn ${newStatus ? 'MỞ KHÓA' : 'KHÓA'} tài khoản @${userToToggle.username} không?`,
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          await toggleUserStatusAPI(id, newStatus);
+          setFeedbackModal({
+            show: true,
+            type: 'success',
+            message: `Đã thay đổi trạng thái của tài khoản @${userToToggle.username} thành ${newStatus ? 'Hoạt động' : 'Tạm khóa'}.`
+          });
+          loadUsers(); // Refresh list
+        } catch (err) {
+          setFeedbackModal({
+            show: true,
+            type: 'error',
+            message: err.message || 'Lỗi khi thay đổi trạng thái.'
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
   };
 
   const resetForm = () => {
@@ -71,12 +89,12 @@ export default function UserManagementContent() {
     setIsEditing(false);
     setEditId(null);
     setShowForm(false);
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
     // Validations
     if (!formData.username.trim() || !formData.email.trim() || !formData.fullName.trim()) {
@@ -85,10 +103,10 @@ export default function UserManagementContent() {
     }
 
     // Check duplicate username or email locally before sending
-    const isDuplicate = usersList.some(u => 
-      u.id !== editId && 
+    const isDuplicate = usersList.some(u =>
+      u.id !== editId &&
       (u.username.toLowerCase() === formData.username.trim().toLowerCase() ||
-       u.email.toLowerCase() === formData.email.trim().toLowerCase())
+        u.email.toLowerCase() === formData.email.trim().toLowerCase())
     );
 
     if (isDuplicate) {
@@ -99,12 +117,18 @@ export default function UserManagementContent() {
     try {
       if (isEditing) {
         await updateUserAPI(editId, formData);
-        const msg = `Cập nhật tài khoản @${formData.username} thành công!`;
-        setSuccessModalMessage(msg);
+        setFeedbackModal({
+          show: true,
+          type: 'success',
+          message: `Cập nhật tài khoản @${formData.username} thành công!`
+        });
       } else {
         await createUserAPI(formData);
-        const msg = `Tạo mới tài khoản @${formData.username} thành công!`;
-        setSuccessModalMessage(msg);
+        setFeedbackModal({
+          show: true,
+          type: 'success',
+          message: `Tạo mới tài khoản @${formData.username} thành công!`
+        });
       }
       resetForm();
       loadUsers(); // Refresh list
@@ -114,6 +138,7 @@ export default function UserManagementContent() {
   };
 
   const handleEditClick = (user) => {
+    setError('');
     setFormData({
       username: user.username,
       email: user.email,
@@ -127,30 +152,42 @@ export default function UserManagementContent() {
     setShowForm(true);
   };
 
-  const handleDeleteClick = async (user) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa tài khoản @${user.username} không? Hành động này không thể hoàn tác.`)) {
-      return;
-    }
-    setError('');
-    setSuccess('');
-    
-    try {
-      await deleteUserAPI(user.id);
-      setSuccess(`Đã xóa thành công tài khoản @${user.username}.`);
-      loadUsers(); // Refresh list
-    } catch (err) {
-      setError(err.message || 'Lỗi khi xóa người dùng.');
-    }
+  const handleDeleteClick = (user) => {
+    setConfirmModal({
+      show: true,
+      title: 'Xác nhận xóa tài khoản',
+      message: `Bạn có chắc chắn muốn xóa tài khoản @${user.username} không? Hành động này không thể hoàn tác.`,
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          await deleteUserAPI(user.id);
+          setFeedbackModal({
+            show: true,
+            type: 'success',
+            message: `Đã xóa thành công tài khoản @${user.username}.`
+          });
+          loadUsers(); // Refresh list
+        } catch (err) {
+          setFeedbackModal({
+            show: true,
+            type: 'error',
+            message: err.message || 'Lỗi khi xóa người dùng.'
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
   };
 
   const filteredUsers = usersList.filter(u => {
     const matchesSearch = u.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          u.username.toLowerCase().includes(searchQuery.toLowerCase());
+      u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.username.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === '' || u.role === roleFilter;
-    const matchesStatus = statusFilter === '' || 
-                          (statusFilter === 'active' && u.enabled) || 
-                          (statusFilter === 'locked' && !u.enabled);
+    const matchesStatus = statusFilter === '' ||
+      (statusFilter === 'active' && u.enabled) ||
+      (statusFilter === 'locked' && !u.enabled);
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -187,7 +224,7 @@ export default function UserManagementContent() {
         else if (item.role === 'HORSE_OWNER') badgeClass = 'bg-primary';
         else if (item.role === 'JOCKEY') badgeClass = 'bg-info text-dark';
         else if (item.role === 'RACE_REFEREE') badgeClass = 'bg-success';
-        
+
         return (
           <span className={`badge ${badgeClass} fw-bold text-uppercase`} style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
             {item.role}
@@ -251,7 +288,7 @@ export default function UserManagementContent() {
 
   return (
     <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
-      
+
       {/* Title & Action Buttons */}
       <div className="d-flex justify-content-between align-items-end mb-4">
         <div>
@@ -265,7 +302,7 @@ export default function UserManagementContent() {
 
         {!showForm && (
           <button
-            onClick={() => setShowForm(true)}
+            onClick={() => { setError(''); setShowForm(true); }}
             className="btn btn-success d-flex align-items-center gap-2 fw-bold"
             style={{ fontSize: '13px', padding: '6px 14px' }}
           >
@@ -274,21 +311,9 @@ export default function UserManagementContent() {
         )}
       </div>
 
-      {/* Message alerts */}
-      {error && (
-        <div style={{ padding: '14px 18px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '10px', color: '#f87171', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-          <FaInfoCircle /> {error}
-        </div>
-      )}
-      {success && (
-        <div style={{ padding: '14px 18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '10px', color: '#34d399', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-          <FaCheckCircle style={{ color: '#10b981' }} /> {success}
-        </div>
-      )}
-
       {/* CRUD Form Modal */}
       {showForm && createPortal(
-        <div 
+        <div
           style={{
             position: 'fixed',
             top: 0,
@@ -303,28 +328,33 @@ export default function UserManagementContent() {
           }}
           onClick={resetForm}
         >
-          <div 
-            className="glass-card" 
-            style={{ 
-              width: '100%', 
-              maxWidth: '650px', 
-              padding: '24px', 
+          <div
+            className="glass-card"
+            style={{
+              width: '100%',
+              maxWidth: '650px',
+              padding: '24px',
               boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
               border: '1px solid var(--ho-border-gold, #D4AF37)',
               background: '#ffffff',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out'
-            }} 
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {error && (
+                <div style={{ padding: '10px 14px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', color: '#ef4444', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FaInfoCircle /> {error}
+                </div>
+              )}
               <div className="d-flex justify-content-between align-items-center" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
                 <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)' }}>
                   {isEditing ? 'Cập Nhật Thông Tin Thành Viên' : 'Thêm Thành Viên Mới'}
                 </h3>
-                <button 
-                  type="button" 
-                  onClick={resetForm} 
+                <button
+                  type="button"
+                  onClick={resetForm}
                   style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#a0aec0', padding: '0 4px', lineHeight: 1 }}
                   aria-label="Close"
                 >
@@ -449,65 +479,132 @@ export default function UserManagementContent() {
         document.body
       )}
 
-      {/* Success Modal */}
-      {successModalMessage && createPortal(
-        <div 
+      {/* Confirm Modal */}
+      {confirmModal.show && createPortal(
+        <div
           style={{
             position: 'fixed',
             top: 0,
             left: 0,
             width: '100vw',
             height: '100vh',
-            backgroundColor: 'transparent',
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(3px)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 1060,
+            zIndex: 1100,
           }}
-          onClick={() => setSuccessModalMessage('')}
+          onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: null })}
         >
-          <div 
-            className="glass-card text-center" 
-            style={{ 
-              width: '100%', 
-              maxWidth: '400px', 
-              padding: '30px 24px', 
+          <div
+            className="glass-card"
+            style={{
+              width: '100%',
+              maxWidth: '450px',
+              padding: '24px',
               boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
-              border: '1px solid #10b981',
+              border: '1px solid var(--ho-border-gold, #D4AF37)',
               background: '#ffffff',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out'
-            }} 
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '10px' }}>
+                {confirmModal.title}
+              </h3>
+              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                {confirmModal.message}
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: null })}
+                  className="btn btn-outline-secondary btn-sm"
+                  style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirmModal.onConfirm) confirmModal.onConfirm();
+                    setConfirmModal({ show: false, title: '', message: '', onConfirm: null });
+                  }}
+                  className="btn btn-success btn-sm fw-bold"
+                  style={{ padding: '8px 24px', fontSize: '13px', borderRadius: '8px' }}
+                >
+                  Xác nhận
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Feedback Modal */}
+      {feedbackModal.show && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1100,
+          }}
+          onClick={() => setFeedbackModal({ show: false, type: 'success', message: '' })}
+        >
+          <div
+            className="glass-card text-center"
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              padding: '30px 24px',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
+              border: `1px solid ${feedbackModal.type === 'success' ? '#10b981' : '#ef4444'}`,
+              background: '#ffffff',
+              borderRadius: '16px',
+              animation: 'scaleUp 0.2s ease-out'
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-              <div 
-                style={{ 
-                  width: '60px', 
-                  height: '60px', 
-                  borderRadius: '50%', 
-                  backgroundColor: 'rgba(16, 185, 129, 0.15)', 
-                  display: 'flex', 
-                  justifyContent: 'center', 
+              <div
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  backgroundColor: feedbackModal.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  display: 'flex',
+                  justifyContent: 'center',
                   alignItems: 'center',
-                  color: '#10b981'
+                  color: feedbackModal.type === 'success' ? '#10b981' : '#ef4444'
                 }}
               >
-                <FaCheckCircle size="36" />
+                {feedbackModal.type === 'success' ? <FaCheckCircle size="36" /> : <FaInfoCircle size="36" />}
               </div>
-              
+
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
-                Thành Công!
+                {feedbackModal.type === 'success' ? 'Thành Công!' : 'Thất Bại!'}
               </h3>
-              
+
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                {successModalMessage}
+                {feedbackModal.message}
               </p>
-              
+
               <button
                 type="button"
-                onClick={() => setSuccessModalMessage('')}
-                className="btn btn-success fw-bold w-100"
+                onClick={() => setFeedbackModal({ show: false, type: 'success', message: '' })}
+                className={`btn ${feedbackModal.type === 'success' ? 'btn-success' : 'btn-danger'} fw-bold w-100`}
                 style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
               >
                 Xác nhận
@@ -520,7 +617,7 @@ export default function UserManagementContent() {
 
       {/* Filter & Search Controls */}
       <div className="glass-card mb-4 p-3 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-stretch align-items-md-center" style={{ border: '1px solid var(--ho-border-gold)' }}>
-        
+
         {/* Search Input */}
         <div style={{ position: 'relative', flex: '1 1 auto', minWidth: '280px' }}>
           <FaSearch style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--ho-primary-medium)', opacity: 0.7 }} />
@@ -546,7 +643,6 @@ export default function UserManagementContent() {
             style={{ fontSize: '14px', minWidth: '150px', height: '42px', paddingRight: '24px' }}
           >
             <option value="">Tất cả vai trò</option>
-            <option value="ADMIN">ADMIN</option>
             <option value="HORSE_OWNER">HORSE OWNER</option>
             <option value="JOCKEY">JOCKEY</option>
             <option value="RACE_REFEREE">RACE REFEREE</option>

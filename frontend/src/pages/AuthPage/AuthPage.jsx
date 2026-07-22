@@ -18,7 +18,7 @@ export default function AuthPage({ view }) {
       else if (user.role === 'HORSE_OWNER') navigate('/owner');
       else if (user.role === 'JOCKEY') navigate('/jockey');
       else if (user.role === 'RACE_REFEREE') navigate('/referee');
-      else navigate('/spectator');
+      else navigate('/');
     }
   }, [isAuthenticated, user, navigate]);
 

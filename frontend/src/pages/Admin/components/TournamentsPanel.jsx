@@ -8,21 +8,23 @@ import {
   createTournamentAPI,
   updateTournamentAPI,
   updateTournamentStatusAPI,
-  deleteTournamentAPI
+  deleteTournamentAPI,
+  confirmRaceRegistrationsAPI
 } from '../../../services/admin';
 import axiosClient from '../../../api/axiosClient';
-import { FaPlus, FaEdit, FaTrash, FaTrophy, FaCalendarAlt, FaMapMarkerAlt, FaDollarSign, FaInfoCircle, FaCheckCircle } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaTrophy, FaCalendarAlt, FaMapMarkerAlt, FaDollarSign, FaInfoCircle, FaCheckCircle, FaChevronDown, FaChevronUp, FaFilter } from 'react-icons/fa';
 
 export default function TournamentsPanel() {
   const [tournaments, setTournaments] = useState([]);
   const [referees, setReferees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [successModalMessage, setSuccessModalMessage] = useState('');
+  const [feedbackModal, setFeedbackModal] = useState({ show: false, type: 'success', message: '' });
+  const [confirmModal, setConfirmModal] = useState({ show: false, title: '', message: '', onConfirm: null });
   const [tracks, setTracks] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedTrack, setSelectedTrack] = useState(null);
+  const [trackShape, setTrackShape] = useState('STRAIGHT');
 
   // Filter States
   const [statusFilter, setStatusFilter] = useState('');
@@ -32,6 +34,7 @@ export default function TournamentsPanel() {
   const [endDateFilter, setEndDateFilter] = useState('');
   const [minPrizeFilter, setMinPrizeFilter] = useState('');
   const [maxPrizeFilter, setMaxPrizeFilter] = useState('');
+  const [isFilterCollapsed, setIsFilterCollapsed] = useState(true);
 
   // Breed and Lightbox States
   const [breeds, setBreeds] = useState([]);
@@ -44,7 +47,6 @@ export default function TournamentsPanel() {
   const [newTrackName, setNewTrackName] = useState('');
   const [newTrackRegion, setNewTrackRegion] = useState('');
   const [newTrackSurface, setNewTrackSurface] = useState('Grass');
-  const [newTrackShape, setNewTrackShape] = useState('STRAIGHT');
 
   // Form State
   const [isEditing, setIsEditing] = useState(false);
@@ -56,25 +58,50 @@ export default function TournamentsPanel() {
     location: '',
     description: '',
     registrationDeadline: '',
-    maxSlots: 10,
-    prizeFirst: 10000000,
-    prizeSecond: 5000000,
-    prizeThird: 2000000,
-    minBetAmount: 50000,
-    entryFee: 100000,
-    minSlots: 3,
+    maxSlots: '',
+    prizeFirst: '',
+    prizeSecond: '',
+    prizeThird: '',
+    minBetAmount: '',
+    entryFee: '',
+    minSlots: '',
     allowedClasses: '',
-    allowedAges: '3,4,5',
-    allowedGenders: 'MALE,FEMALE',
-    imageUrl: 'https://images.unsplash.com/photo-1598974357801-cbca100e6563?q=80&w=600',
+    allowedAges: '',
+    allowedGenders: '',
+    imageUrl: '',
     refereeId: '',
     registrationOpeningTime: '',
     officialRaceTime: '',
     surfaceType: 'Grass',
-    distance: 1200
+    distance: ''
   };
 
   const [formData, setFormData] = useState(initialFormState);
+
+  const handleGenderCheckboxChange = (gender, checked) => {
+    let currentGenders = formData.allowedGenders 
+      ? formData.allowedGenders.split(',').map(g => g.trim().toUpperCase()).filter(Boolean)
+      : [];
+    if (checked) {
+      if (!currentGenders.includes(gender)) {
+        currentGenders.push(gender);
+      }
+    } else {
+      currentGenders = currentGenders.filter(g => g !== gender);
+    }
+    setFormData(prev => ({
+      ...prev,
+      allowedGenders: currentGenders.join(',')
+    }));
+  };
+
+  const isMaleChecked = formData.allowedGenders 
+    ? formData.allowedGenders.split(',').map(g => g.trim().toUpperCase()).includes('MALE')
+    : false;
+
+  const isFemaleChecked = formData.allowedGenders 
+    ? formData.allowedGenders.split(',').map(g => g.trim().toUpperCase()).includes('FEMALE')
+    : false;
 
   // Fetch Data
   const fetchData = async () => {
@@ -152,11 +179,11 @@ export default function TournamentsPanel() {
 
   const handleConfirmAddTrack = async (e) => {
     if (!newTrackName.trim()) {
-      alert('Vui lòng nhập tên sân thi đấu');
+      setFeedbackModal({ show: true, type: 'error', message: 'Vui lòng nhập tên sân thi đấu' });
       return;
     }
     if (!newTrackRegion.trim()) {
-      alert('Vui lòng nhập khu vực tổ chức');
+      setFeedbackModal({ show: true, type: 'error', message: 'Vui lòng nhập khu vực tổ chức' });
       return;
     }
     try {
@@ -164,7 +191,7 @@ export default function TournamentsPanel() {
       const newTrack = await createTrackAPI({
         name: newTrackName.trim(),
         location: newTrackRegion.trim(),
-        shape: newTrackShape,
+        shape: trackShape,
         surfaceCondition: 'Good'
       });
       // Add new track to local list
@@ -177,9 +204,9 @@ export default function TournamentsPanel() {
 
       // Close the modal
       setShowNewTrackModal(false);
-      setSuccess('Thêm sân thi đấu mới thành công!');
+      setFeedbackModal({ show: true, type: 'success', message: 'Thêm sân thi đấu mới thành công!' });
     } catch (err) {
-      alert(err.message || 'Lỗi khi tạo sân thi đấu mới');
+      setFeedbackModal({ show: true, type: 'error', message: err.message || 'Lỗi khi tạo sân thi đấu mới' });
     } finally {
       setLoading(false);
     }
@@ -192,16 +219,17 @@ export default function TournamentsPanel() {
     });
     setSelectedRegion('');
     setSelectedTrack(null);
+    setTrackShape('STRAIGHT');
     setIsEditing(false);
     setEditId(null);
     setShowForm(false);
+    setError('');
   };
 
   // Create or Update
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
     if (parseInt(formData.minSlots) < 3) {
       setError('Số lượng ngựa tối thiểu tham gia phải từ 3 con trở lên.');
@@ -240,10 +268,10 @@ export default function TournamentsPanel() {
     try {
       if (isEditing) {
         await updateTournamentAPI(editId, formattedData);
-        setSuccessModalMessage('Cập nhật giải đấu thành công!');
+        setFeedbackModal({ show: true, type: 'success', message: 'Cập nhật giải đấu thành công!' });
       } else {
         await createTournamentAPI(formattedData);
-        setSuccessModalMessage('Tạo giải đấu mới thành công!');
+        setFeedbackModal({ show: true, type: 'success', message: 'Tạo giải đấu mới thành công!' });
       }
       fetchData();
       resetForm();
@@ -254,6 +282,7 @@ export default function TournamentsPanel() {
 
   // Edit helper
   const handleEditClick = (t) => {
+    setError('');
     // Format dates back for datetime-local (YYYY-MM-DDTHH:mm)
     const formatLocalDateTime = (dtStr) => {
       if (!dtStr) return '';
@@ -265,32 +294,34 @@ export default function TournamentsPanel() {
     if (track) {
       setSelectedRegion(track.location);
       setSelectedTrack(track);
+      setTrackShape(track.shape ?? 'STRAIGHT');
     } else {
       setSelectedRegion('');
       setSelectedTrack(null);
+      setTrackShape('STRAIGHT');
     }
 
     setFormData({
-      tournamentName: t.tournamentName || '',
-      location: t.location || '',
-      description: t.description || '',
+      tournamentName: t.tournamentName ?? '',
+      location: t.location ?? '',
+      description: t.description ?? '',
       registrationDeadline: formatLocalDateTime(t.registrationDeadline),
-      maxSlots: t.maxSlots || 10,
-      prizeFirst: t.prizeFirst || 0,
-      prizeSecond: t.prizeSecond || 0,
-      prizeThird: t.prizeThird || 0,
-      minBetAmount: t.minBetAmount || 0,
-      entryFee: t.entryFee || 0,
-      minSlots: t.minSlots || 3,
-      allowedClasses: t.allowedClasses || '',
-      allowedAges: t.allowedAges || '3,4,5',
-      allowedGenders: t.allowedGenders || 'MALE,FEMALE',
-      imageUrl: t.imageUrl || '',
-      refereeId: t.refereeId || (referees.length > 0 ? referees[0].id : ''),
+      maxSlots: t.maxSlots ?? '',
+      prizeFirst: t.prizeFirst ?? '',
+      prizeSecond: t.prizeSecond ?? '',
+      prizeThird: t.prizeThird ?? '',
+      minBetAmount: t.minBetAmount ?? '',
+      entryFee: t.entryFee ?? '',
+      minSlots: t.minSlots ?? '',
+      allowedClasses: t.allowedClasses ?? '',
+      allowedAges: t.allowedAges ?? '',
+      allowedGenders: t.allowedGenders ?? '',
+      imageUrl: t.imageUrl ?? '',
+      refereeId: t.refereeId ?? (referees.length > 0 ? referees[0].id : ''),
       registrationOpeningTime: formatLocalDateTime(t.registrationOpeningTime),
       officialRaceTime: formatLocalDateTime(t.officialRaceTime),
-      surfaceType: t.surfaceType || 'Grass',
-      distance: t.distance || 1200
+      surfaceType: t.surfaceType ?? 'Grass',
+      distance: t.distance ?? ''
     });
     setEditId(t.id);
     setIsEditing(true);
@@ -298,32 +329,90 @@ export default function TournamentsPanel() {
   };
 
   // Delete
-  const handleDelete = async (id) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa giải đấu này không? Tất cả vòng đua liên quan cũng sẽ bị ảnh hưởng.')) {
-      return;
-    }
-    setError('');
-    setSuccess('');
-    try {
-      await deleteTournamentAPI(id);
-      setSuccess('Xóa giải đấu thành công!');
-      fetchData();
-    } catch (err) {
-      setError(err.message || 'Lỗi khi xóa giải đấu.');
-    }
+  const handleDelete = (id) => {
+    setConfirmModal({
+      show: true,
+      title: 'Xác nhận xóa giải đấu',
+      message: 'Bạn có chắc chắn muốn xóa giải đấu này không? Tất cả vòng đua liên quan cũng sẽ bị ảnh hưởng và thao tác này không thể hoàn tác.',
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          await deleteTournamentAPI(id);
+          setFeedbackModal({
+            show: true,
+            type: 'success',
+            message: 'Xóa giải đấu thành công!'
+          });
+          fetchData();
+        } catch (err) {
+          setFeedbackModal({
+            show: true,
+            type: 'error',
+            message: err.message || 'Lỗi khi xóa giải đấu.'
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
   };
 
   // Update Status
-  const handleStatusChange = async (id, status) => {
-    setError('');
-    setSuccess('');
-    try {
-      await updateTournamentStatusAPI(id, status);
-      setSuccess(`Cập nhật trạng thái giải đấu thành ${status} thành công!`);
-      fetchData();
-    } catch (err) {
-      setError(err.message || 'Lỗi khi cập nhật trạng thái.');
-    }
+  const handleStatusChange = (id, status) => {
+    setConfirmModal({
+      show: true,
+      title: 'Xác nhận thay đổi trạng thái',
+      message: `Bạn có chắc chắn muốn cập nhật trạng thái giải đấu thành "${status}" không?`,
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          await updateTournamentStatusAPI(id, status);
+          setFeedbackModal({
+            show: true,
+            type: 'success',
+            message: `Cập nhật trạng thái giải đấu thành "${status}" thành công!`
+          });
+          fetchData();
+        } catch (err) {
+          setFeedbackModal({
+            show: true,
+            type: 'error',
+            message: err.message || 'Lỗi khi cập nhật trạng thái.'
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
+  };
+
+  // Confirm Registration (Chốt danh sách)
+  const handleConfirmRegistration = (tournamentId) => {
+    setConfirmModal({
+      show: true,
+      title: 'Xác nhận chốt danh sách',
+      message: 'Bạn có chắc chắn muốn chốt danh sách thi đấu cho giải đấu này? Thao tác này sẽ khóa đăng ký, chuyển trạng thái vòng đua sang LOCKED_LIST và hoàn lại lệ phí cho các đơn chưa được duyệt.',
+      onConfirm: async () => {
+        try {
+          setLoading(true);
+          const res = await confirmRaceRegistrationsAPI(tournamentId);
+          setFeedbackModal({
+            show: true,
+            type: 'success',
+            message: res.message || 'Chốt danh sách giải đấu thành công! Trận đấu đã chuyển sang trạng thái sẵn sàng đua (LOCKED_LIST).'
+          });
+          fetchData();
+        } catch (err) {
+          setFeedbackModal({
+            show: true,
+            type: 'error',
+            message: err.message || 'Lỗi khi chốt danh sách thi đấu.'
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
   };
 
   const handleImageUpload = async (e) => {
@@ -343,13 +432,12 @@ export default function TournamentsPanel() {
           uploadedUrl = 'http://localhost:8080' + uploadedUrl;
         }
         setFormData(prev => ({ ...prev, imageUrl: uploadedUrl }));
-        setSuccessModalMessage('Tải ảnh lên thành công!');
+        setFeedbackModal({ show: true, type: 'success', message: 'Tải ảnh lên thành công!' });
         setError('');
       }
     } catch (err) {
       const errMsg = err.response?.data?.message || 'Lỗi tải ảnh lên.';
       setError(errMsg);
-      setSuccess('');
     }
   };
 
@@ -377,7 +465,7 @@ export default function TournamentsPanel() {
         </h2>
         {!showForm && (
           <button
-            onClick={() => setShowForm(true)}
+            onClick={() => { setError(''); setShowForm(true); }}
             className="btn btn-success d-flex align-items-center gap-2 fw-bold"
             style={{ fontSize: '13px', padding: '6px 14px' }}
           >
@@ -385,18 +473,6 @@ export default function TournamentsPanel() {
           </button>
         )}
       </div>
-
-      {/* Messages */}
-      {error && (
-        <div style={{ padding: '14px 18px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '10px', color: '#ef4444', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <FaInfoCircle /> {error}
-        </div>
-      )}
-      {success && (
-        <div style={{ padding: '14px 18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '10px', color: '#10b981', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <FaInfoCircle /> {success}
-        </div>
-      )}
 
       {/* Form Section */}
       {showForm && createPortal(
@@ -430,6 +506,11 @@ export default function TournamentsPanel() {
             onClick={(e) => e.stopPropagation()}
           >
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {error && (
+                <div style={{ padding: '10px 14px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', color: '#ef4444', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FaInfoCircle /> {error}
+                </div>
+              )}
               <div className="d-flex justify-content-between align-items-center" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
                 <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)' }}>
                   {isEditing ? 'Cập Nhật Giải Đấu' : 'Tạo Giải Đấu Mới'}
@@ -484,6 +565,9 @@ export default function TournamentsPanel() {
                         onChange={(trackObj) => {
                           setSelectedTrack(trackObj);
                           setFormData(prev => ({ ...prev, location: trackObj ? trackObj.name : '' }));
+                          if (trackObj && trackObj.shape) {
+                            setTrackShape(trackObj.shape);
+                          }
                         }}
                         options={tracks.filter(t => t.location === selectedRegion)}
                         placeholder="Gõ hoặc chọn sân thi đấu..."
@@ -494,19 +578,35 @@ export default function TournamentsPanel() {
                       />
                     </div>
 
-                    <div className="form-group">
-                      <label className="ho-input-label">Bề mặt đường đua *</label>
-                      <select
-                        name="surfaceType"
-                        value={formData.surfaceType}
-                        onChange={handleInputChange}
-                        required
-                        className="ho-form-input text-dark fw-semibold"
-                      >
-                        <option value="Grass">Grass (Cỏ)</option>
-                        <option value="Muddy">Muddy (Đất bùn)</option>
-                        <option value="Artificial">Artificial (Nhân tạo)</option>
-                      </select>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                      <div className="form-group">
+                        <label className="ho-input-label">Bề mặt đường đua *</label>
+                        <select
+                          name="surfaceType"
+                          value={formData.surfaceType}
+                          onChange={handleInputChange}
+                          required
+                          className="ho-form-input text-dark fw-semibold"
+                        >
+                          <option value="Grass">Grass (Cỏ)</option>
+                          <option value="Muddy">Muddy (Đất bùn)</option>
+                          <option value="Artificial">Artificial (Nhân tạo)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="ho-input-label">Hình dạng đường đua *</label>
+                        <select
+                          name="trackShape"
+                          value={trackShape}
+                          onChange={(e) => setTrackShape(e.target.value)}
+                          required
+                          className="ho-form-input text-dark fw-semibold"
+                        >
+                          <option value="STRAIGHT">STRAIGHT (Đường thẳng)</option>
+                          <option value="OVAL">OVAL (Đường tròn/oval)</option>
+                        </select>
+                      </div>
                     </div>
 
                     <div className="form-group">
@@ -519,6 +619,7 @@ export default function TournamentsPanel() {
                         required
                         min="400"
                         className="ho-form-input text-dark fw-semibold"
+                        placeholder="VD: 1200"
                       />
                     </div>
 
@@ -586,6 +687,7 @@ export default function TournamentsPanel() {
                           required
                           min="3"
                           className="ho-form-input text-dark fw-semibold"
+                          placeholder="VD: 3"
                         />
                       </div>
                       <div className="form-group">
@@ -598,6 +700,7 @@ export default function TournamentsPanel() {
                           required
                           min="3"
                           className="ho-form-input text-dark fw-semibold"
+                          placeholder="VD: 10"
                         />
                       </div>
                     </div>
@@ -613,6 +716,7 @@ export default function TournamentsPanel() {
                           required
                           min="0"
                           className="ho-form-input text-dark fw-semibold"
+                          placeholder="VD: 500000"
                         />
                       </div>
                       <div className="form-group">
@@ -625,6 +729,7 @@ export default function TournamentsPanel() {
                           required
                           min="0"
                           className="ho-form-input text-dark fw-semibold"
+                          placeholder="VD: 100000"
                         />
                       </div>
                     </div>
@@ -640,6 +745,7 @@ export default function TournamentsPanel() {
                           required
                           min="0"
                           className="ho-form-input text-dark fw-semibold"
+                          placeholder="VD: 10000000"
                         />
                       </div>
                       <div className="form-group">
@@ -652,6 +758,7 @@ export default function TournamentsPanel() {
                           required
                           min="0"
                           className="ho-form-input text-dark fw-semibold"
+                          placeholder="VD: 5000000"
                         />
                       </div>
                       <div className="form-group">
@@ -778,7 +885,7 @@ export default function TournamentsPanel() {
                             const res = await axiosClient.get('/breeds/official');
                             const updatedBreeds = res.data || [];
                             setBreeds(updatedBreeds);
-                            setSuccessModalMessage(`Thêm giống ngựa "${newBreed}" thành công!`);
+                            setFeedbackModal({ show: true, type: 'success', message: `Thêm giống ngựa "${newBreed}" thành công!` });
                           } catch (err) {
                             alert(err.response?.data?.message || 'Không thể tạo giống ngựa mới.');
                           } finally {
@@ -801,15 +908,27 @@ export default function TournamentsPanel() {
                         />
                       </div>
                       <div className="form-group">
-                        <label className="ho-input-label">Giới tính</label>
-                        <input
-                          type="text"
-                          name="allowedGenders"
-                          value={formData.allowedGenders}
-                          onChange={handleInputChange}
-                          className="ho-form-input text-dark fw-semibold"
-                          placeholder="VD: MALE,FEMALE"
-                        />
+                        <label className="ho-input-label d-block mb-2">Giới tính</label>
+                        <div style={{ display: 'flex', gap: '20px', alignItems: 'center', height: '38px' }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--ho-primary-dark)', fontWeight: '600' }}>
+                            <input
+                              type="checkbox"
+                              checked={isMaleChecked}
+                              onChange={(e) => handleGenderCheckboxChange('MALE', e.target.checked)}
+                              style={{ width: '16px', height: '16px', accentColor: 'var(--ho-primary-dark)' }}
+                            />
+                            Đực (MALE)
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--ho-primary-dark)', fontWeight: '600' }}>
+                            <input
+                              type="checkbox"
+                              checked={isFemaleChecked}
+                              onChange={(e) => handleGenderCheckboxChange('FEMALE', e.target.checked)}
+                              style={{ width: '16px', height: '16px', accentColor: 'var(--ho-primary-dark)' }}
+                            />
+                            Cái (FEMALE)
+                          </label>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -840,8 +959,8 @@ export default function TournamentsPanel() {
         document.body
       )}
 
-      {/* Success Modal */}
-      {successModalMessage && createPortal(
+      {/* Confirm Modal */}
+      {confirmModal.show && createPortal(
         <div
           style={{
             position: 'fixed',
@@ -849,13 +968,80 @@ export default function TournamentsPanel() {
             left: 0,
             width: '100vw',
             height: '100vh',
-            backgroundColor: 'transparent',
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(3px)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            zIndex: 1060,
+            zIndex: 1100,
           }}
-          onClick={() => setSuccessModalMessage('')}
+          onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: null })}
+        >
+          <div
+            className="glass-card"
+            style={{
+              width: '100%',
+              maxWidth: '450px',
+              padding: '24px',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
+              border: '1px solid var(--ho-border-gold, #D4AF37)',
+              background: '#ffffff',
+              borderRadius: '16px',
+              animation: 'scaleUp 0.2s ease-out'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '10px' }}>
+                {confirmModal.title}
+              </h3>
+              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                {confirmModal.message}
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: null })}
+                  className="btn btn-outline-secondary btn-sm"
+                  style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirmModal.onConfirm) confirmModal.onConfirm();
+                    setConfirmModal({ show: false, title: '', message: '', onConfirm: null });
+                  }}
+                  className="btn btn-success btn-sm fw-bold"
+                  style={{ padding: '8px 24px', fontSize: '13px', borderRadius: '8px' }}
+                >
+                  Xác nhận
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Feedback Modal */}
+      {feedbackModal.show && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1100,
+          }}
+          onClick={() => setFeedbackModal({ show: false, type: 'success', message: '' })}
         >
           <div
             className="glass-card text-center"
@@ -864,7 +1050,7 @@ export default function TournamentsPanel() {
               maxWidth: '400px',
               padding: '30px 24px',
               boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
-              border: '1px solid #10b981',
+              border: `1px solid ${feedbackModal.type === 'success' ? '#10b981' : '#ef4444'}`,
               background: '#ffffff',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out'
@@ -877,28 +1063,28 @@ export default function TournamentsPanel() {
                   width: '60px',
                   height: '60px',
                   borderRadius: '50%',
-                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                  backgroundColor: feedbackModal.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  color: '#10b981'
+                  color: feedbackModal.type === 'success' ? '#10b981' : '#ef4444'
                 }}
               >
-                <FaCheckCircle size="36" />
+                {feedbackModal.type === 'success' ? <FaCheckCircle size="36" /> : <FaInfoCircle size="36" />}
               </div>
 
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
-                Thành Công!
+                {feedbackModal.type === 'success' ? 'Thành Công!' : 'Thất Bại!'}
               </h3>
 
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
-                {successModalMessage}
+                {feedbackModal.message}
               </p>
 
               <button
                 type="button"
-                onClick={() => setSuccessModalMessage('')}
-                className="btn btn-success fw-bold w-100"
+                onClick={() => setFeedbackModal({ show: false, type: 'success', message: '' })}
+                className={`btn ${feedbackModal.type === 'success' ? 'btn-success' : 'btn-danger'} fw-bold w-100`}
                 style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
               >
                 Xác nhận
@@ -911,7 +1097,30 @@ export default function TournamentsPanel() {
 
       {/* Filter & Search Toolbar */}
       <div className="glass-card mb-2 p-3" style={{ border: '1px solid var(--ho-border-gold)', borderRadius: '12px' }}>
-        <div className="row g-3">
+        <div 
+          style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            cursor: 'pointer',
+            paddingBottom: isFilterCollapsed ? '0px' : '12px',
+            borderBottom: isFilterCollapsed ? 'none' : '1px solid rgba(212, 175, 55, 0.2)'
+          }}
+          onClick={() => setIsFilterCollapsed(!isFilterCollapsed)}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--ho-primary-dark)', fontWeight: '600', fontSize: '14px' }}>
+            <FaFilter style={{ color: 'var(--ho-accent-gold-text)' }} /> Bộ lọc tìm kiếm
+          </div>
+          <button
+            type="button"
+            style={{ background: 'none', border: 'none', color: 'var(--ho-primary-dark)', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+          >
+            {isFilterCollapsed ? <FaChevronDown size="14" /> : <FaChevronUp size="14" />}
+          </button>
+        </div>
+
+        {!isFilterCollapsed && (
+          <div className="row g-3" style={{ marginTop: '10px' }}>
           {/* Search Name */}
           <div className="col-12 col-md-3">
             <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tìm theo tên giải đấu</label>
@@ -1025,7 +1234,8 @@ export default function TournamentsPanel() {
             </button>
           </div>
         </div>
-      </div>
+      )}
+    </div>
 
       {/* Tournaments List Grid */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -1122,6 +1332,23 @@ export default function TournamentsPanel() {
                     <option value="Finished">Finished (Completed)</option>
                     <option value="Cancelled">Cancelled</option>
                   </select>
+
+                  {t.tournamentStatus === 'Active' && (
+                    <button
+                      onClick={() => handleConfirmRegistration(t.id)}
+                      className="btn btn-warning btn-sm fw-bold text-dark"
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: '11px',
+                        borderRadius: '8px',
+                        border: '1px solid #D4AF37',
+                        whiteSpace: 'nowrap'
+                      }}
+                      title="Chốt danh sách đăng ký và chuyển sang LOCKED_LIST để trọng tài chuẩn bị trận đấu"
+                    >
+                      Chốt danh sách
+                    </button>
+                  )}
 
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button
@@ -1243,18 +1470,6 @@ export default function TournamentsPanel() {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="ho-input-label">Hình dạng đường đua *</label>
-                  <select
-                    value={newTrackShape}
-                    onChange={(e) => setNewTrackShape(e.target.value)}
-                    required
-                    className="ho-form-input text-dark fw-semibold"
-                  >
-                    <option value="STRAIGHT">STRAIGHT (Đường thẳng)</option>
-                    <option value="OVAL">OVAL (Đường tròn/oval)</option>
-                  </select>
-                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid rgba(0, 0, 0, 0.08)', paddingTop: '15px' }}>

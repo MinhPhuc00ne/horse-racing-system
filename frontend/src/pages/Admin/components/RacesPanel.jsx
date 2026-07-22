@@ -3,8 +3,10 @@ import { createPortal } from 'react-dom';
 import {
   getRaceRegistrationsAPI,
   approveRaceRegistrationAPI,
-  rejectRaceRegistrationAPI
+  rejectRaceRegistrationAPI,
+  confirmRaceRegistrationsAPI
 } from '../../../services/admin';
+import { getTournamentsAPI } from '../../../services/races';
 import { FaCheck, FaTimes, FaInfoCircle, FaSearch, FaFlag, FaExclamationTriangle } from 'react-icons/fa';
 
 const MOCK_REGISTRATIONS = [
@@ -118,6 +120,7 @@ export default function RacesPanel() {
   // Approve registration
   const handleApproveConfirm = async () => {
     const regId = approveModal.regId;
+    const currentReg = registrations.find(r => r.id === regId);
     setApproveModal({ show: false, regId: null, horseName: '', jockeyName: '', tournamentName: '' });
     
     setErrorModalMessage('');
@@ -132,8 +135,37 @@ export default function RacesPanel() {
         return;
       }
       await approveRaceRegistrationAPI(regId);
+      
+      // Fetch latest registrations list
+      const regList = await getRaceRegistrationsAPI();
+      setRegistrations(regList);
+
+      // Auto-confirm LOCKED_LIST check (Background check)
+      if (currentReg) {
+        try {
+          const tournamentsList = await getTournamentsAPI();
+          const tournament = tournamentsList.find(t => t.tournamentName === currentReg.tournamentName);
+          if (tournament) {
+            const sameTournamentRegs = regList.filter(r => r.tournamentName === currentReg.tournamentName);
+            const approvedCount = sameTournamentRegs.filter(r => r.status === 'APPROVED').length;
+            const pendingCount = sameTournamentRegs.filter(r => r.status === 'PENDING' || r.status === 'PENDING_JOCKEY').length;
+
+            const maxSlots = tournament.maxSlots || 10;
+            const minSlots = tournament.minSlots || 3;
+
+            if (approvedCount >= maxSlots || (pendingCount === 0 && approvedCount >= minSlots)) {
+              // Call background confirm registration to automatically transition status to LOCKED_LIST
+              await confirmRaceRegistrationsAPI(tournament.id);
+              setSuccessModalMessage('Đã duyệt đơn đăng ký và tự động chốt danh sách giải đấu (LOCKED_LIST) thành công!');
+              return;
+            }
+          }
+        } catch (autoErr) {
+          console.warn('Lỗi khi tự động chốt danh sách giải đấu:', autoErr);
+        }
+      }
+
       setSuccessModalMessage('Đã duyệt đơn đăng ký đua thành công!');
-      fetchRegistrations();
     } catch (err) {
       setErrorModalMessage(err.response?.data?.message || err.message || 'Lỗi khi duyệt đơn đăng ký.');
     }

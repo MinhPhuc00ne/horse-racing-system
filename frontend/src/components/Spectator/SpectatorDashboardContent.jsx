@@ -131,36 +131,36 @@ export default function SpectatorDashboardContent() {
             <div className="row g-4 mt-2">
               <div className="col-12 col-md-6">
                 <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small block mb-1">Username</span>
+                  <span className="text-secondary small d-block mb-1">Username</span>
                   <span className="fw-bold text-dark fs-5">{user?.username || 'N/A'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
                 <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small block mb-1">Full Name</span>
+                  <span className="text-secondary small d-block mb-1">Full Name</span>
                   <span className="fw-bold text-dark fs-5">{user?.fullName || 'N/A'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
                 <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small block mb-1">Email Address</span>
-                  <span className="fw-bold text-dark fs-5 text-truncate block">{user?.email || 'N/A'}</span>
+                  <span className="text-secondary small d-block mb-1">Email Address</span>
+                  <span className="fw-bold text-dark fs-5 text-truncate d-block">{user?.email || 'N/A'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
                 <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small block mb-1">Phone Number</span>
+                  <span className="text-secondary small d-block mb-1">Phone Number</span>
                   <span className="fw-bold text-dark fs-5">{user?.phone || 'Not provided'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
                 <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small block mb-1">System Role</span>
-                  <span className="badge text-uppercase font-weight-bold" style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: 'var(--ho-accent-gold-text)' }}>
+                  <span className="text-secondary small d-block mb-1">System Role</span>
+                  <span className="badge text-uppercase font-weight-bold d-inline-block" style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: 'var(--ho-accent-gold-text)' }}>
                     {user?.role || 'SPECTATOR'}
                   </span>
                 </div>
@@ -168,7 +168,7 @@ export default function SpectatorDashboardContent() {
 
               <div className="col-12 col-md-6">
                 <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small block mb-1">Join Date</span>
+                  <span className="text-secondary small d-block mb-1">Join Date</span>
                   <span className="fw-bold text-dark fs-5">{formatDate(user?.createdAt)}</span>
                 </div>
               </div>

@@ -72,7 +72,6 @@ const Home = () => {
     if (user.role === 'HORSE_OWNER') return <Navigate to="/owner" replace />;
     if (user.role === 'JOCKEY') return <Navigate to="/jockey" replace />;
     if (user.role === 'RACE_REFEREE') return <Navigate to="/referee" replace />;
-    return <Navigate to="/spectator" replace />;
   }
 
   return (

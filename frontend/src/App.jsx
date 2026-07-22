@@ -104,7 +104,7 @@ function App() {
 
                 {/* Spectator Nested Dashboard Layout */}
                 <Route
-                  path="/spectator/*"
+                  path="/spectators/*"
                   element={
                     <ProtectedRoute allowedRoles={["SPECTATOR", "HORSE_OWNER", "JOCKEY", "RACE_REFEREE"]}>
                       <SpectatorPage />

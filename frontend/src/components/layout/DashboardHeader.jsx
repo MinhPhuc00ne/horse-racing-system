@@ -15,7 +15,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
   const [pendingNotifications, setPendingNotifications] = useState([]);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [feedbackModalInitialTab, setFeedbackModalInitialTab] = useState('CREATE');
-  
+
   const dropdownRef = useRef(null);
   const notificationRef = useRef(null);
   const navigate = useNavigate();
@@ -26,15 +26,15 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
       const refreshResponse = await axiosClient.post('/auth/refresh', {
         refreshToken: refreshToken,
       });
-      
+
       const { accessToken: newAccessToken, refreshToken: newRefreshToken } = refreshResponse.data;
-      
+
       localStorage.setItem('horse_racing_accessToken', newAccessToken);
       localStorage.setItem('horse_racing_refreshToken', newRefreshToken);
-      
+
       const profileResponse = await axiosClient.get('/auth/me');
       const updatedUser = profileResponse.data;
-      
+
       login({
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
@@ -156,14 +156,14 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
 
   useEffect(() => {
     loadNotifications();
-    
+
     const handleStorageChange = () => {
       loadNotifications();
     };
-    
+
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('jockey_invitations_updated', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('jockey_invitations_updated', handleStorageChange);
@@ -229,7 +229,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
     } else if (user?.role === 'JOCKEY') {
       navigate('/jockey/profile');
     } else if (user?.role === 'SPECTATOR') {
-      navigate('/spectator/dashboard');
+      navigate('/spectators/profile');
     } else if (user?.role === 'ADMIN') {
       navigate('/admin/dashboard');
     } else {
@@ -256,10 +256,10 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
   return (
     <header className="dashboard-layout-header ho-wrapper w-100 position-relative">
       <div className="container-fluid px-3 px-md-4 d-flex align-items-center justify-content-between h-100">
-        
+
         {/* Brand Title & Hamburger Toggle */}
         <div className="d-flex align-items-center gap-3">
-          <button 
+          <button
             className="d-xl-none btn border-0 p-1 d-flex align-items-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             style={{ color: '#ffffff' }}
@@ -268,16 +268,11 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
               {mobileMenuOpen ? 'close' : 'menu'}
             </span>
           </button>
-          
-          <div 
+
+          <div
             className="d-flex align-items-center cursor-pointer"
             onClick={() => {
-              if (user?.role === 'RACE_REFEREE') navigate('/referee/pre-race-check');
-              else if (user?.role === 'JOCKEY') navigate('/jockey/home');
-              else if (user?.role === 'HORSE_OWNER') navigate('/owner/home');
-              else if (user?.role === 'SPECTATOR') navigate('/spectator/home');
-              else if (user?.role === 'ADMIN') navigate('/admin/dashboard');
-              else navigate('/');
+              navigate('/');
             }}
             style={{ cursor: 'pointer' }}
           >
@@ -300,7 +295,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                     <NavLink
                       key={sub.path}
                       to={sub.path}
-                      className={({ isActive }) => 
+                      className={({ isActive }) =>
                         `nav-dropdown-item ${isActive ? 'nav-dropdown-item-active' : ''}`
                       }
                     >
@@ -314,7 +309,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
               <NavLink
                 key={link.path}
                 to={link.path}
-                className={({ isActive }) => 
+                className={({ isActive }) =>
                   `nav-link-horizontal ${isActive ? 'nav-link-horizontal-active' : 'nav-link-horizontal-inactive'}`
                 }
               >
@@ -336,8 +331,8 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
             >
               <span className="material-symbols-outlined text-dark" style={{ fontSize: '20px' }}>notifications</span>
               {pendingNotifications.length > 0 && (
-                <span className="position-absolute bg-danger border border-white rounded-circle d-flex align-items-center justify-content-center text-white" 
-                      style={{ top: '-4px', right: '-4px', width: '18px', height: '18px', fontSize: '9px', fontWeight: 'bold' }}>
+                <span className="position-absolute bg-danger border border-white rounded-circle d-flex align-items-center justify-content-center text-white"
+                  style={{ top: '-4px', right: '-4px', width: '18px', height: '18px', fontSize: '9px', fontWeight: 'bold' }}>
                   {pendingNotifications.length}
                 </span>
               )}
@@ -348,7 +343,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                 <div className="avatar-dropdown-header d-flex justify-content-between align-items-center">
                   <span className="fw-bold">Notifications ({pendingNotifications.length})</span>
                   {pendingNotifications.length > 0 && (
-                    <button 
+                    <button
                       className="btn btn-link p-0 text-decoration-none small text-primary fw-semibold"
                       style={{ fontSize: '11px', cursor: 'pointer' }}
                       onClick={handleMarkAllAsRead}
@@ -358,7 +353,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                   )}
                 </div>
                 <div className="avatar-dropdown-divider" style={{ marginBottom: 0 }} />
-                
+
                 <div className="no-scrollbar" style={{ maxHeight: '280px', overflowY: 'auto' }}>
                   {pendingNotifications.length === 0 ? (
                     <div className="py-4 text-center text-muted small" style={{ fontStyle: 'italic' }}>
@@ -369,14 +364,14 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                       const isUpgrade = noti.type === 'UPGRADE_APPROVED';
                       const isSysNoti = noti.type === 'SYSTEM_NOTIFICATION';
                       return (
-                        <button 
-                          key={noti.id} 
+                        <button
+                          key={noti.id}
                           className="avatar-dropdown-item d-flex flex-column align-items-start gap-1 py-3 px-3 border-bottom"
-                          style={{ 
-                            borderBottom: '1px solid #edf2f7', 
-                            borderTop: 'none', 
-                            background: isUpgrade ? 'rgba(16, 185, 129, 0.05)' : isSysNoti ? 'rgba(59, 130, 246, 0.05)' : 'none', 
-                            borderRadius: 0 
+                          style={{
+                            borderBottom: '1px solid #edf2f7',
+                            borderTop: 'none',
+                            background: isUpgrade ? 'rgba(16, 185, 129, 0.05)' : isSysNoti ? 'rgba(59, 130, 246, 0.05)' : 'none',
+                            borderRadius: 0
                           }}
                           onClick={() => handleNotificationClick(noti)}
                         >
@@ -392,11 +387,11 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                             </span>
                           </div>
                           <p className="text-secondary small m-0 text-truncate-2" style={{ fontSize: '11.5px', lineHeight: '1.4', textAlign: 'left', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', whiteSpace: 'normal' }}>
-                            {noti.content 
-                              ? noti.content 
-                              : isUpgrade 
+                            {noti.content
+                              ? noti.content
+                              : isUpgrade
                                 ? `Upgrade request to ${noti.requestedRole ? noti.requestedRole.replace('_', ' ') : 'new role'} has been approved. Click here to activate your role!`
-                                : noti.type === 'FRIEND_REQUEST' 
+                                : noti.type === 'FRIEND_REQUEST'
                                   ? 'sent you a connection request.'
                                   : `Invited you to ride ${noti.horseName} at tournament ${noti.tournamentName}`
                             }
@@ -441,19 +436,19 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
             {dropdownOpen && (
               <div className="avatar-dropdown-menu">
                 <div className="avatar-dropdown-header">Account Actions</div>
-                
+
                 <button className="avatar-dropdown-item" onClick={handleProfileClick}>
                   <span className="material-symbols-outlined avatar-dropdown-icon">person</span>
                   My Profile
                 </button>
-                
+
                 <button className="avatar-dropdown-item" onClick={handleFeedbackClick}>
                   <span className="material-symbols-outlined avatar-dropdown-icon">rate_review</span>
                   Feedback
                 </button>
-                
+
                 <div className="avatar-dropdown-divider" />
-                
+
                 <button className="avatar-dropdown-item logout" onClick={handleLogoutClick}>
                   <span className="material-symbols-outlined avatar-dropdown-icon text-danger">logout</span>
                   Logout
@@ -482,12 +477,12 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                         key={sub.path}
                         to={sub.path}
                         onClick={() => setMobileMenuOpen(false)}
-                        className={({ isActive }) => 
+                        className={({ isActive }) =>
                           `mobile-nav-link p-2 rounded d-flex align-items-center ${isActive ? 'bg-warning text-dark fw-bold' : 'text-dark'}`
                         }
                         style={{ textDecoration: 'none', fontSize: '0.9rem' }}
                       >
-                        {sub.icon && <span className="material-symbols-outlined me-2" style={{fontSize: '18px'}}>{sub.icon}</span>}
+                        {sub.icon && <span className="material-symbols-outlined me-2" style={{ fontSize: '18px' }}>{sub.icon}</span>}
                         {sub.label}
                       </NavLink>
                     ))}
@@ -498,7 +493,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
                   key={link.path}
                   to={link.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) => 
+                  className={({ isActive }) =>
                     `mobile-nav-link p-2 rounded d-flex align-items-center ${isActive ? 'bg-warning text-dark fw-bold' : 'text-dark'}`
                   }
                   style={{ textDecoration: 'none' }}
@@ -509,7 +504,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
               )
             ))}
             <hr className="my-2" />
-            <button 
+            <button
               className="btn btn-outline-danger btn-sm text-start d-flex align-items-center gap-2 p-2 w-100"
               onClick={() => {
                 setMobileMenuOpen(false);

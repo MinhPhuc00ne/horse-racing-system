@@ -14,12 +14,11 @@ import SpectatorLiveSimulationPage from '../../components/Spectator/SpectatorLiv
 import './Spectator.css';
 
 const spectatorNavLinks = [
-  { path: '/spectator/home', label: 'Home', icon: 'home' },
-  { path: '/spectator/dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { path: '/spectator/tournaments', label: 'Tournaments & Races', icon: 'emoji_events' },
-  { path: '/spectator/live', label: 'Live Simulation', icon: 'sports_score' },
-  { path: '/spectator/wallet', label: 'Wallet & Transactions', icon: 'account_balance_wallet' },
-  { path: '/spectator/upgrade', label: 'Account Upgrade', icon: 'manage_accounts' }
+  { path: '/spectators/profile', label: 'Profile', icon: 'person' },
+  { path: '/spectators/tournaments', label: 'Tournaments & Races', icon: 'emoji_events' },
+  { path: '/spectators/live', label: 'Live Simulation', icon: 'sports_score' },
+  { path: '/spectators/wallet', label: 'Wallet & Transactions', icon: 'account_balance_wallet' },
+  { path: '/spectators/upgrade', label: 'Account Upgrade', icon: 'manage_accounts' }
 ];
 
 export default function SpectatorPage() {
@@ -38,8 +37,8 @@ export default function SpectatorPage() {
         { path: '/referee/pre-race-check', label: 'Pre-Race Check', icon: 'fact_check' },
         { path: '/referee/live-simulation', label: 'Live Simulation', icon: 'sports_score' },
         { path: '/referee/violations', label: 'Violations & Flags', icon: 'gavel' },
-        { path: '/spectator/tournaments', label: 'Betting', icon: 'local_atm' },
-        { path: '/spectator/wallet', label: 'Wallet & Transactions', icon: 'account_balance_wallet' }
+        { path: '/spectators/tournaments', label: 'Betting', icon: 'local_atm' },
+        { path: '/spectators/wallet', label: 'Wallet & Transactions', icon: 'account_balance_wallet' }
       ];
     } else if (user.role === 'HORSE_OWNER') {
       dynamicNavLinks = [
@@ -50,9 +49,9 @@ export default function SpectatorPage() {
         { path: '/owner/friends', label: 'Connections', icon: 'group' },
         { path: '/owner/financials', label: 'Financials', icon: 'payments' },
         { path: '/owner/analytics', label: 'Analytics', icon: 'analytics' },
-        { path: '/spectator/tournaments', label: 'Betting', icon: 'local_atm' },
-        { path: '/spectator/live', label: 'Live Simulation', icon: 'live_tv' },
-        { path: '/spectator/wallet', label: 'Wallet & Transactions', icon: 'account_balance_wallet' }
+        { path: '/spectators/tournaments', label: 'Betting', icon: 'local_atm' },
+        { path: '/spectators/live', label: 'Live Simulation', icon: 'live_tv' },
+        { path: '/spectators/wallet', label: 'Wallet & Transactions', icon: 'account_balance_wallet' }
       ];
     } else if (user.role === 'JOCKEY') {
       dynamicNavLinks = [
@@ -61,9 +60,9 @@ export default function SpectatorPage() {
         { path: '/jockey/races', label: 'Races & Tournaments', icon: 'sports_score' },
         { path: '/jockey/invitations', label: 'Invitations & Connections', icon: 'mail' },
         { path: '/jockey/profile', label: 'Profile & Wallet', icon: 'person' },
-        { path: '/spectator/tournaments', label: 'Betting', icon: 'local_atm' },
-        { path: '/spectator/live', label: 'Live Simulation', icon: 'live_tv' },
-        { path: '/spectator/wallet', label: 'Wallet & Transactions', icon: 'account_balance_wallet' }
+        { path: '/spectators/tournaments', label: 'Betting', icon: 'local_atm' },
+        { path: '/spectators/live', label: 'Live Simulation', icon: 'live_tv' },
+        { path: '/spectators/wallet', label: 'Wallet & Transactions', icon: 'account_balance_wallet' }
       ];
     }
   }
@@ -71,15 +70,14 @@ export default function SpectatorPage() {
   return (
     <DashboardLayout navLinks={dynamicNavLinks} profile={profile}>
       <Routes>
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="home" element={<Home />} />
-        <Route path="dashboard" element={<SpectatorDashboardContent />} />
+        <Route index element={<Navigate to="profile" replace />} />
+        <Route path="profile" element={<SpectatorDashboardContent />} />
         <Route path="tournaments" element={<SpectatorTournaments />} />
         <Route path="live" element={<SpectatorLiveSimulationPage />} />
         <Route path="wallet" element={<SpectatorWallet />} />
         <Route path="upgrade" element={<SpectatorUpgradeRole />} />
         {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to="dashboard" replace />} />
+        <Route path="*" element={<Navigate to="profile" replace />} />
       </Routes>
     </DashboardLayout>
   );
