@@ -1,5 +1,5 @@
 
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import './Home.css';
@@ -7,6 +7,7 @@ import HeroSection from '../../components/Home/HeroSection';
 import StatsSection from '../../components/Home/StatsSection';
 import TournamentsSection from '../../components/Home/TournamentsSection';
 import RankingBoard from '../../components/Home/RankingBoard';
+import { getTournamentsAPI } from '../../services/races';
 
 const horseRankings = [
   {
@@ -66,6 +67,19 @@ const jockeyRankings = [
 
 const Home = () => {
   const { isAuthenticated, user } = useContext(AuthContext);
+  const [tournaments, setTournaments] = useState([]);
+
+  useEffect(() => {
+    const fetchTournaments = async () => {
+      try {
+        const data = await getTournamentsAPI();
+        setTournaments(data || []);
+      } catch (err) {
+        console.error('Failed to fetch tournaments for HomePage:', err);
+      }
+    };
+    fetchTournaments();
+  }, []);
 
   if (isAuthenticated && user) {
     if (user.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
@@ -78,8 +92,8 @@ const Home = () => {
     <div className="home-page-wrapper">
       <main className="home-canvas">
         <HeroSection />
-        <StatsSection />
-        <TournamentsSection />
+        <StatsSection tournaments={tournaments} />
+        <TournamentsSection tournaments={tournaments} />
 
         <section id="rankings" className="leaderboards-section" aria-label="Elite rankings">
           <div className="leaderboards-grid">
