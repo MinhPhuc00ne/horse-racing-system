@@ -85,6 +85,16 @@ public class AiChatService {
     }
 
     public String chat(String userMessage, java.util.Map<String, String> image, User user) {
+        if (userMessage == null || userMessage.isBlank()) {
+            ObjectNode errorNode = objectMapper.createObjectNode();
+            errorNode.put("text", "Please provide a valid question or message.");
+            return errorNode.toString();
+        }
+
+        if (userMessage.length() > 2000) {
+            userMessage = userMessage.substring(0, 2000);
+        }
+
         if (geminiApiKey == null || geminiApiKey.isEmpty() || geminiApiKey.contains("your-gemini-api-key")) {
             return "{\"text\": \"Error: Gemini API Key is not configured. Please add GEMINI_API_KEY to environment variables.\" }";
         }
