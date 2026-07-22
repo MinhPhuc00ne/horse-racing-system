@@ -1333,23 +1333,6 @@ export default function TournamentsPanel() {
                     <option value="Cancelled">Cancelled</option>
                   </select>
 
-                  {t.tournamentStatus === 'Active' && (
-                    <button
-                      onClick={() => handleConfirmRegistration(t.id)}
-                      className="btn btn-warning btn-sm fw-bold text-dark"
-                      style={{
-                        padding: '6px 12px',
-                        fontSize: '11px',
-                        borderRadius: '8px',
-                        border: '1px solid #D4AF37',
-                        whiteSpace: 'nowrap'
-                      }}
-                      title="Chốt danh sách đăng ký và chuyển sang LOCKED_LIST để trọng tài chuẩn bị trận đấu"
-                    >
-                      Chốt danh sách
-                    </button>
-                  )}
-
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button
                       onClick={() => handleEditClick(t)}
