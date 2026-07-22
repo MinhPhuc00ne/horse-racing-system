@@ -108,6 +108,11 @@
             <artifactId>bucket4j-core</artifactId>
             <version>8.10.1</version>
         </dependency>
+        <!-- Caffeine Cache for bounded rate limiter eviction -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
         <!-- PayOS API -->
         <dependency>
             <groupId>vn.payos</groupId>
