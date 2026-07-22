@@ -96,7 +96,7 @@ export const initialSystemUsers = [
     experienceYears: 12,
     winRate: 65,
     matchesPlayed: 450,
-    description: "Nài ngựa chuyên nghiệp với hơn 12 năm kinh nghiệm chinh chiến tại các giải đấu cự ly trung bình châu Á."
+    description: "Professional jockey with over 12 years of experience competing in Asian mid-distance tournaments."
   },
   {
     id: "JOK002",
@@ -110,7 +110,7 @@ export const initialSystemUsers = [
     experienceYears: 8,
     winRate: 58,
     matchesPlayed: 320,
-    description: "Kỷ lục gia đua ngựa tốc độ, chuyên gia bứt phá ở các vòng đua nước rút 1200m."
+    description: "Speed racing record holder, specialist in sprint final stretches (1200m)."
   },
   {
     id: "JOK003",
@@ -124,7 +124,7 @@ export const initialSystemUsers = [
     experienceYears: 4,
     winRate: 40,
     matchesPlayed: 120,
-    description: "Nài ngựa trẻ triển vọng với phong cách thi đấu điềm tĩnh và khả năng phối hợp ăn ý với các giống ngựa Arabian."
+    description: "Promising young jockey with a calm racing style and excellent synergy with Arabian horse breeds."
   },
   {
     id: "JOK004",
@@ -138,7 +138,7 @@ export const initialSystemUsers = [
     experienceYears: 6,
     winRate: 45,
     matchesPlayed: 180,
-    description: "Chuyên gia vượt chướng ngại vật và điều khiển nhịp độ trận đấu xuất sắc ở các đường chạy cỏ Turf."
+    description: "Expert in obstacles and pacing control on turf tracks."
   },
   // Other Horse Owners
   {
@@ -149,7 +149,7 @@ export const initialSystemUsers = [
     stableAddress: "Cu Chi, Ho Chi Minh City",
     friendStatus: "FRIEND",
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80",
-    description: "Chủ trang trại Heavenly Horse Stable chuyên nhập khẩu và nhân giống ngựa thuần chủng từ châu Âu."
+    description: "Owner of Heavenly Horse Stable, specializing in importing and breeding European thoroughbreds."
   },
   {
     id: "OWN203",
@@ -159,7 +159,7 @@ export const initialSystemUsers = [
     stableAddress: "Dong Anh, Hanoi",
     friendStatus: "NONE",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80",
-    description: "Platinum Stable - Nơi nuôi dưỡng những chiến mã tốc độ và bền bỉ hàng đầu cho giải vô địch quốc gia."
+    description: "Platinum Stable - Nurturing top speed and endurance racehorses for national championships."
   }
 ];
 

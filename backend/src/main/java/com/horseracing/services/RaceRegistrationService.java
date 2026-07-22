@@ -226,8 +226,8 @@ public class RaceRegistrationService {
 
         notificationService.sendNotification(
                 jockey.getUser(),
-                "Lời mời tham gia giải đấu",
-                "Chủ ngựa " + owner.getUser().getFullName() + " mời bạn làm nài ngựa điều khiển ngựa " + horse.getName() + " tham gia vòng đua " + race.getRaceName() + " thuộc giải đấu " + race.getTournament().getTournamentName() + " với tỷ lệ chia thưởng: Jockey " + request.getJockeySharePercent() + "% - Owner " + request.getOwnerSharePercent() + "%. Vui lòng xác nhận.",
+                "Tournament Participation Invitation",
+                "Horse Owner " + owner.getUser().getFullName() + " invited you to ride horse " + horse.getName() + " in race " + race.getRaceName() + " of tournament " + race.getTournament().getTournamentName() + " with profit split: Jockey " + request.getJockeySharePercent() + "% - Owner " + request.getOwnerSharePercent() + "%. Please confirm.",
                 NotificationType.REGISTRATION
         );
 
@@ -295,14 +295,14 @@ public class RaceRegistrationService {
 
         notificationService.sendNotification(
                 registration.getOwner().getUser(),
-                "Đăng ký giải đấu được phê duyệt",
-                "Đăng ký thi đấu vòng đua " + race.getRaceName() + " với ngựa " + registration.getHorse().getName() + " của bạn đã được Admin phê duyệt chính thức. Bạn đã nằm trong danh sách thi đấu.",
+                "Tournament Registration Approved",
+                "Your registration for race " + race.getRaceName() + " with horse " + registration.getHorse().getName() + " has been approved by Admin. You are now officially on the participant list.",
                 NotificationType.REGISTRATION
         );
         notificationService.sendNotification(
                 registration.getJockey().getUser(),
-                "Đăng ký giải đấu được phê duyệt",
-                "Đăng ký thi đấu vòng đua " + race.getRaceName() + " với ngựa " + registration.getHorse().getName() + " của bạn đã được Admin phê duyệt chính thức. Bạn đã nằm trong danh sách thi đấu.",
+                "Tournament Registration Approved",
+                "Your registration for race " + race.getRaceName() + " with horse " + registration.getHorse().getName() + " has been approved by Admin. You are now officially on the participant list.",
                 NotificationType.REGISTRATION
         );
 
@@ -342,14 +342,14 @@ public class RaceRegistrationService {
 
         notificationService.sendNotification(
                 registration.getOwner().getUser(),
-                "Đăng ký giải đấu không được chọn",
-                "Đăng ký thi đấu vòng đua " + registration.getRace().getRaceName() + " với ngựa " + registration.getHorse().getName() + " của bạn không được chọn (do vượt quá số lượng giới hạn hoặc không đạt tiêu chí giải đấu). Phí tham gia (nếu có) đã được hoàn lại 100% vào ví.",
+                "Tournament Registration Not Selected",
+                "Your registration for race " + registration.getRace().getRaceName() + " with horse " + registration.getHorse().getName() + " was not selected. Any entry fee paid has been 100% refunded to your wallet.",
                 NotificationType.REGISTRATION
         );
         notificationService.sendNotification(
                 registration.getJockey().getUser(),
-                "Đăng ký giải đấu không được chọn",
-                "Đăng ký thi đấu vòng đua " + registration.getRace().getRaceName() + " với ngựa " + registration.getHorse().getName() + " của bạn không được chọn (do vượt quá số lượng giới hạn hoặc không đạt tiêu chí giải đấu). Phí tham gia (nếu có) đã được hoàn lại 100% vào ví.",
+                "Tournament Registration Not Selected",
+                "Your registration for race " + registration.getRace().getRaceName() + " with horse " + registration.getHorse().getName() + " was not selected. Any entry fee paid has been 100% refunded to your wallet.",
                 NotificationType.REGISTRATION
         );
 
@@ -427,8 +427,8 @@ public class RaceRegistrationService {
 
         notificationService.sendNotification(
                 registration.getJockey().getUser(),
-                "Hủy đăng ký giải đấu",
-                "Chủ ngựa " + registration.getOwner().getUser().getFullName() + " đã hủy đăng ký tham gia vòng đua " + registration.getRace().getRaceName() + " đối với bạn.",
+                "Tournament Registration Cancelled",
+                "Horse Owner " + registration.getOwner().getUser().getFullName() + " cancelled the registration for race " + registration.getRace().getRaceName() + " with you.",
                 NotificationType.REGISTRATION
         );
 
@@ -549,8 +549,8 @@ public class RaceRegistrationService {
 
         notificationService.sendNotification(
                 registration.getJockey().getUser(),
-                "Cập nhật thông tin đăng ký giải đấu",
-                "Thông tin đăng ký thi đấu giải đấu " + registration.getRace().getTournament().getTournamentName() + " của bạn đã được cập nhật bởi Chủ ngựa " + registration.getOwner().getUser().getFullName() + ". Vui lòng kiểm tra và xác nhận lại.",
+                "Registration Information Updated",
+                "Your registration information for tournament " + registration.getRace().getTournament().getTournamentName() + " was updated by Horse Owner " + registration.getOwner().getUser().getFullName() + ". Please review and confirm.",
                 NotificationType.REGISTRATION
         );
 

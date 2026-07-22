@@ -22,23 +22,23 @@ public class EmailService {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
-            String htmlMsg = "<h3>Chào " + fullName + ",</h3>"
-                    + "<p>Cảm ơn bạn đã đăng ký tài khoản tại Hệ thống quản lý đua ngựa.</p>"
-                    + "<p>Để kích hoạt tài khoản của bạn, vui lòng nhập mã OTP bên dưới trên trang xác thực hoặc nhấp vào liên kết sau:</p>"
+            String htmlMsg = "<h3>Hello " + fullName + ",</h3>"
+                    + "<p>Thank you for registering an account at Horse Racing Management System.</p>"
+                    + "<p>To activate your account, please enter the OTP code below on the verification page or click the link below:</p>"
                     + "<h2 style='color: #0f5132; background: #e2f0d9; display: inline-block; padding: 10px 20px; border-radius: 5px; letter-spacing: 2px;'>" + token + "</h2>"
-                    + "<p style='margin-top: 20px;'><a href='" + activationLink + "?token=" + token + "' style='display:inline-block; background-color:#198754; color:white; padding:10px 20px; text-decoration:none; border-radius:5px; font-weight:bold;'>Kích hoạt tài khoản</a></p>"
-                    + "<p style='color: #6c757d; font-size: 0.9em; margin-top: 15px;'>Mã xác nhận và liên kết này sẽ hết hạn trong vòng 15 phút.</p>"
+                    + "<p style='margin-top: 20px;'><a href='" + activationLink + "?token=" + token + "' style='display:inline-block; background-color:#198754; color:white; padding:10px 20px; text-decoration:none; border-radius:5px; font-weight:bold;'>Activate Account</a></p>"
+                    + "<p style='color: #6c757d; font-size: 0.9em; margin-top: 15px;'>This verification code and link will expire in 15 minutes.</p>"
                     + "<br/>"
-                    + "<p>Trân trọng,<br/>Đội ngũ Hệ thống quản lý đua ngựa.</p>";
+                    + "<p>Best regards,<br/>Horse Racing Management Team.</p>";
 
             helper.setTo(toEmail);
-            helper.setSubject("Kích hoạt tài khoản của bạn - Horse Racing Management");
+            helper.setSubject("Activate Your Account - Horse Racing Management");
             helper.setText(htmlMsg, true);
 
             mailSender.send(mimeMessage);
-            log.info("Email kích hoạt đã được gửi thành công đến {}", toEmail);
+            log.info("Verification email sent successfully to {}", toEmail);
         } catch (MessagingException e) {
-            log.error("Lỗi khi gửi email kích hoạt đến {}: {}", toEmail, e.getMessage());
+            log.error("Error sending verification email to {}: {}", toEmail, e.getMessage());
         }
     }
 
@@ -48,23 +48,23 @@ public class EmailService {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
 
-            String htmlMsg = "<h3>Chào " + fullName + ",</h3>"
-                    + "<p>Chúng tôi đã nhận được yêu cầu khôi phục mật khẩu cho tài khoản của bạn tại Hệ thống quản lý đua ngựa.</p>"
-                    + "<p>Vui lòng nhập mã OTP dưới đây để tiến hành thiết lập lại mật khẩu của bạn:</p>"
+            String htmlMsg = "<h3>Hello " + fullName + ",</h3>"
+                    + "<p>We received a password reset request for your account at Horse Racing Management System.</p>"
+                    + "<p>Please enter the OTP code below to reset your password:</p>"
                     + "<h2 style='color: #856404; background: #fff3cd; display: inline-block; padding: 10px 20px; border-radius: 5px; letter-spacing: 2px;'>" + token + "</h2>"
-                    + "<p style='color: #6c757d; font-size: 0.9em; margin-top: 15px;'>Mã xác nhận này sẽ hết hạn trong vòng 10 phút.</p>"
-                    + "<p>Nếu bạn không gửi yêu cầu này, vui lòng bỏ qua email này hoặc liên hệ với bộ phận hỗ trợ của chúng tôi để được trợ giúp bảo mật tài khoản.</p>"
+                    + "<p style='color: #6c757d; font-size: 0.9em; margin-top: 15px;'>This code will expire in 10 minutes.</p>"
+                    + "<p>If you did not request a password reset, please ignore this email or contact support.</p>"
                     + "<br/>"
-                    + "<p>Trân trọng,<br/>Đội ngũ Hệ thống quản lý đua ngựa.</p>";
+                    + "<p>Best regards,<br/>Horse Racing Management Team.</p>";
 
             helper.setTo(toEmail);
-            helper.setSubject("Yêu cầu khôi phục mật khẩu - Horse Racing Management");
+            helper.setSubject("Password Reset Request - Horse Racing Management");
             helper.setText(htmlMsg, true);
 
             mailSender.send(mimeMessage);
-            log.info("Email khôi phục mật khẩu đã được gửi thành công đến {}", toEmail);
+            log.info("Password reset email sent successfully to {}", toEmail);
         } catch (MessagingException e) {
-            log.error("Lỗi khi gửi email khôi phục mật khẩu đến {}: {}", toEmail, e.getMessage());
+            log.error("Error sending password reset email to {}: {}", toEmail, e.getMessage());
         }
     }
 }

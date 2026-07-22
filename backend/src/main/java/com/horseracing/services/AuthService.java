@@ -61,9 +61,9 @@ public class AuthService {
         if (existingUserOpt.isPresent()) {
             User existingUser = existingUserOpt.get();
             if (existingUser.getProvider() == AuthProvider.GOOGLE) {
-                throw new RuntimeException("Email này đã được đăng ký qua Google. Vui lòng chọn đăng nhập bằng Google.");
+                throw new RuntimeException("This email is already registered via Google. Please log in using Google.");
             } else {
-                throw new RuntimeException("Email này đã được đăng ký. Vui lòng đăng nhập.");
+                throw new RuntimeException("Email is already registered. Please log in.");
             }
         }
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -105,11 +105,11 @@ public class AuthService {
     @Transactional
     public void verifyAccount(String token) {
         VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Mã xác thực không hợp lệ. Vui lòng kiểm tra lại."));
+                .orElseThrow(() -> new RuntimeException("Invalid verification code. Please check again."));
 
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             verificationTokenRepository.delete(verificationToken);
-            throw new RuntimeException("Mã xác thực đã hết hạn. Vui lòng đăng ký lại hoặc yêu cầu gửi lại mã.");
+            throw new RuntimeException("Verification code has expired. Please register again or request a new code.");
         }
 
         User user = verificationToken.getUser();
@@ -124,26 +124,26 @@ public class AuthService {
      */
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại hoặc sai mật khẩu."));
+                .orElseThrow(() -> new RuntimeException("Invalid email or password."));
 
         if (user.getProvider() == AuthProvider.GOOGLE) {
-            throw new RuntimeException("Tài khoản này được đăng ký qua Google. Vui lòng sử dụng nút 'Đăng nhập bằng Google'.");
+            throw new RuntimeException("This account was registered via Google. Please use Google Login.");
         }
 
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         } catch (org.springframework.security.authentication.BadCredentialsException e) {
-            throw new RuntimeException("Email không tồn tại hoặc sai mật khẩu.");
+            throw new RuntimeException("Invalid email or password.");
         }
 
         if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE").isPresent()) {
-            throw new RuntimeException("Tài khoản của bạn đã bị khóa/cấm do vi phạm điều khoản.");
+            throw new RuntimeException("Your account has been locked or suspended due to terms violations.");
         }
 
         // Explicit check: account must be verified via email
         if (!user.isEnabled()) {
-            throw new RuntimeException("Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email để xác thực.");
+            throw new RuntimeException("Account is not activated. Please check your email for verification.");
         }
 
         String accessToken = jwtUtils.generateAccessToken(user);
@@ -179,11 +179,11 @@ public class AuthService {
             if (existingUserOpt.isPresent()) {
                 User user = existingUserOpt.get();
                 if (user.getProvider() != AuthProvider.GOOGLE) {
-                    throw new RuntimeException("Email này đã được đăng ký bằng tài khoản thường. Vui lòng đăng nhập bằng mật khẩu.");
+                    throw new RuntimeException("Email registered via standard account. Please log in with your password.");
                 }
 
                 if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE").isPresent()) {
-                    throw new RuntimeException("Tài khoản của bạn đã bị khóa/cấm do vi phạm điều khoản.");
+                    throw new RuntimeException("Your account has been locked or suspended due to terms violations.");
                 }
 
                 String accessToken = jwtUtils.generateAccessToken(user);
@@ -221,7 +221,7 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         if (user.getProvider() != AuthProvider.GOOGLE) {
-            throw new RuntimeException("Chỉ tài khoản Google mới có thể cập nhật profile qua API này.");
+            throw new RuntimeException("Only Google accounts can update profile via this API.");
         }
 
         // Only allow changing username if it hasn't been explicitly set (it currently defaults to email)
@@ -249,7 +249,7 @@ public class AuthService {
 
         User user = refreshToken.getUser();
         if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE").isPresent()) {
-            throw new RuntimeException("Tài khoản của bạn đã bị khóa/cấm do vi phạm điều khoản.");
+            throw new RuntimeException("Your account has been locked or suspended due to terms violations.");
         }
         
         String newAccessToken = jwtUtils.generateAccessToken(user);
@@ -285,10 +285,10 @@ public class AuthService {
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại trong hệ thống."));
+                .orElseThrow(() -> new RuntimeException("Email does not exist in the system."));
 
         if (user.getProvider() != AuthProvider.LOCAL) {
-            throw new RuntimeException("Tài khoản này được đăng nhập bằng " + user.getProvider() + ". Không thể đặt lại mật khẩu.");
+            throw new RuntimeException("This account logs in with " + user.getProvider() + ". Cannot reset password.");
         }
 
         // Generate 6-digit OTP code using SecureRandom
@@ -313,17 +313,17 @@ public class AuthService {
     @Transactional(readOnly = true)
     public void verifyResetOtp(VerifyOtpRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại trong hệ thống."));
+                .orElseThrow(() -> new RuntimeException("Email does not exist in the system."));
 
         PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Mã OTP không hợp lệ hoặc không tồn tại."));
+                .orElseThrow(() -> new RuntimeException("Invalid or non-existent OTP code."));
 
         if (!resetToken.getToken().equals(request.getOtp())) {
-            throw new RuntimeException("Mã OTP không chính xác.");
+            throw new RuntimeException("Incorrect OTP code.");
         }
 
         if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Mã OTP đã hết hạn.");
+            throw new RuntimeException("OTP code has expired.");
         }
     }
 
@@ -333,18 +333,18 @@ public class AuthService {
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại trong hệ thống."));
+                .orElseThrow(() -> new RuntimeException("Email does not exist in the system."));
 
         PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Mã OTP không hợp lệ hoặc không tồn tại."));
+                .orElseThrow(() -> new RuntimeException("Invalid or non-existent OTP code."));
 
         if (!resetToken.getToken().equals(request.getOtp())) {
-            throw new RuntimeException("Mã OTP không chính xác.");
+            throw new RuntimeException("Incorrect OTP code.");
         }
 
         if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             passwordResetTokenRepository.delete(resetToken);
-            throw new RuntimeException("Mã OTP đã hết hạn.");
+            throw new RuntimeException("OTP code has expired.");
         }
 
         // Update user's password

@@ -45,7 +45,7 @@ public class PaymentService {
 
         // Build item data
         PaymentLinkItem item = PaymentLinkItem.builder()
-                .name("Nạp tiền vào ví " + user.getUsername())
+                .name("Wallet Deposit - " + user.getUsername())
                 .price(amount.longValue())
                 .quantity(1)
                 .build();
@@ -54,7 +54,7 @@ public class PaymentService {
         CreatePaymentLinkRequest paymentData = CreatePaymentLinkRequest.builder()
                 .orderCode(orderCode)
                 .amount(amount.longValue())
-                .description("Nạp tiền ví")
+                .description("Wallet Deposit")
                 .returnUrl(returnUrl)
                 .cancelUrl(cancelUrl)
                 .items(List.of(item))

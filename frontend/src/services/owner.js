@@ -5,7 +5,7 @@ export async function getOwnerProfileAPI() {
     const response = await axiosClient.get('/owner/profile');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy thông tin hồ sơ chủ ngựa.';
+    const errMsg = error.response?.data?.message || 'Failed to get horse owner profile.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -15,7 +15,7 @@ export async function updateOwnerProfileAPI(profileData) {
     const response = await axiosClient.put('/owner/profile', profileData);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật thông tin hồ sơ.';
+    const errMsg = error.response?.data?.message || 'Failed to update profile info.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -25,7 +25,7 @@ export async function getMyHorsesAPI() {
     const response = await axiosClient.get('/owner/horses');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách ngựa.';
+    const errMsg = error.response?.data?.message || 'Failed to get horses list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -35,7 +35,7 @@ export async function createHorseAPI(horseData) {
     const response = await axiosClient.post('/owner/horses', horseData);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể thêm ngựa mới.';
+    const errMsg = error.response?.data?.message || 'Failed to add new horse.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -51,7 +51,7 @@ export async function submitRaceRegistrationAPI(registrationData) {
     });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể đăng ký giải đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to submit race registration.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -61,7 +61,7 @@ export async function getMyRaceRegistrationsAPI() {
     const response = await axiosClient.get('/owner/race-registrations');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách đăng ký thi đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to get race registrations list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -71,7 +71,7 @@ export async function cancelRaceRegistrationAPI(id) {
     const response = await axiosClient.put(`/owner/race-registrations/${id}/cancel`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể hủy đăng ký thi đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to cancel race registration.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -81,7 +81,7 @@ export async function updateRaceRegistrationAPI(id, registrationData) {
     const response = await axiosClient.put(`/owner/race-registrations/${id}`, registrationData);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật đăng ký thi đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to update race registration.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -99,7 +99,7 @@ export async function uploadFilesAPI(files) {
     });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải tệp lên.';
+    const errMsg = error.response?.data?.message || 'Failed to upload files.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -109,7 +109,7 @@ export async function updateHorseAPI(id, horseData) {
     const response = await axiosClient.put(`/owner/horses/${id}`, horseData);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật thông tin ngựa.';
+    const errMsg = error.response?.data?.message || 'Failed to update horse info.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -119,7 +119,7 @@ export async function deleteHorseAPI(id) {
     await axiosClient.delete(`/owner/horses/${id}`);
     return { success: true };
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể xóa ngựa.';
+    const errMsg = error.response?.data?.message || 'Failed to delete horse.';
     throw new Error(errMsg, { cause: error });
   }
 }

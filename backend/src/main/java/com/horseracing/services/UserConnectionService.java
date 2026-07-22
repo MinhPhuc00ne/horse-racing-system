@@ -59,8 +59,8 @@ public class UserConnectionService {
                     conn = userConnectionRepository.save(conn);
                     notificationService.sendNotification(
                             recipient,
-                            "Lời mời kết nối mới",
-                            "Bạn nhận được lời mời kết nối mới từ " + requester.getFullName() + " (Vai trò: " + requester.getRole() + ").",
+                            "New Connection Request",
+                            "You received a new connection request from " + requester.getFullName() + " (Role: " + requester.getRole() + ").",
                             NotificationType.CONNECTION
                     );
                     return mapToResponse(conn, requester);
@@ -77,8 +77,8 @@ public class UserConnectionService {
         connection = userConnectionRepository.save(connection);
         notificationService.sendNotification(
                 recipient,
-                "Lời mời kết nối mới",
-                "Bạn nhận được lời mời kết nối mới từ " + requester.getFullName() + " (Vai trò: " + requester.getRole() + ").",
+                "New Connection Request",
+                "You received a new connection request from " + requester.getFullName() + " (Role: " + requester.getRole() + ").",
                 NotificationType.CONNECTION
         );
         return mapToResponse(connection, requester);
@@ -102,16 +102,16 @@ public class UserConnectionService {
             connection = userConnectionRepository.save(connection);
             notificationService.sendNotification(
                     connection.getRequester(),
-                    "Yêu cầu kết nối được chấp nhận",
-                    connection.getRecipient().getFullName() + " đã chấp nhận yêu cầu kết nối của bạn. Hai bạn giờ đã có thể đăng ký tham gia các giải đấu cùng nhau.",
+                    "Connection Request Accepted",
+                    connection.getRecipient().getFullName() + " accepted your connection request. You can now register for tournaments together.",
                     NotificationType.CONNECTION
             );
             return mapToResponse(connection, connection.getRecipient());
         } else if ("REJECT".equalsIgnoreCase(action)) {
             notificationService.sendNotification(
                     connection.getRequester(),
-                    "Yêu cầu kết nối bị từ chối",
-                    connection.getRecipient().getFullName() + " đã từ chối yêu cầu kết nối của bạn.",
+                    "Connection Request Rejected",
+                    connection.getRecipient().getFullName() + " rejected your connection request.",
                     NotificationType.CONNECTION
             );
             // Delete connection request so they can try again later

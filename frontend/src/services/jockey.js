@@ -5,7 +5,7 @@ export async function getJockeyProfileAPI() {
     const response = await axiosClient.get('/jockey/profile');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải hồ sơ kỵ sĩ.';
+    const errMsg = error.response?.data?.message || 'Failed to load jockey profile.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -24,7 +24,7 @@ export async function updateJockeyProfileAPI(profileData) {
     });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật hồ sơ kỵ sĩ.';
+    const errMsg = error.response?.data?.message || 'Failed to update jockey profile.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -34,7 +34,7 @@ export async function getJockeyInvitationsAPI() {
     const response = await axiosClient.get('/jockey/invitations');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải danh sách lời mời đua.';
+    const errMsg = error.response?.data?.message || 'Failed to load race invitations list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -48,7 +48,7 @@ export async function respondToJockeyInvitationAPI(invitationId, action) {
     window.dispatchEvent(new Event('jockey_invitations_updated'));
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể gửi phản hồi lời mời đua.';
+    const errMsg = error.response?.data?.message || 'Failed to respond to race invitation.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -58,7 +58,7 @@ export async function getJockeyScheduleAPI() {
     const response = await axiosClient.get('/jockey/schedule');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải lịch thi đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to load race schedule.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -68,7 +68,7 @@ export async function getJockeyHistoryAPI() {
     const response = await axiosClient.get('/jockey/history');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải lịch sử thi đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to load race history.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -78,7 +78,7 @@ export async function getJockeyLeaderboardAPI() {
     const response = await axiosClient.get('/jockey/leaderboard');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải bảng xếp hạng kỵ sĩ.';
+    const errMsg = error.response?.data?.message || 'Failed to load jockey leaderboard.';
     throw new Error(errMsg, { cause: error });
   }
 }

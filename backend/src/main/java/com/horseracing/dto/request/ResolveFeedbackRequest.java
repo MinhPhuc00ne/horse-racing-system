@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 public class ResolveFeedbackRequest {
 
-    @NotBlank(message = "Ghi chú xử lý không được để trống")
-    @Size(max = 2000, message = "Ghi chú xử lý không được quá 2000 ký tự")
+    @NotBlank(message = "Admin note cannot be blank")
+    @Size(max = 2000, message = "Admin note cannot exceed 2000 characters")
     private String adminNote;
 }

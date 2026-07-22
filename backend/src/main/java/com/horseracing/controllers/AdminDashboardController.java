@@ -95,7 +95,7 @@ public class AdminDashboardController {
         Map<String, Long> breedDistribution = new LinkedHashMap<>();
         List<Horse> horses = horseRepository.findAll();
         for (Horse h : horses) {
-            String bName = (h.getBreed() != null && h.getBreed().getBreedName() != null) ? h.getBreed().getBreedName() : "Khác";
+            String bName = (h.getBreed() != null && h.getBreed().getBreedName() != null) ? h.getBreed().getBreedName() : "Other";
             breedDistribution.put(bName, breedDistribution.getOrDefault(bName, 0L) + 1);
         }
 

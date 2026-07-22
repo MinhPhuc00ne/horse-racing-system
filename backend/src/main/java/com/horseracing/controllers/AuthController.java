@@ -128,7 +128,7 @@ public class AuthController {
     public ResponseEntity<?> verifyAccount(@RequestParam("token") String token) {
         try {
             authService.verifyAccount(token);
-            return ResponseEntity.ok(new MessageResponse("Tài khoản đã được kích hoạt thành công! Bạn có thể đăng nhập ngay bây giờ."));
+            return ResponseEntity.ok(new MessageResponse("Account activated successfully! You can now log in."));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }
@@ -141,7 +141,7 @@ public class AuthController {
     public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         try {
             authService.forgotPassword(request);
-            return ResponseEntity.ok(new MessageResponse("Mã OTP khôi phục mật khẩu đã được gửi đến email của bạn."));
+            return ResponseEntity.ok(new MessageResponse("Password reset OTP has been sent to your email."));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }
@@ -154,7 +154,7 @@ public class AuthController {
     public ResponseEntity<?> verifyResetOtp(@Valid @RequestBody VerifyOtpRequest request) {
         try {
             authService.verifyResetOtp(request);
-            return ResponseEntity.ok(new MessageResponse("Mã OTP chính xác. Bạn có thể thiết lập mật khẩu mới."));
+            return ResponseEntity.ok(new MessageResponse("OTP verified successfully. You can now set your new password."));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }
@@ -167,7 +167,7 @@ public class AuthController {
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         try {
             authService.resetPassword(request);
-            return ResponseEntity.ok(new MessageResponse("Mật khẩu đã được cập nhật thành công."));
+            return ResponseEntity.ok(new MessageResponse("Password updated successfully."));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }

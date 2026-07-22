@@ -29,7 +29,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     private User findUserByIdentifier(String identifier) {
         return userRepository.findByEmail(identifier)
                 .or(() -> userRepository.findByUsername(identifier))
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng: " + identifier));
+                .orElseThrow(() -> new RuntimeException("User not found: " + identifier));
     }
 
     @Override
@@ -98,7 +98,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Transactional
     public FeedbackResponse resolveFeedback(Integer feedbackId, ResolveFeedbackRequest request) {
         Feedback feedback = feedbackRepository.findById(feedbackId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy ý kiến đóng góp với ID: " + feedbackId));
+                .orElseThrow(() -> new RuntimeException("Feedback not found with ID: " + feedbackId));
 
         feedback.setStatus("RESOLVED");
         feedback.setAdminNote(request.getAdminNote().trim());
@@ -110,8 +110,8 @@ public class FeedbackServiceImpl implements FeedbackService {
             if (updated.getUser() != null) {
                 notificationService.sendNotification(
                         updated.getUser(),
-                        "Phản hồi ý kiến đóng góp #" + feedbackId,
-                        "Ý kiến đóng góp của bạn (\"" + updated.getSubject() + "\") đã được Ban quản trị xử lý: " + updated.getAdminNote(),
+                        "Feedback Response #" + feedbackId,
+                        "Your feedback (\"" + updated.getSubject() + "\") has been processed by Administration: " + updated.getAdminNote(),
                         NotificationType.GENERAL
                 );
             }
@@ -126,7 +126,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Transactional
     public FeedbackResponse rejectFeedback(Integer feedbackId, ResolveFeedbackRequest request) {
         Feedback feedback = feedbackRepository.findById(feedbackId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy ý kiến đóng góp với ID: " + feedbackId));
+                .orElseThrow(() -> new RuntimeException("Feedback not found with ID: " + feedbackId));
 
         feedback.setStatus("REJECTED");
         feedback.setAdminNote(request.getAdminNote().trim());
@@ -138,8 +138,8 @@ public class FeedbackServiceImpl implements FeedbackService {
             if (updated.getUser() != null) {
                 notificationService.sendNotification(
                         updated.getUser(),
-                        "Phản hồi ý kiến đóng góp #" + feedbackId,
-                        "Ý kiến đóng góp của bạn (\"" + updated.getSubject() + "\") bị từ chối/không xử lý. Lý do: " + updated.getAdminNote(),
+                        "Feedback Response #" + feedbackId,
+                        "Your feedback (\"" + updated.getSubject() + "\") was rejected. Reason: " + updated.getAdminNote(),
                         NotificationType.GENERAL
                 );
             }

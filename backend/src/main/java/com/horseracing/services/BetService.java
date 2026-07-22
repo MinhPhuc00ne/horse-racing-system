@@ -46,23 +46,23 @@ public class BetService {
         // 1. Check user role (SPECTATOR, HORSE_OWNER, and JOCKEY are allowed to bet)
         Role role = user.getRole();
         if (role != Role.SPECTATOR && role != Role.HORSE_OWNER && role != Role.JOCKEY) {
-            throw new BusinessException("Chỉ người xem (SPECTATOR), chủ ngựa (HORSE_OWNER) và nài ngựa (JOCKEY) mới được phép đặt cược.", HttpStatus.FORBIDDEN);
+            throw new BusinessException("Only Spectators, Horse Owners, and Jockeys are allowed to place bets.", HttpStatus.FORBIDDEN);
         }
 
         // 2. Retrieve and validate Race
         Race race = raceRepository.findById(request.getRaceId())
-                .orElseThrow(() -> new BusinessException("Không tìm thấy cuộc đua.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("Race not found.", HttpStatus.NOT_FOUND));
 
         // Validation for JOCKEY and HORSE_OWNER: cannot bet on tournaments they participate in
         if (role == Role.JOCKEY) {
             boolean isParticipating = raceParticipantRepository.existsByJockeyUserIdAndTournamentId(user.getId(), race.getTournament().getId());
             if (isParticipating) {
-                throw new BusinessException("Nài ngựa (JOCKEY) không được phép đặt cược trong giải đấu mà mình tham gia.", HttpStatus.FORBIDDEN);
+                throw new BusinessException("Jockeys are not allowed to place bets in tournaments they participate in.", HttpStatus.FORBIDDEN);
             }
         } else if (role == Role.HORSE_OWNER) {
             boolean isParticipating = raceParticipantRepository.existsByHorseOwnerUserIdAndTournamentId(user.getId(), race.getTournament().getId());
             if (isParticipating) {
-                throw new BusinessException("Chủ ngựa (HORSE_OWNER) không được phép đặt cược trong giải đấu mà mình tham gia.", HttpStatus.FORBIDDEN);
+                throw new BusinessException("Horse Owners are not allowed to place bets in tournaments they participate in.", HttpStatus.FORBIDDEN);
             }
         }
 
@@ -72,40 +72,40 @@ public class BetService {
                 || "CLOSED_FOR_REGISTER".equalsIgnoreCase(status)
                 || "LOCKED_LIST".equalsIgnoreCase(status);
         if (!isBettingAllowedStatus) {
-            throw new BusinessException("Cổng đặt cược hiện đang đóng cho trận đấu này.", HttpStatus.BAD_REQUEST);
+            throw new BusinessException("Betting is currently closed for this race.", HttpStatus.BAD_REQUEST);
         }
 
         // Block placing bets if the simulation has already finished
         boolean isSimFinished = raceSimulationRepository.findByRaceId(race.getId()).stream()
                 .anyMatch(sim -> "FINISHED".equalsIgnoreCase(sim.getStatus()));
         if (isSimFinished) {
-            throw new BusinessException("Cuộc đua đã chạy xong, cổng đặt cược đã đóng.", HttpStatus.BAD_REQUEST);
+            throw new BusinessException("The race has finished and betting is closed.", HttpStatus.BAD_REQUEST);
         }
 
         // 3. Retrieve and validate RaceParticipant
         RaceParticipant participant = raceParticipantRepository.findById(request.getParticipantId())
-                .orElseThrow(() -> new BusinessException("Không tìm thấy chú ngựa tham gia cuộc đua.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("Race participant not found.", HttpStatus.NOT_FOUND));
 
         if (!participant.getRace().getId().equals(race.getId())) {
-            throw new BusinessException("Chú ngựa được chọn không tham gia cuộc đua này.", HttpStatus.BAD_REQUEST);
+            throw new BusinessException("Selected horse is not participating in this race.", HttpStatus.BAD_REQUEST);
         }
 
         if ("DISQUALIFIED".equalsIgnoreCase(participant.getStatus())) {
-            throw new BusinessException("Chú ngựa này đã bị truất quyền thi đấu trước trận.", HttpStatus.BAD_REQUEST);
+            throw new BusinessException("This horse has been disqualified before the race.", HttpStatus.BAD_REQUEST);
         }
 
         // 4. Validate Min Bet Amount
         BigDecimal minBet = race.getTournament().getMinBetAmount();
         if (minBet != null && request.getAmount().compareTo(minBet) < 0) {
-            throw new BusinessException("Số tiền đặt cược phải tối thiểu là " + minBet + " VNĐ.", HttpStatus.BAD_REQUEST);
+            throw new BusinessException("Minimum bet amount is " + minBet + " VND.", HttpStatus.BAD_REQUEST);
         }
 
         // 5. Retrieve Wallet and check balance
         Wallet wallet = walletRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new BusinessException("Không tìm thấy ví của người dùng. Vui lòng liên hệ Admin.", HttpStatus.BAD_REQUEST));
+                .orElseThrow(() -> new BusinessException("User wallet not found. Please contact Administrator.", HttpStatus.BAD_REQUEST));
 
         if (wallet.getBalance().compareTo(request.getAmount()) < 0) {
-            throw new BusinessException("Số dư ví không đủ để thực hiện đặt cược.", HttpStatus.BAD_REQUEST);
+            throw new BusinessException("Insufficient wallet balance to place bet.", HttpStatus.BAD_REQUEST);
         }
 
         // 6. Deduct balance from Wallet

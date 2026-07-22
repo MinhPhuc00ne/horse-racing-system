@@ -132,8 +132,8 @@ public class JockeyService {
             registration = raceRegistrationRepository.save(registration);
             notificationService.sendNotification(
                     registration.getOwner().getUser(),
-                    "Jockey chấp nhận lời mời thi đấu",
-                    "Jockey " + registration.getJockey().getUser().getFullName() + " đã đồng ý tham gia vòng đua " + registration.getRace().getRaceName() + " với ngựa " + registration.getHorse().getName() + ". Hồ sơ đăng ký đã chính thức được gửi lên Ban Tổ Chức (chờ Admin duyệt).",
+                    "Jockey Accepted Tournament Invitation",
+                    "Jockey " + registration.getJockey().getUser().getFullName() + " accepted to ride horse " + registration.getHorse().getName() + " in race " + registration.getRace().getRaceName() + ". Registration submitted to Organizers for Admin approval.",
                     NotificationType.REGISTRATION
             );
         } else if ("REJECT".equalsIgnoreCase(action)) {
@@ -141,8 +141,8 @@ public class JockeyService {
             registration = raceRegistrationRepository.save(registration);
             notificationService.sendNotification(
                     registration.getOwner().getUser(),
-                    "Jockey từ chối lời mời thi đấu",
-                    "Jockey " + registration.getJockey().getUser().getFullName() + " đã từ chối lời mời tham gia vòng đua " + registration.getRace().getRaceName() + " với ngựa " + registration.getHorse().getName() + ". Lượt đăng ký này đã bị hủy bỏ.",
+                    "Jockey Declined Tournament Invitation",
+                    "Jockey " + registration.getJockey().getUser().getFullName() + " declined the invitation to ride horse " + registration.getHorse().getName() + " in race " + registration.getRace().getRaceName() + ". Registration cancelled.",
                     NotificationType.REGISTRATION
             );
         } else {

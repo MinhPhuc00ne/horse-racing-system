@@ -9,7 +9,7 @@ export async function createFeedbackAPI({ subject, content }) {
     const response = await axiosClient.post('/feedbacks', { subject, content });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể gửi phản hồi. Vui lòng thử lại sau.';
+    const errMsg = error.response?.data?.message || 'Failed to submit feedback. Please try again later.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -19,7 +19,7 @@ export async function getAdminFeedbacksAPI(params = {}) {
     const response = await axiosClient.get('/admin/feedbacks', { params });
     return response.data || [];
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải danh sách phản hồi.';
+    const errMsg = error.response?.data?.message || 'Failed to load feedbacks list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -29,7 +29,7 @@ export async function resolveFeedbackAPI(id, adminNote) {
     const response = await axiosClient.put(`/admin/feedbacks/${id}/resolve`, { adminNote });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể xử lý phản hồi.';
+    const errMsg = error.response?.data?.message || 'Failed to process feedback.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -39,7 +39,7 @@ export async function rejectFeedbackAPI(id, adminNote) {
     const response = await axiosClient.put(`/admin/feedbacks/${id}/reject`, { adminNote });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể từ chối phản hồi.';
+    const errMsg = error.response?.data?.message || 'Failed to reject feedback.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -49,7 +49,7 @@ export async function getMyFeedbacksAPI() {
     const response = await axiosClient.get('/feedbacks/my');
     return response.data || [];
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách phản hồi cá nhân.';
+    const errMsg = error.response?.data?.message || 'Failed to get my feedback list.';
     throw new Error(errMsg, { cause: error });
   }
 }

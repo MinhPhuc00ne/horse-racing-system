@@ -23,7 +23,7 @@
   --ho-border-muted: rgba(255, 255, 255, 0.08);
 
   /* Fonts */
-  --font-family: 'Google Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family: 'Google Sans', system-ui, -apple-system, sans-serif;
 }
 
 * {

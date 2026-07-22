@@ -13,7 +13,7 @@ export async function getTournamentsAPI() {
     const response = await axiosClient.get('/tournaments');
     return response.data || [];
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách giải đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to get tournaments list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -23,7 +23,7 @@ export async function getTournamentRacesAPI(tournamentId) {
     const response = await axiosClient.get(`/tournaments/${tournamentId}/races`);
     return response.data; // List of RaceResponse
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách vòng đua.';
+    const errMsg = error.response?.data?.message || 'Failed to get race rounds list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -33,7 +33,7 @@ export async function getRaceParticipantsAPI(raceId) {
     const response = await axiosClient.get(`/races/${raceId}/participants`);
     return response.data; // List of ParticipantResponse
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách người tham gia.';
+    const errMsg = error.response?.data?.message || 'Failed to get race participants.';
     throw new Error(errMsg, { cause: error });
   }
 }

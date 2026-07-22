@@ -156,7 +156,7 @@ public class BetServiceTest {
         when(raceSimulationRepository.findByRaceId(10)).thenReturn(List.of(finishedSim));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Cuộc đua đã chạy xong, cổng đặt cược đã đóng.", exception.getMessage());
+        assertEquals("The race has finished and betting is closed.", exception.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
 
@@ -170,7 +170,7 @@ public class BetServiceTest {
                 .build();
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(adminUser, request));
-        assertEquals("Chỉ người xem (SPECTATOR), chủ ngựa (HORSE_OWNER) và nài ngựa (JOCKEY) mới được phép đặt cược.", exception.getMessage());
+        assertEquals("Only Spectators, Horse Owners, and Jockeys are allowed to place bets.", exception.getMessage());
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
@@ -187,7 +187,7 @@ public class BetServiceTest {
         when(raceParticipantRepository.existsByJockeyUserIdAndTournamentId(jockeyUser.getId(), 1)).thenReturn(true);
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(jockeyUser, request));
-        assertEquals("Nài ngựa (JOCKEY) không được phép đặt cược trong giải đấu mà mình tham gia.", exception.getMessage());
+        assertEquals("Jockeys are not allowed to place bets in tournaments they participate in.", exception.getMessage());
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
@@ -204,7 +204,7 @@ public class BetServiceTest {
         when(raceParticipantRepository.existsByHorseOwnerUserIdAndTournamentId(ownerUser.getId(), 1)).thenReturn(true);
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(ownerUser, request));
-        assertEquals("Chủ ngựa (HORSE_OWNER) không được phép đặt cược trong giải đấu mà mình tham gia.", exception.getMessage());
+        assertEquals("Horse Owners are not allowed to place bets in tournaments they participate in.", exception.getMessage());
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
@@ -260,7 +260,7 @@ public class BetServiceTest {
         when(raceRepository.findById(999)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Không tìm thấy cuộc đua.", exception.getMessage());
+        assertEquals("Race not found.", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
 
@@ -277,7 +277,7 @@ public class BetServiceTest {
         when(raceRepository.findById(10)).thenReturn(Optional.of(race));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Cổng đặt cược hiện đang đóng cho trận đấu này.", exception.getMessage());
+        assertEquals("Betting is currently closed for this race.", exception.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
 
@@ -294,7 +294,7 @@ public class BetServiceTest {
         when(raceParticipantRepository.findById(999)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Không tìm thấy chú ngựa tham gia cuộc đua.", exception.getMessage());
+        assertEquals("Race participant not found.", exception.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
 
@@ -314,7 +314,7 @@ public class BetServiceTest {
         when(raceParticipantRepository.findById(100)).thenReturn(Optional.of(participant));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Chú ngựa được chọn không tham gia cuộc đua này.", exception.getMessage());
+        assertEquals("Selected horse is not participating in this race.", exception.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
 
@@ -333,7 +333,7 @@ public class BetServiceTest {
         when(raceParticipantRepository.findById(100)).thenReturn(Optional.of(participant));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Chú ngựa này đã bị truất quyền thi đấu trước trận.", exception.getMessage());
+        assertEquals("This horse has been disqualified before the race.", exception.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
 
@@ -350,7 +350,7 @@ public class BetServiceTest {
         when(raceParticipantRepository.findById(100)).thenReturn(Optional.of(participant));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Số tiền đặt cược phải tối thiểu là 10.0 VNĐ.", exception.getMessage());
+        assertEquals("Minimum bet amount is 10.0 VND.", exception.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
 
@@ -368,7 +368,7 @@ public class BetServiceTest {
         when(walletRepository.findByUserId(1)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Không tìm thấy ví của người dùng. Vui lòng liên hệ Admin.", exception.getMessage());
+        assertEquals("User wallet not found. Please contact Administrator.", exception.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
 
@@ -386,7 +386,7 @@ public class BetServiceTest {
         when(walletRepository.findByUserId(1)).thenReturn(Optional.of(wallet));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
-        assertEquals("Số dư ví không đủ để thực hiện đặt cược.", exception.getMessage());
+        assertEquals("Insufficient wallet balance to place bet.", exception.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
 

@@ -194,14 +194,14 @@ public class PredictionPayoutServiceTest {
         when(betRepository.findByParticipantIdAndStatus(201, "PENDING")).thenReturn(List.of(bet));
         when(walletRepository.findByUserId(11)).thenReturn(Optional.of(wallet));
 
-        predictionPayoutService.refundBetsForParticipant(participant1, "REJECTED", "Ngựa bị loại. Hoàn trả cược {amount} VNĐ.");
+        predictionPayoutService.refundBetsForParticipant(participant1, "REJECTED", "Horse disqualified. Bet refunded {amount} VND.");
 
         assertEquals("REFUNDED", bet.getStatus());
         assertEquals(0, BigDecimal.valueOf(170.0).compareTo(wallet.getBalance())); // 20 + 150 = 170
 
         verify(walletRepository, times(1)).save(wallet);
         verify(walletTransactionRepository, times(1)).save(any(WalletTransaction.class));
-        verify(notificationService, times(1)).sendNotification(eq(spectator1), anyString(), eq("Ngựa bị loại. Hoàn trả cược 150.0 VNĐ."), eq(NotificationType.WALLET));
+        verify(notificationService, times(1)).sendNotification(eq(spectator1), anyString(), eq("Horse disqualified. Bet refunded 150.0 VND."), eq(NotificationType.WALLET));
     }
 
     @Test

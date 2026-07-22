@@ -11,7 +11,7 @@ export async function getWalletBalanceAPI() {
     const response = await axiosClient.get('/wallets/balance');
     return response.data; // Wallet entity: { id, balance, ... }
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy số dư ví.';
+    const errMsg = error.response?.data?.message || 'Failed to get wallet balance.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -19,9 +19,9 @@ export async function getWalletBalanceAPI() {
 export async function depositAPI(amount) {
   try {
     const response = await axiosClient.post('/wallets/deposit', { amount });
-    return response.data; // Trả về { checkoutUrl, orderCode, etc. }
+    return response.data; // { checkoutUrl, orderCode, etc. }
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Yêu cầu nạp tiền thất bại.';
+    const errMsg = error.response?.data?.message || 'Deposit request failed.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -37,7 +37,7 @@ export async function withdrawAPI(amount, bankName, bankBin, bankAccountNumber, 
     });
     return response.data; // WalletTransaction
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Yêu cầu rút tiền thất bại.';
+    const errMsg = error.response?.data?.message || 'Withdrawal request failed.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -52,7 +52,7 @@ export async function updateBankAccountAPI(bankName, bankBin, bankAccountNumber,
     });
     return response.data; // UserResponse
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Cập nhật tài khoản ngân hàng thất bại.';
+    const errMsg = error.response?.data?.message || 'Failed to update bank account.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -62,7 +62,7 @@ export async function cancelWithdrawalAPI(transactionId) {
     const response = await axiosClient.put(`/wallets/transactions/${transactionId}/cancel`);
     return response.data; // WalletTransaction
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Hủy yêu cầu rút tiền thất bại.';
+    const errMsg = error.response?.data?.message || 'Failed to cancel withdrawal request.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -78,25 +78,25 @@ export async function getTransactionHistoryAPI() {
       
       let eventLabel = '';
       if (tx.transactionType === 'DEPOSIT') {
-        eventLabel = 'Nạp tiền vào ví';
+        eventLabel = 'Wallet Deposit';
       } else if (tx.transactionType === 'WITHDRAW') {
-        eventLabel = 'Rút tiền về ngân hàng';
+        eventLabel = 'Bank Withdrawal';
       } else if (tx.transactionType === 'PRIZE' || tx.transactionType === 'WINNINGS') {
-        eventLabel = 'Tiền thưởng thắng cuộc';
+        eventLabel = 'Race Winnings / Prize';
       } else if (tx.transactionType === 'ENTRY_FEE') {
-        eventLabel = 'Lệ phí tham gia cuộc đua';
+        eventLabel = 'Race Entry Fee';
       } else if (tx.transactionType === 'REFUND') {
-        eventLabel = 'Hoàn trả tiền';
+        eventLabel = 'Refund';
       } else {
-        eventLabel = `Giao dịch khác (${tx.transactionType})`;
+        eventLabel = `Other Transaction (${tx.transactionType})`;
       }
 
       if (tx.status === 'PENDING') {
-        eventLabel += ' (Chờ thanh toán)';
+        eventLabel += ' (Pending)';
       } else if (tx.status === 'FAILED') {
-        eventLabel += ' (Thất bại)';
+        eventLabel += ' (Failed)';
       } else if (tx.status === 'CANCELLED') {
-        eventLabel += ' (Đã hủy)';
+        eventLabel += ' (Cancelled)';
       }
 
       return {
@@ -109,7 +109,7 @@ export async function getTransactionHistoryAPI() {
       };
     });
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy lịch sử giao dịch.';
+    const errMsg = error.response?.data?.message || 'Failed to get transaction history.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -119,7 +119,7 @@ export async function checkDepositStatusAPI(orderCode) {
     const response = await axiosClient.get(`/wallets/deposit/status/${orderCode}`);
     return response.data; // { orderCode, status }
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể kiểm tra trạng thái giao dịch.';
+    const errMsg = error.response?.data?.message || 'Failed to check transaction status.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -131,7 +131,7 @@ export async function exportTransactionsPdfAPI() {
     });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Lỗi khi tải PDF giao dịch.';
+    const errMsg = error.response?.data?.message || 'Error exporting transaction PDF.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -143,7 +143,7 @@ export async function exportTransactionsExcelAPI() {
     });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Lỗi khi tải Excel giao dịch.';
+    const errMsg = error.response?.data?.message || 'Error exporting transaction Excel.';
     throw new Error(errMsg, { cause: error });
   }
 }

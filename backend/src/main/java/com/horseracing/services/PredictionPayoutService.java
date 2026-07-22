@@ -224,8 +224,8 @@ public class PredictionPayoutService {
 
                     notificationService.sendNotification(
                             bet.getUser(),
-                            "Chúc mừng thắng cược cuộc đua",
-                            "Chúc mừng! Bạn đã thắng cược (" + type + ") tại vòng đua " + race.getRaceName() + " với số tiền thắng cược " + payout + " VNĐ (dựa trên tỷ lệ odds " + odds + " của quỹ chia). Số tiền đã được cộng vào ví.",
+                            "Race Bet Won - Congratulations!",
+                            "Congratulations! You won your bet (" + type + ") in race " + race.getRaceName() + " with payout amount " + payout + " VND (based on odds " + odds + "). The amount has been credited to your wallet.",
                             NotificationType.WALLET
                     );
                 } else {
@@ -235,8 +235,8 @@ public class PredictionPayoutService {
 
                     notificationService.sendNotification(
                             bet.getUser(),
-                            "Kết quả đặt cược cuộc đua",
-                            "Kết quả vòng đua " + race.getRaceName() + " đã được Trọng tài xác nhận. Thật tiếc, vé cược (" + type + ") của bạn vào ngựa " + bet.getParticipant().getHorse().getName() + " không trúng thưởng. Chúc bạn may mắn lần sau!",
+                            "Race Bet Result",
+                            "Race result for " + race.getRaceName() + " has been confirmed by the Referee. Unfortunately, your bet (" + type + ") on horse " + bet.getParticipant().getHorse().getName() + " did not win. Better luck next time!",
                             NotificationType.RACE_STATUS
                     );
                 }
@@ -314,7 +314,7 @@ public class PredictionPayoutService {
 
             notificationService.sendNotification(
                     bet.getUser(),
-                    "Hoàn tiền cược cuộc đua",
+                    "Race Bet Refunded",
                     notificationMessage.replace("{amount}", bet.getAmount().toString()),
                     NotificationType.WALLET
             );
@@ -356,8 +356,8 @@ public class PredictionPayoutService {
 
                 notificationService.sendNotification(
                         bet.getUser(),
-                        "Hoàn tiền cược cuộc đua",
-                        "Cuộc đua " + race.getRaceName() + " đã bị hủy bỏ. Hệ thống đã hoàn trả 100% số tiền đặt cược (" + bet.getAmount() + " VNĐ) vào ví của bạn.",
+                        "Race Bet Refunded",
+                        "Race " + race.getRaceName() + " was cancelled. The system refunded 100% of your bet (" + bet.getAmount() + " VND) to your wallet.",
                         NotificationType.WALLET
                 );
             }

@@ -16,7 +16,7 @@ export const initialJockeyProfile = {
   bankAccount: "1023456789 (Vietcombank)",
   walletBalance: 450000000, // in VND
   avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
-  description: "Kỷ lục gia đua ngựa tốc độ, chuyên gia bứt phá ở các cự ly trung bình và vòng nước rút.",
+  description: "Speed racing record holder, specialist in mid-distance and sprint final stretches.",
   avatarZoom: 1,
   avatarOffsetX: 0,
   avatarOffsetY: 0
@@ -38,7 +38,7 @@ export const initialJockeyInvitations = [
     jockeyShare: 20, // 20% share
     ownerShare: 80,
     status: "PENDING",
-    notes: " Silver Cloud cần một nài ngựa điềm tĩnh điều khiển nhịp độ. Rất mong được hợp tác cùng anh!"
+    notes: "Silver Cloud needs a calm jockey to control the pace. Looking forward to collaborating with you!"
   },
   {
     id: "INV002",
@@ -55,7 +55,7 @@ export const initialJockeyInvitations = [
     jockeyShare: 30, // 30% share
     ownerShare: 70,
     status: "PENDING",
-    notes: "Cơ hội tranh cúp cự ly 1200m tại sân Đại Nam, rất mong Ryan tham dự cùng đội của chúng tôi."
+    notes: "1200m cup competition at Dai Nam track. We would love to have Ryan join our team."
   }
 ];
 
@@ -134,7 +134,7 @@ export const initialJockeyFriends = [
     stableName: "Royal Stable",
     stableAddress: "Binh Duong Boulevard, Thu Dau Mot, Binh Duong",
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80",
-    description: "Royal Stable chuyên cung cấp các giống ngựa thuần chủng xuất sắc nhất thế giới."
+    description: "Royal Stable specializes in providing the finest thoroughbred horses in the world."
   },
   {
     userId: 888,
@@ -147,7 +147,7 @@ export const initialJockeyFriends = [
     stableName: "Heavenly Horse Stable",
     stableAddress: "Cu Chi, Ho Chi Minh City",
     avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80",
-    description: "Chủ trang trại Heavenly Horse Stable chuyên nhập khẩu và nhân giống ngựa thuần chủng từ châu Âu."
+    description: "Owner of Heavenly Horse Stable, specializing in importing and breeding European thoroughbreds."
   }
 ];
 
@@ -163,7 +163,7 @@ export const initialJockeyDirectory = [
     stableName: "Royal Stable",
     stableAddress: "Binh Duong Boulevard, Thu Dau Mot, Binh Duong",
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80",
-    description: "Royal Stable chuyên cung cấp các giống ngựa thuần chủng xuất sắc nhất thế giới."
+    description: "Royal Stable specializes in providing the finest thoroughbred horses in the world."
   },
   {
     userId: 888,
@@ -176,7 +176,7 @@ export const initialJockeyDirectory = [
     stableName: "Heavenly Horse Stable",
     stableAddress: "Cu Chi, Ho Chi Minh City",
     avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80",
-    description: "Chủ trang trại Heavenly Horse Stable chuyên nhập khẩu và nhân giống ngựa thuần chủng từ châu Âu."
+    description: "Owner of Heavenly Horse Stable, specializing in importing and breeding European thoroughbreds."
   },
   {
     userId: 777,
@@ -189,7 +189,7 @@ export const initialJockeyDirectory = [
     stableName: "Platinum Stable",
     stableAddress: "Dong Anh, Hanoi",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&q=80",
-    description: "Platinum Stable - Nơi nuôi dưỡng những chiến mã tốc độ và bền bỉ hàng đầu."
+    description: "Platinum Stable - Nurturing top speed and endurance racehorses."
   },
   {
     userId: 666,
@@ -205,7 +205,7 @@ export const initialJockeyDirectory = [
     matchesPlayed: 120,
     rankingScore: 980,
     licenseNumber: "LIC-JOC-4456",
-    description: "Nài ngựa trẻ triển vọng với phong cách thi đấu điềm tĩnh."
+    description: "Promising young jockey with a calm racing style."
   },
   {
     userId: 555,
@@ -221,7 +221,7 @@ export const initialJockeyDirectory = [
     matchesPlayed: 180,
     rankingScore: 920,
     licenseNumber: "LIC-JOC-8872",
-    description: "Chuyên gia vượt chướng ngại vật và điều khiển nhịp độ trận đấu xuất sắc."
+    description: "Expert in obstacles and pacing control."
   }
 ];
 

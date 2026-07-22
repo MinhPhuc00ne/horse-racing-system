@@ -77,7 +77,7 @@ public class WalletController {
             bankAccountNumber = walletService.getBankAccountForUser(user);
             if (bankAccountNumber != null && !bankAccountNumber.isBlank()) {
                 bankAccountHolderName = user.getFullName(); // Use full name as default holder
-                bankName = "Ngân hàng mặc định (Profile)";
+                bankName = "Default Bank (Profile)";
                 bankBin = "000000"; // default placeholder
             }
         }
@@ -91,7 +91,7 @@ public class WalletController {
         // 4. Throw exception only if core info is missing
         if (bankName == null || bankName.isBlank() ||
             bankAccountNumber == null || bankAccountNumber.isBlank()) {
-            throw new RuntimeException("Tên ngân hàng và số tài khoản thụ hưởng bắt buộc phải nhập");
+            throw new RuntimeException("Bank name and recipient account number are required");
         }
         
         WalletTransaction tx = walletService.requestWithdrawal(user, amount, bankName, bankBin, bankAccountNumber, bankAccountHolderName);
@@ -115,7 +115,7 @@ public class WalletController {
         
         if (bankName == null || bankName.isBlank() ||
             bankAccountNumber == null || bankAccountNumber.isBlank()) {
-            throw new RuntimeException("Tên ngân hàng và số tài khoản không được để trống");
+            throw new RuntimeException("Bank name and account number cannot be empty");
         }
         
         user.setBankName(bankName);

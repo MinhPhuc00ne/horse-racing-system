@@ -11,11 +11,11 @@ import lombok.*;
 @Builder
 public class CreateFeedbackRequest {
 
-    @NotBlank(message = "Tiêu đề không được để trống")
-    @Size(max = 255, message = "Tiêu đề không được quá 255 ký tự")
+    @NotBlank(message = "Subject cannot be blank")
+    @Size(max = 255, message = "Subject cannot exceed 255 characters")
     private String subject;
 
-    @NotBlank(message = "Nội dung đóng góp không được để trống")
-    @Size(max = 2000, message = "Nội dung không được quá 2000 ký tự")
+    @NotBlank(message = "Content cannot be blank")
+    @Size(max = 2000, message = "Content cannot exceed 2000 characters")
     private String content;
 }

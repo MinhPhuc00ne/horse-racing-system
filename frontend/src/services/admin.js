@@ -9,7 +9,7 @@ export async function getUpgradeRequestsAPI() {
     const response = await axiosClient.get('/admin/upgrade-requests');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải danh sách yêu cầu nâng cấp.';
+    const errMsg = error.response?.data?.message || 'Failed to load upgrade requests.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -19,7 +19,7 @@ export async function approveUpgradeRequestAPI(requestId) {
     const response = await axiosClient.put(`/admin/upgrade-requests/${requestId}/approve`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể phê duyệt yêu cầu nâng cấp.';
+    const errMsg = error.response?.data?.message || 'Failed to approve upgrade request.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -27,11 +27,11 @@ export async function approveUpgradeRequestAPI(requestId) {
 export async function rejectUpgradeRequestAPI(requestId, rejectionReason) {
   try {
     const response = await axiosClient.put(`/admin/upgrade-requests/${requestId}/reject`, {
-      rejectionReason: rejectionReason || 'Yêu cầu bị từ chối bởi Quản trị viên',
+      rejectionReason: rejectionReason || 'Request rejected by Administrator',
     });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể từ chối yêu cầu nâng cấp.';
+    const errMsg = error.response?.data?.message || 'Failed to reject upgrade request.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -41,7 +41,7 @@ export async function getRefereesAPI() {
     const response = await axiosClient.get('/admin/referees');
     return response.data || [];
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách trọng tài.';
+    const errMsg = error.response?.data?.message || 'Failed to get referees list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -51,7 +51,7 @@ export async function getTracksAPI() {
     const response = await axiosClient.get('/admin/tracks');
     return response.data || [];
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách đường đua.';
+    const errMsg = error.response?.data?.message || 'Failed to get racetracks list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -61,7 +61,7 @@ export async function createTrackAPI(data) {
     const response = await axiosClient.post('/admin/tracks', data);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tạo sân thi đấu mới.';
+    const errMsg = error.response?.data?.message || 'Failed to create new racetrack.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -71,7 +71,7 @@ export async function createTournamentAPI(data) {
     const response = await axiosClient.post('/admin/tournaments', data);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tạo giải đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to create tournament.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -81,7 +81,7 @@ export async function updateTournamentAPI(id, data) {
     const response = await axiosClient.put(`/admin/tournaments/${id}`, data);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật giải đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to update tournament.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -91,7 +91,7 @@ export async function updateTournamentStatusAPI(id, status) {
     const response = await axiosClient.put(`/admin/tournaments/${id}/status`, { status });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật trạng thái giải đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to update tournament status.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -101,7 +101,7 @@ export async function deleteTournamentAPI(id) {
     const response = await axiosClient.delete(`/admin/tournaments/${id}`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể xóa giải đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to delete tournament.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -111,7 +111,7 @@ export async function createRaceAPI(data) {
     const response = await axiosClient.post('/admin/races', data);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tạo vòng đua.';
+    const errMsg = error.response?.data?.message || 'Failed to create race round.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -121,7 +121,7 @@ export async function getRaceRegistrationsAPI() {
     const response = await axiosClient.get('/admin/race-registrations');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách đăng ký đua.';
+    const errMsg = error.response?.data?.message || 'Failed to get race registrations.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -131,7 +131,7 @@ export async function approveRaceRegistrationAPI(id) {
     const response = await axiosClient.put(`/admin/race-registrations/${id}/approve`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể duyệt đơn đăng ký đua.';
+    const errMsg = error.response?.data?.message || 'Failed to approve race registration.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -141,7 +141,7 @@ export async function rejectRaceRegistrationAPI(id) {
     const response = await axiosClient.put(`/admin/race-registrations/${id}/reject`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể từ chối đơn đăng ký đua.';
+    const errMsg = error.response?.data?.message || 'Failed to reject race registration.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -151,7 +151,7 @@ export async function confirmRaceRegistrationsAPI(tournamentId) {
     const response = await axiosClient.post(`/admin/tournaments/${tournamentId}/confirm-registration`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể chốt danh sách thi đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to finalize participant list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -161,7 +161,7 @@ export async function getWithdrawalsAPI() {
     const response = await axiosClient.get('/admin/wallets/withdrawals');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách yêu cầu rút tiền.';
+    const errMsg = error.response?.data?.message || 'Failed to get withdrawal requests.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -171,7 +171,7 @@ export async function approveWithdrawalAPI(id) {
     const response = await axiosClient.put(`/admin/wallets/transactions/${id}/approve`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể duyệt giao dịch rút tiền.';
+    const errMsg = error.response?.data?.message || 'Failed to approve withdrawal transaction.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -181,7 +181,7 @@ export async function rejectWithdrawalAPI(id) {
     const response = await axiosClient.put(`/admin/wallets/transactions/${id}/reject`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể từ chối giao dịch rút tiền.';
+    const errMsg = error.response?.data?.message || 'Failed to reject withdrawal transaction.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -191,7 +191,7 @@ export async function updateRaceStatusAPI(id, status) {
     const response = await axiosClient.put(`/admin/races/${id}/status`, { status });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật trạng thái vòng đua.';
+    const errMsg = error.response?.data?.message || 'Failed to update race round status.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -201,7 +201,7 @@ export async function getPrizeDistributionsAPI(raceId) {
     const response = await axiosClient.get(`/admin/races/${raceId}/prize-distributions`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy thông tin trao giải.';
+    const errMsg = error.response?.data?.message || 'Failed to get prize distribution details.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -211,7 +211,7 @@ export async function getAdminDashboardStatsAPI() {
     const response = await axiosClient.get('/admin/dashboard/stats');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy số liệu thống kê trang quản trị.';
+    const errMsg = error.response?.data?.message || 'Failed to get admin dashboard statistics.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -222,7 +222,7 @@ export async function getAllUsersAPI() {
     const response = await axiosClient.get('/admin/users');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách người dùng.';
+    const errMsg = error.response?.data?.message || 'Failed to get users list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -232,7 +232,7 @@ export async function createUserAPI(data) {
     const response = await axiosClient.post('/admin/users', data);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tạo mới người dùng.';
+    const errMsg = error.response?.data?.message || 'Failed to create new user.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -242,7 +242,7 @@ export async function updateUserAPI(id, data) {
     const response = await axiosClient.put(`/admin/users/${id}`, data);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật người dùng.';
+    const errMsg = error.response?.data?.message || 'Failed to update user.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -252,7 +252,7 @@ export async function deleteUserAPI(id) {
     const response = await axiosClient.delete(`/admin/users/${id}`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể xóa người dùng.';
+    const errMsg = error.response?.data?.message || 'Failed to delete user.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -262,7 +262,7 @@ export async function toggleUserStatusAPI(id, enabled) {
     const response = await axiosClient.put(`/admin/users/${id}/status`, { enabled });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật trạng thái tài khoản.';
+    const errMsg = error.response?.data?.message || 'Failed to update account status.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -275,7 +275,7 @@ export async function getAdminBlacklistsAPI(status = 'ALL', targetType = 'ALL') 
     });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải danh sách Blacklist.';
+    const errMsg = error.response?.data?.message || 'Failed to load Blacklist.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -285,7 +285,7 @@ export async function addAdminBlacklistAPI(data) {
     const response = await axiosClient.post('/admin/blacklist', data);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể đưa đối tượng vào Blacklist.';
+    const errMsg = error.response?.data?.message || 'Failed to add target to Blacklist.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -295,7 +295,7 @@ export async function unbanAdminBlacklistAPI(id, reason) {
     const response = await axiosClient.put(`/admin/blacklist/${id}/unban`, { reason });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể thực hiện gỡ cấm (Unban).';
+    const errMsg = error.response?.data?.message || 'Failed to unban target.';
     throw new Error(errMsg, { cause: error });
   }
 }

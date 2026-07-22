@@ -16,7 +16,7 @@ export async function loginAPI(email, password) {
     });
     return response.data; // { accessToken, refreshToken, user: { ... } }
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Email hoặc mật khẩu không chính xác. Vui lòng thử lại.';
+    const errMsg = error.response?.data?.message || 'Invalid email or password. Please try again.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -32,7 +32,7 @@ export async function signupAPI({ username, fullName, email, password, role = 'S
     });
     return response.data; // { accessToken, refreshToken, user: { ... } }
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin đăng ký.';
+    const errMsg = error.response?.data?.message || 'Registration failed. Please check your information.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -42,7 +42,7 @@ export async function verifyAccountAPI(token) {
     const response = await axiosClient.get(`/auth/verify?token=${token}`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Xác thực tài khoản thất bại. Mã OTP không hợp lệ hoặc đã hết hạn.';
+    const errMsg = error.response?.data?.message || 'Account verification failed. Code is invalid or expired.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -54,7 +54,7 @@ export async function logoutAPI(refreshToken) {
     });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Đăng xuất thất bại. Vui lòng thử lại.';
+    const errMsg = error.response?.data?.message || 'Logout failed. Please try again.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -64,7 +64,7 @@ export async function getProfileAPI() {
     const response = await axiosClient.get('/auth/me');
     return response.data; // UserResponse
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy thông tin hồ sơ người dùng.';
+    const errMsg = error.response?.data?.message || 'Failed to get user profile.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -76,7 +76,7 @@ export async function googleLoginAPI(credential) {
     });
     return response.data; // { accessToken, refreshToken, user: { ... } }
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Đăng nhập bằng Google thất bại. Vui lòng thử lại.';
+    const errMsg = error.response?.data?.message || 'Google login failed. Please try again.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -86,7 +86,7 @@ export async function forgotPasswordAPI(email) {
     const response = await axiosClient.post('/auth/forgot-password', { email });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể gửi mã OTP. Vui lòng thử lại.';
+    const errMsg = error.response?.data?.message || 'Failed to send OTP code. Please try again.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -96,7 +96,7 @@ export async function resetPasswordAPI({ email, otp, newPassword }) {
     const response = await axiosClient.post('/auth/reset-password', { email, otp, newPassword });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Đặt lại mật khẩu thất bại. Vui lòng kiểm tra mã OTP và thử lại.';
+    const errMsg = error.response?.data?.message || 'Password reset failed. Please check OTP and try again.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -120,7 +120,7 @@ export async function completeGoogleProfileAPI(username, fullName) {
     });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể hoàn tất cập nhật thông tin tài khoản.';
+    const errMsg = error.response?.data?.message || 'Failed to complete profile update.';
     throw new Error(errMsg, { cause: error });
   }
 }

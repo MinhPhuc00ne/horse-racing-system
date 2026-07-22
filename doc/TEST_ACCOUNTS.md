@@ -309,3 +309,49 @@
    Lý do cấm: Thao túng hành vi cá cược trái phép
    Trạng thái: ACTIVE (Cấm vĩnh viễn)
    Số dư ví: 50,000đ
+
+==================================================
+7. TÀI KHOẢN YÊU CẦU NÂNG CẤP (UPGRADE REQUESTS) - 4 TÀI KHOẢN
+==================================================
+--- CHỜ DUYỆT (PENDING) ---
+1) Username: kurobe
+   Email: kurobe@tempest.com
+   Mật khẩu: SlimeTempest@2026
+   Họ tên: Kurobe Smith
+   Role hiện tại: SPECTATOR
+   Role yêu cầu nâng cấp: HORSE_OWNER (Chủ Ngựa)
+   Trạng thái yêu cầu: PENDING (Chờ Admin duyệt)
+   Chuồng ngựa đăng ký: Chuồng Ngựa Kurobe
+   Số dư ví: 50,000đ
+
+2) Username: sooka
+   Email: sooka@tempest.com
+   Mật khẩu: SlimeTempest@2026
+   Họ tên: Sooka Dragonewt
+   Role hiện tại: SPECTATOR
+   Role yêu cầu nâng cấp: JOCKEY (Kỵ Thủ)
+   Trạng thái yêu cầu: PENDING (Chờ Admin duyệt)
+   Số giấy phép: JCK-TEMPEST-09 (Chiều cao: 168cm, Cân nặng: 51kg)
+   Số dư ví: 50,000đ
+
+--- KHÔNG ĐƯỢC DUYỆT (REJECTED) ---
+3) Username: yamato
+   Email: yamato@tempest.com
+   Mật khẩu: SlimeTempest@2026
+   Họ tên: Yamato General
+   Role hiện tại: SPECTATOR
+   Role yêu cầu nâng cấp: HORSE_OWNER (Chủ Ngựa)
+   Trạng thái yêu cầu: REJECTED (Admin từ chối)
+   Lý do từ chối: Hồ sơ không hợp lệ: Thông tin giấy phép và địa chỉ trang trại chưa đầy đủ.
+   Số dư ví: 50,000đ
+
+4) Username: takuya
+   Email: takuya@tempest.com
+   Mật khẩu: SlimeTempest@2026
+   Họ tên: Takuya Ninja
+   Role hiện tại: SPECTATOR
+   Role yêu cầu nâng cấp: JOCKEY (Kỵ Thủ)
+   Trạng thái yêu cầu: REJECTED (Admin từ chối)
+   Lý do từ chối: Không đạt yêu cầu: Cân nặng và chiều cao không phù hợp tiêu chuẩn Kỵ Thủ Tempest.
+   Số dư ví: 50,000đ
+

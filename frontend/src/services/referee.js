@@ -9,7 +9,7 @@ export async function getRefereeDashboardStatsAPI() {
     const response = await axiosClient.get('/referee/dashboard/stats');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải dữ liệu thống kê.';
+    const errMsg = error.response?.data?.message || 'Failed to load statistics.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -19,7 +19,7 @@ export async function getAssignedRacesAPI(status = '') {
     const response = await axiosClient.get(`/referee/races?status=${status}`);
     return response.data || [];
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách trận đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to get assigned races.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -29,7 +29,7 @@ export async function getRacePreCheckAPI(raceId) {
     const response = await axiosClient.get(`/referee/races/${raceId}/pre-check`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải dữ liệu trước trận.';
+    const errMsg = error.response?.data?.message || 'Failed to load pre-race check data.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -39,7 +39,7 @@ export async function updateRaceConditionsAPI(raceId, conditions) {
     const response = await axiosClient.put(`/referee/races/${raceId}/conditions`, conditions);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật điều kiện sân chạy.';
+    const errMsg = error.response?.data?.message || 'Failed to update track conditions.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -49,7 +49,7 @@ export async function updateJockeyWeightAPI(raceId, jockeyId, actualWeight) {
     const response = await axiosClient.put(`/referee/races/${raceId}/jockeys/${jockeyId}/weight`, { actualWeight });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật cân nặng nài ngựa.';
+    const errMsg = error.response?.data?.message || 'Failed to update jockey weight.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -59,7 +59,7 @@ export async function disqualifyParticipantAPI(raceId, participantId, reason) {
     const response = await axiosClient.put(`/referee/races/${raceId}/participants/${participantId}/disqualify`, { reason });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể loại thí sinh thi đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to disqualify participant.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -69,7 +69,7 @@ export async function addBlacklistAPI(data) {
     const response = await axiosClient.post('/referee/blacklist', data);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể thêm vào danh sách đen.';
+    const errMsg = error.response?.data?.message || 'Failed to add to blacklist.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -79,7 +79,7 @@ export async function startRaceAPI(raceId) {
     const response = await axiosClient.post(`/referee/races/${raceId}/start`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể bắt đầu giải đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to start race.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -89,7 +89,7 @@ export async function getHorsesToInspectAPI() {
     const response = await axiosClient.get('/referee/inspect/horses');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải danh sách kiểm tra ngựa.';
+    const errMsg = error.response?.data?.message || 'Failed to load horses inspection list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -99,7 +99,7 @@ export async function updateHorseInspectionStatusAPI(id, newStatus, reason = '')
     const response = await axiosClient.put(`/referee/inspect/horses/${id}`, { status: newStatus, reason });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật trạng thái kiểm tra.';
+    const errMsg = error.response?.data?.message || 'Failed to update inspection status.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -114,7 +114,7 @@ export async function getCompletedRacesAPI() {
       time: race.startTime
     }));
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải danh sách giải đấu đã hoàn tất.';
+    const errMsg = error.response?.data?.message || 'Failed to load completed races list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -124,7 +124,7 @@ export async function getRaceResultsAPI(raceId) {
     const response = await axiosClient.get(`/referee/races/${raceId}/results`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy kết quả giải đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to get race results.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -134,7 +134,7 @@ export async function confirmRaceResultsAPI(raceId) {
     const response = await axiosClient.post(`/referee/races/${raceId}/confirm-results`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể xác nhận kết quả giải đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to confirm race results.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -144,7 +144,7 @@ export async function getViolationsAPI() {
     const response = await axiosClient.get('/referee/violations');
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải danh sách vi phạm.';
+    const errMsg = error.response?.data?.message || 'Failed to load violations list.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -154,7 +154,7 @@ export async function reportViolationAPI(raceId, data) {
     const response = await axiosClient.post(`/referee/races/${raceId}/flags`, data);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể báo cáo vi phạm.';
+    const errMsg = error.response?.data?.message || 'Failed to report violation.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -173,7 +173,7 @@ export async function cancelRefereeAssignmentAPI(tournamentId) {
     const response = await axiosClient.put(`/referee/tournaments/${tournamentId}/cancel-assignment`);
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể hủy phân công giải đấu.';
+    const errMsg = error.response?.data?.message || 'Failed to cancel referee assignment.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -183,7 +183,7 @@ export async function updatePovAPI(raceId, horseId) {
     const response = await axiosClient.put(`/referee/races/${raceId}/pov`, { horseId });
     return response.data;
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể cập nhật POV.';
+    const errMsg = error.response?.data?.message || 'Failed to update POV.';
     throw new Error(errMsg, { cause: error });
   }
 }

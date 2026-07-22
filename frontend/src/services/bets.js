@@ -13,7 +13,7 @@ export async function placeBetAPI(data) {
     const response = await axiosClient.post('/bets', data);
     return response.data; // BetResponse
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Đặt cược thất bại. Vui lòng kiểm tra lại.';
+    const errMsg = error.response?.data?.message || 'Bet placement failed. Please try again.';
     throw new Error(errMsg, { cause: error });
   }
 }
@@ -26,7 +26,7 @@ export async function getMyBetsAPI() {
     const response = await axiosClient.get('/bets/my-bets');
     return response.data; // List of BetResponse
   } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tải danh sách vé cược.';
+    const errMsg = error.response?.data?.message || 'Failed to load bet tickets list.';
     throw new Error(errMsg, { cause: error });
   }
 }

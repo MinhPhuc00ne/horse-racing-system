@@ -145,8 +145,8 @@ public class AdminBlacklistService {
 
             notificationService.sendNotification(
                     target,
-                    "Tài khoản bị tạm khóa / Đưa vào Blacklist",
-                    "Tài khoản của bạn đã bị đưa vào Blacklist bởi Admin. Lý do: " + request.getReason() + ". Thời hạn cấm: " + (Boolean.TRUE.equals(request.getIsPermanent()) ? "Vĩnh viễn" : request.getEndDate()) + ".",
+                    "Account Suspended / Blacklisted",
+                    "Your account has been blacklisted by Admin. Reason: " + request.getReason() + ". Duration: " + (Boolean.TRUE.equals(request.getIsPermanent()) ? "Permanent" : request.getEndDate()) + ".",
                     NotificationType.SYSTEM_ALERT
             );
         } else if ("HORSE".equalsIgnoreCase(request.getTargetType())) {
@@ -160,8 +160,8 @@ public class AdminBlacklistService {
                 targetDetail = "Owner: " + target.getOwner().getUser().getFullName();
                 notificationService.sendNotification(
                         target.getOwner().getUser(),
-                        "Chiến mã bị đưa vào Blacklist",
-                        "Ngựa " + target.getName() + " của bạn đã bị đưa vào Blacklist bởi Admin. Lý do: " + request.getReason() + ".",
+                        "Horse Blacklisted",
+                        "Your horse " + target.getName() + " has been blacklisted by Admin. Reason: " + request.getReason() + ".",
                         NotificationType.SYSTEM_ALERT
                 );
             }
@@ -196,8 +196,8 @@ public class AdminBlacklistService {
         blacklist = blacklistRepository.save(blacklist);
 
         String note = (unbanRequest != null && unbanRequest.getReason() != null && !unbanRequest.getReason().isBlank())
-                ? "Gỡ cấm: " + unbanRequest.getReason()
-                : "Gỡ cấm bởi Admin";
+                ? "Unbanned: " + unbanRequest.getReason()
+                : "Unbanned by Admin";
 
         BanHistory history = BanHistory.builder()
                 .blacklist(blacklist)
@@ -221,8 +221,8 @@ public class AdminBlacklistService {
 
                 notificationService.sendNotification(
                         target,
-                        "Mở khóa tài khoản / Gỡ khỏi Blacklist",
-                        "Tài khoản của bạn đã được mở khóa và gỡ khỏi Blacklist bởi Admin. " + note,
+                        "Account Unlocked / Removed from Blacklist",
+                        "Your account has been unlocked and removed from Blacklist by Admin. " + note,
                         NotificationType.SYSTEM_ALERT
                 );
             }
@@ -238,8 +238,8 @@ public class AdminBlacklistService {
                     targetDetail = "Owner: " + target.getOwner().getUser().getFullName();
                     notificationService.sendNotification(
                             target.getOwner().getUser(),
-                            "Chiến mã được gỡ khỏi Blacklist",
-                            "Ngựa " + target.getName() + " của bạn đã được Admin gỡ khỏi Blacklist. " + note,
+                            "Horse Removed from Blacklist",
+                            "Your horse " + target.getName() + " has been removed from Blacklist by Admin. " + note,
                             NotificationType.SYSTEM_ALERT
                     );
                 }

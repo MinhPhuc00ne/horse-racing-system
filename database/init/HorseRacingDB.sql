@@ -12,65 +12,65 @@ begin
 EXEC [HorseRacingDB].[dbo].[sp_fulltext_database] @action = 'enable'
 end
 GO
-ALTER DATABASE [HorseRacingDB] SET ANSI_NULL_DEFAULT OFF 
+ALTER DATABASE [HorseRacingDB] SET ANSI_NULL_DEFAULT OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET ANSI_NULLS OFF 
+ALTER DATABASE [HorseRacingDB] SET ANSI_NULLS OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET ANSI_PADDING OFF 
+ALTER DATABASE [HorseRacingDB] SET ANSI_PADDING OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET ANSI_WARNINGS OFF 
+ALTER DATABASE [HorseRacingDB] SET ANSI_WARNINGS OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET ARITHABORT OFF 
+ALTER DATABASE [HorseRacingDB] SET ARITHABORT OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET AUTO_CLOSE OFF 
+ALTER DATABASE [HorseRacingDB] SET AUTO_CLOSE OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET AUTO_SHRINK OFF 
+ALTER DATABASE [HorseRacingDB] SET AUTO_SHRINK OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET AUTO_UPDATE_STATISTICS ON 
+ALTER DATABASE [HorseRacingDB] SET AUTO_UPDATE_STATISTICS ON
 GO
-ALTER DATABASE [HorseRacingDB] SET CURSOR_CLOSE_ON_COMMIT OFF 
+ALTER DATABASE [HorseRacingDB] SET CURSOR_CLOSE_ON_COMMIT OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET CURSOR_DEFAULT  GLOBAL 
+ALTER DATABASE [HorseRacingDB] SET CURSOR_DEFAULT  GLOBAL
 GO
-ALTER DATABASE [HorseRacingDB] SET CONCAT_NULL_YIELDS_NULL OFF 
+ALTER DATABASE [HorseRacingDB] SET CONCAT_NULL_YIELDS_NULL OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET NUMERIC_ROUNDABORT OFF 
+ALTER DATABASE [HorseRacingDB] SET NUMERIC_ROUNDABORT OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET QUOTED_IDENTIFIER OFF 
+ALTER DATABASE [HorseRacingDB] SET QUOTED_IDENTIFIER OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET RECURSIVE_TRIGGERS OFF 
+ALTER DATABASE [HorseRacingDB] SET RECURSIVE_TRIGGERS OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET  DISABLE_BROKER 
+ALTER DATABASE [HorseRacingDB] SET  DISABLE_BROKER
 GO
-ALTER DATABASE [HorseRacingDB] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+ALTER DATABASE [HorseRacingDB] SET AUTO_UPDATE_STATISTICS_ASYNC OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET DATE_CORRELATION_OPTIMIZATION OFF 
+ALTER DATABASE [HorseRacingDB] SET DATE_CORRELATION_OPTIMIZATION OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET TRUSTWORTHY OFF 
+ALTER DATABASE [HorseRacingDB] SET TRUSTWORTHY OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+ALTER DATABASE [HorseRacingDB] SET ALLOW_SNAPSHOT_ISOLATION OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET PARAMETERIZATION SIMPLE 
+ALTER DATABASE [HorseRacingDB] SET PARAMETERIZATION SIMPLE
 GO
-ALTER DATABASE [HorseRacingDB] SET READ_COMMITTED_SNAPSHOT OFF 
+ALTER DATABASE [HorseRacingDB] SET READ_COMMITTED_SNAPSHOT OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET HONOR_BROKER_PRIORITY OFF 
+ALTER DATABASE [HorseRacingDB] SET HONOR_BROKER_PRIORITY OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET RECOVERY SIMPLE 
+ALTER DATABASE [HorseRacingDB] SET RECOVERY SIMPLE
 GO
-ALTER DATABASE [HorseRacingDB] SET  MULTI_USER 
+ALTER DATABASE [HorseRacingDB] SET  MULTI_USER
 GO
-ALTER DATABASE [HorseRacingDB] SET PAGE_VERIFY CHECKSUM  
+ALTER DATABASE [HorseRacingDB] SET PAGE_VERIFY CHECKSUM
 GO
-ALTER DATABASE [HorseRacingDB] SET DB_CHAINING OFF 
+ALTER DATABASE [HorseRacingDB] SET DB_CHAINING OFF
 GO
-ALTER DATABASE [HorseRacingDB] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+ALTER DATABASE [HorseRacingDB] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF )
 GO
-ALTER DATABASE [HorseRacingDB] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+ALTER DATABASE [HorseRacingDB] SET TARGET_RECOVERY_TIME = 60 SECONDS
 GO
-ALTER DATABASE [HorseRacingDB] SET DELAYED_DURABILITY = DISABLED 
+ALTER DATABASE [HorseRacingDB] SET DELAYED_DURABILITY = DISABLED
 GO
-ALTER DATABASE [HorseRacingDB] SET ACCELERATED_DATABASE_RECOVERY = OFF  
+ALTER DATABASE [HorseRacingDB] SET ACCELERATED_DATABASE_RECOVERY = OFF
 GO
 ALTER DATABASE [HorseRacingDB] SET QUERY_STORE = ON
 GO
@@ -89,7 +89,7 @@ CREATE TABLE [dbo].[ban_history](
 	[action_by] [int] NOT NULL,
 	[action_note] [nvarchar](500) NULL,
 	[created_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -111,7 +111,7 @@ CREATE TABLE [dbo].[bets](
 	[payout_amount] [decimal](18, 2) NULL,
 	[bet_type] [nvarchar](20) NULL,
 	[created_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -127,7 +127,7 @@ CREATE TABLE [dbo].[betting_transactions](
 	[bet_id] [int] NOT NULL,
 	[wallet_transaction_id] [int] NOT NULL,
 	[created_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -148,7 +148,7 @@ CREATE TABLE [dbo].[blacklist](
 	[is_permanent] [bit] NULL,
 	[status] [nvarchar](20) NULL,
 	[created_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -168,7 +168,7 @@ CREATE TABLE [dbo].[chat_messages](
 	[is_deleted] [bit] NULL,
 	[created_at] [datetime] NULL,
 	[updated_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -185,11 +185,11 @@ CREATE TABLE [dbo].[chat_rooms](
 	[status] [nvarchar](20) NULL,
 	[created_at] [datetime] NULL,
 	[closed_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
-UNIQUE NONCLUSTERED 
+UNIQUE NONCLUSTERED
 (
 	[race_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -203,11 +203,11 @@ GO
 CREATE TABLE [dbo].[horse_breeds](
 	[id] [int] IDENTITY(1,1) NOT NULL,
 	[breed_name] [nvarchar](100) NOT NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
-UNIQUE NONCLUSTERED 
+UNIQUE NONCLUSTERED
 (
 	[breed_name] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -230,11 +230,11 @@ CREATE TABLE [dbo].[horse_owner_profiles](
 	[phone] [varchar](20) NULL,
 	[identity_number] [varchar](50) NULL,
 	[date_of_birth] [date] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
-UNIQUE NONCLUSTERED 
+UNIQUE NONCLUSTERED
 (
 	[user_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -260,7 +260,7 @@ CREATE TABLE [dbo].[horses](
 	[stamina_rating] [int] NULL,
 	[gate_performance_rating] [int] NULL,
 	[image_url] [nvarchar](1000) NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -279,7 +279,7 @@ CREATE TABLE [dbo].[jockey_agreements](
 	[status] [nvarchar](50) NULL,
 	[sent_at] [datetime] NULL,
 	[responded_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -303,11 +303,11 @@ CREATE TABLE [dbo].[jockey_profiles](
 	[approval_status] [nvarchar](20) NULL,
 	[created_at] [datetime] NULL,
 	[updated_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
-UNIQUE NONCLUSTERED 
+UNIQUE NONCLUSTERED
 (
 	[user_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -327,7 +327,7 @@ CREATE TABLE [dbo].[notifications](
 	[is_read] [bit] NULL,
 	[created_at] [datetime] NULL,
 	[read_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -343,15 +343,15 @@ CREATE TABLE [dbo].[password_reset_tokens](
 	[expiry_date] [datetime2](6) NOT NULL,
 	[token] [varchar](255) NOT NULL,
 	[user_id] [int] NOT NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UK71lqwbwtklmljk3qlsugr1mig] UNIQUE NONCLUSTERED 
+ CONSTRAINT [UK71lqwbwtklmljk3qlsugr1mig] UNIQUE NONCLUSTERED
 (
 	[token] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UKla2ts67g4oh2sreayswhox1i6] UNIQUE NONCLUSTERED 
+ CONSTRAINT [UKla2ts67g4oh2sreayswhox1i6] UNIQUE NONCLUSTERED
 (
 	[user_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -372,7 +372,7 @@ CREATE TABLE [dbo].[prize_distributions](
 	[status] [nvarchar](20) NULL,
 	[created_at] [datetime] NULL,
 	[distributed_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -394,16 +394,16 @@ CREATE TABLE [dbo].[race_participants](
 	[average_speed] [float] NULL,
 	[status] [nvarchar](50) NULL,
 	[created_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UQ_race_horse] UNIQUE NONCLUSTERED 
+ CONSTRAINT [UQ_race_horse] UNIQUE NONCLUSTERED
 (
 	[race_id] ASC,
 	[horse_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UQ_race_jockey] UNIQUE NONCLUSTERED 
+ CONSTRAINT [UQ_race_jockey] UNIQUE NONCLUSTERED
 (
 	[race_id] ASC,
 	[jockey_id] ASC
@@ -425,7 +425,7 @@ CREATE TABLE [dbo].[race_registrations](
 	[created_at] [datetime] NULL,
 	[jockey_share_percent] [float] NULL,
 	[owner_share_percent] [float] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -444,7 +444,7 @@ CREATE TABLE [dbo].[race_simulations](
 	[status] [nvarchar](50) NULL,
 	[current_tick] [int] NULL,
 	[created_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -460,7 +460,7 @@ CREATE TABLE [dbo].[race_tracks](
 	[name] [nvarchar](255) NOT NULL,
 	[location] [nvarchar](255) NULL,
 	[surface_condition] [nvarchar](100) NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -486,7 +486,7 @@ CREATE TABLE [dbo].[races](
 	[status] [nvarchar](50) NULL,
 	[end_time] [time](7) NULL,
 	[referee_id] [int] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -505,7 +505,7 @@ CREATE TABLE [dbo].[referee_flags](
 	[violation_type] [nvarchar](50) NOT NULL,
 	[description] [nvarchar](500) NULL,
 	[created_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -522,11 +522,11 @@ CREATE TABLE [dbo].[refresh_tokens](
 	[revoked] [bit] NOT NULL,
 	[token] [varchar](512) NOT NULL,
 	[user_id] [int] NOT NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UKghpmfn23vmxfu3spu3lfg4r2d] UNIQUE NONCLUSTERED 
+ CONSTRAINT [UKghpmfn23vmxfu3spu3lfg4r2d] UNIQUE NONCLUSTERED
 (
 	[token] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -547,7 +547,7 @@ CREATE TABLE [dbo].[role_upgrade_requests](
 	[reviewed_at] [datetime] NULL,
 	[rejection_reason] [nvarchar](500) NULL,
 	[notes] [nvarchar](500) NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -562,7 +562,7 @@ CREATE TABLE [dbo].[roles](
 	[id] [int] IDENTITY(1,1) NOT NULL,
 	[role_name] [varchar](50) NOT NULL,
 	[description] [text] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -584,7 +584,7 @@ CREATE TABLE [dbo].[simulation_horse_states](
 	[rank_in_race] [int] NULL,
 	[status] [nvarchar](50) NULL,
 	[last_updated_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -621,7 +621,7 @@ CREATE TABLE [dbo].[tournaments](
 	[allowed_genders] [nvarchar](255) NULL,
 	[registration_opening_time] [datetime] NULL,
 	[official_race_time] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -662,7 +662,7 @@ CREATE TABLE [dbo].[upgrade_requests](
 	[stable_address] [varchar](255) NULL,
 	[stable_name] [varchar](255) NULL,
 	[weight] [float] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -679,16 +679,16 @@ CREATE TABLE [dbo].[user_connections](
 	[recipient_id] [int] NOT NULL,
 	[status] [nvarchar](20) NOT NULL,
 	[created_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UK7eu4uisnpdfh04pa012x02ots] UNIQUE NONCLUSTERED 
+ CONSTRAINT [UK7eu4uisnpdfh04pa012x02ots] UNIQUE NONCLUSTERED
 (
 	[requester_id] ASC,
 	[recipient_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UQ_User_Connection] UNIQUE NONCLUSTERED 
+ CONSTRAINT [UQ_User_Connection] UNIQUE NONCLUSTERED
 (
 	[requester_id] ASC,
 	[recipient_id] ASC
@@ -718,15 +718,15 @@ CREATE TABLE [dbo].[users](
 	[bank_bin] [varchar](20) NULL,
 	[bank_account_number] [varchar](50) NULL,
 	[bank_account_holder_name] [nvarchar](100) NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
-UNIQUE NONCLUSTERED 
+UNIQUE NONCLUSTERED
 (
 	[email] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
-UNIQUE NONCLUSTERED 
+UNIQUE NONCLUSTERED
 (
 	[username] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -742,15 +742,15 @@ CREATE TABLE [dbo].[verification_tokens](
 	[expiry_date] [datetime2](6) NOT NULL,
 	[token] [varchar](255) NOT NULL,
 	[user_id] [int] NOT NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UK6q9nsb665s9f8qajm3j07kd1e] UNIQUE NONCLUSTERED 
+ CONSTRAINT [UK6q9nsb665s9f8qajm3j07kd1e] UNIQUE NONCLUSTERED
 (
 	[token] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UKdqp95ggn6gvm865km5muba2o5] UNIQUE NONCLUSTERED 
+ CONSTRAINT [UKdqp95ggn6gvm865km5muba2o5] UNIQUE NONCLUSTERED
 (
 	[user_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -775,7 +775,7 @@ CREATE TABLE [dbo].[wallet_transactions](
 	[bank_bin] [varchar](20) NULL,
 	[bank_account_number] [varchar](50) NULL,
 	[bank_account_holder_name] [nvarchar](100) NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -792,11 +792,11 @@ CREATE TABLE [dbo].[wallets](
 	[balance] [decimal](18, 2) NULL,
 	[created_at] [datetime] NULL,
 	[updated_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
-UNIQUE NONCLUSTERED 
+UNIQUE NONCLUSTERED
 (
 	[user_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -813,7 +813,7 @@ CREATE TABLE [dbo].[ai_chat_histories](
 	[sender] [nvarchar](10) NOT NULL,
 	[message] [nvarchar](max) NOT NULL,
 	[created_at] [datetime2](6) NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -832,7 +832,7 @@ CREATE TABLE [dbo].[referee_change_requests](
 	[status] [nvarchar](50) NOT NULL,
 	[created_at] [datetime] NULL,
 	[updated_at] [datetime] NULL,
-PRIMARY KEY CLUSTERED 
+PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -1356,19 +1356,24 @@ INSERT INTO [dbo].[users] ([username], [email], [password], [full_name], [phone]
 
 ('clayman', 'clayman@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Clayman Marionette', '0901000034', 'LOCAL', 'SPECTATOR', 1),
 ('footman', 'footman@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Footman Clown', '0901000035', 'LOCAL', 'SPECTATOR', 1),
-('laplace', 'laplace@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Laplace Clown', '0901000036', 'LOCAL', 'SPECTATOR', 1);
+('laplace', 'laplace@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Laplace Clown', '0901000036', 'LOCAL', 'SPECTATOR', 1),
+
+('kurobe', 'kurobe@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Kurobe Smith', '0901000037', 'LOCAL', 'SPECTATOR', 1),
+('sooka', 'sooka@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Sooka Dragonewt', '0901000038', 'LOCAL', 'SPECTATOR', 1),
+('yamato', 'yamato@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Yamato General', '0901000039', 'LOCAL', 'SPECTATOR', 1),
+('takuya', 'takuya@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Takuya Ninja', '0901000040', 'LOCAL', 'SPECTATOR', 1);
 GO
 
 -- 3. Insert Owner & Jockey Profiles
 INSERT INTO [dbo].[horse_owner_profiles] ([user_id], [stable_name], [stable_address], [phone], [identity_number], [date_of_birth], [bank_account], [description], [reputation_stars], [approval_status]) VALUES
-((SELECT id FROM [users] WHERE username='benimaru'), 'Chuồng Ngựa Benimaru', 'Khu Đông Thành Phố Tempest', '0901000010', '038090100010', '1995-05-15', '9704123456789010', 'Trang trại đua ngựa hàng đầu ma quốc Tempest', 5.0, 'APPROVED'),
-((SELECT id FROM [users] WHERE username='souei'), 'Chuồng Ngựa Souei', 'Khu Tây Thành Phố Tempest', '0901000011', '038090100011', '1996-08-20', '9704123456789011', 'Chuyên gia huấn luyện ngựa đua tốc độ cao', 5.0, 'APPROVED'),
-((SELECT id FROM [users] WHERE username='hakuro'), 'Chuồng Ngựa Hakuro', 'Khu Nam Thành Phố Tempest', '0901000012', '038090100012', '1985-03-10', '9704123456789012', 'Trang trại danh giá với chiến mã lâu đời', 5.0, 'APPROVED'),
-((SELECT id FROM [users] WHERE username='geld'), 'Chuồng Ngựa Geld', 'Khu Bắc Thành Phố Tempest', '0901000013', '038090100013', '1990-11-25', '9704123456789013', 'Trang trại ngựa đua sức bền bỉ', 5.0, 'APPROVED'),
-((SELECT id FROM [users] WHERE username='gabil'), 'Chuồng Ngựa Gabil', 'Khu Hồ Long Thần Tempest', '0901000014', '038090100014', '1997-02-14', '9704123456789014', 'Chuồng ngựa phong cách Long Tộc độc đáo', 5.0, 'APPROVED'),
-((SELECT id FROM [users] WHERE username='rigurd'), 'Chuồng Ngựa Rigurd', 'Trung Tâm Thành Phố Tempest', '0901000015', '038090100015', '1980-07-04', '9704123456789015', 'Trang trại lâu đời nhất ma quốc Tempest', 5.0, 'APPROVED'),
-((SELECT id FROM [users] WHERE username='gobta'), 'Chuồng Ngựa Gobta', 'Ngoại Ô Thành Phố Tempest', '0901000016', '038090100016', '1999-09-09', '9704123456789016', 'Chuồng ngựa trẻ đầy triển vọng', 5.0, 'APPROVED'),
-((SELECT id FROM [users] WHERE username='kaijin'), 'Chuồng Ngựa Kaijin', 'Khu Thợ Kỹ Thuật Tempest', '0901000017', '038090100017', '1988-12-12', '9704123456789017', 'Trang trại kết hợp công nghệ hiện đại', 5.0, 'APPROVED');
+((SELECT id FROM [users] WHERE username='benimaru'), N'Benimaru Stables', N'East District, Tempest City', '0901000010', '038090100010', '1995-05-15', '9704123456789010', N'Top racing stables in Tempest Federation', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='souei'), N'Souei Stables', N'West District, Tempest City', '0901000011', '038090100011', '1996-08-20', '9704123456789011', N'High-speed racing horse training experts', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='hakuro'), N'Hakuro Stables', N'South District, Tempest City', '0901000012', '038090100012', '1985-03-10', '9704123456789012', N'Prestigious ranch with legendary thoroughbreds', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='geld'), N'Geld Stables', N'North District, Tempest City', '0901000013', '038090100013', '1990-11-25', '9704123456789013', N'Endurance horse racing specialists', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='gabil'), N'Gabil Stables', N'Dragon Shrine Lake District, Tempest', '0901000014', '038090100014', '1997-02-14', '9704123456789014', N'Unique Dragonewt style racing stables', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='rigurd'), N'Rigurd Stables', N'City Center, Tempest', '0901000015', '038090100015', '1980-07-04', '9704123456789015', N'The oldest established ranch in Tempest', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='gobta'), N'Gobta Stables', N'Outskirts, Tempest City', '0901000016', '038090100016', '1999-09-09', '9704123456789016', N'Promising young horse stables', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='kaijin'), N'Kaijin Stables', N'Craftsman District, Tempest', '0901000017', '038090100017', '1988-12-12', '9704123456789017', N'Ranch combining modern tech and craftsmanship', 5.0, 'APPROVED');
 GO
 
 INSERT INTO [dbo].[jockey_profiles] ([user_id], [height], [weight], [win_rate], [experience_year], [ranking_score], [license_number], [bank_account], [approval_status]) VALUES
@@ -1391,83 +1396,83 @@ GO
 INSERT INTO [dbo].[horses] ([owner_id], [breed_id], [name], [age], [gender], [training_status], [health_status], [status], [speed_rating], [stamina_rating], [gate_performance_rating], [color]) VALUES
 -- Owner 1 (Benimaru)
 ((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 1, 'Veldora', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 95.0, 90, 88, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 2, 'Xích Hỏa', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 85, 82, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 3, 'Hồng Liên', 3, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 75.0, 70, 75, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 4, 'Bạch Viêm', 6, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 82.0, 80, 78, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 1, 'Hỏa Long', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 90.0, 88, 85, 'Palomino'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 2, 'Tân Viêm', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 3, 'Hỏa Ảnh', 7, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 70.0, 65, 60, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 4, 'Hỏa Sâm', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 2, N'Xích Hỏa', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 85, 82, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 3, N'Hồng Liên', 3, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 75.0, 70, 75, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 4, N'Bạch Viêm', 6, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 82.0, 80, 78, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 1, N'Hỏa Long', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 90.0, 88, 85, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 2, N'Tân Viêm', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 3, N'Hỏa Ảnh', 7, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 70.0, 65, 60, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 4, N'Hỏa Sâm', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
 
 -- Owner 2 (Souei)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 1, 'Ảnh Ma', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 94.0, 92, 90, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 2, 'Tật Phong', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 89.0, 86, 84, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 3, 'Dạ Ảnh', 6, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 80.0, 78, 75, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 4, 'U Hồn', 3, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 72.0, 70, 72, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 1, 'Tàn Ảnh', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 86.0, 84, 80, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 2, 'Ẩn Ảnh', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 3, 'Lôi Ảnh', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 78.0, 75, 70, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 4, 'Phong Ảnh', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 1, N'Ảnh Ma', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 94.0, 92, 90, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 2, N'Tật Phong', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 89.0, 86, 84, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 3, N'Dạ Ảnh', 6, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 80.0, 78, 75, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 4, N'U Hồn', 3, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 72.0, 70, 72, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 1, N'Tàn Ảnh', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 86.0, 84, 80, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 2, N'Ẩn Ảnh', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 3, N'Lôi Ảnh', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 78.0, 75, 70, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 4, N'Phong Ảnh', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
 
 -- Owner 3 (Hakuro)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 1, 'Kiếm Thánh', 6, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 96.0, 94, 92, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 2, 'Thiên Nhất', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 91.0, 88, 86, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 3, 'Lôi Thần', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 83.0, 80, 78, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 4, 'Nhất Đao', 7, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 79.0, 76, 74, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 1, 'Truy Nhượng', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 82, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 2, 'Kiếm Ảnh', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 3, 'Phần Thiên', 5, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 74.0, 70, 68, 'Palomino'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 4, 'Tân Kiếm', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 1, N'Kiếm Thánh', 6, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 96.0, 94, 92, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 2, N'Thiên Nhất', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 91.0, 88, 86, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 3, N'Lôi Thần', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 83.0, 80, 78, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 4, N'Nhất Đao', 7, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 79.0, 76, 74, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 1, N'Truy Nhượng', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 82, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 2, N'Kiếm Ảnh', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 3, N'Phần Thiên', 5, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 74.0, 70, 68, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 4, N'Tân Kiếm', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
 
 -- Owner 4 (Geld)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 1, 'Ngang Tàng', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 90.0, 96, 85, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 2, 'Bá Vương', 6, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 92, 82, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 3, 'Thiên Giáp', 4, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 82.0, 86, 78, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 4, 'Thiên Thạch', 7, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 76.0, 82, 72, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 1, 'Kình Lực', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 85.0, 90, 80, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 2, 'Trùng Sinh', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 3, 'Bản Thạch', 5, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 72.0, 78, 66, 'Brown'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 4, 'Khôi Giáp', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 1, N'Ngang Tàng', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 90.0, 96, 85, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 2, N'Bá Vương', 6, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 92, 82, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 3, N'Thiên Giáp', 4, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 82.0, 86, 78, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 4, N'Thiên Thạch', 7, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 76.0, 82, 72, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 1, N'Kình Lực', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 85.0, 90, 80, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 2, N'Trùng Sinh', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 3, N'Bản Thạch', 5, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 72.0, 78, 66, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 4, N'Khôi Giáp', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
 
 -- Owner 5 (Gabil)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 1, 'Hồng Long', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 92.0, 89, 87, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 1, N'Hồng Long', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 92.0, 89, 87, 'Bay'),
 ((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 2, 'Phi Long', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 83, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 3, 'Thùy Long', 6, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 81.0, 79, 76, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 3, N'Thùy Long', 6, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 81.0, 79, 76, 'Gray'),
 ((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 4, 'Thanh Long', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 77.0, 74, 70, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 1, 'Xích Long', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 84.0, 82, 79, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 2, 'Tân Long', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 3, 'Bá Long', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 73.0, 71, 67, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 4, 'Vũ Long', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 1, N'Xích Long', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 84.0, 82, 79, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 2, N'Tân Long', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 3, N'Bá Long', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 73.0, 71, 67, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 4, N'Vũ Long', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
 
 -- Owner 6 (Rigurd)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 1, 'Tiên Phong', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 89.0, 88, 86, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 2, 'Lãnh Đạo', 6, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 86.0, 84, 82, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 3, 'Trân Thú', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 80.0, 78, 75, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 1, N'Tiên Phong', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 89.0, 88, 86, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 2, N'Lãnh Đạo', 6, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 86.0, 84, 82, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 3, N'Trân Thú', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 80.0, 78, 75, 'Chestnut'),
 ((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 4, 'Quang Vinh', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 75.0, 72, 68, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 1, 'Huy Hoàng', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 83.0, 81, 77, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 2, 'Tân Binh', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 3, 'Vệ Binh', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 71.0, 69, 65, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 4, 'Thiên Binh', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 1, N'Huy Hoàng', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 83.0, 81, 77, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 2, N'Tân Binh', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 3, N'Vệ Binh', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 71.0, 69, 65, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 4, N'Thiên Binh', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
 
 -- Owner 7 (Gobta)
 ((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 1, 'Lan Nha', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 93.0, 91, 89, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 2, 'Cực Phong', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 86, 84, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 3, 'Tốc Độ', 3, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 82.0, 79, 77, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 4, 'Thần Phong', 6, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 78.0, 75, 71, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 1, 'Bão Tuyết', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 85.0, 83, 80, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 2, 'Bạch Nha', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 3, 'Hắc Nha', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 73.0, 70, 66, 'Brown'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 4, 'Bát Phong', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 2, N'Cực Phong', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 86, 84, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 3, N'Tốc Độ', 3, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 82.0, 79, 77, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 4, N'Thần Phong', 6, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 78.0, 75, 71, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 1, N'Bão Tuyết', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 85.0, 83, 80, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 2, N'Bạch Nha', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 3, N'Hắc Nha', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 73.0, 70, 66, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 4, N'Bát Phong', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Roan'),
 
 -- Owner 8 (Kaijin)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 1, 'Hợp Kim', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 91.0, 90, 88, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 2, 'Thần Khí', 6, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 83, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 3, 'Hỏa Lô', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 81.0, 78, 76, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 4, 'Thép Tinh', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 77.0, 74, 70, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 1, 'Kim Cương', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 84.0, 82, 79, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 2, 'Bảo Kiếm', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 3, 'Giáp Thiết', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 72.0, 68, 64, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 4, 'Luyện Kim', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown');
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 1, N'Hợp Kim', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 91.0, 90, 88, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 2, N'Thần Khí', 6, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 83, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 3, N'Hỏa Lô', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 81.0, 78, 76, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 4, N'Thép Tinh', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 77.0, 74, 70, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 1, N'Kim Cương', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 84.0, 82, 79, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 2, N'Bảo Kiếm', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 3, N'Giáp Thiết', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 72.0, 68, 64, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 4, N'Luyện Kim', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown');
 GO
 
 -- 6. Insert User Connections (Each Owner connected to at least 3 Jockeys)
@@ -1515,29 +1520,44 @@ GO
 
 -- 7. Insert Race Tracks (1 Straight, 1 Circular)
 INSERT INTO [dbo].[race_tracks] ([name], [location], [surface_condition]) VALUES
-('Sân đua Thẳng Tempest', 'Thành phố Tempest', 'Good'),
-('Sân đua Tròn Jura', 'Đại ngàn Jura', 'Good');
+(N'Sân đua Thẳng Tempest', N'Thành phố Tempest', 'Good'),
+(N'Sân đua Tròn Jura', N'Đại ngàn Jura', 'Good');
 GO
 
 -- 8. Insert Tournaments (Admin Created, Fees & Prizes < 20,000 VND, Referees Assigned)
 INSERT INTO [dbo].[tournaments] ([tournament_name], [location], [description], [tournament_status], [start_date], [end_date], [registration_deadline], [referee_id], [entry_fee], [total_prize], [prize_first], [prize_second], [prize_third], [min_bet_amount], [min_slots], [max_slots], [allowed_classes], [allowed_ages], [allowed_genders], [registration_opening_time], [official_race_time]) VALUES
-('Giải Đấu Hoàng Gia Tempest', 'Thành phố Tempest', 'Giải đấu tốc độ chính thức đường đua thẳng ma quốc Tempest', 'OPEN_FOR_REGISTER', '2026-08-01', '2026-08-05', '2026-07-31 23:59:59', (SELECT id FROM [users] WHERE username='guy_crimson'), 10000.00, 19000.00, 10000.00, 6000.00, 3000.00, 5000.00, 4, 12, 'All Classes', '3-8', 'MALE, FEMALE', '2026-07-20 08:00:00', '2026-08-01 14:00:00'),
-('Cúp Vô Địch Ma Quốc Jura', 'Đại ngàn Jura', 'Giải đấu đường đua vòng tròn đỉnh cao đại ngàn Jura', 'OPEN_FOR_REGISTER', '2026-08-10', '2026-08-15', '2026-08-09 23:59:59', (SELECT id FROM [users] WHERE username='velgrynd'), 15000.00, 19500.00, 10000.00, 5500.00, 4000.00, 5000.00, 4, 12, 'All Classes', '3-8', 'MALE, FEMALE', '2026-07-25 08:00:00', '2026-08-10 15:00:00');
+(N'Giải Đấu Hoàng Gia Tempest', N'Thành phố Tempest', N'Giải đấu tốc độ chính thức đường đua thẳng ma quốc Tempest', 'OPEN_FOR_REGISTER', '2026-08-01', '2026-08-05', '2026-07-31 23:59:59', (SELECT id FROM [users] WHERE username='guy_crimson'), 10000.00, 19000.00, 10000.00, 6000.00, 3000.00, 5000.00, 4, 12, 'All Classes', '3-8', 'MALE, FEMALE', '2026-07-20 08:00:00', '2026-08-01 14:00:00'),
+(N'Cúp Vô Địch Ma Quốc Jura', N'Đại ngàn Jura', N'Giải đấu đường đua vòng tròn đỉnh cao đại ngàn Jura', 'OPEN_FOR_REGISTER', '2026-08-10', '2026-08-15', '2026-08-09 23:59:59', (SELECT id FROM [users] WHERE username='velgrynd'), 15000.00, 19500.00, 10000.00, 5500.00, 4000.00, 5000.00, 4, 12, 'All Classes', '3-8', 'MALE, FEMALE', '2026-07-25 08:00:00', '2026-08-10 15:00:00');
 GO
 
 -- 9. Insert Blacklist Entries (3 accounts put on ban list)
 INSERT INTO [dbo].[blacklist] ([target_type], [target_id], [reason], [start_date], [end_date], [is_permanent], [status], [created_at]) VALUES
-('USER', (SELECT id FROM [users] WHERE username='clayman'), 'Vi phạm điều khoản dịch vụ và hành vi gian lận tại Tempest', GETDATE(), NULL, 1, 'ACTIVE', GETDATE()),
-('USER', (SELECT id FROM [users] WHERE username='footman'), 'Quấy rối trật tự trường đua và cố ý gây rối', GETDATE(), NULL, 1, 'ACTIVE', GETDATE()),
-('USER', (SELECT id FROM [users] WHERE username='laplace'), 'Thao túng hành vi cá cược trái phép', GETDATE(), NULL, 1, 'ACTIVE', GETDATE());
+('USER', (SELECT id FROM [users] WHERE username='clayman'), N'Vi phạm điều khoản dịch vụ và hành vi gian lận tại Tempest', GETDATE(), NULL, 1, 'ACTIVE', GETDATE()),
+('USER', (SELECT id FROM [users] WHERE username='footman'), N'Quấy rối trật tự trường đua và cố ý gây rối', GETDATE(), NULL, 1, 'ACTIVE', GETDATE()),
+('USER', (SELECT id FROM [users] WHERE username='laplace'), N'Thao túng hành vi cá cược trái phép', GETDATE(), NULL, 1, 'ACTIVE', GETDATE());
 GO
 
--- 10. Create Wallets for all 36 accounts with starting balance of 50,000.00 VNĐ
+-- 10. Insert Upgrade Requests (2 PENDING, 2 REJECTED)
+INSERT INTO [dbo].[upgrade_requests] ([user_id], [requested_role], [status], [notes], [rejection_reason], [full_name], [phone_number], [identity_number], [date_of_birth], [stable_name], [stable_address], [license_number], [height], [weight], [experience_years], [created_at]) VALUES
+-- 1. Kurobe (Owner - PENDING)
+((SELECT id FROM [users] WHERE username='kurobe'), 'HORSE_OWNER', 'PENDING', N'Yêu cầu nâng cấp tài khoản lên Chủ Ngựa cho trang trại Kurobe', NULL, 'Kurobe Smith', '0901000037', '038090100037', '1992-04-10', N'Chuồng Ngựa Kurobe', N'Khu Rèn Tempest', NULL, NULL, NULL, 5, GETDATE()),
+
+-- 2. Sooka (Jockey - PENDING)
+((SELECT id FROM [users] WHERE username='sooka'), 'JOCKEY', 'PENDING', N'Yêu cầu nâng cấp tài khoản lên Kỵ Thủ chuyên nghiệp', NULL, 'Sooka Dragonewt', '0901000038', '038090100038', '1998-06-15', NULL, NULL, 'JCK-TEMPEST-09', 168.0, 51.0, 3, GETDATE()),
+
+-- 3. Yamato (Owner - REJECTED)
+((SELECT id FROM [users] WHERE username='yamato'), 'HORSE_OWNER', 'REJECTED', N'Yêu cầu nâng cấp tài khoản thành Chủ Ngựa', N'Hồ sơ không hợp lệ: Thông tin giấy phép và địa chỉ trang trại chưa đầy đủ.', 'Yamato General', '0901000039', '038090100039', '1989-10-20', N'Chuồng Ngựa Yamato', N'Khu Quân Sự Tempest', NULL, NULL, NULL, 2, GETDATE()),
+
+-- 4. Takuya (Jockey - REJECTED)
+((SELECT id FROM [users] WHERE username='takuya'), 'JOCKEY', 'REJECTED', N'Yêu cầu nâng cấp tài khoản thành Kỵ Thủ', N'Không đạt yêu cầu: Cân nặng và chiều cao không phù hợp tiêu chuẩn Kỵ Thủ Tempest.', 'Takuya Ninja', '0901000040', '038090100040', '1999-12-01', NULL, NULL, 'JCK-TEMPEST-10', 172.0, 58.0, 1, GETDATE());
+GO
+
+-- 11. Create Wallets for all accounts with starting balance of 50,000.00 VNĐ
 INSERT INTO [dbo].[wallets] ([user_id], [balance], [created_at])
 SELECT id, 50000.00, GETDATE() FROM [dbo].[users];
 GO
 
 USE [master]
 GO
-ALTER DATABASE [HorseRacingDB] SET  READ_WRITE 
+ALTER DATABASE [HorseRacingDB] SET  READ_WRITE
 GO
