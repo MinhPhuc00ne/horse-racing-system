@@ -33,8 +33,6 @@ export default function SpectatorWallet({ hideHeader = false }) {
   // Withdraw Form State
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawing, setWithdrawing] = useState(false);
-  const [showWithdrawQR, setShowWithdrawQR] = useState(false);
-  const [qrAmount, setQrAmount] = useState(0);
 
   // Bank Account States
   const [selectedBankBin, setSelectedBankBin] = useState('');
@@ -234,8 +232,10 @@ export default function SpectatorWallet({ hideHeader = false }) {
     setWithdrawing(true);
     try {
       await withdrawAPI(amountVal, selectedBankName, selectedBankBin, bankAccountNumber, bankAccountHolderName);
-      setQrAmount(amountVal);
-      setShowWithdrawQR(true);
+      showCustomAlert(
+        'Yêu Cầu Rút Tiền Thành Công',
+        `Yêu cầu rút tiền số tiền ${amountVal.toLocaleString('vi-VN')} VND đã được gửi tới Ban quản trị. Ban quản trị sẽ kiểm tra và thực hiện chuyển khoản vào tài khoản ngân hàng của bạn trong thời gian sớm nhất.`
+      );
       setWithdrawAmount('');
       await fetchWalletData();
       await fetchHistoryData();
@@ -571,70 +571,6 @@ export default function SpectatorWallet({ hideHeader = false }) {
         </div>
       </div>
 
-      {showWithdrawQR && createPortal(
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.75)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 9999,
-            backdropFilter: 'blur(4px)',
-          }}
-          onClick={() => setShowWithdrawQR(false)}
-        >
-          <div
-            style={{
-              backgroundColor: '#fff',
-              borderRadius: '16px',
-              maxWidth: '400px',
-              width: '90%',
-              color: '#333',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-              padding: '24px',
-              textAlign: 'center',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-              <h5 className="m-0 fw-bold text-dark" style={{ fontFamily: 'var(--font-family)' }}>
-                Yêu Cầu Rút Tiền
-              </h5>
-              <button className="btn-close" onClick={() => setShowWithdrawQR(false)}></button>
-            </div>
-            <p className="small text-secondary mb-3">
-              Quét mã QR dưới đây để nhận thông tin giao dịch rút tiền{' '}
-              <strong>{qrAmount.toLocaleString('en-US')} VND</strong>.
-            </p>
-            <div className="mb-3 d-flex justify-content-center bg-light p-3 rounded">
-              <img
-                src={`https://api.vietqr.io/image/970415-113366668888-j1YV5A8.jpg?accountName=HE%20THONG%20DUA%20NGUA&amount=${qrAmount}&addInfo=RUT%20TIEN%20HE%20THONG`}
-                alt="VietQR Withdrawal"
-                style={{ width: '220px', height: '220px', objectFit: 'contain' }}
-              />
-            </div>
-            <div
-              className="alert alert-warning small text-start mb-3 py-2"
-              style={{ border: 'none', backgroundColor: '#fff3cd', color: '#664d03' }}
-            >
-              📌 Yêu cầu đã được gửi lên hệ thống. Ban quản trị sẽ kiểm tra và thực hiện chuyển
-              khoản cho bạn.
-            </div>
-            <button
-              className="ho-btn ho-btn-gold-solid w-100 py-2"
-              onClick={() => setShowWithdrawQR(false)}
-            >
-              Đóng
-            </button>
-          </div>
-        </div>,
-        document.body
-      )}
 
       {showDepositQR && depositQrData && createPortal(
         <div
