@@ -135,6 +135,7 @@ public class TournamentService {
                 .registrationOpeningTime(request.getRegistrationOpeningTime())
                 .officialRaceTime(request.getOfficialRaceTime())
                 .surfaceType(request.getSurfaceType())
+                .distance(request.getDistance() != null ? request.getDistance() : 1200.0)
                 .build();
 
 
@@ -302,6 +303,7 @@ public class TournamentService {
         tournament.setRegistrationOpeningTime(request.getRegistrationOpeningTime());
         tournament.setOfficialRaceTime(request.getOfficialRaceTime());
         tournament.setSurfaceType(request.getSurfaceType());
+        tournament.setDistance(request.getDistance() != null ? request.getDistance() : 1200.0);
 
         tournament = tournamentRepository.save(tournament);
 

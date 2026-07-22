@@ -39,6 +39,7 @@ public class TournamentResponse {
     private LocalDateTime registrationOpeningTime;
     private LocalDateTime officialRaceTime;
     private String surfaceType;
+    private Double distance;
 
 
     public static TournamentResponse fromEntity(Tournament t) {
@@ -68,6 +69,7 @@ public class TournamentResponse {
                 .registrationOpeningTime(t.getRegistrationOpeningTime())
                 .officialRaceTime(t.getOfficialRaceTime())
                 .surfaceType(t.getSurfaceType())
+                .distance(t.getDistance() != null ? t.getDistance() : 1200.0)
                 .createdAt(t.getCreatedAt())
 
                 .updatedAt(t.getUpdatedAt())
