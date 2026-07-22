@@ -111,13 +111,15 @@ public class PaymentService {
             
         } catch (IllegalArgumentException | PayOSException e) {
             log.error("Webhook processing error: {}", e.getMessage(), e);
-            // PayOS requires { "error": 0, "message": "Ok" } even when setting up the webhook URL 
-            // where the signature might be invalid or a dummy payload is sent.
-            response.put("error", 0);
-            response.put("message", "Ok");
-            response.put("success", true);
-            response.putNull("data");
-            return response;
+            // Allow PayOS dashboard webhook URL confirmation pings with test data
+            if (webhookBody != null && webhookBody.has("data") && webhookBody.get("data").has("accountNumber")) {
+                response.put("error", 0);
+                response.put("message", "Ok");
+                response.put("success", true);
+                response.putNull("data");
+                return response;
+            }
+            throw new com.horseracing.exceptions.BusinessException("Invalid PayOS webhook signature", org.springframework.http.HttpStatus.BAD_REQUEST);
         }
     }
 
