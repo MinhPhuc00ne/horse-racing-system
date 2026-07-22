@@ -300,6 +300,7 @@ public class AuthService {
         resetToken.setUser(user);
         resetToken.setToken(otp);
         resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(10)); // 10 minutes expiry
+        resetToken.setFailedAttempts(0);
 
         passwordResetTokenRepository.save(resetToken);
 
@@ -310,7 +311,7 @@ public class AuthService {
     /**
      * Verify the reset password OTP without updating password.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public void verifyResetOtp(VerifyOtpRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email does not exist in the system."));
@@ -318,12 +319,27 @@ public class AuthService {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Invalid or non-existent OTP code."));
 
-        if (!resetToken.getToken().equals(request.getOtp())) {
-            throw new RuntimeException("Incorrect OTP code.");
+        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new RuntimeException("OTP code has expired.");
         }
 
-        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("OTP code has expired.");
+        int attempts = (resetToken.getFailedAttempts() != null ? resetToken.getFailedAttempts() : 0);
+        if (attempts >= 5) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new RuntimeException("Maximum verification attempts exceeded. Please request a new OTP code.");
+        }
+
+        if (!resetToken.getToken().equals(request.getOtp())) {
+            attempts++;
+            resetToken.setFailedAttempts(attempts);
+            if (attempts >= 5) {
+                passwordResetTokenRepository.delete(resetToken);
+                throw new RuntimeException("Incorrect OTP code. Maximum verification attempts exceeded. Please request a new OTP code.");
+            } else {
+                passwordResetTokenRepository.save(resetToken);
+                throw new RuntimeException("Incorrect OTP code. Attempts remaining: " + (5 - attempts));
+            }
         }
     }
 
@@ -338,13 +354,27 @@ public class AuthService {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Invalid or non-existent OTP code."));
 
-        if (!resetToken.getToken().equals(request.getOtp())) {
-            throw new RuntimeException("Incorrect OTP code.");
-        }
-
         if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             passwordResetTokenRepository.delete(resetToken);
             throw new RuntimeException("OTP code has expired.");
+        }
+
+        int attempts = (resetToken.getFailedAttempts() != null ? resetToken.getFailedAttempts() : 0);
+        if (attempts >= 5) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new RuntimeException("Maximum verification attempts exceeded. Please request a new OTP code.");
+        }
+
+        if (!resetToken.getToken().equals(request.getOtp())) {
+            attempts++;
+            resetToken.setFailedAttempts(attempts);
+            if (attempts >= 5) {
+                passwordResetTokenRepository.delete(resetToken);
+                throw new RuntimeException("Incorrect OTP code. Maximum verification attempts exceeded. Please request a new OTP code.");
+            } else {
+                passwordResetTokenRepository.save(resetToken);
+                throw new RuntimeException("Incorrect OTP code. Attempts remaining: " + (5 - attempts));
+            }
         }
 
         // Update user's password
