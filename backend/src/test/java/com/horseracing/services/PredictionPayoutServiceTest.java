@@ -114,9 +114,9 @@ public class PredictionPayoutServiceTest {
         Wallet wallet1 = Wallet.builder().id(501).user(spectator1).balance(BigDecimal.ZERO).build();
 
         when(betRepository.findByRaceId(101)).thenReturn(List.of(bet1, bet2));
-        when(walletRepository.findByUserId(11)).thenReturn(Optional.of(wallet1));
+        when(walletRepository.findByUserIdWithLock(11)).thenReturn(Optional.of(wallet1));
         when(userRepository.findByRole(Role.ADMIN)).thenReturn(List.of(admin));
-        when(walletRepository.findByUserId(1)).thenReturn(Optional.of(Wallet.builder().id(99).user(admin).balance(BigDecimal.ZERO).build()));
+        when(walletRepository.findByUserIdWithLock(1)).thenReturn(Optional.of(Wallet.builder().id(99).user(admin).balance(BigDecimal.ZERO).build()));
 
         predictionPayoutService.processPayouts(101, List.of(participant1, participant2, participant3), race);
 
@@ -162,10 +162,10 @@ public class PredictionPayoutServiceTest {
         Wallet wallet2 = Wallet.builder().id(502).user(spectator2).balance(BigDecimal.ZERO).build();
 
         when(betRepository.findByRaceId(101)).thenReturn(List.of(bet1, bet2));
-        when(walletRepository.findByUserId(11)).thenReturn(Optional.of(wallet1));
-        when(walletRepository.findByUserId(12)).thenReturn(Optional.of(wallet2));
+        when(walletRepository.findByUserIdWithLock(11)).thenReturn(Optional.of(wallet1));
+        when(walletRepository.findByUserIdWithLock(12)).thenReturn(Optional.of(wallet2));
         lenient().when(userRepository.findByRole(Role.ADMIN)).thenReturn(List.of(admin));
-        lenient().when(walletRepository.findByUserId(1)).thenReturn(Optional.of(Wallet.builder().id(99).user(admin).balance(BigDecimal.ZERO).build()));
+        lenient().when(walletRepository.findByUserIdWithLock(1)).thenReturn(Optional.of(Wallet.builder().id(99).user(admin).balance(BigDecimal.ZERO).build()));
 
         predictionPayoutService.processPayouts(101, List.of(participant1, participant2, participant3), race);
 
@@ -192,7 +192,7 @@ public class PredictionPayoutServiceTest {
         Wallet wallet = Wallet.builder().id(501).user(spectator1).balance(BigDecimal.valueOf(20.0)).build();
 
         when(betRepository.findByParticipantIdAndStatus(201, "PENDING")).thenReturn(List.of(bet));
-        when(walletRepository.findByUserId(11)).thenReturn(Optional.of(wallet));
+        when(walletRepository.findByUserIdWithLock(11)).thenReturn(Optional.of(wallet));
 
         predictionPayoutService.refundBetsForParticipant(participant1, "REJECTED", "Horse disqualified. Bet refunded {amount} VND.");
 
@@ -226,8 +226,8 @@ public class PredictionPayoutServiceTest {
         Wallet wallet2 = Wallet.builder().id(502).user(spectator2).balance(BigDecimal.ZERO).build();
 
         when(betRepository.findByRaceId(101)).thenReturn(List.of(bet1, bet2));
-        when(walletRepository.findByUserId(11)).thenReturn(Optional.of(wallet1));
-        when(walletRepository.findByUserId(12)).thenReturn(Optional.of(wallet2));
+        when(walletRepository.findByUserIdWithLock(11)).thenReturn(Optional.of(wallet1));
+        when(walletRepository.findByUserIdWithLock(12)).thenReturn(Optional.of(wallet2));
 
         predictionPayoutService.refundBetsForRace(race);
 

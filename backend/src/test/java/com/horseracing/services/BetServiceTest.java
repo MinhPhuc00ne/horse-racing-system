@@ -110,7 +110,7 @@ public class BetServiceTest {
 
         when(raceRepository.findById(10)).thenReturn(Optional.of(race));
         when(raceParticipantRepository.findById(100)).thenReturn(Optional.of(participant));
-        when(walletRepository.findByUserId(1)).thenReturn(Optional.of(wallet));
+        when(walletRepository.findByUserIdWithLock(1)).thenReturn(Optional.of(wallet));
 
         when(betRepository.save(any(Bet.class))).thenAnswer(invocation -> {
             Bet b = invocation.getArgument(0);
@@ -226,7 +226,7 @@ public class BetServiceTest {
         when(raceRepository.findById(10)).thenReturn(Optional.of(race));
         when(raceParticipantRepository.existsByJockeyUserIdAndTournamentId(jockeyUser.getId(), 1)).thenReturn(false);
         when(raceParticipantRepository.findById(100)).thenReturn(Optional.of(participant));
-        when(walletRepository.findByUserId(jockeyUser.getId())).thenReturn(Optional.of(jockeyWallet));
+        when(walletRepository.findByUserIdWithLock(jockeyUser.getId())).thenReturn(Optional.of(jockeyWallet));
 
         when(betRepository.save(any(Bet.class))).thenAnswer(invocation -> {
             Bet b = invocation.getArgument(0);
@@ -365,7 +365,7 @@ public class BetServiceTest {
 
         when(raceRepository.findById(10)).thenReturn(Optional.of(race));
         when(raceParticipantRepository.findById(100)).thenReturn(Optional.of(participant));
-        when(walletRepository.findByUserId(1)).thenReturn(Optional.empty());
+        when(walletRepository.findByUserIdWithLock(1)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
         assertEquals("User wallet not found. Please contact Administrator.", exception.getMessage());
@@ -383,7 +383,7 @@ public class BetServiceTest {
 
         when(raceRepository.findById(10)).thenReturn(Optional.of(race));
         when(raceParticipantRepository.findById(100)).thenReturn(Optional.of(participant));
-        when(walletRepository.findByUserId(1)).thenReturn(Optional.of(wallet));
+        when(walletRepository.findByUserIdWithLock(1)).thenReturn(Optional.of(wallet));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> betService.placeBet(spectatorUser, request));
         assertEquals("Insufficient wallet balance to place bet.", exception.getMessage());
