@@ -1,5 +1,5 @@
 
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import './Home.css';
@@ -66,6 +66,18 @@ const defaultJockeyRankings = [
 
 const Home = () => {
   const { isAuthenticated, user } = useContext(AuthContext);
+  const [tournaments, setTournaments] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/tournaments')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setTournaments(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   if (isAuthenticated && user) {
     if (user.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
@@ -84,7 +96,7 @@ const Home = () => {
         <section id="rankings" className="leaderboards-section" aria-label="Elite rankings">
           <div className="leaderboards-grid">
             <RankingBoard title="Elite Rankings: Horses" icon="♞" items={horseRankings} />
-            <RankingBoard title="Elite Rankings: Jockeys" icon="♘" items={jockeyRankings} initials />
+            <RankingBoard title="Elite Rankings: Jockeys" icon="♘" items={defaultJockeyRankings} initials />
           </div>
         </section>
       </main>
