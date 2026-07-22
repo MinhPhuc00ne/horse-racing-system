@@ -92,7 +92,8 @@ public class PaymentService {
                         tx.setStatus("SUCCESS");
                         walletTransactionRepository.save(tx);
 
-                        Wallet wallet = tx.getWallet();
+                        Wallet wallet = walletRepository.findByIdWithLock(tx.getWallet().getId())
+                                .orElse(tx.getWallet());
                         wallet.setBalance(wallet.getBalance().add(tx.getAmount()));
                         walletRepository.save(wallet);
                         log.info("Successfully updated wallet balance for user: {}", wallet.getUser().getUsername());
@@ -141,7 +142,8 @@ public class PaymentService {
                         tx.setStatus("SUCCESS");
                         walletTransactionRepository.save(tx);
 
-                        Wallet wallet = tx.getWallet();
+                        Wallet wallet = walletRepository.findByIdWithLock(tx.getWallet().getId())
+                                .orElse(tx.getWallet());
                         wallet.setBalance(wallet.getBalance().add(tx.getAmount()));
                         walletRepository.save(wallet);
                         log.info("Successfully updated wallet balance via manual check for user: {}", wallet.getUser().getUsername());

@@ -54,7 +54,14 @@ public class WalletService {
 
     @Transactional
     public WalletTransaction requestWithdrawal(User user, BigDecimal amount, String bankName, String bankBin, String bankAccountNumber, String bankAccountHolderName) {
-        Wallet wallet = getOrCreateWallet(user);
+        Wallet wallet = walletRepository.findByUserIdWithLock(user.getId())
+                .orElseGet(() -> {
+                    Wallet newWallet = Wallet.builder()
+                            .user(user)
+                            .balance(BigDecimal.ZERO)
+                            .build();
+                    return walletRepository.save(newWallet);
+                });
         
         if (wallet.getBalance().compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient balance");
@@ -103,8 +110,9 @@ public class WalletService {
         transaction.setStatus("FAILED");
         walletTransactionRepository.save(transaction);
         
-        // Refund balance
-        Wallet wallet = transaction.getWallet();
+        // Refund balance with pessimistic lock
+        Wallet wallet = walletRepository.findByIdWithLock(transaction.getWallet().getId())
+                .orElse(transaction.getWallet());
         wallet.setBalance(wallet.getBalance().add(transaction.getAmount()));
         walletRepository.save(wallet);
     }

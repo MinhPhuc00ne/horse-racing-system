@@ -204,7 +204,7 @@ public class PredictionPayoutService {
                     bet.setPayoutAmount(payout);
                     betRepository.save(bet);
 
-                    Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
+                    Wallet wallet = walletRepository.findByUserIdWithLock(bet.getUser().getId())
                             .orElseGet(() -> {
                                 Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
                                 return walletRepository.save(w);
@@ -293,7 +293,7 @@ public class PredictionPayoutService {
             bet.setPayoutAmount(BigDecimal.ZERO);
             betRepository.save(bet);
 
-            Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
+            Wallet wallet = walletRepository.findByUserIdWithLock(bet.getUser().getId())
                     .orElseGet(() -> {
                         Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
                         return walletRepository.save(w);
@@ -336,7 +336,7 @@ public class PredictionPayoutService {
                 bet.setPayoutAmount(BigDecimal.ZERO);
                 betRepository.save(bet);
 
-                Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
+                Wallet wallet = walletRepository.findByUserIdWithLock(bet.getUser().getId())
                         .orElseGet(() -> {
                             Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
                             return walletRepository.save(w);

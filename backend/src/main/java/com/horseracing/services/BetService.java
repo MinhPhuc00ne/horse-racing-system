@@ -100,8 +100,8 @@ public class BetService {
             throw new BusinessException("Minimum bet amount is " + minBet + " VND.", HttpStatus.BAD_REQUEST);
         }
 
-        // 5. Retrieve Wallet and check balance
-        Wallet wallet = walletRepository.findByUserId(user.getId())
+        // 5. Retrieve Wallet with Pessimistic Write Lock to prevent race conditions
+        Wallet wallet = walletRepository.findByUserIdWithLock(user.getId())
                 .orElseThrow(() -> new BusinessException("User wallet not found. Please contact Administrator.", HttpStatus.BAD_REQUEST));
 
         if (wallet.getBalance().compareTo(request.getAmount()) < 0) {
