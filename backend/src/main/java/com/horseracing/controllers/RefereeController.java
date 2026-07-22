@@ -23,7 +23,6 @@ import java.util.Map;
 public class RefereeController {
 
     private final RefereeService refereeService;
-    private final com.horseracing.services.RefereeChangeRequestService changeRequestService;
 
     @GetMapping("/races")
     public ResponseEntity<List<RefereeRaceResponse>> getAssignedRaces(
@@ -166,25 +165,7 @@ public class RefereeController {
         }
     }
 
-    @PostMapping("/change-request")
-    public ResponseEntity<?> createChangeRequest(@Valid @RequestBody com.horseracing.dto.request.RefereeChangeRequestDto request, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        try {
-            return ResponseEntity.ok(changeRequestService.createRequest(userDetails.getUsername(), request));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
-    }
 
-    @GetMapping("/change-requests")
-    public ResponseEntity<?> getMyRequests(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        try {
-            return ResponseEntity.ok(changeRequestService.getRequestsByReferee(userDetails.getUsername()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
-    }
 
     @GetMapping("/violations")
     public ResponseEntity<List<ViolationResponse>> getViolations() {

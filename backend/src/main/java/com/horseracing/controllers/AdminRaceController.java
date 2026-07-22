@@ -53,7 +53,6 @@ public class AdminRaceController {
     private final UserRepository userRepository;
     private final RefereeService refereeService;
     private final TrackService trackService;
-    private final com.horseracing.services.RefereeChangeRequestService changeRequestService;
 
     @GetMapping("/referees")
     public ResponseEntity<List<UserResponse>> getAllReferees() {
@@ -225,28 +224,4 @@ public class AdminRaceController {
         }
     }
 
-    @GetMapping("/referee-requests")
-    public ResponseEntity<?> getAllChangeRequests() {
-        return ResponseEntity.ok(changeRequestService.getAllRequests());
-    }
-
-    @PutMapping("/referee-requests/{id}/approve")
-    public ResponseEntity<?> approveChangeRequest(@PathVariable Integer id, @RequestBody java.util.Map<String, Integer> body) {
-        try {
-            Integer newRefereeId = body.get("newRefereeId");
-            if (newRefereeId == null) return ResponseEntity.badRequest().body(new ErrorResponse(400, "newRefereeId is required"));
-            return ResponseEntity.ok(changeRequestService.approveRequest(id, newRefereeId));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
-    }
-
-    @PutMapping("/referee-requests/{id}/reject")
-    public ResponseEntity<?> rejectChangeRequest(@PathVariable Integer id) {
-        try {
-            return ResponseEntity.ok(changeRequestService.rejectRequest(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
-    }
 }

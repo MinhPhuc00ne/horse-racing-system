@@ -159,68 +159,23 @@ export async function reportViolationAPI(raceId, data) {
   }
 }
 
-export async function createChangeRequestAPI(requestData) {
-  try {
-    const response = await axiosClient.post('/referee/change-request', requestData);
-    return response.data;
-  } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể tạo yêu cầu thay đổi.';
-    throw new Error(errMsg, { cause: error });
-  }
-}
-
-export async function getChangeRequestsAPI() {
-  try {
-    const response = await axiosClient.get('/referee/change-requests');
-    return response.data;
-  } catch (error) {
-    const errMsg = error.response?.data?.message || 'Không thể lấy danh sách yêu cầu thay đổi.';
-    throw new Error(errMsg, { cause: error });
-  }
-}
-
 export async function saveSimulatedRaceAPI(race, results) {
   return { success: true };
 }
 
 export async function getAssignedTournamentsAPI() {
-  if (isMockMode()) {
-    return [
-      { id: 101, tournamentName: 'Giải Ngoại Hạng Nha Trang (Demo)', location: 'Sân đua Nha Trang', tournamentStatus: 'Upcoming', registrationDeadline: '2026-07-10T17:00:00', entryFee: 200000, prizeFirst: 10000000 },
-      { id: 102, tournamentName: 'Cúp Chiến Mã Đà Lạt (Demo)', location: 'Sân đua Đà Lạt', tournamentStatus: 'Upcoming', registrationDeadline: '2026-07-15T10:00:00', entryFee: 300000, prizeFirst: 15000000 }
-    ];
-  }
   const response = await axiosClient.get('/referee/tournaments');
   return response.data;
 }
 
-export async function createRefereeChangeRequestAPI(tournamentId, reason) {
-  if (isMockMode()) {
-    const key = 'referee_change_requests';
-    const requests = JSON.parse(localStorage.getItem(key)) || [];
-    const newReq = {
-      id: Date.now(),
-      tournamentId,
-      tournamentName: tournamentId === 101 ? 'Giải Ngoại Hạng Nha Trang (Demo)' : 'Cúp Chiến Mã Đà Lạt (Demo)',
-      reason,
-      status: 'PENDING',
-      createdAt: new Date().toISOString()
-    };
-    requests.unshift(newReq);
-    localStorage.setItem(key, JSON.stringify(requests));
-    return newReq;
+export async function cancelRefereeAssignmentAPI(tournamentId) {
+  try {
+    const response = await axiosClient.put(`/referee/tournaments/${tournamentId}/cancel-assignment`);
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Không thể hủy phân công giải đấu.';
+    throw new Error(errMsg, { cause: error });
   }
-  const response = await axiosClient.post('/referee/change-request', { tournamentId, reason });
-  return response.data;
-}
-
-export async function getRefereeChangeRequestsAPI() {
-  if (isMockMode()) {
-    const key = 'referee_change_requests';
-    return JSON.parse(localStorage.getItem(key)) || [];
-  }
-  const response = await axiosClient.get('/referee/change-requests');
-  return response.data;
 }
 
 export async function updatePovAPI(raceId, horseId) {
