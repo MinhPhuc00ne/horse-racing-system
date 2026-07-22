@@ -64,14 +64,14 @@ export default function FeedbacksPanel() {
 
     try {
       setResolving(true);
-      if (actionType === 'REJECT') {
+      if (actionType === 'REJECTED') {
         await rejectFeedbackAPI(id, note.trim());
         setSuccessModalMessage('Phản hồi đã được từ chối và gửi thông báo tới người dùng!');
       } else {
         await resolveFeedbackAPI(id, note.trim());
         setSuccessModalMessage('Phản hồi đã được xử lý và lưu ghi chú thành công!');
       }
-      setResolveModal({ show: false, feedbackId: null, actionType: 'RESOLVE', note: '' });
+      setResolveModal({ show: false, feedbackId: null, actionType: 'RESOLVED', note: '' });
       fetchFeedbacks();
     } catch (err) {
       setErrorModalMessage(err.message || 'Thao tác thất bại.');
@@ -127,7 +127,7 @@ export default function FeedbacksPanel() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-      
+
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -168,7 +168,6 @@ export default function FeedbacksPanel() {
               <option value="HORSE_OWNER">Chủ ngựa (Owner)</option>
               <option value="RACE_REFEREE">Trọng tài (Referee)</option>
               <option value="SPECTATOR">Khán giả (Spectator)</option>
-              <option value="ADMIN">Quản trị viên (Admin)</option>
             </select>
           </div>
 
@@ -309,7 +308,7 @@ export default function FeedbacksPanel() {
 
       {/* Success Modal */}
       {successModalMessage && createPortal(
-        <div 
+        <div
           style={{
             position: 'fixed',
             top: 0,
@@ -324,44 +323,44 @@ export default function FeedbacksPanel() {
           }}
           onClick={() => setSuccessModalMessage('')}
         >
-          <div 
-            className="glass-card text-center" 
-            style={{ 
-              width: '100%', 
-              maxWidth: '400px', 
-              padding: '30px 24px', 
+          <div
+            className="glass-card text-center"
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              padding: '30px 24px',
               boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
               border: '1px solid #10b981',
               background: '#ffffff',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out'
-            }} 
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-              <div 
-                style={{ 
-                  width: '60px', 
-                  height: '60px', 
-                  borderRadius: '50%', 
-                  backgroundColor: 'rgba(16, 185, 129, 0.15)', 
-                  display: 'flex', 
-                  justifyContent: 'center', 
+              <div
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                  display: 'flex',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   color: '#10b981'
                 }}
               >
                 <FaCheckCircle size="30" />
               </div>
-              
+
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
                 Thành Công!
               </h3>
-              
+
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                 {successModalMessage}
               </p>
-              
+
               <button
                 type="button"
                 onClick={() => setSuccessModalMessage('')}
@@ -378,7 +377,7 @@ export default function FeedbacksPanel() {
 
       {/* Error Modal */}
       {errorModalMessage && createPortal(
-        <div 
+        <div
           style={{
             position: 'fixed',
             top: 0,
@@ -393,44 +392,44 @@ export default function FeedbacksPanel() {
           }}
           onClick={() => setErrorModalMessage('')}
         >
-          <div 
-            className="glass-card text-center" 
-            style={{ 
-              width: '100%', 
-              maxWidth: '400px', 
-              padding: '30px 24px', 
+          <div
+            className="glass-card text-center"
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              padding: '30px 24px',
               boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
               border: '1px solid #ef4444',
               background: '#ffffff',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out'
-            }} 
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-              <div 
-                style={{ 
-                  width: '60px', 
-                  height: '60px', 
-                  borderRadius: '50%', 
-                  backgroundColor: 'rgba(239, 68, 68, 0.15)', 
-                  display: 'flex', 
-                  justifyContent: 'center', 
+              <div
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                  display: 'flex',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   color: '#ef4444'
                 }}
               >
                 <FaExclamationTriangle size="30" />
               </div>
-              
+
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: '#ef4444' }}>
                 Đã Xảy Ra Lỗi!
               </h3>
-              
+
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
                 {errorModalMessage}
               </p>
-              
+
               <button
                 type="button"
                 onClick={() => setErrorModalMessage('')}
@@ -519,15 +518,15 @@ export default function FeedbacksPanel() {
               <span className="text-dark fw-bold">{detailModal.feedback.subject}</span>
 
               <span className="text-secondary fw-semibold" style={{ gridColumn: 'span 2', marginTop: '5px' }}>Nội dung đóng góp:</span>
-              <div 
-                style={{ 
-                  gridColumn: 'span 2', 
-                  padding: '12px', 
-                  background: 'rgba(0,56,32,0.02)', 
-                  border: '1px solid rgba(0,56,32,0.08)', 
-                  borderRadius: '8px', 
-                  fontSize: '13px', 
-                  lineHeight: '1.6', 
+              <div
+                style={{
+                  gridColumn: 'span 2',
+                  padding: '12px',
+                  background: 'rgba(0,56,32,0.02)',
+                  border: '1px solid rgba(0,56,32,0.08)',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  lineHeight: '1.6',
                   color: '#2d3748',
                   maxHeight: '200px',
                   overflowY: 'auto'
@@ -541,15 +540,15 @@ export default function FeedbacksPanel() {
                   <span className={`fw-bold ${detailModal.feedback.status === 'RESOLVED' ? 'text-success' : 'text-danger'}`} style={{ gridColumn: 'span 2', marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     {detailModal.feedback.status === 'RESOLVED' ? <FaCheckCircle /> : <FaBan />} Phản hồi từ Admin:
                   </span>
-                  <div 
-                    style={{ 
-                      gridColumn: 'span 2', 
-                      padding: '12px', 
-                      background: detailModal.feedback.status === 'RESOLVED' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)', 
-                      border: `1px solid ${detailModal.feedback.status === 'RESOLVED' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`, 
-                      borderRadius: '8px', 
-                      fontSize: '13px', 
-                      lineHeight: '1.6', 
+                  <div
+                    style={{
+                      gridColumn: 'span 2',
+                      padding: '12px',
+                      background: detailModal.feedback.status === 'RESOLVED' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)',
+                      border: `1px solid ${detailModal.feedback.status === 'RESOLVED' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      lineHeight: '1.6',
                       color: detailModal.feedback.status === 'RESOLVED' ? '#0f5132' : '#842029',
                       fontStyle: 'italic'
                     }}
@@ -625,7 +624,7 @@ export default function FeedbacksPanel() {
               maxWidth: '500px',
               padding: '24px',
               boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-              border: `1px solid ${resolveModal.actionType === 'REJECT' ? '#ef4444' : 'var(--ho-border-gold, #D4AF37)'}`,
+              border: `1px solid ${resolveModal.actionType === 'REJECTED' ? '#ef4444' : 'var(--ho-border-gold, #D4AF37)'}`,
               background: '#ffffff',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out',
@@ -635,20 +634,20 @@ export default function FeedbacksPanel() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: resolveModal.actionType === 'REJECT' ? '#ef4444' : 'var(--ho-primary-dark)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '10px', margin: 0 }}>
-              {resolveModal.actionType === 'REJECT' ? `Từ Chối Ý Kiến Đóng Góp #${resolveModal.feedbackId}` : `Xử Lý Ý Kiến Đóng Góp #${resolveModal.feedbackId}`}
+            <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: resolveModal.actionType === 'REJECTED' ? '#ef4444' : 'var(--ho-primary-dark)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '10px', margin: 0 }}>
+              {resolveModal.actionType === 'REJECTED' ? `Từ Chối Ý Kiến Đóng Góp #${resolveModal.feedbackId}` : `Xử Lý Ý Kiến Đóng Góp #${resolveModal.feedbackId}`}
             </h3>
 
             <div className="form-group text-start">
               <label className="ho-input-label">
-                {resolveModal.actionType === 'REJECT' ? 'Lý do từ chối đơn đóng góp *' : 'Ghi chú xử lý / Nội dung phản hồi *'}
+                {resolveModal.actionType === 'REJECTED' ? 'Lý do từ chối đơn đóng góp *' : 'Ghi chú xử lý / Nội dung phản hồi *'}
               </label>
               <textarea
                 className="ho-form-input text-dark fw-semibold"
                 rows="5"
                 required
                 disabled={resolving}
-                placeholder={resolveModal.actionType === 'REJECT' ? 'Nhập lý do từ chối để thông báo tới người dùng...' : 'Nhập hướng giải quyết hoặc nội dung phản hồi gửi tới người dùng...'}
+                placeholder={resolveModal.actionType === 'REJECTED' ? 'Nhập lý do từ chối để thông báo tới người dùng...' : 'Nhập hướng giải quyết hoặc nội dung phản hồi gửi tới người dùng...'}
                 value={resolveModal.note}
                 onChange={(e) => setResolveModal(prev => ({ ...prev, note: e.target.value }))}
                 style={{ resize: 'vertical', width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--ho-border-gold)' }}
@@ -668,10 +667,10 @@ export default function FeedbacksPanel() {
               <button
                 type="submit"
                 disabled={resolving}
-                className={`btn btn-sm fw-bold ${resolveModal.actionType === 'REJECT' ? 'btn-danger' : 'btn-success'}`}
+                className={`btn btn-sm fw-bold ${resolveModal.actionType === 'REJECTED' ? 'btn-danger' : 'btn-success'}`}
                 style={{ padding: '8px 24px', borderRadius: '8px' }}
               >
-                {resolving ? 'Đang lưu...' : (resolveModal.actionType === 'REJECT' ? 'Xác nhận từ chối' : 'Xác nhận đã xử lý')}
+                {resolving ? 'Đang lưu...' : (resolveModal.actionType === 'REJECTED' ? 'Xác nhận từ chối' : 'Xác nhận đã xử lý')}
               </button>
             </div>
           </form>

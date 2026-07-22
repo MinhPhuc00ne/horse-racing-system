@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
+
+import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import './Home.css';
@@ -6,16 +7,8 @@ import HeroSection from '../../components/Home/HeroSection';
 import StatsSection from '../../components/Home/StatsSection';
 import TournamentsSection from '../../components/Home/TournamentsSection';
 import RankingBoard from '../../components/Home/RankingBoard';
-import { getPublicLeaderboardAPI } from '../../services/publicApi';
 
-const getInitials = (name) => {
-  if (!name) return 'JK';
-  const parts = name.trim().split(' ');
-  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-};
-
-const defaultHorseRankings = [
+const horseRankings = [
   {
     rank: '01',
     avatar: '♞',
@@ -73,53 +66,6 @@ const defaultJockeyRankings = [
 
 const Home = () => {
   const { isAuthenticated, user } = useContext(AuthContext);
-  const [horseRankings, setHorseRankings] = useState(defaultHorseRankings);
-  const [jockeyRankings, setJockeyRankings] = useState(defaultJockeyRankings);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-    getPublicLeaderboardAPI()
-      .then((data) => {
-        if (!isMounted || !data) return;
-
-        if (data.horses && data.horses.length > 0) {
-          const formattedHorses = data.horses.map((h, idx) => ({
-            rank: String(h.rank || idx + 1).padStart(2, '0'),
-            avatar: '♞',
-            name: h.horseName || 'Unnamed Horse',
-            detail: h.breedName || 'Standard Breed',
-            metric: `${h.rating ?? 0} Rating`,
-            status: idx === 0 ? 'Top Seeding' : 'Elite',
-            featured: idx === 0,
-          }));
-          setHorseRankings(formattedHorses);
-        }
-
-        if (data.jockeys && data.jockeys.length > 0) {
-          const formattedJockeys = data.jockeys.map((j, idx) => ({
-            rank: String(j.rank || idx + 1).padStart(2, '0'),
-            avatar: getInitials(j.fullName),
-            name: j.fullName || 'Unnamed Jockey',
-            detail: `Score: ${j.rankingScore ?? 0}`,
-            metric: `${j.winRate ?? 0}% Win`,
-            status: idx === 0 ? 'Top Seeding' : 'Elite',
-            featured: idx === 0,
-          }));
-          setJockeyRankings(formattedJockeys);
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to load public leaderboard:', err);
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   if (isAuthenticated && user) {
     if (user.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
@@ -132,8 +78,8 @@ const Home = () => {
     <div className="home-page-wrapper">
       <main className="home-canvas">
         <HeroSection />
-        <StatsSection />
-        <TournamentsSection />
+        <StatsSection tournaments={tournaments} />
+        <TournamentsSection tournaments={tournaments} />
 
         <section id="rankings" className="leaderboards-section" aria-label="Elite rankings">
           <div className="leaderboards-grid">
