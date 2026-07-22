@@ -1314,75 +1314,72 @@ INSERT INTO [dbo].[roles] ([role_name], [description]) VALUES
 ('RACE_REFEREE', 'Race Referee');
 GO
 
--- 2. Insert Users (Password: Password123!)
+-- 2. Insert Users (Password for all non-admin accounts: SlimeTempest@2026, Admin password: Admin@12345)
 INSERT INTO [dbo].[users] ([username], [email], [password], [full_name], [phone], [provider], [role], [enabled]) VALUES
-('spectator1', 'spectator1@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test SPECTATOR 1', '0123400011', 'LOCAL', 'SPECTATOR', 1),
-('spectator2', 'spectator2@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test SPECTATOR 2', '0123400012', 'LOCAL', 'SPECTATOR', 1),
-('spectator3', 'spectator3@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test SPECTATOR 3', '0123400013', 'LOCAL', 'SPECTATOR', 1),
-('spectator4', 'spectator4@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test SPECTATOR 4', '0123400014', 'LOCAL', 'SPECTATOR', 1),
-('spectator5', 'spectator5@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test SPECTATOR 5', '0123400015', 'LOCAL', 'SPECTATOR', 1),
-('spectator6', 'spectator6@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test SPECTATOR 6', '0123400016', 'LOCAL', 'SPECTATOR', 1),
-('spectator7', 'spectator7@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test SPECTATOR 7', '0123400017', 'LOCAL', 'SPECTATOR', 1),
-('spectator8', 'spectator8@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test SPECTATOR 8', '0123400018', 'LOCAL', 'SPECTATOR', 1),
-('spectator9', 'spectator9@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test SPECTATOR 9', '0123400019', 'LOCAL', 'SPECTATOR', 1),
-('spectator10', 'spectator10@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test SPECTATOR 10', '0123400020', 'LOCAL', 'SPECTATOR', 1),
-('owner1', 'owner1@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test HORSE_OWNER 1', '0123400021', 'LOCAL', 'HORSE_OWNER', 1),
-('owner2', 'owner2@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test HORSE_OWNER 2', '0123400022', 'LOCAL', 'HORSE_OWNER', 1),
-('owner3', 'owner3@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test HORSE_OWNER 3', '0123400023', 'LOCAL', 'HORSE_OWNER', 1),
-('owner4', 'owner4@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test HORSE_OWNER 4', '0123400024', 'LOCAL', 'HORSE_OWNER', 1),
-('owner5', 'owner5@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test HORSE_OWNER 5', '0123400025', 'LOCAL', 'HORSE_OWNER', 1),
-('owner6', 'owner6@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test HORSE_OWNER 6', '0123400026', 'LOCAL', 'HORSE_OWNER', 1),
-('owner7', 'owner7@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test HORSE_OWNER 7', '0123400027', 'LOCAL', 'HORSE_OWNER', 1),
-('owner8', 'owner8@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test HORSE_OWNER 8', '0123400028', 'LOCAL', 'HORSE_OWNER', 1),
-('owner9', 'owner9@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test HORSE_OWNER 9', '0123400029', 'LOCAL', 'HORSE_OWNER', 1),
-('owner10', 'owner10@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test HORSE_OWNER 10', '0123400030', 'LOCAL', 'HORSE_OWNER', 1),
-('jockey1', 'jockey1@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test JOCKEY 1', '0123400031', 'LOCAL', 'JOCKEY', 1),
-('jockey2', 'jockey2@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test JOCKEY 2', '0123400032', 'LOCAL', 'JOCKEY', 1),
-('jockey3', 'jockey3@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test JOCKEY 3', '0123400033', 'LOCAL', 'JOCKEY', 1),
-('jockey4', 'jockey4@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test JOCKEY 4', '0123400034', 'LOCAL', 'JOCKEY', 1),
-('jockey5', 'jockey5@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test JOCKEY 5', '0123400035', 'LOCAL', 'JOCKEY', 1),
-('jockey6', 'jockey6@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test JOCKEY 6', '0123400036', 'LOCAL', 'JOCKEY', 1),
-('jockey7', 'jockey7@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test JOCKEY 7', '0123400037', 'LOCAL', 'JOCKEY', 1),
-('jockey8', 'jockey8@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test JOCKEY 8', '0123400038', 'LOCAL', 'JOCKEY', 1),
-('jockey9', 'jockey9@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test JOCKEY 9', '0123400039', 'LOCAL', 'JOCKEY', 1),
-('jockey10', 'jockey10@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test JOCKEY 10', '0123400040', 'LOCAL', 'JOCKEY', 1),
-('referee1', 'referee1@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test RACE_REFEREE 1', '0123400041', 'LOCAL', 'RACE_REFEREE', 1),
-('referee2', 'referee2@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test RACE_REFEREE 2', '0123400042', 'LOCAL', 'RACE_REFEREE', 1),
-('referee3', 'referee3@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test RACE_REFEREE 3', '0123400043', 'LOCAL', 'RACE_REFEREE', 1),
-('referee4', 'referee4@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test RACE_REFEREE 4', '0123400044', 'LOCAL', 'RACE_REFEREE', 1),
-('referee5', 'referee5@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test RACE_REFEREE 5', '0123400045', 'LOCAL', 'RACE_REFEREE', 1),
-('referee6', 'referee6@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test RACE_REFEREE 6', '0123400046', 'LOCAL', 'RACE_REFEREE', 1),
-('referee7', 'referee7@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test RACE_REFEREE 7', '0123400047', 'LOCAL', 'RACE_REFEREE', 1),
-('referee8', 'referee8@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test RACE_REFEREE 8', '0123400048', 'LOCAL', 'RACE_REFEREE', 1),
-('referee9', 'referee9@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test RACE_REFEREE 9', '0123400049', 'LOCAL', 'RACE_REFEREE', 1),
-('referee10', 'referee10@test.com', '$2a$10$fGL7iOzTjw1bkUVT3vpfz.9DPzgsYnLpkOj6vg5I38/yCKjf7mVay', 'Test RACE_REFEREE 10', '0123400050', 'LOCAL', 'RACE_REFEREE', 1);
+('admin', 'admin@gmail.com', '$2a$10$O2bhOwtxrJ8epZ3Meq4w4uyYwPDBeoMaQOfasG9XdrGrhvpQztp/.', 'System Administrator', '0901000001', 'LOCAL', 'ADMIN', 1),
+
+('shuna', 'shuna@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Shuna Princess', '0901000002', 'LOCAL', 'SPECTATOR', 1),
+('shion', 'shion@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Shion Greatmaster', '0901000003', 'LOCAL', 'SPECTATOR', 1),
+('milim', 'milim.nava@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Milim Nava', '0901000004', 'LOCAL', 'SPECTATOR', 1),
+('ramiris', 'ramiris@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Ramiris Fairy', '0901000005', 'LOCAL', 'SPECTATOR', 1),
+('treyni', 'treyni@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Treyni Dryad', '0901000006', 'LOCAL', 'SPECTATOR', 1),
+('trya', 'trya@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Trya Dryad', '0901000007', 'LOCAL', 'SPECTATOR', 1),
+('dreyfus', 'dreyfus@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Dreyfus Knight', '0901000008', 'LOCAL', 'SPECTATOR', 1),
+('myourmiles', 'myourmiles@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Myourmiles Merchant', '0901000009', 'LOCAL', 'SPECTATOR', 1),
+
+('benimaru', 'benimaru@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Benimaru Commander', '0901000010', 'LOCAL', 'HORSE_OWNER', 1),
+('souei', 'souei@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Souei Shadow', '0901000011', 'LOCAL', 'HORSE_OWNER', 1),
+('hakuro', 'hakuro@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Hakuro Swordsman', '0901000012', 'LOCAL', 'HORSE_OWNER', 1),
+('geld', 'geld@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Geld Orc King', '0901000013', 'LOCAL', 'HORSE_OWNER', 1),
+('gabil', 'gabil@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Gabil Dragonewt', '0901000014', 'LOCAL', 'HORSE_OWNER', 1),
+('rigurd', 'rigurd@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Rigurd Goblin Prime', '0901000015', 'LOCAL', 'HORSE_OWNER', 1),
+('gobta', 'gobta@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Gobta Rider', '0901000016', 'LOCAL', 'HORSE_OWNER', 1),
+('kaijin', 'kaijin@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Kaijin Craftsman', '0901000017', 'LOCAL', 'HORSE_OWNER', 1),
+
+('ranga', 'ranga@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Ranga Star Wolf', '0901000018', 'LOCAL', 'JOCKEY', 1),
+('beretta', 'beretta@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Beretta Golem', '0901000019', 'LOCAL', 'JOCKEY', 1),
+('diablo', 'diablo@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Diablo Black Primordial', '0901000020', 'LOCAL', 'JOCKEY', 1),
+('carrion', 'carrion@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Carrion Beast King', '0901000021', 'LOCAL', 'JOCKEY', 1),
+('phobio', 'phobio@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Phobio Panther', '0901000022', 'LOCAL', 'JOCKEY', 1),
+('suphia', 'suphia@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Suphia Tiger', '0901000023', 'LOCAL', 'JOCKEY', 1),
+('albis', 'albis@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Albis Serpent', '0901000024', 'LOCAL', 'JOCKEY', 1),
+('grucius', 'grucius@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Grucius Werewolf', '0901000025', 'LOCAL', 'JOCKEY', 1),
+
+('guy_crimson', 'guy.crimson@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Guy Crimson', '0901000026', 'LOCAL', 'RACE_REFEREE', 1),
+('velgrynd', 'velgrynd@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Velgrynd Dragon', '0901000027', 'LOCAL', 'RACE_REFEREE', 1),
+('velzard', 'velzard@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Velzard Dragon', '0901000028', 'LOCAL', 'RACE_REFEREE', 1),
+('luminous', 'luminous@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Luminous Valentine', '0901000029', 'LOCAL', 'RACE_REFEREE', 1),
+('dagruel', 'dagruel@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Dagruel Giant', '0901000030', 'LOCAL', 'RACE_REFEREE', 1),
+('dino', 'dino@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Dino Fallen Angel', '0901000031', 'LOCAL', 'RACE_REFEREE', 1),
+('leon_cromwell', 'leon.cromwell@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Leon Cromwell', '0901000032', 'LOCAL', 'RACE_REFEREE', 1),
+('elmesia', 'elmesia@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Elmesia El-Ru Thaliad', '0901000033', 'LOCAL', 'RACE_REFEREE', 1),
+
+('clayman', 'clayman@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Clayman Marionette', '0901000034', 'LOCAL', 'SPECTATOR', 1),
+('footman', 'footman@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Footman Clown', '0901000035', 'LOCAL', 'SPECTATOR', 1),
+('laplace', 'laplace@tempest.com', '$2a$10$pr8Z1G6oodLUpWSKA7AOMugY16Vcq6R9iDFhaXC1y0rILBHr0r4Yq', 'Laplace Clown', '0901000036', 'LOCAL', 'SPECTATOR', 1);
 GO
 
 -- 3. Insert Owner & Jockey Profiles
-INSERT INTO [dbo].[horse_owner_profiles] ([user_id], [stable_name], [approval_status], [reputation_stars]) VALUES
-((SELECT id FROM [users] WHERE username='owner1'), 'Stable 1', 'APPROVED', 5.0),
-((SELECT id FROM [users] WHERE username='owner2'), 'Stable 2', 'APPROVED', 5.0),
-((SELECT id FROM [users] WHERE username='owner3'), 'Stable 3', 'APPROVED', 5.0),
-((SELECT id FROM [users] WHERE username='owner4'), 'Stable 4', 'APPROVED', 5.0),
-((SELECT id FROM [users] WHERE username='owner5'), 'Stable 5', 'APPROVED', 5.0),
-((SELECT id FROM [users] WHERE username='owner6'), 'Stable 6', 'APPROVED', 5.0),
-((SELECT id FROM [users] WHERE username='owner7'), 'Stable 7', 'APPROVED', 5.0),
-((SELECT id FROM [users] WHERE username='owner8'), 'Stable 8', 'APPROVED', 5.0),
-((SELECT id FROM [users] WHERE username='owner9'), 'Stable 9', 'APPROVED', 5.0),
-((SELECT id FROM [users] WHERE username='owner10'), 'Stable 10', 'APPROVED', 5.0);
+INSERT INTO [dbo].[horse_owner_profiles] ([user_id], [stable_name], [stable_address], [phone], [identity_number], [date_of_birth], [bank_account], [description], [reputation_stars], [approval_status]) VALUES
+((SELECT id FROM [users] WHERE username='benimaru'), 'Chuồng Ngựa Benimaru', 'Khu Đông Thành Phố Tempest', '0901000010', '038090100010', '1995-05-15', '9704123456789010', 'Trang trại đua ngựa hàng đầu ma quốc Tempest', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='souei'), 'Chuồng Ngựa Souei', 'Khu Tây Thành Phố Tempest', '0901000011', '038090100011', '1996-08-20', '9704123456789011', 'Chuyên gia huấn luyện ngựa đua tốc độ cao', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='hakuro'), 'Chuồng Ngựa Hakuro', 'Khu Nam Thành Phố Tempest', '0901000012', '038090100012', '1985-03-10', '9704123456789012', 'Trang trại danh giá với chiến mã lâu đời', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='geld'), 'Chuồng Ngựa Geld', 'Khu Bắc Thành Phố Tempest', '0901000013', '038090100013', '1990-11-25', '9704123456789013', 'Trang trại ngựa đua sức bền bỉ', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='gabil'), 'Chuồng Ngựa Gabil', 'Khu Hồ Long Thần Tempest', '0901000014', '038090100014', '1997-02-14', '9704123456789014', 'Chuồng ngựa phong cách Long Tộc độc đáo', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='rigurd'), 'Chuồng Ngựa Rigurd', 'Trung Tâm Thành Phố Tempest', '0901000015', '038090100015', '1980-07-04', '9704123456789015', 'Trang trại lâu đời nhất ma quốc Tempest', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='gobta'), 'Chuồng Ngựa Gobta', 'Ngoại Ô Thành Phố Tempest', '0901000016', '038090100016', '1999-09-09', '9704123456789016', 'Chuồng ngựa trẻ đầy triển vọng', 5.0, 'APPROVED'),
+((SELECT id FROM [users] WHERE username='kaijin'), 'Chuồng Ngựa Kaijin', 'Khu Thợ Kỹ Thuật Tempest', '0901000017', '038090100017', '1988-12-12', '9704123456789017', 'Trang trại kết hợp công nghệ hiện đại', 5.0, 'APPROVED');
 GO
 
-INSERT INTO [dbo].[jockey_profiles] ([user_id], [approval_status], [win_rate], [experience_year], [ranking_score]) VALUES
-((SELECT id FROM [users] WHERE username='jockey1'), 'APPROVED', 31.0, 1, 1010),
-((SELECT id FROM [users] WHERE username='jockey2'), 'APPROVED', 32.0, 2, 1020),
-((SELECT id FROM [users] WHERE username='jockey3'), 'APPROVED', 33.0, 3, 1030),
-((SELECT id FROM [users] WHERE username='jockey4'), 'APPROVED', 34.0, 4, 1040),
-((SELECT id FROM [users] WHERE username='jockey5'), 'APPROVED', 35.0, 5, 1050),
-((SELECT id FROM [users] WHERE username='jockey6'), 'APPROVED', 36.0, 6, 1060),
-((SELECT id FROM [users] WHERE username='jockey7'), 'APPROVED', 37.0, 7, 1070),
-((SELECT id FROM [users] WHERE username='jockey8'), 'APPROVED', 38.0, 8, 1080),
-((SELECT id FROM [users] WHERE username='jockey9'), 'APPROVED', 39.0, 9, 1090),
-((SELECT id FROM [users] WHERE username='jockey10'), 'APPROVED', 40.0, 10, 1100);
+INSERT INTO [dbo].[jockey_profiles] ([user_id], [height], [weight], [win_rate], [experience_year], [ranking_score], [license_number], [bank_account], [approval_status]) VALUES
+((SELECT id FROM [users] WHERE username='ranga'), 168.0, 52.0, 45.5, 5, 1350, 'JCK-TEMPEST-01', '970488880001', 'APPROVED'),
+((SELECT id FROM [users] WHERE username='beretta'), 170.0, 54.0, 52.0, 6, 1420, 'JCK-TEMPEST-02', '970488880002', 'APPROVED'),
+((SELECT id FROM [users] WHERE username='diablo'), 175.0, 55.0, 68.0, 8, 1600, 'JCK-TEMPEST-03', '970488880003', 'APPROVED'),
+((SELECT id FROM [users] WHERE username='carrion'), 172.0, 53.0, 38.0, 4, 1180, 'JCK-TEMPEST-04', '970488880004', 'APPROVED'),
+((SELECT id FROM [users] WHERE username='phobio'), 166.0, 51.0, 42.0, 3, 1220, 'JCK-TEMPEST-05', '970488880005', 'APPROVED'),
+((SELECT id FROM [users] WHERE username='suphia'), 167.0, 50.0, 50.0, 5, 1380, 'JCK-TEMPEST-06', '970488880006', 'APPROVED'),
+((SELECT id FROM [users] WHERE username='albis'), 169.0, 52.0, 60.0, 7, 1500, 'JCK-TEMPEST-07', '970488880007', 'APPROVED'),
+((SELECT id FROM [users] WHERE username='grucius'), 171.0, 53.0, 35.0, 3, 1100, 'JCK-TEMPEST-08', '970488880008', 'APPROVED');
 GO
 
 -- 4. Insert Horse Breeds
@@ -1390,56 +1387,154 @@ INSERT INTO [dbo].[horse_breeds] ([breed_name]) VALUES
 ('Thoroughbred'), ('Arabian'), ('Quarter Horse'), ('Appaloosa');
 GO
 
--- 5. Insert Horses
-INSERT INTO [dbo].[horses] ([owner_id], [breed_id], [name], [age], [gender], [status]) VALUES
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='owner1')), (SELECT id FROM [horse_breeds] WHERE breed_name='Thoroughbred'), 'Horse 1', 4, 'MALE', 'ACTIVE'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='owner2')), (SELECT id FROM [horse_breeds] WHERE breed_name='Thoroughbred'), 'Horse 2', 4, 'MALE', 'ACTIVE'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='owner3')), (SELECT id FROM [horse_breeds] WHERE breed_name='Thoroughbred'), 'Horse 3', 4, 'MALE', 'ACTIVE'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='owner4')), (SELECT id FROM [horse_breeds] WHERE breed_name='Thoroughbred'), 'Horse 4', 4, 'MALE', 'ACTIVE'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='owner5')), (SELECT id FROM [horse_breeds] WHERE breed_name='Thoroughbred'), 'Horse 5', 4, 'MALE', 'ACTIVE'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='owner6')), (SELECT id FROM [horse_breeds] WHERE breed_name='Thoroughbred'), 'Horse 6', 4, 'MALE', 'ACTIVE'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='owner7')), (SELECT id FROM [horse_breeds] WHERE breed_name='Thoroughbred'), 'Horse 7', 4, 'MALE', 'ACTIVE'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='owner8')), (SELECT id FROM [horse_breeds] WHERE breed_name='Thoroughbred'), 'Horse 8', 4, 'MALE', 'ACTIVE'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='owner9')), (SELECT id FROM [horse_breeds] WHERE breed_name='Thoroughbred'), 'Horse 9', 4, 'MALE', 'ACTIVE'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='owner10')), (SELECT id FROM [horse_breeds] WHERE breed_name='Thoroughbred'), 'Horse 10', 4, 'MALE', 'ACTIVE');
+-- 5. Insert Horses (8 horses per owner * 8 owners = 64 horses)
+INSERT INTO [dbo].[horses] ([owner_id], [breed_id], [name], [age], [gender], [training_status], [health_status], [status], [speed_rating], [stamina_rating], [gate_performance_rating], [color]) VALUES
+-- Owner 1 (Benimaru)
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 1, 'Veldora', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 95.0, 90, 88, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 2, 'Xích Hỏa', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 85, 82, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 3, 'Hồng Liên', 3, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 75.0, 70, 75, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 4, 'Bạch Viêm', 6, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 82.0, 80, 78, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 1, 'Hỏa Long', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 90.0, 88, 85, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 2, 'Tân Viêm', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 3, 'Hỏa Ảnh', 7, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 70.0, 65, 60, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 4, 'Hỏa Sâm', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+
+-- Owner 2 (Souei)
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 1, 'Ảnh Ma', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 94.0, 92, 90, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 2, 'Tật Phong', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 89.0, 86, 84, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 3, 'Dạ Ảnh', 6, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 80.0, 78, 75, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 4, 'U Hồn', 3, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 72.0, 70, 72, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 1, 'Tàn Ảnh', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 86.0, 84, 80, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 2, 'Ẩn Ảnh', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 3, 'Lôi Ảnh', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 78.0, 75, 70, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 4, 'Phong Ảnh', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+
+-- Owner 3 (Hakuro)
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 1, 'Kiếm Thánh', 6, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 96.0, 94, 92, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 2, 'Thiên Nhất', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 91.0, 88, 86, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 3, 'Lôi Thần', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 83.0, 80, 78, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 4, 'Nhất Đao', 7, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 79.0, 76, 74, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 1, 'Truy Nhượng', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 82, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 2, 'Kiếm Ảnh', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 3, 'Phần Thiên', 5, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 74.0, 70, 68, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 4, 'Tân Kiếm', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+
+-- Owner 4 (Geld)
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 1, 'Ngang Tàng', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 90.0, 96, 85, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 2, 'Bá Vương', 6, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 92, 82, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 3, 'Thiên Giáp', 4, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 82.0, 86, 78, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 4, 'Thiên Thạch', 7, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 76.0, 82, 72, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 1, 'Kình Lực', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 85.0, 90, 80, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 2, 'Trùng Sinh', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 3, 'Bản Thạch', 5, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 72.0, 78, 66, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 4, 'Khôi Giáp', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+
+-- Owner 5 (Gabil)
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 1, 'Hồng Long', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 92.0, 89, 87, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 2, 'Phi Long', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 83, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 3, 'Thùy Long', 6, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 81.0, 79, 76, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 4, 'Thanh Long', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 77.0, 74, 70, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 1, 'Xích Long', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 84.0, 82, 79, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 2, 'Tân Long', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 3, 'Bá Long', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 73.0, 71, 67, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 4, 'Vũ Long', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+
+-- Owner 6 (Rigurd)
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 1, 'Tiên Phong', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 89.0, 88, 86, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 2, 'Lãnh Đạo', 6, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 86.0, 84, 82, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 3, 'Trân Thú', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 80.0, 78, 75, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 4, 'Quang Vinh', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 75.0, 72, 68, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 1, 'Huy Hoàng', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 83.0, 81, 77, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 2, 'Tân Binh', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 3, 'Vệ Binh', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 71.0, 69, 65, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 4, 'Thiên Binh', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+
+-- Owner 7 (Gobta)
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 1, 'Lan Nha', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 93.0, 91, 89, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 2, 'Cực Phong', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 86, 84, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 3, 'Tốc Độ', 3, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 82.0, 79, 77, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 4, 'Thần Phong', 6, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 78.0, 75, 71, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 1, 'Bão Tuyết', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 85.0, 83, 80, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 2, 'Bạch Nha', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 3, 'Hắc Nha', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 73.0, 70, 66, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 4, 'Bát Phong', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Roan'),
+
+-- Owner 8 (Kaijin)
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 1, 'Hợp Kim', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 91.0, 90, 88, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 2, 'Thần Khí', 6, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 83, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 3, 'Hỏa Lô', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 81.0, 78, 76, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 4, 'Thép Tinh', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 77.0, 74, 70, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 1, 'Kim Cương', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 84.0, 82, 79, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 2, 'Bảo Kiếm', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 3, 'Giáp Thiết', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 72.0, 68, 64, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 4, 'Luyện Kim', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown');
 GO
 
--- 6. Insert User Connections (owner1 is friends with jockey1)
+-- 6. Insert User Connections (Each Owner connected to at least 3 Jockeys)
 INSERT INTO [dbo].[user_connections] ([requester_id], [recipient_id], [status], [created_at]) VALUES
-((SELECT id FROM [users] WHERE username='owner1'), (SELECT id FROM [users] WHERE username='jockey1'), 'ACCEPTED', GETDATE());
+-- Benimaru <-> ranga, beretta, diablo
+((SELECT id FROM [users] WHERE username='benimaru'), (SELECT id FROM [users] WHERE username='ranga'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='benimaru'), (SELECT id FROM [users] WHERE username='beretta'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='benimaru'), (SELECT id FROM [users] WHERE username='diablo'), 'ACCEPTED', GETDATE()),
+
+-- Souei <-> beretta, diablo, carrion
+((SELECT id FROM [users] WHERE username='souei'), (SELECT id FROM [users] WHERE username='beretta'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='souei'), (SELECT id FROM [users] WHERE username='diablo'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='souei'), (SELECT id FROM [users] WHERE username='carrion'), 'ACCEPTED', GETDATE()),
+
+-- Hakuro <-> diablo, carrion, phobio
+((SELECT id FROM [users] WHERE username='hakuro'), (SELECT id FROM [users] WHERE username='diablo'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='hakuro'), (SELECT id FROM [users] WHERE username='carrion'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='hakuro'), (SELECT id FROM [users] WHERE username='phobio'), 'ACCEPTED', GETDATE()),
+
+-- Geld <-> carrion, phobio, suphia
+((SELECT id FROM [users] WHERE username='geld'), (SELECT id FROM [users] WHERE username='carrion'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='geld'), (SELECT id FROM [users] WHERE username='phobio'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='geld'), (SELECT id FROM [users] WHERE username='suphia'), 'ACCEPTED', GETDATE()),
+
+-- Gabil <-> phobio, suphia, albis
+((SELECT id FROM [users] WHERE username='gabil'), (SELECT id FROM [users] WHERE username='phobio'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='gabil'), (SELECT id FROM [users] WHERE username='suphia'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='gabil'), (SELECT id FROM [users] WHERE username='albis'), 'ACCEPTED', GETDATE()),
+
+-- Rigurd <-> suphia, albis, grucius
+((SELECT id FROM [users] WHERE username='rigurd'), (SELECT id FROM [users] WHERE username='suphia'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='rigurd'), (SELECT id FROM [users] WHERE username='albis'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='rigurd'), (SELECT id FROM [users] WHERE username='grucius'), 'ACCEPTED', GETDATE()),
+
+-- Gobta <-> albis, grucius, ranga
+((SELECT id FROM [users] WHERE username='gobta'), (SELECT id FROM [users] WHERE username='albis'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='gobta'), (SELECT id FROM [users] WHERE username='grucius'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='gobta'), (SELECT id FROM [users] WHERE username='ranga'), 'ACCEPTED', GETDATE()),
+
+-- Kaijin <-> grucius, ranga, beretta
+((SELECT id FROM [users] WHERE username='kaijin'), (SELECT id FROM [users] WHERE username='grucius'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='kaijin'), (SELECT id FROM [users] WHERE username='ranga'), 'ACCEPTED', GETDATE()),
+((SELECT id FROM [users] WHERE username='kaijin'), (SELECT id FROM [users] WHERE username='beretta'), 'ACCEPTED', GETDATE());
 GO
 
--- 7. Insert Race Tracks
+-- 7. Insert Race Tracks (1 Straight, 1 Circular)
 INSERT INTO [dbo].[race_tracks] ([name], [location], [surface_condition]) VALUES
-('Grand National Track', 'City Center', 'Good');
+('Sân đua Thẳng Tempest', 'Thành phố Tempest', 'Good'),
+('Sân đua Tròn Jura', 'Đại ngàn Jura', 'Good');
 GO
 
--- 8. Insert Tournaments
-INSERT INTO [dbo].[tournaments] ([tournament_name], [tournament_status], [start_date], [end_date], [image_url], [referee_id], [entry_fee]) VALUES
-('Spring Championship 2026', 'Open Registration', '2026-07-01', '2026-07-15', 'https://example.com/tournament1.jpg', (SELECT id FROM [users] WHERE username='referee1'), 100.00),
-('Summer Cup 2026', 'Registration Closed', '2026-08-01', '2026-08-15', 'https://example.com/tournament2.jpg', (SELECT id FROM [users] WHERE username='referee2'), 150.00),
-('Winter Classic 2025', 'Ongoing', '2025-12-01', '2025-12-15', 'https://example.com/tournament3.jpg', (SELECT id FROM [users] WHERE username='referee3'), 200.00),
-('End of Year Event 2026', 'Completed', '2026-10-01', '2026-10-15', 'https://example.com/tournament4.jpg', (SELECT id FROM [users] WHERE username='referee4'), 50.00);
+-- 8. Insert Tournaments (Admin Created, Fees & Prizes < 20,000 VND, Referees Assigned)
+INSERT INTO [dbo].[tournaments] ([tournament_name], [location], [description], [tournament_status], [start_date], [end_date], [registration_deadline], [referee_id], [entry_fee], [total_prize], [prize_first], [prize_second], [prize_third], [min_bet_amount], [min_slots], [max_slots], [allowed_classes], [allowed_ages], [allowed_genders], [registration_opening_time], [official_race_time]) VALUES
+('Giải Đấu Hoàng Gia Tempest', 'Thành phố Tempest', 'Giải đấu tốc độ chính thức đường đua thẳng ma quốc Tempest', 'OPEN_FOR_REGISTER', '2026-08-01', '2026-08-05', '2026-07-31 23:59:59', (SELECT id FROM [users] WHERE username='guy_crimson'), 10000.00, 19000.00, 10000.00, 6000.00, 3000.00, 5000.00, 4, 12, 'All Classes', '3-8', 'MALE, FEMALE', '2026-07-20 08:00:00', '2026-08-01 14:00:00'),
+('Cúp Vô Địch Ma Quốc Jura', 'Đại ngàn Jura', 'Giải đấu đường đua vòng tròn đỉnh cao đại ngàn Jura', 'OPEN_FOR_REGISTER', '2026-08-10', '2026-08-15', '2026-08-09 23:59:59', (SELECT id FROM [users] WHERE username='velgrynd'), 15000.00, 19500.00, 10000.00, 5500.00, 4000.00, 5000.00, 4, 12, 'All Classes', '3-8', 'MALE, FEMALE', '2026-07-25 08:00:00', '2026-08-10 15:00:00');
 GO
 
--- 9. Insert Races
-INSERT INTO [dbo].[races] ([race_name], [tournament_id], [race_track_id], [race_date], [race_time], [race_round], [max_horses], [distance], [status], [referee_id]) VALUES
-('Qualifier Round 1', 
- (SELECT id FROM [tournaments] WHERE tournament_name='Spring Championship 2026'), 
- (SELECT id FROM [race_tracks] WHERE name='Grand National Track'), 
- '2026-07-01', '14:00:00', 1, 10, 50.0, 'LOCKED_LIST', (SELECT id FROM [users] WHERE username='referee1'));
+-- 9. Insert Blacklist Entries (3 accounts put on ban list)
+INSERT INTO [dbo].[blacklist] ([target_type], [target_id], [reason], [start_date], [end_date], [is_permanent], [status], [created_at]) VALUES
+('USER', (SELECT id FROM [users] WHERE username='clayman'), 'Vi phạm điều khoản dịch vụ và hành vi gian lận tại Tempest', GETDATE(), NULL, 1, 'ACTIVE', GETDATE()),
+('USER', (SELECT id FROM [users] WHERE username='footman'), 'Quấy rối trật tự trường đua và cố ý gây rối', GETDATE(), NULL, 1, 'ACTIVE', GETDATE()),
+('USER', (SELECT id FROM [users] WHERE username='laplace'), 'Thao túng hành vi cá cược trái phép', GETDATE(), NULL, 1, 'ACTIVE', GETDATE());
 GO
 
--- 10. Insert Race Participants (All are inspected and APPROVED to allow starting the race)
-INSERT INTO [dbo].[race_participants] ([race_id], [horse_id], [jockey_id], [gate_number], [status], [created_at]) VALUES
-((SELECT id FROM [races] WHERE race_name='Qualifier Round 1'), (SELECT id FROM [horses] WHERE name='Horse 1'), (SELECT id FROM [jockey_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='jockey1')), 1, 'APPROVED', GETDATE()),
-((SELECT id FROM [races] WHERE race_name='Qualifier Round 1'), (SELECT id FROM [horses] WHERE name='Horse 2'), (SELECT id FROM [jockey_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='jockey2')), 2, 'APPROVED', GETDATE()),
-((SELECT id FROM [races] WHERE race_name='Qualifier Round 1'), (SELECT id FROM [horses] WHERE name='Horse 3'), (SELECT id FROM [jockey_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='jockey3')), 3, 'APPROVED', GETDATE());
-GO
-
--- 11. Create Wallets for all users with a starting balance of 10,000,000.00 VNĐ
+-- 10. Create Wallets for all 36 accounts with starting balance of 50,000.00 VNĐ
 INSERT INTO [dbo].[wallets] ([user_id], [balance], [created_at])
-SELECT id, 10000000.00, GETDATE() FROM [dbo].[users];
+SELECT id, 50000.00, GETDATE() FROM [dbo].[users];
 GO
 
 USE [master]
