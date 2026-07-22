@@ -442,7 +442,8 @@ export default function TournamentsPanel() {
   };
 
   const filteredTournaments = tournaments.filter(t => {
-    const matchesStatus = statusFilter === '' || t.tournamentStatus?.toLowerCase() === statusFilter.toLowerCase();
+    const displayStatus = t.tournamentStatus === 'OPEN_FOR_REGISTER' ? 'Active' : t.tournamentStatus;
+    const matchesStatus = statusFilter === '' || displayStatus?.toLowerCase() === statusFilter.toLowerCase();
     const matchesName = searchName === '' || t.tournamentName?.toLowerCase().includes(searchName.toLowerCase());
     const matchesLocation = searchLocation === '' || t.location?.toLowerCase().includes(searchLocation.toLowerCase());
 
@@ -1267,18 +1268,23 @@ export default function TournamentsPanel() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <h4 className="ho-font-epilogue fs-5 fw-bold" style={{ color: 'var(--ho-primary-dark)', margin: 0, lineHeight: '1.3' }}>{t.tournamentName}</h4>
-                  <span style={{
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    textTransform: 'uppercase',
-                    background: t.tournamentStatus === 'Completed' || t.tournamentStatus === 'Finished' ? 'rgba(16, 185, 129, 0.15)' : t.tournamentStatus === 'Ongoing' || t.tournamentStatus === 'Active' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(212, 175, 55, 0.15)',
-                    color: t.tournamentStatus === 'Completed' || t.tournamentStatus === 'Finished' ? '#10b981' : t.tournamentStatus === 'Ongoing' || t.tournamentStatus === 'Active' ? '#3b82f6' : 'var(--ho-accent-gold-text)',
-                    border: '1px solid var(--ho-border-gold)'
-                  }}>
-                    {t.tournamentStatus}
-                  </span>
+                  {(() => {
+                    const displayStatus = t.tournamentStatus === 'OPEN_FOR_REGISTER' ? 'Active' : t.tournamentStatus;
+                    return (
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        background: displayStatus === 'Completed' || displayStatus === 'Finished' ? 'rgba(16, 185, 129, 0.15)' : displayStatus === 'Ongoing' || displayStatus === 'Active' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(212, 175, 55, 0.15)',
+                        color: displayStatus === 'Completed' || displayStatus === 'Finished' ? '#10b981' : displayStatus === 'Ongoing' || displayStatus === 'Active' ? '#3b82f6' : 'var(--ho-accent-gold-text)',
+                        border: '1px solid var(--ho-border-gold)'
+                      }}>
+                        {displayStatus}
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 <p className="text-secondary small m-0" style={{ lineClamp: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '38px', lineHeight: '1.5' }}>
@@ -1314,7 +1320,7 @@ export default function TournamentsPanel() {
 
                   {/* Status Dropdown */}
                   <select
-                    value={t.tournamentStatus}
+                    value={t.tournamentStatus === 'OPEN_FOR_REGISTER' ? 'Active' : t.tournamentStatus}
                     onChange={(e) => handleStatusChange(t.id, e.target.value)}
                     style={{
                       padding: '6px 12px',
