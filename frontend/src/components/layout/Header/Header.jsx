@@ -36,6 +36,8 @@ const Header = () => {
       navigate('/jockey/profile');
     } else if (user?.role === 'SPECTATOR') {
       navigate('/spectators/profile');
+    } else if (user?.role === 'RACE_REFEREE') {
+      navigate('/referee/profile');
     } else if (user?.role === 'ADMIN') {
       navigate('/admin/dashboard');
     } else {

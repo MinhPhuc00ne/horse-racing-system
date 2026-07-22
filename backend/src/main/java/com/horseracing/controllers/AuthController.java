@@ -122,6 +122,20 @@ public class AuthController {
     }
 
     /**
+     * Update current authenticated user's profile info.
+     */
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody java.util.Map<String, String> request, Authentication authentication) {
+        try {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            UserResponse response = authService.updateUserProfile(userDetails.getUsername(), request);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
+    /**
      * Verify and activate user account using verification token/OTP.
      */
     @GetMapping("/verify")

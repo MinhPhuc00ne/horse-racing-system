@@ -354,4 +354,35 @@ public class AuthService {
         // Delete the token so it cannot be reused
         passwordResetTokenRepository.delete(resetToken);
     }
+
+    @Transactional
+    public UserResponse updateUserProfile(String email, java.util.Map<String, String> updates) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (updates.containsKey("fullName") && updates.get("fullName") != null) {
+            user.setFullName(updates.get("fullName"));
+        }
+        if (updates.containsKey("phone") && updates.get("phone") != null) {
+            user.setPhone(updates.get("phone"));
+        }
+        if (updates.containsKey("avatarUrl") && updates.get("avatarUrl") != null) {
+            user.setAvatarUrl(updates.get("avatarUrl"));
+        }
+        if (updates.containsKey("bankName") && updates.get("bankName") != null) {
+            user.setBankName(updates.get("bankName"));
+        }
+        if (updates.containsKey("bankBin") && updates.get("bankBin") != null) {
+            user.setBankBin(updates.get("bankBin"));
+        }
+        if (updates.containsKey("bankAccountNumber") && updates.get("bankAccountNumber") != null) {
+            user.setBankAccountNumber(updates.get("bankAccountNumber"));
+        }
+        if (updates.containsKey("bankAccountHolderName") && updates.get("bankAccountHolderName") != null) {
+            user.setBankAccountHolderName(updates.get("bankAccountHolderName"));
+        }
+
+        userRepository.save(user);
+        return UserResponse.fromEntity(user);
+    }
 }

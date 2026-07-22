@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { checkDepositStatusAPI } from '../../services/wallet';
 import { getJockeyProfileAPI } from '../../services/jockey';
 import { getOwnerProfileAPI } from '../../services/owner';
+import { getProfileAPI } from '../../services/auth';
 
 export default function PaymentQRPage() {
   const location = useLocation();
@@ -37,10 +38,15 @@ export default function PaymentQRPage() {
             if (profile?.bankAccount) {
               setBankAccount(profile.bankAccount);
             }
-          } else {
+          } else if (user.role === 'JOCKEY') {
             const profile = await getJockeyProfileAPI();
             if (profile?.bankAccount) {
               setBankAccount(profile.bankAccount);
+            }
+          } else {
+            const profile = await getProfileAPI();
+            if (profile?.bankAccountNumber) {
+              setBankAccount(`${profile.bankAccountNumber} (${profile.bankName || 'Ngân hàng'})`);
             }
           }
         } catch (err) {
@@ -51,7 +57,7 @@ export default function PaymentQRPage() {
     }
   }, [bankAccount, user]);
 
-  const roleName = user?.role === 'HORSE_OWNER' ? 'Chủ Chuồng Ngựa' : 'Kỵ Sĩ';
+  const roleName = user?.role === 'HORSE_OWNER' ? 'Chủ Chuồng Ngựa' : user?.role === 'RACE_REFEREE' ? 'Trọng Tài' : 'Kỵ Sĩ';
   const accountHolder = `VÍ ĐIỆN TỬ ${roleName.toUpperCase()} - ${user?.fullName?.toUpperCase() || 'KHÁCH HÀNG'}`;
   const bankName = orderCode ? 'PayOS Portal' : 'Ngân hàng liên kết';
   const accountNumber = bankAccount ? bankAccount : 'Chưa bổ sung';

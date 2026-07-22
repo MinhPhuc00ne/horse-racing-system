@@ -19,6 +19,8 @@ public class UserResponse {
     private String username;
     private String email;
     private String fullName;
+    private String phone;
+    private String avatarUrl;
     private Role role;
     private AuthProvider provider;
     private boolean enabled;
@@ -34,6 +36,8 @@ public class UserResponse {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .avatarUrl(user.getAvatarUrl())
                 .role(user.getRole())
                 .provider(user.getProvider())
                 .enabled(user.isEnabled())
