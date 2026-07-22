@@ -376,12 +376,14 @@ export default function LiveSimulation() {
   // Handle saving race results to localStorage when finished
   useEffect(() => {
     if (racePhase === 'FINISHED' && !resultsSaved) {
-      // Sort horses to calculate ranks
+      // Sort horses to calculate ranks (accounting for flag penalties: +3s / 3000ms per flag)
       const sorted = [...horses].sort((a, b) => {
         if (a.isDisqualified && b.isDisqualified) return 0;
         if (a.isDisqualified) return 1;
         if (b.isDisqualified) return -1;
-        return (a.finishedTime || 0) - (b.finishedTime || 0);
+        const aPenalty = (a.flaggedPositions?.length || 0) * 3000;
+        const bPenalty = (b.flaggedPositions?.length || 0) * 3000;
+        return ((a.finishedTime || 0) + aPenalty) - ((b.finishedTime || 0) + bPenalty);
       });
       const results = sorted.map((h, index) => {
         const flagPenalties = h.flaggedPositions?.length || 0;
@@ -405,7 +407,7 @@ export default function LiveSimulation() {
       if (actualRaceId && actualRaceId !== 999) {
         saveSimulatedRaceAPI(newRace, results).then(() => {
           setResultsSaved(true);
-          setFinalPodium(results);
+          // Keep official Backend SSE results in finalPodium, do not overwrite with FE estimation
           setShowResultsSummary(true);
         }).catch(err => {
           console.error('Failed to save simulated race', err);
