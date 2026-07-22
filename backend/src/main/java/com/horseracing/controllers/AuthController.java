@@ -2,7 +2,6 @@ package com.horseracing.controllers;
 
 import com.horseracing.dto.request.*;
 import com.horseracing.dto.response.AuthResponse;
-import com.horseracing.dto.response.ErrorResponse;
 import com.horseracing.dto.response.MessageResponse;
 import com.horseracing.dto.response.UserResponse;
 import com.horseracing.services.AuthService;
@@ -25,27 +24,18 @@ public class AuthController {
      * Register a new user account (default role: SPECTATOR).
      */
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
-        try {
-            AuthResponse response = authService.register(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        AuthResponse response = authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
      * Login with email and password.
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        try {
-            AuthResponse response = authService.login(request);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse(401, e.getMessage()));
-        }
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -53,137 +43,94 @@ public class AuthController {
      * frontend.
      */
     @PostMapping("/google")
-    public ResponseEntity<?> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
-        try {
-            AuthResponse response = authService.googleLogin(request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new ErrorResponse(401, "Google authentication failed: " + e.getMessage()));
-        }
+    public ResponseEntity<AuthResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        AuthResponse response = authService.googleLogin(request);
+        return ResponseEntity.ok(response);
     }
 
     /**
      * Complete profile for newly created Google account
      */
     @PostMapping("/google/complete-profile")
-    public ResponseEntity<?> completeGoogleProfile(
-            @Valid @RequestBody com.horseracing.dto.request.CompleteProfileRequest request,
+    public ResponseEntity<UserResponse> completeGoogleProfile(
+            @Valid @RequestBody CompleteProfileRequest request,
             Authentication authentication) {
-        try {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            UserResponse response = authService.completeGoogleProfile(userDetails.getUsername(), request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserResponse response = authService.completeGoogleProfile(userDetails.getUsername(), request);
+        return ResponseEntity.ok(response);
     }
 
     /**
      * Refresh access token using a valid refresh token.
      */
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
-        try {
-            AuthResponse response = authService.refreshToken(request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse(401, e.getMessage()));
-        }
+    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        AuthResponse response = authService.refreshToken(request);
+        return ResponseEntity.ok(response);
     }
 
     /**
      * Logout by revoking the refresh token.
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@Valid @RequestBody LogoutRequest request) {
-        try {
-            authService.logout(request);
-            return ResponseEntity.ok(new MessageResponse("Logged out successfully"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<MessageResponse> logout(@Valid @RequestBody LogoutRequest request) {
+        authService.logout(request);
+        return ResponseEntity.ok(new MessageResponse("Logged out successfully"));
     }
 
     /**
      * Get current authenticated user's info.
      */
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-        try {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            UserResponse response = authService.getCurrentUser(userDetails.getUsername());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse(401, "Not authenticated"));
-        }
+    public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserResponse response = authService.getCurrentUser(userDetails.getUsername());
+        return ResponseEntity.ok(response);
     }
 
     /**
      * Update current authenticated user's profile info.
      */
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestBody java.util.Map<String, String> request, Authentication authentication) {
-        try {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            UserResponse response = authService.updateUserProfile(userDetails.getUsername(), request);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<UserResponse> updateProfile(@RequestBody java.util.Map<String, String> request, Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserResponse response = authService.updateUserProfile(userDetails.getUsername(), request);
+        return ResponseEntity.ok(response);
     }
 
     /**
      * Verify and activate user account using verification token/OTP.
      */
     @GetMapping("/verify")
-    public ResponseEntity<?> verifyAccount(@RequestParam("token") String token) {
-        try {
-            authService.verifyAccount(token);
-            return ResponseEntity.ok(new MessageResponse("Account activated successfully! You can now log in."));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<MessageResponse> verifyAccount(@RequestParam("token") String token) {
+        authService.verifyAccount(token);
+        return ResponseEntity.ok(new MessageResponse("Account activated successfully! You can now log in."));
     }
 
     /**
      * Request a password reset OTP code.
      */
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        try {
-            authService.forgotPassword(request);
-            return ResponseEntity.ok(new MessageResponse("Password reset OTP has been sent to your email."));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<MessageResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok(new MessageResponse("Password reset OTP has been sent to your email."));
     }
 
     /**
      * Verify the password reset OTP code.
      */
     @PostMapping("/verify-reset-otp")
-    public ResponseEntity<?> verifyResetOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        try {
-            authService.verifyResetOtp(request);
-            return ResponseEntity.ok(new MessageResponse("OTP verified successfully. You can now set your new password."));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<MessageResponse> verifyResetOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        authService.verifyResetOtp(request);
+        return ResponseEntity.ok(new MessageResponse("OTP verified successfully. You can now set your new password."));
     }
 
     /**
      * Reset password using OTP and the new password.
      */
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-        try {
-            authService.resetPassword(request);
-            return ResponseEntity.ok(new MessageResponse("Password updated successfully."));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(new MessageResponse("Password updated successfully."));
     }
 }
