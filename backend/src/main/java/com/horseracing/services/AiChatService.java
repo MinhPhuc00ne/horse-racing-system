@@ -275,7 +275,12 @@ public class AiChatService {
                     JsonNode firstCandidate = candidates.get(0);
                     JsonNode parts = firstCandidate.path("content").path("parts");
                     if (parts.isArray() && parts.size() > 0) {
-                        replyText = parts.get(0).path("text").asText();
+                        for (JsonNode part : parts) {
+                            if (part.has("text") && !part.get("text").asText().isEmpty()) {
+                                replyText = part.get("text").asText();
+                                break;
+                            }
+                        }
                     }
                 }
             }

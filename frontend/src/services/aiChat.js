@@ -10,7 +10,7 @@ const isMockMode = () => {
 
 export async function sendChatMessageAPI(message, image = null) {
   try {
-    // Based on AiChatController, can return plain string or object
+    const response = await axiosClient.post('/v1/chat', { message, image });
     return response.data;
   } catch (error) {
     console.error('Error sending AI chat message:', error);
