@@ -38,3 +38,6 @@ mysql-data/
 .env
 .env.local
 .env.*.local
+
+.agents
+skills-lock.json
