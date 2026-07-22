@@ -111,11 +111,11 @@ function handleLogoutRedirect() {
   window.location.href = '/login';
 }
 
-// Tự động kiểm tra trạng thái hoạt động của Backend
+// Automatically check backend status
 (async () => {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout 5 giây
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout 5 seconds
     await fetch('http://localhost:8080/api/tournaments', { 
       signal: controller.signal,
       mode: 'cors'

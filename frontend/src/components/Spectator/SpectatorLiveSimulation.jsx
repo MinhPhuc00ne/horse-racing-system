@@ -38,7 +38,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
   const confettiParticles = useRef([]);
   const shakeIntensity = useRef(0);
   const lastCommentaryChange = useRef(0);
-  const commentaryText = useRef("Chào mừng quý khách đến với trường đua trực tiếp!");
+  const commentaryText = useRef("Welcome to the live racetrack!");
   const fireworks = useRef([]);
   const crowdBubbles = useRef([]);
   const horseImagesRef = useRef({});
@@ -81,10 +81,10 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
       const finishedCount = currentHorses.filter(h => h.progress >= 100).length;
       if (finishedCount === 0) {
         const finishComments = [
-          `Chiến mã ${finishLeader.name} (Số ${finishLeader.id}) đang tiến rất sát vạch đích!`,
-          `Giai đoạn nước rút cực kỳ căng thẳng! ${finishLeader.name} đang dẫn đầu!`,
-          `Cơ hội chiến thắng đang chia đều, các chiến mã đang bung hết sức mình!`,
-          `Ai sẽ là nhà vô địch? Tất cả đang dồn mắt về vạch đích!`
+          `Horse ${finishLeader.name} (No. ${finishLeader.id}) is closing in on the finish line!`,
+          `The sprint phase is extremely intense! ${finishLeader.name} is in the lead!`,
+          `The chance of victory is wide open, all horses are giving it their all!`,
+          `Who will be the champion? Everyone is watching the finish line!`
         ];
         commentaryText.current = finishComments[Math.floor(Math.random() * finishComments.length)];
         lastCommentaryChange.current = now;
@@ -97,28 +97,28 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
 
     if (leadDiff > 12) {
       comments.push(
-        `Chiến mã ${leader.name} (Số ${leader.id}) đang bứt tốc ngoạn mục, tạo khoảng cách lớn!`,
-        `Khoảng cách dẫn đầu của ${leader.name} vẫn đang được duy trì rất tốt!`,
-        `${leader.name} đang một mình băng băng dẫn đầu đoàn đua!`
+        `Horse ${leader.name} (No. ${leader.id}) is accelerating spectacularly, creating a massive gap!`,
+        `The lead distance of ${leader.name} is being maintained exceptionally well!`,
+        `${leader.name} is running away with the lead all by itself!`
       );
     } else if (second && leadDiff <= 3) {
       comments.push(
-        `Cuộc rượt đuổi nghẹt thở! ${leader.name} và ${second.name} đang kèn cựa cực kỳ gay cấn!`,
-        `Cạnh tranh khốc liệt! ${second.name} đang bám đuổi quyết liệt phía sau ${leader.name}!`,
-        `Hai vị trí dẫn đầu liên tục so kè nhau từng mét đường đua!`
+        `A breathtaking chase! ${leader.name} and ${second.name} are locked in a head-to-head battle!`,
+        `Fierce competition! ${second.name} is chasing relentlessly behind ${leader.name}!`,
+        `The top two positions are constantly competing millimeter by millimeter!`
       );
     } else {
       comments.push(
-        `Chiến mã ${leader.name} (Số ${leader.id}) đang tạm dẫn đầu đoàn đua với tốc độ ${leader.speed || 60} km/h!`,
-        `Đoàn đua đang bám đuổi sát sao phía sau vị trí của ${leader.name}!`,
-        `${leader.name} đang làm chủ tốc độ ở chặng giữa đường đua!`
+        `Horse ${leader.name} (No. ${leader.id}) is temporarily leading the pack with a speed of ${leader.speed || 60} km/h!`,
+        `The pack is chasing closely behind ${leader.name}'s position!`,
+        `${leader.name} is controlling the pace in the middle of the track!`
       );
     }
 
     comments.push(
-      `Tốc độ cuộc đua đang được đẩy lên rất cao!`,
-      `Khán giả trên khán đài đang hò reo cổ vũ vô cùng náo nhiệt!`,
-      `Các chiến mã đang dồn hết thể lực cho những mét đua quyết định!`
+      `The speed of the race is being pushed extremely high!`,
+      `The crowd in the stands is cheering enthusiastically!`,
+      `The horses are exhausting all their energy for the final crucial meters!`
     );
 
     commentaryText.current = comments[Math.floor(Math.random() * comments.length)];
@@ -179,7 +179,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
             horseId: p.horseId,
             name: p.horseName,
             jockeyName: p.jockeyName,
-            ownerName: 'Chủ ngựa liên kết',
+            ownerName: 'Linked Owner',
             weight: (450 + Math.random() * 50).toFixed(1),
             progress: horseProgress,
             color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea', '#f472b6', '#3b82f6'][idx % 7],
@@ -274,7 +274,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                   const alreadyFinished = prev.some(other => other.progress >= 100 && other.id !== h.id);
                   if (!alreadyFinished) {
                     audioManager.setSfxVolume('crowd', 0.95);
-                    commentaryText.current = `🏆 CHIẾN THẮNG! Chiến mã số ${h.id} (${h.name}) đã xuất sắc cán đích đầu tiên!`;
+                    commentaryText.current = `🏆 VICTORY! Horse No. ${h.id} (${h.name}) has crossed the finish line first!`;
                     lastCommentaryChange.current = Date.now() + 8000;
                   }
                 }
@@ -321,9 +321,9 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
 
         const winner = mappedResults.find(r => r.rank === 1);
         if (winner) {
-          commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Chiến thắng thuộc về ${winner.horseName}!`;
+          commentaryText.current = `🏁 RACE OVER! Victory goes to ${winner.horseName}!`;
         } else {
-          commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC!`;
+          commentaryText.current = `🏁 RACE OVER!`;
         }
         lastCommentaryChange.current = Date.now() + 999999;
       } catch (err) {
@@ -355,21 +355,21 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
           if (isCancelled) return;
           setSpawnedCount(i);
           audioManager.playIntroChime();
-          const currentHorseName = horsesRef.current[i - 1]?.name || `Chiến mã ${i}`;
-          commentaryText.current = `Đang dắt chiến mã số ${i} (${currentHorseName}) vào cổng xuất phát...`;
+          const currentHorseName = horsesRef.current[i - 1]?.name || `Horse ${i}`;
+          commentaryText.current = `Leading horse No. ${i} (${currentHorseName}) into the starting gate...`;
         }
         await new Promise(r => setTimeout(r, 600));
         for (let i = 5; i > 0; i--) {
           if (isCancelled) return;
           setCountdown(i.toString());
           audioManager.playCountdownBeep(false);
-          commentaryText.current = `Chuẩn bị xuất phát... T-minus ${i} giây!`;
+          commentaryText.current = `Get ready for start... T-minus ${i} seconds!`;
           await new Promise(r => setTimeout(r, 1000));
         }
         if (isCancelled) return;
         setCountdown('GO!');
         audioManager.playCountdownBeep(true);
-        commentaryText.current = "CỔNG MỞ! CUỘC ĐUA CHÍNH THỨC BẮT ĐẦU!";
+        commentaryText.current = "GATES OPEN! THE RACE HAS OFFICIALLY BEGUN!";
         await new Promise(r => setTimeout(r, 600));
         if (isCancelled) return;
         setCountdown(null);
@@ -2016,20 +2016,20 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
         <div className="d-flex justify-content-between align-items-center mb-4">
           <div className="d-flex align-items-center gap-3">
             <button className="ho-btn ho-btn-outline-secondary py-2 px-3 d-flex align-items-center gap-1" onClick={onClose}>
-              <span className="material-symbols-outlined">arrow_back</span> Quay lại
+              <span className="material-symbols-outlined">arrow_back</span> Back
             </button>
             <div>
               <div className="d-flex align-items-center gap-2">
-                <h2 className="ho-font-epilogue fs-4 fw-bold text-dark m-0">Đua Giả Lập Trực Tiếp</h2>
+                <h2 className="ho-font-epilogue fs-4 fw-bold text-dark m-0">Live Simulation</h2>
                 <span className="live-status-badge">
                   <span className="pulse-dot"></span> LIVE VIEW
                 </span>
               </div>
-              <p className="text-secondary small m-0">Màn hình giám sát sa bàn đua trực quan của người xem.</p>
+              <p className="text-secondary small m-0">Visual simulation monitor for spectators.</p>
             </div>
           </div>
           <div className="stat-pill">
-            Trạng thái trận: <strong className="text-success text-uppercase">{racePhase === 'FINISHED' ? 'Đã kết thúc' : racePhase === 'RUNNING' ? 'Đang chạy' : 'Chuẩn bị'}</strong>
+            Race Status: <strong className="text-success text-uppercase">{racePhase === 'FINISHED' ? 'Finished' : racePhase === 'RUNNING' ? 'Running' : 'Preparing'}</strong>
           </div>
         </div>
 
@@ -2048,7 +2048,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                     className="btn btn-sm p-1 d-flex align-items-center justify-content-center border-0 bg-transparent"
                     style={{ color: isSfxMuted ? '#dc3545' : '#198754' }}
                     onClick={toggleSfx}
-                    title={isSfxMuted ? "Bật âm thanh" : "Tắt âm thanh"}
+                    title={isSfxMuted ? "Unmute sound" : "Mute sound"}
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
                       {isSfxMuted ? 'volume_off' : 'volume_up'}
@@ -2072,7 +2072,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
 
                 {/* Weather select */}
                 <div className="d-flex align-items-center gap-1 small text-secondary me-2">
-                  <span>Môi trường:</span>
+                  <span>Environment:</span>
                   <select
                     className="form-select form-select-sm bg-white border-secondary text-dark"
                     style={{ fontSize: '11px', borderRadius: '20px', padding: '2px 24px 2px 8px', width: 'auto', minWidth: '120px' }}
@@ -2086,8 +2086,8 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                     <option value="rain">🌧️ Rainy Storm</option>
                   </select>
                 </div>
-                <span className="stat-pill">Cự ly: <strong>{race.distance}m</strong></span>
-                <span className="stat-pill">Đường đua: <strong className="text-success">{environment === 'snow' ? 'SNOW' : environment === 'rain' ? 'MUD' : 'TURF'}</strong></span>
+                <span className="stat-pill">Distance: <strong>{race.distance}m</strong></span>
+                <span className="stat-pill">Track Type: <strong className="text-success">{environment === 'snow' ? 'SNOW' : environment === 'rain' ? 'MUD' : 'TURF'}</strong></span>
               </div>
             </div>
 
@@ -2102,7 +2102,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                 <div className="pov-exit-hud">
                   <div className="d-flex align-items-center gap-2">
                     <span className="material-symbols-outlined text-warning animate-pulse">videocam</span>
-                    <span>Theo dõi POV: <strong>{povHorse.name}</strong> (Làn {povHorse.id})</span>
+                    <span>POV Tracking: <strong>{povHorse.name}</strong> (Lane {povHorse.id})</span>
                   </div>
                 </div>
               )}
@@ -2116,7 +2116,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
               )}
             </div>
             <div className="text-center mt-3 text-secondary small">
-              💡 Màn hình giả lập chỉ xem để theo dõi thứ hạng trực quan thời gian thực.
+              💡 The simulation screen is for visual real-time ranking tracking only.
             </div>
           </div>
 
@@ -2126,7 +2126,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
             <div className="glass-hud-panel" style={{ minHeight: '340px' }}>
               <h4 className="fw-bold text-dark fs-6 mb-3 pb-2 d-flex align-items-center gap-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)' }}>
                 <span className="material-symbols-outlined text-warning">emoji_events</span>
-                Bảng xếp hạng
+                Leaderboard
               </h4>
 
               <div className="leaderboard-list">
@@ -2169,14 +2169,14 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
             <div className="glass-card p-3">
               <h4 className="fw-bold text-dark fs-6 mb-3 pb-2 d-flex align-items-center gap-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)' }}>
                 <span className="material-symbols-outlined text-success">local_atm</span>
-                Cược của tôi trong trận này
+                My Bets in This Race
               </h4>
 
               {loadingBets ? (
-                <div className="text-center py-3 text-secondary small">Đang tải vé cược...</div>
+                <div className="text-center py-3 text-secondary small">Loading bets...</div>
               ) : myBets.length === 0 ? (
                 <div className="text-center py-4 text-muted small">
-                  Bạn không đặt cược vé nào cho cuộc đua này.
+                  You have not placed any bets for this race.
                 </div>
               ) : (
                 <div className="d-flex flex-column gap-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
@@ -2185,7 +2185,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                       <div>
                         <strong className="text-dark small block">{bet.horseName}</strong>
                         <span className="text-secondary block" style={{ fontSize: '10px' }}>
-                          Cửa: <strong className="text-success">{bet.betType}</strong> | Tiền: {bet.amount?.toLocaleString('vi-VN')} VNĐ
+                          Option: <strong className="text-success">{bet.betType}</strong> | Bet: {bet.amount?.toLocaleString('en-US')} VND
                         </span>
                       </div>
                       <div className="text-end">
@@ -2194,11 +2194,11 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                             bet.status === 'REFUNDED' ? 'bg-secondary' :
                               'bg-warning text-dark'
                           } text-uppercase mb-1`} style={{ fontSize: '8px', display: 'block' }}>
-                          {bet.status === 'WON' ? 'Thắng cược' : bet.status === 'LOST' ? 'Thua cược' : bet.status === 'REFUNDED' ? 'Hoàn tiền' : 'Đang cược'}
+                          {bet.status === 'WON' ? 'WON' : bet.status === 'LOST' ? 'LOST' : bet.status === 'REFUNDED' ? 'REFUNDED' : 'PENDING'}
                         </span>
                         {bet.status === 'WON' && (
                           <span className="text-success fw-bold block" style={{ fontSize: '10px' }}>
-                            +{bet.payoutAmount?.toLocaleString('vi-VN')}đ
+                            +{bet.payoutAmount?.toLocaleString('en-US')} VND
                           </span>
                         )}
                       </div>
@@ -2218,7 +2218,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
             <span className="material-symbols-outlined text-warning mb-2" style={{ fontSize: '64px' }}>
               emoji_events
             </span>
-            <h3 className="ho-font-epilogue fs-4 fw-bold text-dark mb-1">Cuộc đua hoàn tất!</h3>
+            <h3 className="ho-font-epilogue fs-4 fw-bold text-dark mb-1">Race Completed!</h3>
             <p className="text-secondary small mb-4">{race.raceName}</p>
 
             <div className="d-flex flex-column gap-2 mb-4 text-start">
@@ -2250,7 +2250,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                 className="ho-btn ho-btn-gold-solid flex-grow-1 py-2"
                 onClick={() => setShowResultsSummary(false)}
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>

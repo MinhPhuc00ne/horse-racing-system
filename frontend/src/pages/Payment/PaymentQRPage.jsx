@@ -23,7 +23,7 @@ export default function PaymentQRPage() {
     try {
       user = JSON.parse(userStr);
     } catch (e) {
-      console.error('Lỗi parse user:', e);
+      console.error('Error parsing user:', e);
     }
   }
 
@@ -50,17 +50,17 @@ export default function PaymentQRPage() {
             }
           }
         } catch (err) {
-          console.error('Lỗi khi tải tài khoản ngân hàng từ profile:', err);
+          console.error('Error loading bank account from profile:', err);
         }
       };
       fetchProfile();
     }
   }, [bankAccount, user]);
 
-  const roleName = user?.role === 'HORSE_OWNER' ? 'Chủ Chuồng Ngựa' : user?.role === 'RACE_REFEREE' ? 'Trọng Tài' : 'Kỵ Sĩ';
-  const accountHolder = `VÍ ĐIỆN TỬ ${roleName.toUpperCase()} - ${user?.fullName?.toUpperCase() || 'KHÁCH HÀNG'}`;
-  const bankName = orderCode ? 'PayOS Portal' : 'Ngân hàng liên kết';
-  const accountNumber = bankAccount ? bankAccount : 'Chưa bổ sung';
+  const roleName = user?.role === 'HORSE_OWNER' ? 'Horse Owner' : user?.role === 'RACE_REFEREE' ? 'Race Referee' : 'Jockey';
+  const accountHolder = `WALLET ${roleName.toUpperCase()} - ${user?.fullName?.toUpperCase() || 'CUSTOMER'}`;
+  const bankName = orderCode ? 'PayOS Portal' : 'Linked Bank';
+  const accountNumber = bankAccount ? bankAccount : 'Not added yet';
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('PENDING'); // PENDING, SUCCESS, FAILED
@@ -75,15 +75,15 @@ export default function PaymentQRPage() {
         if (res.status === 'SUCCESS') {
           clearInterval(intervalId);
           setPaymentStatus('SUCCESS');
-          alert('Thanh toán thành công! Số tiền đã được cộng vào ví.');
+          alert('Payment successful! The amount has been credited to your wallet.');
           navigate(returnUrl, { replace: true });
         } else if (res.status === 'CANCELLED' || res.status === 'FAILED') {
           clearInterval(intervalId);
           setPaymentStatus('FAILED');
-          alert('Giao dịch đã bị hủy hoặc thất bại.');
+          alert('The transaction has been cancelled or failed.');
         }
       } catch (err) {
-        console.error('Lỗi khi kiểm tra trạng thái thanh toán:', err);
+        console.error('Error checking payment status:', err);
       }
     }, 3000);
 
@@ -93,7 +93,7 @@ export default function PaymentQRPage() {
   const handleConfirmPayment = async () => {
     if (!orderCode) {
       // Mock mode success fallback
-      alert(`Đã nạp thành công ${amount.toLocaleString()} VND vào ví!`);
+      alert(`Successfully deposited ${amount.toLocaleString()} VND into your wallet!`);
       navigate(returnUrl, { replace: true });
       return;
     }
@@ -102,13 +102,13 @@ export default function PaymentQRPage() {
     try {
       const res = await checkDepositStatusAPI(orderCode);
       if (res.status === 'SUCCESS') {
-        alert('Thanh toán thành công! Số tiền đã được cộng vào ví.');
+        alert('Payment successful! The amount has been credited to your wallet.');
         navigate(returnUrl, { replace: true });
       } else {
-        alert(`Trạng thái thanh toán hiện tại: ${res.status === 'PENDING' ? 'Chưa nhận được thanh toán' : res.status}`);
+        alert(`Current payment status: ${res.status === 'PENDING' ? 'Payment not received yet' : res.status}`);
       }
     } catch (error) {
-      alert('Có lỗi xảy ra khi kiểm tra: ' + error.message);
+      alert('An error occurred during verification: ' + error.message);
     } finally {
       setIsProcessing(false);
     }
@@ -119,7 +119,7 @@ export default function PaymentQRPage() {
   };
 
   // If we have a real qrCode from PayOS, render it, otherwise use the mock transaction template data
-  const qrData = qrCode || `Nạp tiền: ${amount} VND. Chuyển khoản đến ${accountHolder}. Ngân hàng: ${bankName}. Số tài khoản: ${accountNumber}`;
+  const qrData = qrCode || `Deposit: ${amount} VND. Transfer to ${accountHolder}. Bank: ${bankName}. Account number: ${accountNumber}`;
 
   return (
     <div
@@ -130,7 +130,7 @@ export default function PaymentQRPage() {
         className="card p-5 shadow-lg text-center"
         style={{ maxWidth: '500px', width: '100%', borderRadius: '15px', backgroundColor: '#fff' }}
       >
-        <h2 className="mb-4 text-dark fw-bold">Nạp Tiền Vào Ví {roleName}</h2>
+        <h2 className="mb-4 text-dark fw-bold">Deposit to {roleName} Wallet</h2>
 
         <div className="d-flex justify-content-center mb-3 p-3 border rounded bg-white">
           <img
@@ -149,33 +149,33 @@ export default function PaymentQRPage() {
               className="btn btn-link text-decoration-underline text-success small fw-bold"
               style={{ fontSize: '13px' }}
             >
-              Mở trang thanh toán cổng PayOS (Cửa sổ mới)
+              Open PayOS payment portal (New window)
             </a>
           </div>
         )}
 
         <div className="text-start mb-4 p-3 rounded" style={{ backgroundColor: '#f8f9fa', fontSize: '14px' }}>
           <p className="mb-2 text-dark">
-            <strong>Ngân hàng thụ hưởng:</strong> {bankName}
+            <strong>Beneficiary Bank:</strong> {bankName}
           </p>
           <p className="mb-2 text-dark">
-            <strong>Tài khoản nhận:</strong> {accountHolder}
+            <strong>Recipient Account:</strong> {accountHolder}
           </p>
           <p className="mb-2 text-dark">
-            <strong>Số tài khoản:</strong> {accountNumber}
+            <strong>Account Number:</strong> {accountNumber}
           </p>
           <p className="mb-2 text-dark">
-            <strong>Số tiền nạp:</strong>{' '}
+            <strong>Deposit Amount:</strong>{' '}
             <span className="text-success fw-bold">{amount.toLocaleString()} VND</span>
           </p>
           <p className="mb-0 text-dark">
-            <strong>Nội dung chuyển khoản:</strong> {orderCode ? `NAPTIEN HORSES ORDER ${orderCode}` : `NAPTIEN ${user?.username?.toUpperCase() || 'USER'}`}
+            <strong>Transfer Description:</strong> {orderCode ? `NAPTIEN HORSES ORDER ${orderCode}` : `NAPTIEN ${user?.username?.toUpperCase() || 'USER'}`}
           </p>
         </div>
 
         {orderCode && (
           <div className="alert alert-info py-2 px-3 mb-3 text-start" style={{ fontSize: '12px' }}>
-            <i className="bi bi-info-circle-fill me-1"></i> Hệ thống đang tự động kiểm tra giao dịch mỗi 3 giây sau khi bạn chuyển khoản.
+            <i className="bi bi-info-circle-fill me-1"></i> The system is automatically checking the transaction every 3 seconds after your transfer.
           </div>
         )}
 
@@ -186,7 +186,7 @@ export default function PaymentQRPage() {
             onClick={handleCancel}
             disabled={isProcessing}
           >
-            Quay Lại
+            Back
           </button>
           <button
             className="btn w-50 fw-bold"
@@ -194,7 +194,7 @@ export default function PaymentQRPage() {
             onClick={handleConfirmPayment}
             disabled={isProcessing}
           >
-            {isProcessing ? 'Đang Kiểm Tra...' : (orderCode ? 'Kiểm Tra Thanh Toán' : 'Đã Thanh Toán')}
+            {isProcessing ? 'Verifying...' : (orderCode ? 'Verify Payment' : 'Paid')}
           </button>
         </div>
       </div>

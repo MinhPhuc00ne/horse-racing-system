@@ -1396,83 +1396,83 @@ GO
 INSERT INTO [dbo].[horses] ([owner_id], [breed_id], [name], [age], [gender], [training_status], [health_status], [status], [speed_rating], [stamina_rating], [gate_performance_rating], [color]) VALUES
 -- Owner 1 (Benimaru)
 ((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 1, 'Veldora', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 95.0, 90, 88, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 2, N'Xích Hỏa', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 85, 82, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 3, N'Hồng Liên', 3, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 75.0, 70, 75, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 4, N'Bạch Viêm', 6, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 82.0, 80, 78, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 1, N'Hỏa Long', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 90.0, 88, 85, 'Palomino'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 2, N'Tân Viêm', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 3, N'Hỏa Ảnh', 7, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 70.0, 65, 60, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 4, N'Hỏa Sâm', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 2, 'Red Flame', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 85, 82, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 3, 'Red Lotus', 3, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 75.0, 70, 75, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 4, 'White Flame', 6, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 82.0, 80, 78, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 1, 'Fire Dragon', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 90.0, 88, 85, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 2, 'Nova Flame', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 3, 'Fire Shadow', 7, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 70.0, 65, 60, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='benimaru')), 4, 'Fire Ginseng', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
 
 -- Owner 2 (Souei)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 1, N'Ảnh Ma', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 94.0, 92, 90, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 2, N'Tật Phong', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 89.0, 86, 84, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 3, N'Dạ Ảnh', 6, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 80.0, 78, 75, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 4, N'U Hồn', 3, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 72.0, 70, 72, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 1, N'Tàn Ảnh', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 86.0, 84, 80, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 2, N'Ẩn Ảnh', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 3, N'Lôi Ảnh', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 78.0, 75, 70, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 4, N'Phong Ảnh', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 1, 'Shadow Demon', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 94.0, 92, 90, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 2, 'Hurricane', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 89.0, 86, 84, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 3, 'Night Shadow', 6, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 80.0, 78, 75, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 4, 'Specter', 3, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 72.0, 70, 72, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 1, 'Residual Shadow', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 86.0, 84, 80, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 2, 'Hidden Shadow', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 3, 'Lightning Shadow', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 78.0, 75, 70, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='souei')), 4, 'Wind Shadow', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
 
 -- Owner 3 (Hakuro)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 1, N'Kiếm Thánh', 6, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 96.0, 94, 92, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 2, N'Thiên Nhất', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 91.0, 88, 86, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 3, N'Lôi Thần', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 83.0, 80, 78, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 4, N'Nhất Đao', 7, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 79.0, 76, 74, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 1, N'Truy Nhượng', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 82, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 2, N'Kiếm Ảnh', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 3, N'Phần Thiên', 5, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 74.0, 70, 68, 'Palomino'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 4, N'Tân Kiếm', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 1, 'Sword Saint', 6, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 96.0, 94, 92, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 2, 'Heaven One', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 91.0, 88, 86, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 3, 'Thunder God', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 83.0, 80, 78, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 4, 'Single Blade', 7, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 79.0, 76, 74, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 1, 'Chase Yield', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 82, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 2, 'Sword Shadow', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 3, 'Burning Sky', 5, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 74.0, 70, 68, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='hakuro')), 4, 'New Sword', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
 
 -- Owner 4 (Geld)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 1, N'Ngang Tàng', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 90.0, 96, 85, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 2, N'Bá Vương', 6, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 92, 82, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 3, N'Thiên Giáp', 4, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 82.0, 86, 78, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 4, N'Thiên Thạch', 7, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 76.0, 82, 72, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 1, N'Kình Lực', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 85.0, 90, 80, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 2, N'Trùng Sinh', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 3, N'Bản Thạch', 5, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 72.0, 78, 66, 'Brown'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 4, N'Khôi Giáp', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 1, 'Bold', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 90.0, 96, 85, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 2, 'Overlord', 6, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 92, 82, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 3, 'Heavenly Armor', 4, 'FEMALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 82.0, 86, 78, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 4, 'Meteor', 7, 'MALE', 'COMPLETED', 'FAIR', 'RESTING', 76.0, 82, 72, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 1, 'Mighty Power', 4, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 85.0, 90, 80, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 2, 'Rebirth', 3, 'MALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 3, 'Stone', 5, 'FEMALE', 'COMPLETED', 'INJURED', 'INJURED', 72.0, 78, 66, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='geld')), 4, 'Helmet', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
 
 -- Owner 5 (Gabil)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 1, N'Hồng Long', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 92.0, 89, 87, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 2, 'Phi Long', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 83, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 3, N'Thùy Long', 6, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 81.0, 79, 76, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 4, 'Thanh Long', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 77.0, 74, 70, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 1, N'Xích Long', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 84.0, 82, 79, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 2, N'Tân Long', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 3, N'Bá Long', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 73.0, 71, 67, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 4, N'Vũ Long', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 1, 'Red Dragon', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 92.0, 89, 87, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 2, 'Flying Dragon', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 83, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 3, 'Drooping Dragon', 6, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 81.0, 79, 76, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 4, 'Azure Dragon', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 77.0, 74, 70, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 1, 'Crimson Dragon', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 84.0, 82, 79, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 2, 'New Dragon', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 3, 'Overlord Dragon', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 73.0, 71, 67, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gabil')), 4, 'Feather Dragon', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
 
 -- Owner 6 (Rigurd)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 1, N'Tiên Phong', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 89.0, 88, 86, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 2, N'Lãnh Đạo', 6, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 86.0, 84, 82, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 3, N'Trân Thú', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 80.0, 78, 75, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 4, 'Quang Vinh', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 75.0, 72, 68, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 1, N'Huy Hoàng', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 83.0, 81, 77, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 2, N'Tân Binh', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 3, N'Vệ Binh', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 71.0, 69, 65, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 4, N'Thiên Binh', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 1, 'Pioneer', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 89.0, 88, 86, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 2, 'Leader', 6, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 86.0, 84, 82, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 3, 'Precious Beast', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 80.0, 78, 75, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 4, 'Glory', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 75.0, 72, 68, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 1, 'Brilliant', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 83.0, 81, 77, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 2, 'Rookie', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 3, 'Guard', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 71.0, 69, 65, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='rigurd')), 4, 'Heavenly Soldier', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
 
 -- Owner 7 (Gobta)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 1, 'Lan Nha', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 93.0, 91, 89, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 2, N'Cực Phong', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 86, 84, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 3, N'Tốc Độ', 3, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 82.0, 79, 77, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 4, N'Thần Phong', 6, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 78.0, 75, 71, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 1, N'Bão Tuyết', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 85.0, 83, 80, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 2, N'Bạch Nha', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 3, N'Hắc Nha', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 73.0, 70, 66, 'Brown'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 4, N'Bát Phong', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 1, 'Blue Fang', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 93.0, 91, 89, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 2, 'Extreme Wind', 5, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 88.0, 86, 84, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 3, 'Speed', 3, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 82.0, 79, 77, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 4, 'Divine Wind', 6, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 78.0, 75, 71, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 1, 'Blizzard', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 85.0, 83, 80, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 2, 'White Fang', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 3, 'Black Fang', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 73.0, 70, 66, 'Brown'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='gobta')), 4, 'Eight Winds', 3, 'MALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Roan'),
 
 -- Owner 8 (Kaijin)
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 1, N'Hợp Kim', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 91.0, 90, 88, 'Gray'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 2, N'Thần Khí', 6, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 83, 'Chestnut'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 3, N'Hỏa Lô', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 81.0, 78, 76, 'Bay'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 4, N'Thép Tinh', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 77.0, 74, 70, 'Black'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 1, N'Kim Cương', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 84.0, 82, 79, 'White'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 2, N'Bảo Kiếm', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 3, N'Giáp Thiết', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 72.0, 68, 64, 'Roan'),
-((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 4, N'Luyện Kim', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown');
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 1, 'Alloy', 5, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 91.0, 90, 88, 'Gray'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 2, 'Divine Artifact', 6, 'FEMALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 87.0, 85, 83, 'Chestnut'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 3, 'Fire Furnace', 4, 'MALE', 'IN_PROGRESS', 'GOOD', 'ACTIVE', 81.0, 78, 76, 'Bay'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 4, 'Refined Steel', 7, 'FEMALE', 'COMPLETED', 'FAIR', 'RESTING', 77.0, 74, 70, 'Black'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 1, 'Diamond', 4, 'MALE', 'COMPLETED', 'EXCELLENT', 'ACTIVE', 84.0, 82, 79, 'White'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 2, 'Treasure Sword', 3, 'FEMALE', 'NOT_STARTED', 'EXCELLENT', 'ACTIVE', NULL, NULL, NULL, 'Palomino'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 3, 'Iron Armor', 5, 'MALE', 'COMPLETED', 'INJURED', 'INJURED', 72.0, 68, 64, 'Roan'),
+((SELECT id FROM [horse_owner_profiles] WHERE user_id=(SELECT id FROM [users] WHERE username='kaijin')), 4, 'Alchemy', 3, 'FEMALE', 'NOT_STARTED', 'GOOD', 'ACTIVE', NULL, NULL, NULL, 'Brown');
 GO
 
 -- 6. Insert User Connections (Each Owner connected to at least 3 Jockeys)
@@ -1520,36 +1520,36 @@ GO
 
 -- 7. Insert Race Tracks (1 Straight, 1 Circular)
 INSERT INTO [dbo].[race_tracks] ([name], [location], [surface_condition]) VALUES
-(N'Sân đua Thẳng Tempest', N'Thành phố Tempest', 'Good'),
-(N'Sân đua Tròn Jura', N'Đại ngàn Jura', 'Good');
+('Tempest Straight Track', 'Tempest City', 'Good'),
+('Jura Circular Track', 'Jura Great Forest', 'Good');
 GO
 
 -- 8. Insert Tournaments (Admin Created, Fees & Prizes < 20,000 VND, Referees Assigned)
 INSERT INTO [dbo].[tournaments] ([tournament_name], [location], [description], [tournament_status], [start_date], [end_date], [registration_deadline], [referee_id], [entry_fee], [total_prize], [prize_first], [prize_second], [prize_third], [min_bet_amount], [min_slots], [max_slots], [allowed_classes], [allowed_ages], [allowed_genders], [registration_opening_time], [official_race_time]) VALUES
-(N'Giải Đấu Hoàng Gia Tempest', N'Thành phố Tempest', N'Giải đấu tốc độ chính thức đường đua thẳng ma quốc Tempest', 'OPEN_FOR_REGISTER', '2026-08-01', '2026-08-05', '2026-07-31 23:59:59', (SELECT id FROM [users] WHERE username='guy_crimson'), 10000.00, 19000.00, 10000.00, 6000.00, 3000.00, 5000.00, 4, 12, 'All Classes', '3-8', 'MALE, FEMALE', '2026-07-20 08:00:00', '2026-08-01 14:00:00'),
-(N'Cúp Vô Địch Ma Quốc Jura', N'Đại ngàn Jura', N'Giải đấu đường đua vòng tròn đỉnh cao đại ngàn Jura', 'OPEN_FOR_REGISTER', '2026-08-10', '2026-08-15', '2026-08-09 23:59:59', (SELECT id FROM [users] WHERE username='velgrynd'), 15000.00, 19500.00, 10000.00, 5500.00, 4000.00, 5000.00, 4, 12, 'All Classes', '3-8', 'MALE, FEMALE', '2026-07-25 08:00:00', '2026-08-10 15:00:00');
+('Tempest Royal Tournament', 'Tempest City', 'Official speed tournament on the Tempest straight track', 'OPEN_FOR_REGISTER', '2026-08-01', '2026-08-05', '2026-07-31 23:59:59', (SELECT id FROM [users] WHERE username='guy_crimson'), 10000.00, 19000.00, 10000.00, 6000.00, 3000.00, 5000.00, 4, 12, 'All Classes', '3-8', 'MALE, FEMALE', '2026-07-20 08:00:00', '2026-08-01 14:00:00'),
+('Jura Championship Cup', 'Jura Great Forest', 'High-level circular track tournament in the Jura Forest', 'OPEN_FOR_REGISTER', '2026-08-10', '2026-08-15', '2026-08-09 23:59:59', (SELECT id FROM [users] WHERE username='velgrynd'), 15000.00, 19500.00, 10000.00, 5500.00, 4000.00, 5000.00, 4, 12, 'All Classes', '3-8', 'MALE, FEMALE', '2026-07-25 08:00:00', '2026-08-10 15:00:00');
 GO
 
 -- 9. Insert Blacklist Entries (3 accounts put on ban list)
 INSERT INTO [dbo].[blacklist] ([target_type], [target_id], [reason], [start_date], [end_date], [is_permanent], [status], [created_at]) VALUES
-('USER', (SELECT id FROM [users] WHERE username='clayman'), N'Vi phạm điều khoản dịch vụ và hành vi gian lận tại Tempest', GETDATE(), NULL, 1, 'ACTIVE', GETDATE()),
-('USER', (SELECT id FROM [users] WHERE username='footman'), N'Quấy rối trật tự trường đua và cố ý gây rối', GETDATE(), NULL, 1, 'ACTIVE', GETDATE()),
-('USER', (SELECT id FROM [users] WHERE username='laplace'), N'Thao túng hành vi cá cược trái phép', GETDATE(), NULL, 1, 'ACTIVE', GETDATE());
+('USER', (SELECT id FROM [users] WHERE username='clayman'), 'Violation of terms of service and fraudulent behavior at Tempest', GETDATE(), NULL, 1, 'ACTIVE', GETDATE()),
+('USER', (SELECT id FROM [users] WHERE username='footman'), 'Disrupting racetrack order and intentional misconduct', GETDATE(), NULL, 1, 'ACTIVE', GETDATE()),
+('USER', (SELECT id FROM [users] WHERE username='laplace'), 'Illegal betting manipulation', GETDATE(), NULL, 1, 'ACTIVE', GETDATE());
 GO
 
 -- 10. Insert Upgrade Requests (2 PENDING, 2 REJECTED)
 INSERT INTO [dbo].[upgrade_requests] ([user_id], [requested_role], [status], [notes], [rejection_reason], [full_name], [phone_number], [identity_number], [date_of_birth], [stable_name], [stable_address], [license_number], [height], [weight], [experience_years], [created_at]) VALUES
 -- 1. Kurobe (Owner - PENDING)
-((SELECT id FROM [users] WHERE username='kurobe'), 'HORSE_OWNER', 'PENDING', N'Yêu cầu nâng cấp tài khoản lên Chủ Ngựa cho trang trại Kurobe', NULL, 'Kurobe Smith', '0901000037', '038090100037', '1992-04-10', N'Chuồng Ngựa Kurobe', N'Khu Rèn Tempest', NULL, NULL, NULL, 5, GETDATE()),
+((SELECT id FROM [users] WHERE username='kurobe'), 'HORSE_OWNER', 'PENDING', 'Request account upgrade to Horse Owner for Kurobe stables', NULL, 'Kurobe Smith', '0901000037', '038090100037', '1992-04-10', 'Kurobe Stables', 'Forge District, Tempest', NULL, NULL, NULL, 5, GETDATE()),
 
 -- 2. Sooka (Jockey - PENDING)
-((SELECT id FROM [users] WHERE username='sooka'), 'JOCKEY', 'PENDING', N'Yêu cầu nâng cấp tài khoản lên Kỵ Thủ chuyên nghiệp', NULL, 'Sooka Dragonewt', '0901000038', '038090100038', '1998-06-15', NULL, NULL, 'JCK-TEMPEST-09', 168.0, 51.0, 3, GETDATE()),
+((SELECT id FROM [users] WHERE username='sooka'), 'JOCKEY', 'PENDING', 'Request account upgrade to professional Jockey', NULL, 'Sooka Dragonewt', '0901000038', '038090100038', '1998-06-15', NULL, NULL, 'JCK-TEMPEST-09', 168.0, 51.0, 3, GETDATE()),
 
 -- 3. Yamato (Owner - REJECTED)
-((SELECT id FROM [users] WHERE username='yamato'), 'HORSE_OWNER', 'REJECTED', N'Yêu cầu nâng cấp tài khoản thành Chủ Ngựa', N'Hồ sơ không hợp lệ: Thông tin giấy phép và địa chỉ trang trại chưa đầy đủ.', 'Yamato General', '0901000039', '038090100039', '1989-10-20', N'Chuồng Ngựa Yamato', N'Khu Quân Sự Tempest', NULL, NULL, NULL, 2, GETDATE()),
+((SELECT id FROM [users] WHERE username='yamato'), 'HORSE_OWNER', 'REJECTED', 'Request account upgrade to Horse Owner', 'Invalid profile: License information and stable address are incomplete.', 'Yamato General', '0901000039', '038090100039', '1989-10-20', 'Yamato Stables', 'Military District, Tempest', NULL, NULL, NULL, 2, GETDATE()),
 
 -- 4. Takuya (Jockey - REJECTED)
-((SELECT id FROM [users] WHERE username='takuya'), 'JOCKEY', 'REJECTED', N'Yêu cầu nâng cấp tài khoản thành Kỵ Thủ', N'Không đạt yêu cầu: Cân nặng và chiều cao không phù hợp tiêu chuẩn Kỵ Thủ Tempest.', 'Takuya Ninja', '0901000040', '038090100040', '1999-12-01', NULL, NULL, 'JCK-TEMPEST-10', 172.0, 58.0, 1, GETDATE());
+((SELECT id FROM [users] WHERE username='takuya'), 'JOCKEY', 'REJECTED', 'Request account upgrade to Jockey', 'Did not meet requirements: Weight and height do not match Tempest Jockey standards.', 'Takuya Ninja', '0901000040', '038090100040', '1999-12-01', NULL, NULL, 'JCK-TEMPEST-10', 172.0, 58.0, 1, GETDATE());
 GO
 
 -- 11. Create Wallets for all accounts with starting balance of 50,000.00 VNĐ

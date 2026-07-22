@@ -49,7 +49,7 @@ export default function JockeyInvitationsContent() {
         const friends = await getFriendsAPI();
         setFriendsList(friends);
       } catch (err) {
-        console.error('Lỗi khi tải danh sách bạn bè:', err);
+        console.error('Error loading friends list:', err);
       }
     };
     loadFriends();
@@ -64,7 +64,7 @@ export default function JockeyInvitationsContent() {
           const directory = await getConnectionsDirectoryAPI(searchQuery, roleFilter);
           setDirectoryList(directory);
         } catch (err) {
-          console.error('Lỗi khi tải danh bạ:', err);
+          console.error('Error loading directory:', err);
         } finally {
           setLoading(false);
         }
@@ -80,7 +80,7 @@ export default function JockeyInvitationsContent() {
       const directory = await getConnectionsDirectoryAPI(searchQuery, roleFilter);
       setDirectoryList(directory);
     } catch (err) {
-      console.error('Lỗi khi làm mới kết nối:', err);
+      console.error('Error refreshing connections:', err);
     }
   };
 
@@ -91,7 +91,7 @@ export default function JockeyInvitationsContent() {
       await refreshData();
       await refreshAll();
     } catch (err) {
-      alert('Gửi yêu cầu kết bạn thất bại: ' + err.message);
+      alert('Failed to send friend request: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -104,7 +104,7 @@ export default function JockeyInvitationsContent() {
       await refreshData();
       await refreshAll();
     } catch (err) {
-      alert('Trả lời yêu cầu kết bạn thất bại: ' + err.message);
+      alert('Failed to respond to friend request: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -117,7 +117,7 @@ export default function JockeyInvitationsContent() {
       await refreshData();
       await refreshAll();
     } catch (err) {
-      alert('Xóa kết nối thất bại: ' + err.message);
+      alert('Failed to delete connection: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -136,12 +136,12 @@ export default function JockeyInvitationsContent() {
 
   const handleAcceptRide = (id) => {
     respondToInvitation(id, 'ACCEPTED');
-    alert('Đã chấp nhận lời mời đua thành công! Cuộc đua đã được thêm vào lịch trình cá nhân của bạn.');
+    alert('Successfully accepted race invitation! The race has been added to your personal schedule.');
   };
 
   const handleRejectRide = (id) => {
     respondToInvitation(id, 'REJECTED');
-    alert('Đã từ chối lời mời đua thành công.');
+    alert('Successfully rejected race invitation.');
   };
 
   return (
@@ -150,10 +150,10 @@ export default function JockeyInvitationsContent() {
       <div className="d-flex justify-content-between align-items-end border-bottom pb-3 mb-4" style={{ borderColor: 'var(--ho-border-muted)' }}>
         <div>
           <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
-            Hộp thư Lời mời & Kết nối
+            Invitations & Connections Inbox
           </h2>
           <p className="text-secondary small m-0">
-            Duyệt các yêu cầu hợp tác đua ngựa và kết nối bạn bè với các Horse Owner.
+            Browse race cooperation requests and connect with Horse Owners.
           </p>
         </div>
       </div>
@@ -165,7 +165,7 @@ export default function JockeyInvitationsContent() {
           className={`ho-tab-btn ${activeTab === 'race-invitations' ? 'ho-tab-btn-active' : ''}`}
           style={{ borderRadius: '30px' }}
         >
-          Lời mời đua ngựa ({pendingInvitations.length})
+          Race Invitations ({pendingInvitations.length})
         </button>
         <button
           onClick={() => {
@@ -175,7 +175,7 @@ export default function JockeyInvitationsContent() {
           className={`ho-tab-btn ${activeTab === 'connections' ? 'ho-tab-btn-active' : ''}`}
           style={{ borderRadius: '30px' }}
         >
-          Mạng lưới bạn bè
+          Friends Network
         </button>
       </div>
 
@@ -185,14 +185,14 @@ export default function JockeyInvitationsContent() {
           <div className="row g-4">
             {pendingInvitations.length === 0 ? (
               <div className="col-12 text-center py-5 glass-card text-secondary italic">
-                Hiện tại bạn không có lời mời đua ngựa mới nào.
+                You currently have no new race invitations.
               </div>
             ) : (
               pendingInvitations.map((inv) => (
                 <div key={inv.id} className="col-12 col-md-6">
                   <DataCard 
                     title={inv.tournamentName} 
-                    subtitle={`${inv.raceDate} lúc ${inv.raceTime}`}
+                    subtitle={`${inv.raceDate} at ${inv.raceTime}`}
                     interactive={false}
                   >
                     <div className="mb-3 p-3 rounded" style={{ backgroundColor: 'rgba(212,175,55,0.06)', border: '1px solid var(--ho-border-gold)' }}>
@@ -211,19 +211,19 @@ export default function JockeyInvitationsContent() {
 
                     <div className="d-flex flex-column gap-2 mb-4">
                       <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                        <span className="fw-semibold text-muted small">Chiến mã:</span>
+                        <span className="fw-semibold text-muted small">Horse:</span>
                         <span className="fw-bold text-dark small">{inv.horseName} ({inv.horseBreed})</span>
                       </div>
                       <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                        <span className="fw-semibold text-muted small">Địa điểm đường chạy:</span>
+                        <span className="fw-semibold text-muted small">Track Location:</span>
                         <span className="text-dark small text-truncate ms-2" style={{ maxWidth: '200px' }}>{inv.location}</span>
                       </div>
                       <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                        <span className="fw-semibold text-muted small">Tỷ lệ chia thưởng (Jockey / Owner):</span>
+                        <span className="fw-semibold text-muted small">Prize Split (Jockey / Owner):</span>
                         <span className="fw-bold text-success small">{inv.jockeyShare}% / {inv.ownerShare}%</span>
                       </div>
                       <div className="d-flex justify-content-between py-1">
-                        <span className="fw-semibold text-muted small">Tiền thưởng giải:</span>
+                        <span className="fw-semibold text-muted small">Prize Pool:</span>
                         <span className="fw-bold text-dark small">{inv.prizePool}</span>
                       </div>
                     </div>
@@ -233,13 +233,13 @@ export default function JockeyInvitationsContent() {
                         onClick={() => handleRejectRide(inv.id)}
                         className="ho-btn ho-btn-outline-danger flex-grow-1 py-2 fw-bold"
                       >
-                        Từ chối
+                        Reject
                       </button>
                       <button
                         onClick={() => handleAcceptRide(inv.id)}
                         className="ho-btn ho-btn-dark-green flex-grow-1 py-2 fw-bold"
                       >
-                        Chấp nhận
+                        Accept
                       </button>
                     </div>
                   </DataCard>
@@ -252,17 +252,17 @@ export default function JockeyInvitationsContent() {
           {processedInvitations.length > 0 && (
             <div className="mt-4">
               <h3 className="ho-font-epilogue fs-5 fw-bold mb-3" style={{ color: 'var(--ho-primary-dark)' }}>
-                Lời mời đã xử lý trước đây
+                Previously Processed Invitations
               </h3>
               <div className="glass-card p-0 overflow-hidden">
                 <table className="table table-hover align-middle mb-0 text-dark">
                   <thead className="table-light">
                     <tr>
-                      <th className="ps-3 py-3 text-secondary small text-uppercase">Giải đua</th>
-                      <th className="py-3 text-secondary small text-uppercase">Chủ ngựa</th>
-                      <th className="py-3 text-secondary small text-uppercase">Ngựa chiến</th>
-                      <th className="py-3 text-secondary small text-uppercase text-center">Tỷ lệ (%)</th>
-                      <th className="pe-3 py-3 text-secondary small text-uppercase text-end">Trạng thái</th>
+                      <th className="ps-3 py-3 text-secondary small text-uppercase">Race Tournament</th>
+                      <th className="py-3 text-secondary small text-uppercase">Horse Owner</th>
+                      <th className="py-3 text-secondary small text-uppercase">Horse</th>
+                      <th className="py-3 text-secondary small text-uppercase text-center">Share (%)</th>
+                      <th className="pe-3 py-3 text-secondary small text-uppercase text-end">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -301,28 +301,28 @@ export default function JockeyInvitationsContent() {
               className={`ho-tab-btn ${activeSubTab === 'my-friends' ? 'ho-tab-btn-active' : ''}`}
               style={{ fontSize: '11px', padding: '0.4rem 1.2rem' }}
             >
-              Bạn bè của tôi ({friendsList.length})
+              My Friends ({friendsList.length})
             </button>
             <button
               onClick={() => setActiveSubTab('friend-requests')}
               className={`ho-tab-btn ${activeSubTab === 'friend-requests' ? 'ho-tab-btn-active' : ''}`}
               style={{ fontSize: '11px', padding: '0.4rem 1.2rem' }}
             >
-              Lời mời kết bạn ({incomingRequests.length})
+              Friend Requests ({incomingRequests.length})
             </button>
             <button
               onClick={() => setActiveSubTab('find')}
               className={`ho-tab-btn ${activeSubTab === 'find' ? 'ho-tab-btn-active' : ''}`}
               style={{ fontSize: '11px', padding: '0.4rem 1.2rem' }}
             >
-              Tìm kiếm chủ chuồng ngựa
+              Search Stable Owners
             </button>
           </div>
 
           {loading && (
             <div className="text-center py-4 text-success fw-bold">
               <div className="spinner-border spinner-border-sm me-2" role="status"></div>
-              Đang tải kết nối...
+              Loading connections...
             </div>
           )}
 
@@ -331,7 +331,7 @@ export default function JockeyInvitationsContent() {
             <div className="row g-4">
               {friendsList.length === 0 ? (
                 <div className="col-12 text-center py-5 glass-card text-secondary italic">
-                  Chưa có kết nối bạn bè nào. Chuyển sang "Tìm kiếm chủ chuồng ngựa" để gửi kết bạn.
+                  No friends yet. Switch to "Search Stable Owners" to send requests.
                 </div>
               ) : (
                 friendsList.map((friend) => (
@@ -366,7 +366,7 @@ export default function JockeyInvitationsContent() {
                           onClick={() => handleDeleteConnection(friend.connectionId)}
                           className="ho-btn ho-btn-outline-danger btn-sm w-100 fw-bold"
                         >
-                          Hủy kết bạn
+                          Unfriend
                         </button>
                       </div>
                     </DataCard>
@@ -381,7 +381,7 @@ export default function JockeyInvitationsContent() {
             <div className="row g-4">
               {incomingRequests.length === 0 ? (
                 <div className="col-12 text-center py-5 glass-card text-secondary italic">
-                  Không có lời mời kết bạn nào đang chờ duyệt.
+                  No pending friend requests.
                 </div>
               ) : (
                 incomingRequests.map((user) => (
@@ -418,13 +418,13 @@ export default function JockeyInvitationsContent() {
                             onClick={() => handleRespondRequest(user.connectionId, 'ACCEPT')}
                             className="ho-btn ho-btn-dark-green flex-grow-1 fw-bold"
                           >
-                            Đồng ý
+                            Accept
                           </button>
                           <button 
                             onClick={() => handleRespondRequest(user.connectionId, 'REJECT')}
                             className="ho-btn ho-btn-outline-danger px-3 fw-bold"
                           >
-                            Từ chối
+                            Reject
                           </button>
                         </div>
                       </div>
@@ -446,7 +446,7 @@ export default function JockeyInvitationsContent() {
                   </span>
                   <input
                     type="text"
-                    placeholder="Tìm kiếm theo Tên hoặc ID chủ ngựa..."
+                    placeholder="Search by Name or ID of Horse Owner..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="ho-form-input ps-5 text-dark"
@@ -458,9 +458,9 @@ export default function JockeyInvitationsContent() {
                   className="ho-form-input text-dark fw-bold"
                   style={{ width: 'auto' }}
                 >
-                  <option value="ALL">Tất cả vai trò</option>
-                  <option value="HORSE_OWNER">Chủ ngựa</option>
-                  <option value="JOCKEY">Nài ngựa khác</option>
+                  <option value="ALL">All Roles</option>
+                  <option value="HORSE_OWNER">Horse Owner</option>
+                  <option value="JOCKEY">Other Jockeys</option>
                 </select>
               </div>
 
@@ -468,7 +468,7 @@ export default function JockeyInvitationsContent() {
               <div className="row g-4">
                 {directoryList.length === 0 ? (
                   <div className="col-12 text-center py-5 glass-card text-secondary italic">
-                    Không tìm thấy người dùng phù hợp.
+                    No matching users found.
                   </div>
                 ) : (
                   directoryList.map((user) => (
@@ -501,7 +501,7 @@ export default function JockeyInvitationsContent() {
 
                         <div className="mt-3" onClick={(e) => e.stopPropagation()}>
                           {user.friendStatus === 'FRIEND' && (
-                            <StatusBadge status="Bạn bè" customClass="w-100 justify-content-center" />
+                            <StatusBadge status="Friend" customClass="w-100 justify-content-center" />
                           )}
 
                           {user.friendStatus === 'PENDING_SENT' && (
@@ -509,7 +509,7 @@ export default function JockeyInvitationsContent() {
                               onClick={() => handleDeleteConnection(user.connectionId)}
                               className="ho-btn ho-btn-outline-secondary w-100 fw-bold"
                             >
-                              Đã gửi yêu cầu
+                              Request Sent
                             </button>
                           )}
 
@@ -519,7 +519,7 @@ export default function JockeyInvitationsContent() {
                                 onClick={() => handleRespondRequest(user.connectionId, 'ACCEPT')}
                                 className="ho-btn ho-btn-dark-green flex-grow-1 fw-bold"
                               >
-                                Đồng ý
+                                Accept
                               </button>
                               <button 
                                 onClick={() => handleRespondRequest(user.connectionId, 'REJECT')}
@@ -535,7 +535,7 @@ export default function JockeyInvitationsContent() {
                               onClick={() => handleAddFriend(user.userId || user.id)}
                               className="ho-btn ho-btn-gold-solid w-100 fw-bold"
                             >
-                              Kết bạn
+                              Add Friend
                             </button>
                           )}
                         </div>
@@ -555,7 +555,7 @@ export default function JockeyInvitationsContent() {
           <div className="modal-content-custom animate-scale-up" style={{ maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
             <div className="d-flex justify-content-between align-items-start border-bottom pb-3 mb-4" style={{ borderColor: 'var(--ho-border-muted)' }}>
               <h3 className="ho-font-epilogue fs-4 fw-bold m-0" style={{ color: 'var(--ho-primary-dark)' }}>
-                Chi tiết người dùng
+                User Details
               </h3>
               <button 
                 onClick={() => setShowFriendModal(false)}
@@ -594,17 +594,17 @@ export default function JockeyInvitationsContent() {
                 <span className="text-secondary">{selectedFriend.email || 'N/A'}</span>
               </div>
               <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                <span className="fw-bold text-dark">Số điện thoại:</span>
+                <span className="fw-bold text-dark">Phone Number:</span>
                 <span className="text-secondary">{selectedFriend.phoneNumber || selectedFriend.phone || 'N/A'}</span>
               </div>
               {selectedFriend.role === 'HORSE_OWNER' && (
                 <>
                   <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                    <span className="fw-bold text-dark">Trang trại:</span>
+                    <span className="fw-bold text-dark">Stable:</span>
                     <span className="text-secondary fw-bold" style={{ color: 'var(--ho-primary-dark)' }}>{selectedFriend.stableName || 'Lucky Stable'}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1">
-                    <span className="fw-bold text-dark">Địa chỉ:</span>
+                    <span className="fw-bold text-dark">Address:</span>
                     <span className="text-secondary text-end small" style={{ maxWidth: '240px' }}>{selectedFriend.stableAddress || 'N/A'}</span>
                   </div>
                 </>
@@ -612,15 +612,15 @@ export default function JockeyInvitationsContent() {
               {selectedFriend.role === 'JOCKEY' && (
                 <>
                   <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                    <span className="fw-bold text-dark">Kinh nghiệm:</span>
-                    <span className="text-secondary fw-bold">{selectedFriend.experienceYears || 0} năm</span>
+                    <span className="fw-bold text-dark">Experience:</span>
+                    <span className="text-secondary fw-bold">{selectedFriend.experienceYears || 0} years</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                    <span className="fw-bold text-dark">Số trận đã tham gia:</span>
-                    <span className="text-secondary fw-bold">{selectedFriend.matchesPlayed || 0} trận</span>
+                    <span className="fw-bold text-dark">Matches Played:</span>
+                    <span className="text-secondary fw-bold">{selectedFriend.matchesPlayed || 0} matches</span>
                   </div>
                   <div className="d-flex justify-content-between py-1">
-                    <span className="fw-bold text-dark">Số điểm xếp hạng:</span>
+                    <span className="fw-bold text-dark">Ranking Score:</span>
                     <span className="text-secondary fw-bold">{selectedFriend.rankingScore || 800} pts</span>
                   </div>
                 </>

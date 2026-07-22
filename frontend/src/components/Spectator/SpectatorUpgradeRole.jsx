@@ -64,7 +64,7 @@ export default function SpectatorUpgradeRole() {
     if (files.length === 0) return;
 
     if (uploadedImages.length + files.length > 5) {
-      alert("Bạn chỉ có thể tải lên tối đa 5 hình ảnh.");
+      alert("You can only upload a maximum of 5 images.");
       return;
     }
 
@@ -83,7 +83,7 @@ export default function SpectatorUpgradeRole() {
       setUploadedImages(prev => [...prev, ...response.data]);
     } catch (err) {
       console.error("Failed to upload files:", err);
-      alert("Tải lên hình ảnh thất bại. Vui lòng kiểm tra lại định dạng tệp.");
+      alert("Image upload failed. Please check the file format.");
     } finally {
       setIsUploading(false);
     }
@@ -100,7 +100,7 @@ export default function SpectatorUpgradeRole() {
     try {
       const payload = {
         requestedRole: requestedRole,
-        notes: notes || ("Yêu cầu nâng cấp lên " + requestedRole.replace('_', ' ')),
+        notes: notes || ("Upgrade request to " + requestedRole.replace('_', ' ')),
         fullName,
         dateOfBirth,
         phoneNumber,
@@ -224,8 +224,8 @@ export default function SpectatorUpgradeRole() {
       {/* Title */}
       <div className="mb-4">
         <span className="role-badge">SPECTATOR ROLE</span>
-        <h2 className="ho-font-epilogue fs-3 fw-bold text-dark mb-1">Nâng Cấp Tài Khoản</h2>
-        <p className="text-secondary small">Trở thành thành viên chính thức với vai trò Chủ Ngựa, Nài Ngựa hoặc Trọng Tài hệ thống.</p>
+        <h2 className="ho-font-epilogue fs-3 fw-bold text-dark mb-1">Account Upgrade</h2>
+        <p className="text-secondary small">Become an official member with the role of Horse Owner, Jockey, or Race Referee.</p>
       </div>
 
       <div className="row g-4 justify-content-center">
@@ -274,21 +274,21 @@ export default function SpectatorUpgradeRole() {
             {(!myRequest || myRequest.status === 'REJECTED') && (
               <form onSubmit={handleRequestUpgrade} className="d-flex flex-column gap-4">
                 <p className="text-secondary small m-0" style={{ fontSize: '13.5px' }}>
-                  Điền đầy đủ thông tin bên dưới và tải lên tài liệu chứng minh để nâng cấp tài khoản của bạn.
+                  Fill in the information below and upload verification documents to upgrade your account.
                 </p>
                 
                 {/* Select role */}
                 <div className="form-group">
-                  <label className="ho-input-label">Chọn vai trò muốn nâng cấp</label>
+                  <label className="ho-input-label">Select role to upgrade to</label>
                   <select 
                     value={requestedRole} 
                     onChange={(e) => setRequestedRole(e.target.value)}
                     className="form-select"
                     style={{ padding: '10px 15px', borderRadius: '8px', border: '1px solid #c0c9c0' }}
                   >
-                    <option value="HORSE_OWNER">Chủ trang trại ngựa (Horse Owner)</option>
-                    <option value="JOCKEY">Nài ngựa (Jockey)</option>
-                    <option value="RACE_REFEREE">Trọng tài đua (Race Referee)</option>
+                    <option value="HORSE_OWNER">Horse Owner</option>
+                    <option value="JOCKEY">Jockey</option>
+                    <option value="RACE_REFEREE">Race Referee</option>
                   </select>
                 </div>
 
@@ -296,24 +296,24 @@ export default function SpectatorUpgradeRole() {
                 <div>
                   <h4 className="form-section-title">
                     <span className="material-symbols-outlined text-success">badge</span>
-                    Thông Tin Định Danh Cá Nhân
+                    Personal Identification Information
                   </h4>
                   
                   <div className="row g-3">
                     <div className="col-12 col-md-6">
-                      <label className="ho-input-label">Họ và Tên</label>
+                      <label className="ho-input-label">Full Name</label>
                       <input 
                         type="text" 
                         required 
                         className="ho-form-input" 
-                        placeholder="Nguyễn Văn A" 
+                        placeholder="John Doe" 
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                       />
                     </div>
                     
                     <div className="col-12 col-md-6">
-                      <label className="ho-input-label">Số Điện Thoại</label>
+                      <label className="ho-input-label">Phone Number</label>
                       <input 
                         type="tel" 
                         required 
@@ -325,7 +325,7 @@ export default function SpectatorUpgradeRole() {
                     </div>
 
                     <div className="col-12 col-md-6">
-                      <label className="ho-input-label">Ngày Sinh</label>
+                      <label className="ho-input-label">Date of Birth</label>
                       <input 
                         type="date" 
                         required 
@@ -336,7 +336,7 @@ export default function SpectatorUpgradeRole() {
                     </div>
                     
                     <div className="col-12 col-md-6">
-                      <label className="ho-input-label">Số CCCD / Hộ Chiếu</label>
+                      <label className="ho-input-label">Identity Card / Passport Number</label>
                       <input 
                         type="text" 
                         required 
@@ -353,13 +353,13 @@ export default function SpectatorUpgradeRole() {
                 <div>
                   <h4 className="form-section-title">
                     <span className="material-symbols-outlined text-success">psychology</span>
-                    Thông Tin Hồ Sơ Chuyên Môn
+                    Professional Profile Information
                   </h4>
 
                   {requestedRole === 'JOCKEY' && (
                     <div className="row g-3">
                       <div className="col-6">
-                        <label className="ho-input-label">Cân nặng (kg)</label>
+                        <label className="ho-input-label">Weight (kg)</label>
                         <input 
                           type="number" 
                           required 
@@ -373,7 +373,7 @@ export default function SpectatorUpgradeRole() {
                         />
                       </div>
                       <div className="col-6">
-                        <label className="ho-input-label">Chiều cao (cm)</label>
+                        <label className="ho-input-label">Height (cm)</label>
                         <input 
                           type="number" 
                           required 
@@ -386,12 +386,12 @@ export default function SpectatorUpgradeRole() {
                         />
                       </div>
                       <div className="col-12">
-                        <label className="ho-input-label">Số Giấy Phép Nài Ngựa (License Number)</label>
+                        <label className="ho-input-label">Jockey License Number</label>
                         <input 
                           type="text" 
                           required 
                           className="ho-form-input" 
-                          placeholder="Ví dụ: JC-998877" 
+                          placeholder="e.g. JC-998877" 
                           value={licenseNumber}
                           onChange={(e) => setLicenseNumber(e.target.value)}
                         />
@@ -402,23 +402,23 @@ export default function SpectatorUpgradeRole() {
                   {requestedRole === 'HORSE_OWNER' && (
                     <div className="row g-3">
                       <div className="col-12">
-                        <label className="ho-input-label">Tên Trang Trại (Stable Name)</label>
+                        <label className="ho-input-label">Stable Name</label>
                         <input 
                           type="text" 
                           required 
                           className="ho-form-input" 
-                          placeholder="Ví dụ: Trang trại ngựa Hùng Cường" 
+                          placeholder="e.g. Tempest Stables" 
                           value={stableName}
                           onChange={(e) => setStableName(e.target.value)}
                         />
                       </div>
                       <div className="col-12">
-                        <label className="ho-input-label">Địa Chỉ Trang Trại (Stable Address)</label>
+                        <label className="ho-input-label">Stable Address</label>
                         <input 
                           type="text" 
                           required 
                           className="ho-form-input" 
-                          placeholder="Số 12 Đường đua, Quận 9, TP.HCM" 
+                          placeholder="12 Racetrack Ave, Tempest City" 
                           value={stableAddress}
                           onChange={(e) => setStableAddress(e.target.value)}
                         />
@@ -429,18 +429,18 @@ export default function SpectatorUpgradeRole() {
                   {requestedRole === 'RACE_REFEREE' && (
                     <div className="row g-3">
                       <div className="col-12 col-md-6">
-                        <label className="ho-input-label">Số Chứng Chỉ Trọng Tài</label>
+                        <label className="ho-input-label">Referee Certificate Number</label>
                         <input 
                           type="text" 
                           required 
                           className="ho-form-input" 
-                          placeholder="Ví dụ: REF-665544" 
+                          placeholder="e.g. REF-665544" 
                           value={certificationNumber}
                           onChange={(e) => setCertificationNumber(e.target.value)}
                         />
                       </div>
                       <div className="col-12 col-md-6">
-                        <label className="ho-input-label">Số Năm Kinh Nghiệm</label>
+                        <label className="ho-input-label">Years of Experience</label>
                         <input 
                           type="number" 
                           required 
@@ -460,7 +460,7 @@ export default function SpectatorUpgradeRole() {
                 <div>
                   <h4 className="form-section-title">
                     <span className="material-symbols-outlined text-success">cloud_upload</span>
-                    Bằng Cấp & Tài Liệu Xác Thực
+                    Credentials & Verification Documents
                   </h4>
 
                   <label className="upload-dropzone" style={{ pointerEvents: isUploading ? 'none' : 'auto' }}>
@@ -476,11 +476,11 @@ export default function SpectatorUpgradeRole() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                     </svg>
                     <div className="upload-text text-secondary mt-2 small">
-                      {isUploading ? 'Đang tải tệp lên máy chủ...' : (
-                        <>Click để <strong>Tải ảnh lên</strong> hoặc Kéo & thả</>
+                      {isUploading ? 'Uploading files to server...' : (
+                        <>Click to <strong>Upload image</strong> or drag & drop</>
                       )}
                     </div>
-                    <div className="upload-subtext text-muted small" style={{ fontSize: '11px' }}>Hỗ trợ định dạng PNG, JPG, JPEG (tối đa 5 ảnh)</div>
+                    <div className="upload-subtext text-muted small" style={{ fontSize: '11px' }}>Supports PNG, JPG, JPEG (max 5 images)</div>
                   </label>
 
                   {uploadedImages.length > 0 && (
@@ -504,11 +504,11 @@ export default function SpectatorUpgradeRole() {
 
                 {/* Notes */}
                 <div className="form-group">
-                  <label className="ho-input-label">Ghi Chú Thêm</label>
+                  <label className="ho-input-label">Additional Notes</label>
                   <textarea 
                     className="ho-form-input" 
                     rows="3" 
-                    placeholder="Giới thiệu bản thân hoặc lưu ý khác cho Ban quản trị..."
+                    placeholder="Introduce yourself or add other notes for the Admin..."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     style={{ resize: 'vertical' }}
@@ -520,7 +520,7 @@ export default function SpectatorUpgradeRole() {
                   className="ho-btn ho-btn-gold-solid w-100 py-3 mt-2"
                   disabled={isSubmitting || isUploading}
                 >
-                  {isSubmitting ? 'Đang gửi yêu cầu...' : 'Gửi yêu cầu nâng cấp vai trò'}
+                  {isSubmitting ? 'Submitting request...' : 'Submit Upgrade Request'}
                 </button>
               </form>
             )}

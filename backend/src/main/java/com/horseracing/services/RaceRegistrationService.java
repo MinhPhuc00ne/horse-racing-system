@@ -531,6 +531,14 @@ public class RaceRegistrationService {
             if (jockeyRegistered) {
                 throw new RuntimeException("This jockey is already registered for this race");
             }
+
+            notificationService.sendNotification(
+                    registration.getJockey().getUser(),
+                    "Jockey Assignment Cancelled",
+                    "Horse Owner " + registration.getOwner().getUser().getFullName() + " has replaced you with another jockey for race " + registration.getRace().getRaceName() + " of tournament " + registration.getRace().getTournament().getTournamentName() + ".",
+                    NotificationType.REGISTRATION
+            );
+
             registration.setJockey(jockey);
         }
 

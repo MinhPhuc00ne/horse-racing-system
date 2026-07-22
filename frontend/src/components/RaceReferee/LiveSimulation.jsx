@@ -56,7 +56,7 @@ export default function LiveSimulation() {
   const shakeIntensity = useRef(0);
   const lightningIntensity = useRef(0);
   const lastCommentaryChange = useRef(0);
-  const commentaryText = useRef("Hệ thống đang chuẩn bị cuộc đua...");
+  const commentaryText = useRef("The system is preparing the race...");
   const fireworks = useRef([]);
   const crowdBubbles = useRef([]);
   const horseImagesRef = useRef({});
@@ -100,10 +100,10 @@ export default function LiveSimulation() {
       const finishedCount = currentHorses.filter(h => h.progress >= 100).length;
       if (finishedCount === 0) {
         const finishComments = [
-          `Chiến mã ${finishLeader.name} (Số ${finishLeader.id}) đang tiến rất sát vạch đích!`,
-          `Giai đoạn nước rút cực kỳ căng thẳng! ${finishLeader.name} đang dẫn đầu!`,
-          `Cơ hội chiến thắng đang chia đều, các chiến mã đang bung hết sức mình!`,
-          `Ai sẽ là nhà vô địch? Tất cả đang dồn mắt về vạch đích!`
+          `Horse ${finishLeader.name} (No. ${finishLeader.id}) is closing in on the finish line!`,
+          `The sprint phase is extremely intense! ${finishLeader.name} is in the lead!`,
+          `The chance of victory is wide open, all horses are giving it their all!`,
+          `Who will be the champion? Everyone is watching the finish line!`
         ];
         commentaryText.current = finishComments[Math.floor(Math.random() * finishComments.length)];
         lastCommentaryChange.current = now;
@@ -116,29 +116,29 @@ export default function LiveSimulation() {
 
     if (leadDiff > 12) {
       comments.push(
-        `Chiến mã ${leader.name} (Số ${leader.id}) đang bứt tốc ngoạn mục, tạo khoảng cách lớn!`,
-        `Khoảng cách dẫn đầu của ${leader.name} vẫn đang được duy trì rất tốt!`,
-        `${leader.name} đang một mình băng băng dẫn đầu đoàn đua!`
+        `Horse ${leader.name} (No. ${leader.id}) is accelerating spectacularly, creating a massive gap!`,
+        `The lead distance of ${leader.name} is being maintained exceptionally well!`,
+        `${leader.name} is running away with the lead all by itself!`
       );
     } else if (second && leadDiff <= 3) {
       comments.push(
-        `Cuộc rượt đuổi nghẹt thở! ${leader.name} và ${second.name} đang kèn cựa cực kỳ gay cấn!`,
-        `Cạnh tranh khốc liệt! ${second.name} đang bám đuổi quyết liệt phía sau ${leader.name}!`,
-        `Hai vị trí dẫn đầu liên tục so kè nhau từng mét đường đua!`
+        `A breathtaking chase! ${leader.name} and ${second.name} are locked in a head-to-head battle!`,
+        `Fierce competition! ${second.name} is chasing relentlessly behind ${leader.name}!`,
+        `The top two positions are constantly competing millimeter by millimeter!`
       );
     } else {
       comments.push(
-        `Chiến mã ${leader.name} (Số ${leader.id}) đang tạm dẫn đầu đoàn đua với tốc độ ${leader.speed || 60} km/h!`,
-        `Đoàn đua đang bám đuổi sát sao phía sau vị trí của ${leader.name}!`,
-        `${leader.name} đang làm chủ tốc độ ở chặng giữa đường đua!`
+        `Horse ${leader.name} (No. ${leader.id}) is temporarily leading the pack with a speed of ${leader.speed || 60} km/h!`,
+        `The pack is chasing closely behind ${leader.name}'s position!`,
+        `${leader.name} is controlling the pace in the middle of the track!`
       );
     }
 
     comments.push(
-      `Tốc độ cuộc đua đang được đẩy lên rất cao!`,
-      `Khán giả trên khán đài đang hò reo cổ vũ vô cùng náo nhiệt!`,
-      `Các chiến mã đang dồn hết thể lực cho những mét đua quyết định!`,
-      `Trọng tài đang theo dõi sát sao từng chuyển động trên sa bàn!`
+      `The speed of the race is being pushed extremely high!`,
+      `The crowd in the stands is cheering enthusiastically!`,
+      `The horses are exhausting all their energy for the final crucial meters!`,
+      `The referee is closely monitoring every movement on the track!`
     );
 
     commentaryText.current = comments[Math.floor(Math.random() * comments.length)];
@@ -220,7 +220,7 @@ export default function LiveSimulation() {
                     const alreadyFinished = prev.some(other => other.progress >= 100 && other.id !== h.id);
                     if (!alreadyFinished) {
                       audioManager.setSfxVolume('crowd', 0.95);
-                      commentaryText.current = `🏆 CHIẾN THẮNG! Chiến mã số ${h.id} (${h.name}) đã xuất sắc cán đích đầu tiên!`;
+                      commentaryText.current = `🏆 VICTORY! Horse No. ${h.id} (${h.name}) has crossed the finish line first!`;
                       lastCommentaryChange.current = Date.now() + 8000;
                     }
                   }
@@ -266,9 +266,9 @@ export default function LiveSimulation() {
 
           const winner = mappedResults.find(r => r.rank === 1);
           if (winner) {
-            commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC! Chiến thắng chung cuộc thuộc về ${winner.horseName}!`;
+            commentaryText.current = `🏁 RACE OVER! Final victory belongs to ${winner.horseName}!`;
           } else {
-            commentaryText.current = `🏁 CUỘC ĐUA KẾT THÚC!`;
+            commentaryText.current = `🏁 RACE OVER!`;
           }
           lastCommentaryChange.current = Date.now() + 999999;
         } catch (err) {
@@ -302,21 +302,21 @@ export default function LiveSimulation() {
           setSpawnedCount(i);
           audioManager.playIntroChime(); // Play spawn chime
 
-          const currentHorseName = horsesRef.current[i - 1]?.name || `Chiến mã ${i}`;
-          commentaryText.current = `Đang dắt chiến mã số ${i} (${currentHorseName}) vào cổng xuất phát...`;
+          const currentHorseName = horsesRef.current[i - 1]?.name || `Horse ${i}`;
+          commentaryText.current = `Leading horse No. ${i} (${currentHorseName}) into the starting gate...`;
         }
         await new Promise(r => setTimeout(r, 600));
         for (let i = 5; i > 0; i--) {
           if (isCancelled) return;
           setCountdown(i.toString());
           audioManager.playCountdownBeep(false); // Play tick beep
-          commentaryText.current = `Chuẩn bị xuất phát... T-minus ${i} giây!`;
+          commentaryText.current = `Get ready for start... T-minus ${i} seconds!`;
           await new Promise(r => setTimeout(r, 1000));
         }
         if (isCancelled) return;
         setCountdown('GO!');
         audioManager.playCountdownBeep(true); // Play GO beep
-        commentaryText.current = "CỔNG MỞ! CUỘC ĐUA CHÍNH THỨC BẮT ĐẦU!";
+        commentaryText.current = "GATES OPEN! THE RACE HAS OFFICIALLY BEGUN!";
         await new Promise(r => setTimeout(r, 600));
         if (isCancelled) return;
         setCountdown(null);
@@ -354,7 +354,7 @@ export default function LiveSimulation() {
             horseId: p.horseId,
             name: p.horseName,
             jockeyName: p.jockeyName,
-            ownerName: p.ownerName || 'Tập đoàn ' + ['Alpha', 'Vanguard', 'Omega', 'Titan', 'Apex'][idx % 5],
+            ownerName: p.ownerName || 'Group ' + ['Alpha', 'Vanguard', 'Omega', 'Titan', 'Apex'][idx % 5],
             weight: p.actualWeight || (450 + Math.random() * 50).toFixed(1),
             progress: 0,
             color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea', '#f472b6', '#3b82f6'][idx % 7],
@@ -1851,7 +1851,7 @@ export default function LiveSimulation() {
             if (vHorse.bubbleTimer > 0) {
               vHorse.bubbleTimer--;
             } else if (Math.random() < 0.003) {
-              const phrases = ["Vượt lên!", "Nhanh hơn!", "Chặn đường kìa!", "Bứt phá nào!", "Sắp tới rồi!", "Cố lên!", "Đừng đầu hàng!", "Phóng thôi!"];
+              const phrases = ["Go ahead!", "Faster!", "Block the way!", "Breakout!", "Almost there!", "Come on!", "Don't give up!", "Sprint!"];
               vHorse.bubbleText = phrases[Math.floor(Math.random() * phrases.length)];
               vHorse.bubbleTimer = 80; // frames to show (~1.3s)
             }
@@ -2144,7 +2144,7 @@ export default function LiveSimulation() {
           // Subtext
           ctx.fillStyle = '#94a3b8';
           ctx.font = "bold 8px sans-serif";
-          ctx.fillText("BĂNG GHI HÌNH CÁN ĐÍCH TRỌNG TÀI", W / 2, f_y + 28);
+          ctx.fillText("REFEREE PHOTO FINISH RECORD", W / 2, f_y + 28);
 
           // Sweep camera line-scan box
           const b_x = f_x + 15;
@@ -2569,7 +2569,7 @@ export default function LiveSimulation() {
     shakeIntensity.current = 0;
     lightningIntensity.current = 0;
     lastCommentaryChange.current = 0;
-    commentaryText.current = "Hệ thống đang chuẩn bị cuộc đua...";
+    commentaryText.current = "The system is preparing the race...";
     fireworks.current = [];
     crowdBubbles.current = [];
     setPovHorse(null);
@@ -2586,7 +2586,7 @@ export default function LiveSimulation() {
               horseId: p.horseId,
               name: p.horseName,
               jockeyName: p.jockeyName,
-              ownerName: p.ownerName || 'Tập đoàn ' + ['Alpha', 'Vanguard', 'Omega', 'Titan', 'Apex'][idx % 5],
+              ownerName: p.ownerName || 'Group ' + ['Alpha', 'Vanguard', 'Omega', 'Titan', 'Apex'][idx % 5],
               weight: p.actualWeight || (450 + Math.random() * 50).toFixed(1),
               progress: 0,
               color: ['#00f2fe', '#10b981', '#ef4444', '#d4af37', '#9333ea'][idx % 5],
@@ -2617,7 +2617,7 @@ export default function LiveSimulation() {
         await startRaceAPI(actualRaceId);
       } catch (err) {
         console.error("Could not start race API", err);
-        alert("Không thể bắt đầu trận đấu: " + (err.message || err));
+        alert("Could not start the race: " + (err.message || err));
         return;
       }
     }
@@ -2729,9 +2729,9 @@ export default function LiveSimulation() {
 
       // Update commentary immediately for flag/violation
       if (isBlacklisted) {
-        commentaryText.current = `🚩 TRUẤT QUYỀN THI ĐẤU! Chiến mã số ${selectedHorseForFlag.id} (${selectedHorseForFlag.name}) phạm quy lần 3 và bị loại (DSQ)!`;
+        commentaryText.current = `🚩 DISQUALIFIED! Horse No. ${selectedHorseForFlag.id} (${selectedHorseForFlag.name}) committed a 3rd violation and is disqualified (DSQ)!`;
       } else {
-        commentaryText.current = `🚩 VI PHẠM! Trọng tài phạt cờ Chiến mã số ${selectedHorseForFlag.id} (${selectedHorseForFlag.name}) vì lỗi ${flagReason}!`;
+        commentaryText.current = `🚩 VIOLATION! Referee flags Horse No. ${selectedHorseForFlag.id} (${selectedHorseForFlag.name}) for ${flagReason}!`;
       }
       lastCommentaryChange.current = Date.now() + 3500; // keep it on screen for 3.5s
 
@@ -2803,7 +2803,7 @@ export default function LiveSimulation() {
                     className="btn btn-sm p-1 d-flex align-items-center justify-content-center border-0 bg-transparent"
                     style={{ color: isSfxMuted ? '#dc3545' : '#198754' }}
                     onClick={toggleSfx}
-                    title={isSfxMuted ? "Bật âm thanh" : "Tắt âm thanh"}
+                    title={isSfxMuted ? "Unmute sound" : "Mute sound"}
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
                       {isSfxMuted ? 'volume_off' : 'volume_up'}

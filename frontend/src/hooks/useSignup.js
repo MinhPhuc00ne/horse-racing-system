@@ -110,7 +110,7 @@ export function useSignup() {
         role,
       });
       
-      alert('Đăng ký thành công! Vui lòng kiểm tra email của bạn để lấy mã OTP và kích hoạt tài khoản.');
+      alert('Registration successful! Please check your email for the OTP to activate your account.');
       navigate(`/verify-account?email=${encodeURIComponent(email.trim())}`);
     } catch (err) {
       setError(err.message || 'An error occurred during sign up. Please try again.');

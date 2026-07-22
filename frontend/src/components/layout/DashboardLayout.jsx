@@ -94,7 +94,7 @@ export default function DashboardLayout({ navLinks, profile, children }) {
                   height: '28px',
                   marginLeft: isSidebarCollapsed ? '0' : '8px'
                 }}
-                title={isSidebarCollapsed ? "Mở rộng sidebar" : "Thu gọn sidebar"}
+                title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
                 <span className="material-symbols-outlined fs-5" style={{ margin: 0 }}>
                   {isSidebarCollapsed ? 'chevron_right' : 'chevron_left'}
@@ -164,7 +164,7 @@ export default function DashboardLayout({ navLinks, profile, children }) {
                     color: sidebarNotifOpen ? '#000000' : '#ffffff',
                     transition: 'all 0.2s ease'
                   }}
-                  title="Thông báo hệ thống"
+                  title="System notifications"
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>notifications</span>
                   {unreadCount > 0 && (
@@ -198,7 +198,7 @@ export default function DashboardLayout({ navLinks, profile, children }) {
                     >
                       <h6 className="m-0 fw-bold d-flex align-items-center gap-2" style={{ fontSize: '0.9rem', color: 'var(--ho-accent-gold-hover, #fed65b)' }}>
                         <span className="material-symbols-outlined fs-5">notifications</span>
-                        Thông Báo Hệ Thống
+                        System Notifications
                       </h6>
                       {unreadCount > 0 && (
                         <button
@@ -206,7 +206,7 @@ export default function DashboardLayout({ navLinks, profile, children }) {
                           className="btn btn-sm btn-link text-decoration-none p-0 fw-semibold"
                           style={{ fontSize: '0.75rem', color: 'var(--ho-primary-light, #95d4ac)' }}
                         >
-                          Đánh dấu đã đọc ({unreadCount})
+                          Mark as read ({unreadCount})
                         </button>
                       )}
                     </div>
@@ -214,7 +214,7 @@ export default function DashboardLayout({ navLinks, profile, children }) {
                     <div style={{ maxHeight: '380px', overflowY: 'auto' }}>
                       {notifications.length === 0 ? (
                         <div className="text-center py-4 text-muted" style={{ fontSize: '0.85rem' }}>
-                          Chưa có thông báo nào.
+                          No notifications yet.
                         </div>
                       ) : (
                         notifications.map((notif) => (
@@ -222,7 +222,7 @@ export default function DashboardLayout({ navLinks, profile, children }) {
                             key={notif.id}
                             onClick={() => {
                               if (!notif.isRead && markAsRead) markAsRead(notif.id);
-                              if (notif.content?.includes('giải đấu') || notif.title?.includes('phân công')) {
+                              if (notif.content?.toLowerCase().includes('tournament') || notif.title?.toLowerCase().includes('assignment') || notif.content?.toLowerCase().includes('tournament') || notif.title?.toLowerCase().includes('assignment')) {
                                 navigate('/admin/tournamentmanagement');
                                 setSidebarNotifOpen(false);
                               }
@@ -249,7 +249,7 @@ export default function DashboardLayout({ navLinks, profile, children }) {
                                 {notif.content}
                               </div>
                               <div className="text-muted mt-2" style={{ fontSize: '0.72rem' }}>
-                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString('vi-VN') : ''}
+                                {notif.createdAt ? new Date(notif.createdAt).toLocaleString('en-US') : ''}
                               </div>
                             </div>
                           </div>
@@ -266,7 +266,7 @@ export default function DashboardLayout({ navLinks, profile, children }) {
               <button
                 className={`btn btn-outline-danger btn-sm text-start d-flex align-items-center gap-2 p-2 w-100 rounded-3 admin-sidebar-logout-btn ${isSidebarCollapsed ? 'justify-content-center' : ''}`}
                 onClick={logout}
-                title={isSidebarCollapsed ? "Đăng xuất" : undefined}
+                title={isSidebarCollapsed ? "Logout" : undefined}
                 style={{ padding: isSidebarCollapsed ? '10px 0' : '8px 12px' }}
               >
                 <span className="material-symbols-outlined fs-5" style={{ margin: 0 }}>logout</span>

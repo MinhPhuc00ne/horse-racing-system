@@ -77,7 +77,7 @@ export default function StableContent() {
           setNewHorseData((prev) => ({ ...prev, image: url }));
         }
       } catch (err) {
-        alert('Tải ảnh lên thất bại: ' + err.message);
+        alert('Failed to upload image: ' + err.message);
       } finally {
         setUploading(false);
       }
@@ -98,7 +98,7 @@ export default function StableContent() {
           setEditHorseData((prev) => ({ ...prev, image: url }));
         }
       } catch (err) {
-        alert('Tải ảnh lên thất bại: ' + err.message);
+        alert('Failed to upload image: ' + err.message);
       } finally {
         setUploading(false);
       }
@@ -148,7 +148,7 @@ export default function StableContent() {
       );
       setShowEditModal(false);
     } catch (err) {
-      alert('Cập nhật thông tin ngựa thất bại: ' + err.message);
+      alert('Failed to update horse info: ' + err.message);
     }
   };
 
@@ -167,7 +167,7 @@ export default function StableContent() {
         setShowDeleteModal(false);
         setHorseToDelete(null);
       } catch (err) {
-        alert('Xóa ngựa thất bại: ' + err.message);
+        alert('Failed to delete horse: ' + err.message);
       }
     }
   };
@@ -227,7 +227,7 @@ export default function StableContent() {
       });
       setShowRegisterModal(false);
     } catch (err) {
-      alert('Thêm ngựa mới thất bại: ' + err.message);
+      alert('Failed to add new horse: ' + err.message);
     }
   };
 

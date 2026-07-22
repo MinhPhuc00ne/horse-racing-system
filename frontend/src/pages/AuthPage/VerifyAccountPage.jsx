@@ -25,7 +25,7 @@ export default function VerifyAccountPage() {
     const tokenToVerify = forceToken || otp.trim();
     
     if (!tokenToVerify) {
-      setError('Vui lòng nhập mã OTP gồm 6 chữ số.');
+      setError('Please enter the 6-digit OTP.');
       return;
     }
 
@@ -35,13 +35,13 @@ export default function VerifyAccountPage() {
 
     try {
       const res = await verifyAccountAPI(tokenToVerify);
-      setSuccess(res.message || 'Tài khoản đã được kích hoạt thành công!');
-      // Sau khi thành công, tự động chuyển về trang login sau 3s
+      setSuccess(res.message || 'Account activated successfully!');
+      // Upon success, redirect to login page after 3s
       setTimeout(() => {
         navigate('/login');
       }, 3000);
     } catch (err) {
-      setError(err.message || 'Mã OTP không hợp lệ hoặc đã hết hạn.');
+      setError(err.message || 'Invalid or expired OTP.');
     } finally {
       setLoading(false);
     }
@@ -61,11 +61,11 @@ export default function VerifyAccountPage() {
           <div className="auth-form-wrapper">
             <div className="auth-header-content">
               <h1 className="auth-title-brand">Horse Racing</h1>
-              <p className="auth-subtitle">Kích hoạt tài khoản của bạn.</p>
+              <p className="auth-subtitle">Activate your account.</p>
             </div>
             
             <div className="auth-form-card">
-              <h2 className="login-card-title">Xác thực tài khoản</h2>
+              <h2 className="login-card-title">Verify Account</h2>
               
               {error && <div className="error-alert">{error}</div>}
               {success && (
@@ -76,16 +76,16 @@ export default function VerifyAccountPage() {
               
               <div style={{textAlign: 'left', marginBottom: '1.5rem', color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5'}}>
                 {email ? (
-                  <>Một mã OTP gồm 6 chữ số đã được gửi đến <strong>{email}</strong>. Vui lòng kiểm tra email và nhập mã đó vào bên dưới để kích hoạt tài khoản của bạn.</>
+                  <>A 6-digit OTP code has been sent to <strong>{email}</strong>. Please check your email and enter it below to activate your account.</>
                 ) : (
-                  <>Vui lòng kiểm tra email của bạn và nhập mã OTP gồm 6 chữ số vào bên dưới để kích hoạt tài khoản.</>
+                  <>Please check your email and enter the 6-digit OTP code below to activate your account.</>
                 )}
               </div>
               
               <form onSubmit={handleVerify}>
                 <Input 
                   type="text"
-                  placeholder="Nhập mã OTP 6 chữ số"
+                  placeholder="Enter 6-digit OTP"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   disabled={loading || success}
@@ -97,7 +97,7 @@ export default function VerifyAccountPage() {
                 />
                 <div className="submit-container">
                    <Button type="submit" disabled={loading || success}>
-                      {loading ? 'Đang xác thực...' : 'Xác thực tài khoản'}
+                      {loading ? 'Verifying...' : 'Verify Account'}
                    </Button>
                 </div>
               </form>
@@ -108,7 +108,7 @@ export default function VerifyAccountPage() {
                   style={{ cursor: 'pointer', marginLeft: 0 }} 
                   onClick={() => navigate('/login')}
                 >
-                  Quay lại đăng nhập
+                  Back to Login
                 </span>
               </div>
             </div>

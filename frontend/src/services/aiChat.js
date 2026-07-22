@@ -10,8 +10,7 @@ const isMockMode = () => {
 
 export async function sendChatMessageAPI(message, image = null) {
   try {
-    const response = await axiosClient.post('/v1/chat', { message, image });
-    // Dựa vào AiChatController, có thể trả về plain string hoặc object
+    // Based on AiChatController, can return plain string or object
     return response.data;
   } catch (error) {
     console.error('Error sending AI chat message:', error);
@@ -24,8 +23,7 @@ export async function getChatHistoryAPI() {
     const response = await axiosClient.get('/v1/chat/history');
     return response.data;
   } catch (error) {
-    console.error('Error getting chat history:', error);
-    // Nếu chưa đăng nhập (UNAUTHORIZED), ta có thể ném lỗi hoặc trả về mảng rỗng
+    // If not logged in (UNAUTHORIZED), throw error or return empty array
     if (error.response?.status === 401) {
       throw new Error('Please log in to view chat history.');
     }

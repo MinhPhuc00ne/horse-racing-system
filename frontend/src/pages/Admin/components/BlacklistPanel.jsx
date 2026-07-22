@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   getAdminBlacklistsAPI, 
@@ -9,14 +9,12 @@ import {
 import { getHorsesToInspectAPI } from '../../../services/referee';
 import { 
   FaSearch, 
-  FaFilter, 
   FaBan, 
   FaUserSlash, 
   FaHorseHead, 
   FaPlus, 
   FaCheckCircle, 
   FaExclamationTriangle, 
-  FaInfoCircle, 
   FaUndo,
   FaShieldAlt
 } from 'react-icons/fa';
@@ -59,8 +57,8 @@ export default function BlacklistPanel() {
       const data = await getAdminBlacklistsAPI(statusFilter, targetTypeFilter);
       setBlacklists(data || []);
     } catch (err) {
-      console.error('Lỗi khi tải danh sách Blacklist:', err);
-      setError(err.message || 'Không thể tải danh sách Blacklist.');
+      console.error('Error fetching Blacklist:', err);
+      setError(err.message || 'Could not load Blacklist list.');
     } finally {
       setLoading(false);
     }
@@ -75,7 +73,7 @@ export default function BlacklistPanel() {
       setUsersList(usersData || []);
       setHorsesList(horsesData || []);
     } catch (err) {
-      console.error('Lỗi khi tải danh sách người dùng/ngựa:', err);
+      console.error('Error fetching users/horses list:', err);
     }
   };
 
@@ -108,15 +106,15 @@ export default function BlacklistPanel() {
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     if (!addFormData.targetId) {
-      alert('Vui lòng chọn hoặc nhập đối tượng bị xử phạt.');
+      alert('Please select or specify the target to penalize.');
       return;
     }
     if (!addFormData.reason.trim()) {
-      alert('Vui lòng nhập lý do phạt.');
+      alert('Please enter a reason for the ban.');
       return;
     }
     if (!addFormData.isPermanent && !addFormData.endDate) {
-      alert('Vui lòng chọn ngày kết thúc cấm nếu không cấm vĩnh viễn.');
+      alert('Please select a ban end date if not a permanent ban.');
       return;
     }
 
@@ -130,7 +128,7 @@ export default function BlacklistPanel() {
         endDate: addFormData.isPermanent ? null : addFormData.endDate
       });
 
-      setSuccessMsg('Đã thêm đối tượng vào Blacklist thành công!');
+      setSuccessMsg('Successfully added target to the blacklist!');
       setShowAddModal(false);
       setAddFormData({
         targetType: 'USER',
@@ -141,17 +139,10 @@ export default function BlacklistPanel() {
       });
       fetchBlacklists();
     } catch (err) {
-      alert('Lỗi: ' + err.message);
+      alert('Error: ' + err.message);
     } finally {
       setSubmittingAdd(false);
     }
-  };
-
-  // Handlers for Unban Modal
-  const handleOpenUnbanModal = (item) => {
-    setSelectedItemForUnban(item);
-    setUnbanReason('');
-    setShowUnbanModal(true);
   };
 
   const handleConfirmUnban = async (e) => {
@@ -161,267 +152,177 @@ export default function BlacklistPanel() {
     try {
       setSubmittingUnban(true);
       await unbanAdminBlacklistAPI(selectedItemForUnban.id, unbanReason.trim());
-      setSuccessMsg(`Đã gỡ cấm (Unban) thành công cho "${selectedItemForUnban.targetName}"!`);
+      setSuccessMsg(`Successfully unbanned "${selectedItemForUnban.targetName}"!`);
       setShowUnbanModal(false);
       setSelectedItemForUnban(null);
       setUnbanReason('');
       fetchBlacklists();
     } catch (err) {
-      alert('Lỗi khi gỡ cấm: ' + err.message);
+      alert('Error unbanning: ' + err.message);
     } finally {
       setSubmittingUnban(false);
     }
   };
 
   return (
-    <div className="container-fluid p-4">
-      {/* Header Title */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', padding: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h3 className="fw-bold mb-1 d-flex align-items-center gap-2 text-dark">
-            <FaShieldAlt className="text-danger" /> Quản Lý Blacklist & Cấm Thi Đấu
+            <FaShieldAlt className="text-danger" /> Blacklist & Ban Management
           </h3>
           <p className="text-muted small mb-0">
-            Theo dõi, phân quyền khóa tài khoản vi phạm hoặc chiến mã bị cấm thi đấu trên toàn hệ thống.
+            Monitor and manage account suspensions and horse bans across the system.
           </p>
         </div>
         <button 
           className="btn btn-danger fw-semibold d-flex align-items-center gap-2 shadow-sm px-3 py-2"
           onClick={() => setShowAddModal(true)}
         >
-          <FaPlus /> Thêm Vào Blacklist
+          <FaPlus /> Add to Blacklist
         </button>
       </div>
 
-      {/* Alert Notifications */}
       {successMsg && (
-        <div className="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+        <div className="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
           <FaCheckCircle className="fs-5" />
           <div>{successMsg}</div>
           <button type="button" className="btn-close" onClick={() => setSuccessMsg('')}></button>
         </div>
       )}
       {error && (
-        <div className="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+        <div className="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
           <FaExclamationTriangle className="fs-5" />
           <div>{error}</div>
           <button type="button" className="btn-close" onClick={() => setError('')}></button>
         </div>
       )}
 
-      {/* Summary Stat Cards */}
-      <div className="row g-3 mb-4">
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card border-0 shadow-sm rounded-3 bg-white p-3 h-100">
-            <div className="d-flex align-items-center justify-content-between">
+      <div className="row g-3">
+        <div className="col-12 col-md-6 col-lg-3">
+          <div className="card border-0 shadow-sm p-3 bg-white">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div className="bg-light p-3 rounded-circle text-secondary fs-4"><FaBan /></div>
               <div>
-                <span className="text-muted small text-uppercase fw-bold">Tổng bản ghi</span>
+                <span className="text-muted small text-uppercase fw-bold">Total Records</span>
                 <h3 className="fw-bold text-dark mt-1 mb-0">{totalCount}</h3>
               </div>
-              <div className="bg-light p-3 rounded-circle text-secondary fs-4">
-                <FaBan />
+            </div>
+          </div>
+        </div>
+        <div className="col-12 col-md-6 col-lg-3">
+          <div className="card border-0 shadow-sm p-3 bg-danger bg-opacity-75 text-white">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div className="bg-white bg-opacity-25 p-3 rounded-circle text-white fs-4"><FaBan /></div>
+              <div>
+                <span className="text-white small text-uppercase fw-bold">Active Bans</span>
+                <h3 className="fw-bold text-white mt-1 mb-0">{activeCount}</h3>
               </div>
             </div>
           </div>
         </div>
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card border-0 shadow-sm rounded-3 bg-white p-3 h-100 border-start border-danger border-4">
-            <div className="d-flex align-items-center justify-content-between">
+        <div className="col-12 col-md-6 col-lg-3">
+          <div className="card border-0 shadow-sm p-3 bg-white">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div className="bg-warning bg-opacity-10 p-3 rounded-circle text-warning fs-4"><FaUserSlash /></div>
               <div>
-                <span className="text-muted small text-uppercase fw-bold">Đang bị cấm (Active)</span>
-                <h3 className="fw-bold text-danger mt-1 mb-0">{activeCount}</h3>
-              </div>
-              <div className="bg-danger bg-opacity-10 p-3 rounded-circle text-danger fs-4">
-                <FaBan />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card border-0 shadow-sm rounded-3 bg-white p-3 h-100">
-            <div className="d-flex align-items-center justify-content-between">
-              <div>
-                <span className="text-muted small text-uppercase fw-bold">Tài khoản bị cấm</span>
+                <span className="text-muted small text-uppercase fw-bold">Banned Accounts</span>
                 <h3 className="fw-bold text-warning mt-1 mb-0">{userBanCount}</h3>
               </div>
-              <div className="bg-warning bg-opacity-10 p-3 rounded-circle text-warning fs-4">
-                <FaUserSlash />
-              </div>
             </div>
           </div>
         </div>
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="card border-0 shadow-sm rounded-3 bg-white p-3 h-100">
-            <div className="d-flex align-items-center justify-content-between">
+        <div className="col-12 col-md-6 col-lg-3">
+          <div className="card border-0 shadow-sm p-3 bg-white">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div className="bg-info bg-opacity-10 p-3 rounded-circle text-info fs-4"><FaHorseHead /></div>
               <div>
-                <span className="text-muted small text-uppercase fw-bold">Ngựa bị cấm</span>
+                <span className="text-muted small text-uppercase fw-bold">Banned Horses</span>
                 <h3 className="fw-bold text-info mt-1 mb-0">{horseBanCount}</h3>
-              </div>
-              <div className="bg-info bg-opacity-10 p-3 rounded-circle text-info fs-4">
-                <FaHorseHead />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filter and Search Bar Card */}
-      <div className="card border-0 shadow-sm rounded-3 mb-4">
+      <div className="card border-0 shadow-sm rounded-3">
         <div className="card-body p-3">
           <div className="row g-3 align-items-center">
-            {/* Search */}
             <div className="col-12 col-md-5">
               <div className="input-group">
-                <span className="input-group-text bg-white border-end-0 text-muted">
-                  <FaSearch />
-                </span>
+                <span className="input-group-text bg-white border-end-0 text-muted"><FaSearch /></span>
                 <input 
                   type="text" 
                   className="form-control border-start-0 ps-0" 
-                  placeholder="Tìm theo tên, email, lý do..."
+                  placeholder="Search by name, email, reason..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
-
-            {/* Target Type Filter */}
             <div className="col-12 col-sm-6 col-md-3">
-              <div className="d-flex align-items-center gap-2">
-                <FaFilter className="text-muted small" />
-                <select 
-                  className="form-select"
-                  value={targetTypeFilter}
-                  onChange={(e) => setTargetTypeFilter(e.target.value)}
-                >
-                  <option value="ALL">Tất cả đối tượng</option>
-                  <option value="USER">Tài khoản Người dùng</option>
-                  <option value="HORSE">Chiến mã (Ngựa)</option>
-                </select>
-              </div>
+              <select className="form-select" value={targetTypeFilter} onChange={(e) => setTargetTypeFilter(e.target.value)}>
+                <option value="ALL">All Targets</option>
+                <option value="USER">User Accounts</option>
+                <option value="HORSE">Horses</option>
+              </select>
             </div>
-
-            {/* Status Filter */}
             <div className="col-12 col-sm-6 col-md-4">
-              <div className="d-flex align-items-center gap-2">
-                <span className="text-muted small fw-semibold text-nowrap">Trạng thái:</span>
-                <select 
-                  className="form-select"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="ALL">Tất cả trạng thái</option>
-                  <option value="ACTIVE">Đang bị Cấm (Active)</option>
-                  <option value="INACTIVE">Đã Gỡ cấm (Inactive)</option>
-                </select>
-              </div>
+              <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                <option value="ALL">All Statuses</option>
+                <option value="ACTIVE">Suspended (Active)</option>
+                <option value="INACTIVE">Unbanned (Inactive)</option>
+              </select>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Table */}
       <div className="card border-0 shadow-sm rounded-3">
         <div className="card-body p-0">
           {loading ? (
-            <div className="text-center py-5">
-              <div className="spinner-border text-danger" role="status"></div>
-              <p className="text-muted mt-2 mb-0">Đang tải danh sách Blacklist...</p>
-            </div>
-          ) : filteredBlacklists.length === 0 ? (
-            <div className="text-center py-5 text-muted">
-              <FaInfoCircle className="fs-3 mb-2 opacity-50" />
-              <p className="mb-0">Không tìm thấy bản ghi Blacklist nào khớp với bộ lọc.</p>
-            </div>
+            <div className="text-center py-5"><div className="spinner-border text-danger"></div></div>
           ) : (
             <div className="table-responsive">
               <table className="table table-hover align-middle mb-0">
                 <thead className="table-light">
                   <tr>
-                    <th className="ps-3" style={{ width: '60px' }}>STT</th>
-                    <th>Đối tượng</th>
-                    <th>Chi tiết / Thông tin</th>
-                    <th>Lý do cấm</th>
-                    <th>Thời hạn cấm</th>
-                    <th className="text-center">Trạng thái</th>
-                    <th>Người xử lý</th>
-                    <th className="text-end pe-3">Thao tác</th>
+                    <th>Target</th>
+                    <th>Details</th>
+                    <th>Reason</th>
+                    <th>Duration</th>
+                    <th className="text-center">Status</th>
+                    <th>Handled By</th>
+                    <th className="text-end pe-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredBlacklists.map((item, index) => (
+                  {filteredBlacklists.map((item) => (
                     <tr key={item.id}>
-                      <td className="ps-3 fw-bold text-muted small">#{index + 1}</td>
-
-                      {/* Target Type & Icon */}
                       <td>
-                        {item.targetType === 'USER' ? (
-                          <span className="badge bg-warning bg-opacity-10 text-dark border border-warning px-2 py-1 d-inline-flex align-items-center gap-1">
-                            <FaUserSlash className="text-warning" /> USER
-                          </span>
-                        ) : (
-                          <span className="badge bg-info bg-opacity-10 text-info border border-info px-2 py-1 d-inline-flex align-items-center gap-1">
-                            <FaHorseHead className="text-info" /> HORSE
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Target Name & Detail */}
-                      <td>
-                        <div className="fw-bold text-dark">{item.targetName || 'N/A'}</div>
-                        <div className="small text-muted">{item.targetDetail || `ID: ${item.targetId}`}</div>
-                      </td>
-
-                      {/* Reason */}
-                      <td style={{ maxWidth: '250px' }}>
-                        <span className="text-secondary small d-inline-block text-truncate" style={{ maxWidth: '240px' }} title={item.reason}>
-                          {item.reason}
+                        <span className={`badge ${item.targetType === 'USER' ? 'bg-warning' : 'bg-info'} bg-opacity-10 text-dark`}>
+                          {item.targetType}
                         </span>
                       </td>
-
-                      {/* Ban Duration */}
                       <td>
-                        {item.isPermanent ? (
-                          <span className="badge bg-danger text-white">Vĩnh viễn</span>
-                        ) : (
-                          <div className="small">
-                            <div>Từ: <span className="fw-semibold">{item.startDate || 'N/A'}</span></div>
-                            <div>Đến: <span className="fw-semibold text-danger">{item.endDate || 'Chưa định ngày'}</span></div>
-                          </div>
-                        )}
+                        <div className="fw-bold">{item.targetName}</div>
+                        <small className="text-muted">{item.targetDetail}</small>
                       </td>
-
-                      {/* Status */}
+                      <td>{item.reason}</td>
+                      <td>
+                        {item.isPermanent ? 'Permanent' : <div>To: {item.endDate}</div>}
+                      </td>
                       <td className="text-center">
-                        {item.status === 'ACTIVE' ? (
-                          <span className="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 py-2 rounded-pill fw-semibold">
-                            <FaBan className="me-1" /> ACTIVE
-                          </span>
-                        ) : (
-                          <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary px-3 py-2 rounded-pill fw-semibold">
-                            INACTIVE (Đã gỡ)
-                          </span>
-                        )}
+                        <span className={`badge ${item.status === 'ACTIVE' ? 'bg-danger' : 'bg-secondary'}`}>
+                          {item.status}
+                        </span>
                       </td>
-
-                      {/* Action By */}
-                      <td>
-                        <div className="small fw-semibold">{item.actionByName || 'System'}</div>
-                        <div className="small text-muted">{item.actionByEmail || ''}</div>
-                      </td>
-
-                      {/* Actions */}
+                      <td>{item.actionByName}</td>
                       <td className="text-end pe-3">
-                        {item.status === 'ACTIVE' ? (
-                          <button
-                            className="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-1 fw-semibold shadow-sm"
-                            onClick={() => handleOpenUnbanModal(item)}
-                            title="Gỡ khỏi danh sách đen"
-                          >
-                            <FaUndo /> Gỡ cấm
+                        {item.status === 'ACTIVE' && (
+                          <button className="btn btn-outline-success btn-sm" onClick={() => { setSelectedItemForUnban(item); setShowUnbanModal(true); }}>
+                            <FaUndo /> Unban
                           </button>
-                        ) : (
-                          <span className="text-muted small italic">Đã xử lý</span>
                         )}
                       </td>
                     </tr>
@@ -433,27 +334,17 @@ export default function BlacklistPanel() {
         </div>
       </div>
 
-      {/* Modal: Thêm vào Blacklist */}
       {showAddModal && createPortal(
-        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
-          <div className="modal-dialog modal-dialog-centered modal-lg">
-            <div className="modal-content border-0 shadow">
-              <div className="modal-header bg-danger text-white">
-                <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
-                  <FaBan /> Đưa Đối Tượng Vào Blacklist
-                </h5>
-                <button 
-                  type="button" 
-                  className="btn-close btn-close-white" 
-                  onClick={() => setShowAddModal(false)}
-                ></button>
-              </div>
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header"><h5>Add to Blacklist</h5></div>
               <form onSubmit={handleAddSubmit}>
                 <div className="modal-body p-4">
-                  {/* Select Target Type */}
+                  {/* Target Type Selector */}
                   <div className="mb-3">
-                    <label className="form-label fw-bold">1. Loại đối tượng bị xử phạt</label>
-                    <div className="d-flex gap-4">
+                    <label className="form-label fw-bold">1. Ban Target Type</label>
+                    <div className="d-flex gap-4 mt-2">
                       <div className="form-check">
                         <input 
                           className="form-check-input" 
@@ -465,7 +356,7 @@ export default function BlacklistPanel() {
                           onChange={(e) => setAddFormData({ ...addFormData, targetType: e.target.value, targetId: '' })}
                         />
                         <label className="form-check-label fw-semibold" htmlFor="targetTypeUser">
-                          Tài khoản Người dùng (User)
+                          User Account
                         </label>
                       </div>
                       <div className="form-check">
@@ -479,7 +370,7 @@ export default function BlacklistPanel() {
                           onChange={(e) => setAddFormData({ ...addFormData, targetType: e.target.value, targetId: '' })}
                         />
                         <label className="form-check-label fw-semibold" htmlFor="targetTypeHorse">
-                          Chiến mã (Horse)
+                          Horse
                         </label>
                       </div>
                     </div>
@@ -487,7 +378,7 @@ export default function BlacklistPanel() {
 
                   {/* Target Selector */}
                   <div className="mb-3">
-                    <label className="form-label fw-bold">2. Chọn đối tượng cụ thể</label>
+                    <label className="form-label fw-bold">2. Select Target *</label>
                     {addFormData.targetType === 'USER' ? (
                       <select 
                         className="form-select"
@@ -495,7 +386,7 @@ export default function BlacklistPanel() {
                         onChange={(e) => setAddFormData({ ...addFormData, targetId: e.target.value })}
                         required
                       >
-                        <option value="">-- Chọn tài khoản cần cấm --</option>
+                        <option value="">-- Select User Account --</option>
                         {usersList.map(u => (
                           <option key={u.id} value={u.id}>
                             #{u.id} - {u.fullName} ({u.email}) [{u.role}]
@@ -509,23 +400,23 @@ export default function BlacklistPanel() {
                         onChange={(e) => setAddFormData({ ...addFormData, targetId: e.target.value })}
                         required
                       >
-                        <option value="">-- Chọn chiến mã cần cấm --</option>
+                        <option value="">-- Select Horse --</option>
                         {horsesList.map(h => (
                           <option key={h.id} value={h.id}>
-                            #{h.id} - Ngựa: {h.name} ({h.breed?.name || 'Không rõ giống'})
+                            #{h.id} - {h.name} ({h.breed?.name || 'Unknown Breed'})
                           </option>
                         ))}
                       </select>
                     )}
                   </div>
 
-                  {/* Reason */}
+                  {/* Ban Reason */}
                   <div className="mb-3">
-                    <label className="form-label fw-bold">3. Lý do vi phạm / Cấm</label>
+                    <label className="form-label fw-bold">3. Ban Reason *</label>
                     <textarea 
                       className="form-control" 
                       rows="3"
-                      placeholder="Nhập lý do chi tiết (ví dụ: Gian lận trong thi đấu, vi phạm điều khoản dịch vụ...)"
+                      placeholder="Enter detailed reason (e.g., cheating, violating terms of service...)"
                       value={addFormData.reason}
                       onChange={(e) => setAddFormData({ ...addFormData, reason: e.target.value })}
                       required
@@ -534,7 +425,7 @@ export default function BlacklistPanel() {
 
                   {/* Ban Duration */}
                   <div className="mb-3">
-                    <label className="form-label fw-bold">4. Thời hạn cấm</label>
+                    <label className="form-label fw-bold">4. Ban Duration</label>
                     <div className="form-check mb-2">
                       <input 
                         className="form-check-input" 
@@ -544,13 +435,13 @@ export default function BlacklistPanel() {
                         onChange={(e) => setAddFormData({ ...addFormData, isPermanent: e.target.checked })}
                       />
                       <label className="form-check-label fw-semibold text-danger" htmlFor="isPermanentCheck">
-                        Cấm Vĩnh Viễn (Permanent Ban)
+                        Permanent Ban
                       </label>
                     </div>
 
                     {!addFormData.isPermanent && (
                       <div className="mt-2">
-                        <label className="form-label small text-muted">Ngày kết thúc cấm (End Date):</label>
+                        <label className="form-label small text-muted">End Date:</label>
                         <input 
                           type="date" 
                           className="form-control"
@@ -571,14 +462,14 @@ export default function BlacklistPanel() {
                     onClick={() => setShowAddModal(false)}
                     disabled={submittingAdd}
                   >
-                    Hủy bỏ
+                    Cancel
                   </button>
                   <button 
                     type="submit" 
                     className="btn btn-danger fw-semibold px-4"
                     disabled={submittingAdd}
                   >
-                    {submittingAdd ? 'Đang xử lý...' : 'Xác Nhận Cấm'}
+                    {submittingAdd ? 'Processing...' : 'Confirm Ban'}
                   </button>
                 </div>
               </form>
@@ -588,14 +479,14 @@ export default function BlacklistPanel() {
         document.body
       )}
 
-      {/* Modal: Xác nhận Unban / Gỡ cấm */}
+      {/* Modal: Confirm Unban / Lift restriction */}
       {showUnbanModal && selectedItemForUnban && createPortal(
         <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow">
               <div className="modal-header bg-success text-white">
                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
-                  <FaUndo /> Xác Nhận Gỡ Cấm (Unban)
+                  <FaUndo /> Confirm Unban
                 </h5>
                 <button 
                   type="button" 
@@ -606,18 +497,18 @@ export default function BlacklistPanel() {
               <form onSubmit={handleConfirmUnban}>
                 <div className="modal-body p-4">
                   <div className="alert alert-info py-2 px-3 mb-3 small">
-                    Bạn đang chuẩn bị mở khóa/gỡ cấm cho đối tượng:
+                    You are about to unban the target:
                     <div className="fw-bold fs-6 mt-1 text-dark">
                       {selectedItemForUnban.targetName} ({selectedItemForUnban.targetType})
                     </div>
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label fw-bold">Ghi chú / Lý do gỡ cấm</label>
+                    <label className="form-label fw-bold">Notes / Reason for Unban</label>
                     <textarea 
                       className="form-control"
                       rows="3"
-                      placeholder="Nhập ghi chú lý do gỡ cấm (ví dụ: Hết hạn xử phạt, đã giải trình thành công...)"
+                      placeholder="Enter reason for unban (e.g. Penalty expired, successful appeal...)"
                       value={unbanReason}
                       onChange={(e) => setUnbanReason(e.target.value)}
                     ></textarea>
@@ -631,14 +522,14 @@ export default function BlacklistPanel() {
                     onClick={() => setShowUnbanModal(false)}
                     disabled={submittingUnban}
                   >
-                    Hủy
+                    Cancel
                   </button>
                   <button 
                     type="submit" 
                     className="btn btn-success fw-semibold px-4"
                     disabled={submittingUnban}
                   >
-                    {submittingUnban ? 'Đang gỡ...' : 'Xác Nhận Mở Khóa'}
+                    {submittingUnban ? 'Unbanning...' : 'Confirm Unban'}
                   </button>
                 </div>
               </form>

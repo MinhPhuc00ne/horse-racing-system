@@ -149,7 +149,7 @@ export function JockeyProvider({ children }) {
           id: inv.id,
           ownerId: inv.ownerId,
           ownerName: inv.ownerName,
-          stableName: inv.stableName || 'Trang trại liên kết',
+          stableName: inv.stableName || 'Linked stables',
           horseName: inv.horseName,
           horseBreed: inv.horseBreed || 'Thoroughbred',
           tournamentId: inv.raceId,
@@ -157,11 +157,11 @@ export function JockeyProvider({ children }) {
           raceDate: inv.raceDate || (inv.createdAt ? inv.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]),
           raceTime: inv.startTime ? inv.startTime.substring(0, 5) : '15:00',
           prizePool: inv.totalPrize !== undefined && inv.totalPrize !== null ? Number(inv.totalPrize).toLocaleString() + ' VND' : '10,000,000 VND',
-          location: inv.location || 'Chưa xác định',
+          location: inv.location || 'TBD',
           jockeyShare: inv.jockeySharePercent,
           ownerShare: inv.ownerSharePercent,
           status: inv.status === 'PENDING_JOCKEY' ? 'PENDING' : inv.status,
-          notes: `Được mời làm kỵ sĩ cưỡi chiến mã ${inv.horseName} tham dự vòng đua ${inv.raceName}.`
+          notes: `Invited to ride horse ${inv.horseName} in race round ${inv.raceName}.`
         }));
         setInvitations(mappedInvs);
       } catch (err) {
@@ -183,9 +183,9 @@ export function JockeyProvider({ children }) {
           id: h.participantId || h.id,
           date: h.raceDate || h.date,
           tournament: h.raceName || h.tournament,
-          raceRound: 'Vòng chung kết',
+          raceRound: 'Final Round',
           horseName: h.horseName,
-          ownerName: 'Chủ ngựa liên kết',
+          ownerName: 'Linked Horse Owner',
           placement: h.finalRank || h.placement,
           finishTime: h.finishTime ? (typeof h.finishTime === 'number' ? `${Math.floor(h.finishTime / 60)}m ${h.finishTime % 60}s` : h.finishTime) : 'N/A',
           prizeMoney: h.prizeMoney,
@@ -221,14 +221,14 @@ export function JockeyProvider({ children }) {
         const scheduleData = await getJockeyScheduleAPI();
         const scheduleList = scheduleData.map(s => ({
           id: s.participantId || s.id,
-          ownerName: s.ownerName || 'Chủ ngựa liên kết',
+          ownerName: s.ownerName || 'Linked Horse Owner',
           stableName: s.stableName || 'Stable',
           horseName: s.horseName,
           horseBreed: s.horseBreed || 'Thoroughbred',
           tournamentName: s.raceName || s.tournamentName,
           raceDate: s.raceDate,
           raceTime: s.startTime || s.raceTime,
-          prizePool: s.prizePool || 'Tiền thưởng giải',
+          prizePool: s.prizePool || 'Tournament prize pool',
           jockeyShare: s.jockeyShare || 30,
           status: s.participantStatus || s.status || 'ACCEPTED',
           gateNumber: s.gateNumber

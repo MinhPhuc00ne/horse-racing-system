@@ -40,7 +40,7 @@ export default function FeedbacksPanel() {
       });
       setFeedbacks(data);
     } catch (err) {
-      setErrorModalMessage(err.message || 'Không thể tải danh sách phản hồi.');
+      setErrorModalMessage(err.message || 'Could not load feedback list.');
     } finally {
       setLoading(false);
     }
@@ -58,7 +58,7 @@ export default function FeedbacksPanel() {
     const actionType = resolveModal.actionType;
 
     if (!note.trim()) {
-      setErrorModalMessage('Vui lòng nhập ghi chú xử lý / lý do phản hồi.');
+      setErrorModalMessage('Please enter processing notes / feedback reason.');
       return;
     }
 
@@ -66,15 +66,15 @@ export default function FeedbacksPanel() {
       setResolving(true);
       if (actionType === 'REJECTED') {
         await rejectFeedbackAPI(id, note.trim());
-        setSuccessModalMessage('Phản hồi đã được từ chối và gửi thông báo tới người dùng!');
+        setSuccessModalMessage('Feedback has been rejected and notification sent to user!');
       } else {
         await resolveFeedbackAPI(id, note.trim());
-        setSuccessModalMessage('Phản hồi đã được xử lý và lưu ghi chú thành công!');
+        setSuccessModalMessage('Feedback has been resolved and note saved successfully!');
       }
       setResolveModal({ show: false, feedbackId: null, actionType: 'RESOLVED', note: '' });
       fetchFeedbacks();
     } catch (err) {
-      setErrorModalMessage(err.message || 'Thao tác thất bại.');
+      setErrorModalMessage(err.message || 'Action failed.');
     } finally {
       setResolving(false);
     }
@@ -82,11 +82,11 @@ export default function FeedbacksPanel() {
 
   const getRoleLabel = (role) => {
     switch (role) {
-      case 'JOCKEY': return 'Nài ngựa (Jockey)';
-      case 'HORSE_OWNER': return 'Chủ ngựa (Owner)';
-      case 'RACE_REFEREE': return 'Trọng tài (Referee)';
-      case 'SPECTATOR': return 'Khán giả (Spectator)';
-      case 'ADMIN': return 'Quản trị viên (Admin)';
+      case 'JOCKEY': return 'Jockey';
+      case 'HORSE_OWNER': return 'Owner';
+      case 'RACE_REFEREE': return 'Referee';
+      case 'SPECTATOR': return 'Spectator';
+      case 'ADMIN': return 'Admin';
       default: return role || 'N/A';
     }
   };
@@ -131,7 +131,7 @@ export default function FeedbacksPanel() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaCommentDots style={{ color: 'var(--ho-accent-gold-text)' }} /> Tiếp Nhận & Phản Hồi Ý Kiến (Feedbacks)
+          <FaCommentDots style={{ color: 'var(--ho-accent-gold-text)' }} /> Receive & Respond to Feedback (Feedbacks)
         </h2>
       </div>
 
@@ -140,12 +140,12 @@ export default function FeedbacksPanel() {
         <div className="row g-3">
           {/* Search Term */}
           <div className="col-12 col-md-5">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tìm kiếm phản hồi</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search Feedback</label>
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
                 className="ho-form-input text-dark fw-semibold"
-                placeholder="Tìm theo tên, email, tiêu đề, nội dung..."
+                placeholder="Search by name, email, subject, content..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ fontSize: '13px', height: '38px', paddingLeft: '35px' }}
@@ -156,34 +156,35 @@ export default function FeedbacksPanel() {
 
           {/* Role Filter */}
           <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Vai trò gửi</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sender Role</label>
             <select
               className="ho-form-input text-dark fw-semibold"
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
               style={{ fontSize: '13px', height: '38px' }}
             >
-              <option value="">Tất cả vai trò</option>
-              <option value="JOCKEY">Nài ngựa (Jockey)</option>
-              <option value="HORSE_OWNER">Chủ ngựa (Owner)</option>
-              <option value="RACE_REFEREE">Trọng tài (Referee)</option>
-              <option value="SPECTATOR">Khán giả (Spectator)</option>
+              <option value="">All Roles</option>
+              <option value="JOCKEY">Jockey</option>
+              <option value="HORSE_OWNER">Owner</option>
+              <option value="RACE_REFEREE">Referee</option>
+              <option value="SPECTATOR">Spectator</option>
+              <option value="ADMIN">Admin</option>
             </select>
           </div>
 
           {/* Status Filter */}
           <div className="col-12 col-md-2">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trạng thái</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</label>
             <select
               className="ho-form-input text-dark fw-semibold"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               style={{ fontSize: '13px', height: '38px' }}
             >
-              <option value="">Tất cả</option>
-              <option value="PENDING">Chờ xử lý (PENDING)</option>
-              <option value="RESOLVED">Đã xử lý (RESOLVED)</option>
-              <option value="REJECTED">Bị từ chối (REJECTED)</option>
+              <option value="">All</option>
+              <option value="PENDING">Pending (PENDING)</option>
+              <option value="RESOLVED">Resolved (RESOLVED)</option>
+              <option value="REJECTED">Rejected (REJECTED)</option>
             </select>
           </div>
 
@@ -208,33 +209,33 @@ export default function FeedbacksPanel() {
       {/* Main Feedback List Section */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: 'var(--ho-primary-dark)', margin: 0 }}>
-          Danh Sách Ý Kiến Đóng Góp ({feedbacks.length})
+          Feedback List ({feedbacks.length})
         </h3>
 
         <div style={{ overflowX: 'auto', background: '#ffffff', border: '1px solid var(--ho-border-gold)', borderRadius: '12px' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--ho-border-gold)', background: 'rgba(0,56,32,0.04)' }}>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Mã đóng góp</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Người đóng góp</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Vai trò</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Tiêu đề đóng góp</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Thời gian gửi</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Trạng thái</th>
-                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Hành động</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Feedback ID</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Contributor</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Role</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Subject</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Submit Time</th>
+                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Status</th>
+                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
                   <td colSpan={7} style={{ padding: '30px', textAlign: 'center', color: 'var(--ho-primary-dark)', fontWeight: '600' }}>
-                    Đang tải dữ liệu phản hồi...
+                    Loading feedback data...
                   </td>
                 </tr>
               ) : feedbacks.length === 0 ? (
                 <tr>
                   <td colSpan={7} style={{ padding: '24px', textAlign: 'center', color: 'var(--ho-text-muted)' }}>
-                    Chưa ghi nhận ý kiến đóng góp nào khớp với bộ lọc.
+                    No feedback recorded matches the filters.
                   </td>
                 </tr>
               ) : (
@@ -243,7 +244,7 @@ export default function FeedbacksPanel() {
                     <td style={{ padding: '16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>#{fb.id}</td>
                     <td style={{ padding: '16px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ color: 'var(--ho-text-dark)', fontWeight: '600' }}>{fb.userFullName || 'Ẩn danh'}</span>
+                        <span style={{ color: 'var(--ho-text-dark)', fontWeight: '600' }}>{fb.userFullName || 'Anonymous'}</span>
                         <span style={{ color: 'var(--ho-text-muted)', fontSize: '12px' }}>{fb.userEmail || ''}</span>
                       </div>
                     </td>
@@ -264,7 +265,7 @@ export default function FeedbacksPanel() {
                       {fb.subject}
                     </td>
                     <td style={{ padding: '16px', color: 'var(--ho-text-muted)' }}>
-                      {fb.createdAt ? new Date(fb.createdAt).toLocaleString('vi-VN') : 'N/A'}
+                      {fb.createdAt ? new Date(fb.createdAt).toLocaleString('en-US') : 'N/A'}
                     </td>
                     <td style={{ padding: '16px' }}>
                       {getStatusBadge(fb.status)}
@@ -276,7 +277,7 @@ export default function FeedbacksPanel() {
                           className="btn btn-outline-secondary btn-sm fw-bold"
                           style={{ padding: '5px 10px', fontSize: '12px', borderRadius: '6px' }}
                         >
-                          Chi tiết
+                          Details
                         </button>
                         {fb.status === 'PENDING' && (
                           <>
@@ -285,14 +286,14 @@ export default function FeedbacksPanel() {
                               className="btn btn-success btn-sm fw-bold d-flex align-items-center gap-1"
                               style={{ padding: '5px 10px', fontSize: '12px', borderRadius: '6px' }}
                             >
-                              <FaCheck size="10" /> Xử lý
+                              <FaCheck size="10" /> Resolve
                             </button>
                             <button
                               onClick={() => setResolveModal({ show: true, feedbackId: fb.id, actionType: 'REJECTED', note: '' })}
                               className="btn btn-outline-danger btn-sm fw-bold d-flex align-items-center gap-1"
                               style={{ padding: '5px 10px', fontSize: '12px', borderRadius: '6px' }}
                             >
-                              <FaBan size="10" /> Từ chối
+                              <FaBan size="10" /> Reject
                             </button>
                           </>
                         )}
@@ -354,7 +355,7 @@ export default function FeedbacksPanel() {
               </div>
 
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
-                Thành Công!
+                Success!
               </h3>
 
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -367,7 +368,7 @@ export default function FeedbacksPanel() {
                 className="btn btn-success fw-bold w-100"
                 style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
               >
-                Xác nhận
+                Confirm
               </button>
             </div>
           </div>
@@ -423,7 +424,7 @@ export default function FeedbacksPanel() {
               </div>
 
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: '#ef4444' }}>
-                Đã Xảy Ra Lỗi!
+                An Error Occurred!
               </h3>
 
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -436,7 +437,7 @@ export default function FeedbacksPanel() {
                 className="btn btn-danger fw-bold w-100"
                 style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>
@@ -480,7 +481,7 @@ export default function FeedbacksPanel() {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '12px' }}>
               <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)' }}>
-                Chi Tiết Ý Kiến Đóng Góp #{detailModal.feedback.id}
+                Feedback Details #{detailModal.feedback.id}
               </h3>
               <button
                 onClick={() => setDetailModal({ show: false, feedback: null })}
@@ -491,13 +492,13 @@ export default function FeedbacksPanel() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px 15px', fontSize: '14px' }}>
-              <span className="text-secondary fw-semibold">Người gửi:</span>
-              <span className="text-dark fw-bold">{detailModal.feedback.userFullName || 'Ẩn danh'}</span>
+              <span className="text-secondary fw-semibold">Sender:</span>
+              <span className="text-dark fw-bold">{detailModal.feedback.userFullName || 'Anonymous'}</span>
 
               <span className="text-secondary fw-semibold">Email:</span>
               <span className="text-dark">{detailModal.feedback.userEmail || 'N/A'}</span>
 
-              <span className="text-secondary fw-semibold">Vai trò:</span>
+              <span className="text-secondary fw-semibold">Role:</span>
               <span>
                 <span style={{
                   padding: '2px 8px',
@@ -511,21 +512,21 @@ export default function FeedbacksPanel() {
                 </span>
               </span>
 
-              <span className="text-secondary fw-semibold">Thời gian:</span>
-              <span className="text-dark">{detailModal.feedback.createdAt ? new Date(detailModal.feedback.createdAt).toLocaleString('vi-VN') : 'N/A'}</span>
+              <span className="text-secondary fw-semibold">Time:</span>
+              <span className="text-dark">{detailModal.feedback.createdAt ? new Date(detailModal.feedback.createdAt).toLocaleString('en-US') : 'N/A'}</span>
 
-              <span className="text-secondary fw-semibold">Tiêu đề:</span>
+              <span className="text-secondary fw-semibold">Subject:</span>
               <span className="text-dark fw-bold">{detailModal.feedback.subject}</span>
 
-              <span className="text-secondary fw-semibold" style={{ gridColumn: 'span 2', marginTop: '5px' }}>Nội dung đóng góp:</span>
-              <div
-                style={{
-                  gridColumn: 'span 2',
-                  padding: '12px',
-                  background: 'rgba(0,56,32,0.02)',
-                  border: '1px solid rgba(0,56,32,0.08)',
-                  borderRadius: '8px',
-                  fontSize: '13px',
+              <span className="text-secondary fw-semibold" style={{ gridColumn: 'span 2', marginTop: '5px' }}>Feedback Content:</span>
+              <div 
+                style={{ 
+                  gridColumn: 'span 2', 
+                  padding: '12px', 
+                  background: 'rgba(0,56,32,0.02)', 
+                  border: '1px solid rgba(0,56,32,0.08)', 
+                  borderRadius: '8px', 
+                  fontSize: '13px', 
                   lineHeight: '1.6',
                   color: '#2d3748',
                   maxHeight: '200px',
@@ -538,7 +539,7 @@ export default function FeedbacksPanel() {
               {detailModal.feedback.adminNote && (
                 <>
                   <span className={`fw-bold ${detailModal.feedback.status === 'RESOLVED' ? 'text-success' : 'text-danger'}`} style={{ gridColumn: 'span 2', marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {detailModal.feedback.status === 'RESOLVED' ? <FaCheckCircle /> : <FaBan />} Phản hồi từ Admin:
+                    {detailModal.feedback.status === 'RESOLVED' ? <FaCheckCircle /> : <FaBan />} Admin Response:
                   </span>
                   <div
                     style={{
@@ -565,7 +566,7 @@ export default function FeedbacksPanel() {
                 className="btn btn-outline-secondary btn-sm"
                 style={{ padding: '8px 20px', borderRadius: '8px' }}
               >
-                Đóng
+                Close
               </button>
               {detailModal.feedback.status === 'PENDING' && (
                 <>
@@ -578,7 +579,7 @@ export default function FeedbacksPanel() {
                     className="btn btn-success btn-sm fw-bold"
                     style={{ padding: '8px 20px', borderRadius: '8px' }}
                   >
-                    Giải quyết ngay
+                    Resolve Now
                   </button>
                   <button
                     onClick={() => {
@@ -589,7 +590,7 @@ export default function FeedbacksPanel() {
                     className="btn btn-outline-danger btn-sm fw-bold"
                     style={{ padding: '8px 20px', borderRadius: '8px' }}
                   >
-                    Từ chối đơn
+                    Reject Request
                   </button>
                 </>
               )}
@@ -635,19 +636,19 @@ export default function FeedbacksPanel() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: resolveModal.actionType === 'REJECTED' ? '#ef4444' : 'var(--ho-primary-dark)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '10px', margin: 0 }}>
-              {resolveModal.actionType === 'REJECTED' ? `Từ Chối Ý Kiến Đóng Góp #${resolveModal.feedbackId}` : `Xử Lý Ý Kiến Đóng Góp #${resolveModal.feedbackId}`}
+              {resolveModal.actionType === 'REJECTED' ? `Reject Feedback #${resolveModal.feedbackId}` : `Resolve Feedback #${resolveModal.feedbackId}`}
             </h3>
 
             <div className="form-group text-start">
               <label className="ho-input-label">
-                {resolveModal.actionType === 'REJECTED' ? 'Lý do từ chối đơn đóng góp *' : 'Ghi chú xử lý / Nội dung phản hồi *'}
+                {resolveModal.actionType === 'REJECTED' ? 'Rejection Reason *' : 'Resolution Notes / Response *'}
               </label>
               <textarea
                 className="ho-form-input text-dark fw-semibold"
                 rows="5"
                 required
                 disabled={resolving}
-                placeholder={resolveModal.actionType === 'REJECTED' ? 'Nhập lý do từ chối để thông báo tới người dùng...' : 'Nhập hướng giải quyết hoặc nội dung phản hồi gửi tới người dùng...'}
+                placeholder={resolveModal.actionType === 'REJECTED' ? 'Enter rejection reason to notify the user...' : 'Enter resolution steps or response to the user...'}
                 value={resolveModal.note}
                 onChange={(e) => setResolveModal(prev => ({ ...prev, note: e.target.value }))}
                 style={{ resize: 'vertical', width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--ho-border-gold)' }}
@@ -662,7 +663,7 @@ export default function FeedbacksPanel() {
                 className="btn btn-outline-secondary btn-sm"
                 style={{ padding: '8px 20px', borderRadius: '8px' }}
               >
-                Hủy bỏ
+                Cancel
               </button>
               <button
                 type="submit"
@@ -670,7 +671,7 @@ export default function FeedbacksPanel() {
                 className={`btn btn-sm fw-bold ${resolveModal.actionType === 'REJECTED' ? 'btn-danger' : 'btn-success'}`}
                 style={{ padding: '8px 24px', borderRadius: '8px' }}
               >
-                {resolving ? 'Đang lưu...' : (resolveModal.actionType === 'REJECTED' ? 'Xác nhận từ chối' : 'Xác nhận đã xử lý')}
+                {resolving ? 'Saving...' : (resolveModal.actionType === 'REJECTED' ? 'Confirm Reject' : 'Confirm Resolve')}
               </button>
             </div>
           </form>

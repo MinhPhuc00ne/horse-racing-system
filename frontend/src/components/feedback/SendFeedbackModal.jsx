@@ -32,7 +32,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
       const data = await getMyFeedbacksAPI();
       setMyFeedbacks(data);
     } catch (err) {
-      setHistoryError(err.message || 'Không thể tải danh sách ý kiến cá nhân.');
+      setHistoryError(err.message || 'Could not load your feedback list.');
     } finally {
       setLoadingHistory(false);
     }
@@ -49,7 +49,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!subject.trim() || !content.trim()) {
-      setErrorMessage('Vui lòng nhập đầy đủ tiêu đề và nội dung đóng góp.');
+      setErrorMessage('Please enter both subject and content.');
       return;
     }
 
@@ -62,10 +62,10 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
       });
       setSubject('');
       setContent('');
-      setSuccessMessage('Cảm ơn bạn! Ý kiến đóng góp đã được gửi thành công đến Ban Quản Trị.');
+      setSuccessMessage('Thank you! Your feedback has been successfully submitted to the Admin Panel.');
       if (onSuccess) onSuccess();
     } catch (err) {
-      setErrorMessage(err.message || 'Không thể gửi đóng góp ý kiến. Vui lòng thử lại.');
+      setErrorMessage(err.message || 'Could not submit feedback. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -82,19 +82,19 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
       case 'RESOLVED':
         return (
           <span style={{ padding: '3px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-            <FaCheck size="10" /> Đã xử lý
+            <FaCheck size="10" /> Resolved
           </span>
         );
       case 'REJECTED':
         return (
           <span style={{ padding: '3px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-            <FaBan size="10" /> Từ chối
+            <FaBan size="10" /> Rejected
           </span>
         );
       default:
         return (
           <span style={{ padding: '3px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '700', backgroundColor: 'rgba(212, 175, 55, 0.15)', color: 'var(--ho-accent-gold-text, #B8860B)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-            <FaClock size="10" /> Chờ xử lý
+            <FaClock size="10" /> Pending
           </span>
         );
     }
@@ -136,7 +136,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-3 pb-2" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
           <h4 className="m-0 fw-bold d-flex align-items-center gap-2" style={{ color: 'var(--ho-primary-dark, #003820)', fontSize: '18px' }}>
-            <FaCommentDots style={{ color: 'var(--ho-accent-gold-text, #B8860B)' }} /> Phản Hồi & Đóng Góp Ý Kiến
+            <FaCommentDots style={{ color: 'var(--ho-accent-gold-text, #B8860B)' }} /> Feedback & Suggestions
           </h4>
           <button
             type="button"
@@ -160,7 +160,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
               fontSize: '13px'
             }}
           >
-            <FaPlusCircle /> Gửi đóng góp mới
+            <FaPlusCircle /> Submit New Feedback
           </button>
 
           <button
@@ -174,7 +174,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
               fontSize: '13px'
             }}
           >
-            <FaHistory /> Đơn ý kiến đã gửi
+            <FaHistory /> My Submitted Feedbacks
           </button>
         </div>
 
@@ -197,7 +197,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
                 >
                   <FaCheckCircle size="32" />
                 </div>
-                <h5 className="fw-bold m-0" style={{ color: 'var(--ho-primary-dark, #003820)' }}>Đã Gửi Thành Công!</h5>
+                 <h5 className="fw-bold m-0" style={{ color: 'var(--ho-primary-dark, #003820)' }}>Submitted Successfully!</h5>
                 <p className="text-secondary small m-0 px-3">{successMessage}</p>
                 <div className="d-flex gap-2 mt-2">
                   <button
@@ -206,7 +206,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
                     className="btn btn-outline-secondary btn-sm fw-bold px-3"
                     style={{ borderRadius: '8px' }}
                   >
-                    Xem danh sách đã gửi
+                    View Submitted List
                   </button>
                   <button
                     type="button"
@@ -214,7 +214,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
                     className="btn btn-success btn-sm fw-bold px-4"
                     style={{ borderRadius: '8px', backgroundColor: 'var(--ho-primary-dark, #003820)', borderColor: 'var(--ho-primary-dark, #003820)' }}
                   >
-                    Hoàn tất
+                    Finish
                   </button>
                 </div>
               </div>
@@ -229,7 +229,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
 
                 <div>
                   <label className="ho-input-label d-block mb-1" style={{ fontSize: '12px', fontWeight: '600', color: 'var(--ho-primary-dark)' }}>
-                    Tiêu đề đóng góp *
+                    Subject *
                   </label>
                   <input
                     type="text"
@@ -237,7 +237,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
                     required
                     maxLength={255}
                     disabled={submitting}
-                    placeholder="Ví dụ: Góp ý về giao diện, đăng ký thi đấu, lỗi hệ thống..."
+                    placeholder="e.g. Feedback on interface, race registrations, bugs..."
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     style={{ fontSize: '14px', height: '40px', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--ho-border-gold)' }}
@@ -246,7 +246,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
 
                 <div>
                   <label className="ho-input-label d-block mb-1" style={{ fontSize: '12px', fontWeight: '600', color: 'var(--ho-primary-dark)' }}>
-                    Nội dung chi tiết *
+                    Detailed Content *
                   </label>
                   <textarea
                     className="ho-form-input text-dark fw-semibold w-100"
@@ -254,7 +254,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
                     required
                     maxLength={2000}
                     disabled={submitting}
-                    placeholder="Mô tả chi tiết vấn đề hoặc ý kiến đề xuất của bạn..."
+                    placeholder="Describe your issue or suggestion in detail..."
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     style={{ fontSize: '14px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--ho-border-gold)', resize: 'vertical' }}
@@ -269,7 +269,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
                     className="btn btn-outline-secondary btn-sm"
                     style={{ padding: '8px 18px', borderRadius: '8px', fontWeight: '600' }}
                   >
-                    Hủy bỏ
+                    Cancel
                   </button>
                   <button
                     type="submit"
@@ -278,7 +278,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
                     style={{ padding: '8px 20px', borderRadius: '8px', backgroundColor: 'var(--ho-primary-dark, #003820)', borderColor: 'var(--ho-primary-dark, #003820)' }}
                   >
                     <FaPaperPlane size="12" />
-                    {submitting ? 'Đang gửi...' : 'Gửi đóng góp'}
+                    {submitting ? 'Submitting...' : 'Submit Feedback'}
                   </button>
                 </div>
               </form>
@@ -287,12 +287,12 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
             /* TAB 2: MY FEEDBACKS HISTORY */
             <div className="d-flex flex-column gap-3">
               {loadingHistory ? (
-                <div className="text-center py-4 text-secondary fw-semibold">Đang tải lịch sử đóng góp...</div>
+                <div className="text-center py-4 text-secondary fw-semibold">Loading feedback history...</div>
               ) : historyError ? (
                 <div className="alert alert-danger py-2 px-3 small">{historyError}</div>
               ) : myFeedbacks.length === 0 ? (
                 <div className="text-center py-4 text-muted">
-                  Bạn chưa gửi ý kiến đóng góp nào.
+                  You have not submitted any feedback yet.
                 </div>
               ) : (
                 myFeedbacks.map((fb) => {
@@ -321,7 +321,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
                             {getStatusBadge(fb.status)}
                           </div>
                           <span className="text-muted" style={{ fontSize: '12px' }}>
-                            Gửi ngày: {fb.createdAt ? new Date(fb.createdAt).toLocaleString('vi-VN') : 'N/A'}
+                            Submitted on: {fb.createdAt ? new Date(fb.createdAt).toLocaleString('en-US') : 'N/A'}
                           </span>
                         </div>
                         <div className="text-muted ms-2">
@@ -333,7 +333,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
                       {isExpanded && (
                         <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(0,0,0,0.08)', fontSize: '13px' }}>
                           <div className="mb-2">
-                            <span className="fw-semibold text-secondary d-block mb-1">Nội dung đã gửi:</span>
+                            <span className="fw-semibold text-secondary d-block mb-1">Submitted Content:</span>
                             <div style={{ padding: '10px 12px', background: 'rgba(0, 0, 0, 0.03)', borderRadius: '8px', lineHeight: '1.5', color: '#333' }}>
                               {fb.content}
                             </div>
@@ -343,7 +343,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
                           {fb.adminNote ? (
                             <div className="mt-2">
                               <span className="fw-bold text-success d-flex align-items-center gap-1 mb-1">
-                                <FaCheckCircle /> Phản hồi từ Ban Quản Trị:
+                                <FaCheckCircle /> Response from Admin Panel:
                               </span>
                               <div style={{ padding: '10px 12px', background: fb.status === 'RESOLVED' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)', borderLeft: `3px solid ${fb.status === 'RESOLVED' ? '#10b981' : '#ef4444'}`, borderRadius: '4px', fontStyle: 'italic', color: '#1a202c', lineHeight: '1.5' }}>
                                 "{fb.adminNote}"
@@ -351,7 +351,7 @@ export default function SendFeedbackModal({ isOpen, onClose, onSuccess, initialT
                             </div>
                           ) : (
                             <div className="mt-2 text-muted fst-italic style-sm" style={{ fontSize: '12px' }}>
-                              Ý kiến đang được Ban quản trị xem xét và xử lý.
+                              Your feedback is currently under review by the Admin Panel.
                             </div>
                           )}
                         </div>

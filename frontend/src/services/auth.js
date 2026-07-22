@@ -112,11 +112,11 @@ export async function resetPasswordAPI({ email, otp, newPassword }) {
 }
 
 // ==========================================
-// MOCK APIS cho Luồng OTP Google (Frontend only)
+// MOCK APIS for Google OTP Flow (Frontend only)
 // ==========================================
 
 export async function sendGoogleOtpAPI(email) {
-  // Giả lập call API mất 1 giây
+  // Simulate API call taking 1 second
   await new Promise((resolve) => setTimeout(resolve, 1000));
   console.log(`[MOCK] OTP sent to ${email}`);
   return { success: true, message: 'OTP sent successfully' };

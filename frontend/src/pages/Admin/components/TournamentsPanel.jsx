@@ -125,7 +125,7 @@ export default function TournamentsPanel() {
       console.error('Fetch error:', err.response || err);
       const url = err.config?.url || 'unknown url';
       const detail = err.response?.data?.message || err.message;
-      setError(`Lỗi khi tải dữ liệu (${url}): ${detail}`);
+      setError(`Error loading data (${url}): ${detail}`);
     } finally {
       setLoading(false);
     }
@@ -179,11 +179,11 @@ export default function TournamentsPanel() {
 
   const handleConfirmAddTrack = async (e) => {
     if (!newTrackName.trim()) {
-      setFeedbackModal({ show: true, type: 'error', message: 'Vui lòng nhập tên sân thi đấu' });
+      setFeedbackModal({ show: true, type: 'error', message: 'Please enter track name' });
       return;
     }
     if (!newTrackRegion.trim()) {
-      setFeedbackModal({ show: true, type: 'error', message: 'Vui lòng nhập khu vực tổ chức' });
+      setFeedbackModal({ show: true, type: 'error', message: 'Please enter location region' });
       return;
     }
     try {
@@ -204,9 +204,9 @@ export default function TournamentsPanel() {
 
       // Close the modal
       setShowNewTrackModal(false);
-      setFeedbackModal({ show: true, type: 'success', message: 'Thêm sân thi đấu mới thành công!' });
+      setFeedbackModal({ show: true, type: 'success', message: 'New track created successfully!' });
     } catch (err) {
-      setFeedbackModal({ show: true, type: 'error', message: err.message || 'Lỗi khi tạo sân thi đấu mới' });
+      setFeedbackModal({ show: true, type: 'error', message: err.message || 'Error creating new track.' });
     } finally {
       setLoading(false);
     }
@@ -232,11 +232,11 @@ export default function TournamentsPanel() {
     setError('');
 
     if (parseInt(formData.minSlots) < 3) {
-      setError('Số lượng ngựa tối thiểu tham gia phải từ 3 con trở lên.');
+      setError('The minimum number of participating horses must be at least 3.');
       return;
     }
     if (parseInt(formData.maxSlots) < 3) {
-      setError('Số lượng ngựa tối đa tham gia phải từ 3 con trở lên.');
+      setError('The maximum number of participating horses must be at least 3.');
       return;
     }
 
@@ -268,15 +268,15 @@ export default function TournamentsPanel() {
     try {
       if (isEditing) {
         await updateTournamentAPI(editId, formattedData);
-        setFeedbackModal({ show: true, type: 'success', message: 'Cập nhật giải đấu thành công!' });
+        setFeedbackModal({ show: true, type: 'success', message: 'Tournament updated successfully!' });
       } else {
         await createTournamentAPI(formattedData);
-        setFeedbackModal({ show: true, type: 'success', message: 'Tạo giải đấu mới thành công!' });
+        setFeedbackModal({ show: true, type: 'success', message: 'New tournament created successfully!' });
       }
       fetchData();
       resetForm();
     } catch (err) {
-      setError(err.message || 'Lỗi khi lưu giải đấu.');
+      setError(err.message || 'Error saving tournament.');
     }
   };
 
@@ -332,8 +332,8 @@ export default function TournamentsPanel() {
   const handleDelete = (id) => {
     setConfirmModal({
       show: true,
-      title: 'Xác nhận xóa giải đấu',
-      message: 'Bạn có chắc chắn muốn xóa giải đấu này không? Tất cả vòng đua liên quan cũng sẽ bị ảnh hưởng và thao tác này không thể hoàn tác.',
+      title: 'Confirm Delete Tournament',
+      message: 'Are you sure you want to delete this tournament? All related race rounds will also be affected, and this action cannot be undone.',
       onConfirm: async () => {
         try {
           setLoading(true);
@@ -341,14 +341,14 @@ export default function TournamentsPanel() {
           setFeedbackModal({
             show: true,
             type: 'success',
-            message: 'Xóa giải đấu thành công!'
+            message: 'Tournament deleted successfully!'
           });
           fetchData();
         } catch (err) {
           setFeedbackModal({
             show: true,
             type: 'error',
-            message: err.message || 'Lỗi khi xóa giải đấu.'
+            message: err.message || 'Error deleting tournament.'
           });
         } finally {
           setLoading(false);
@@ -361,8 +361,8 @@ export default function TournamentsPanel() {
   const handleStatusChange = (id, status) => {
     setConfirmModal({
       show: true,
-      title: 'Xác nhận thay đổi trạng thái',
-      message: `Bạn có chắc chắn muốn cập nhật trạng thái giải đấu thành "${status}" không?`,
+      title: 'Confirm Status Change',
+      message: `Are you sure you want to update the tournament status to "${status}"?`,
       onConfirm: async () => {
         try {
           setLoading(true);
@@ -370,14 +370,14 @@ export default function TournamentsPanel() {
           setFeedbackModal({
             show: true,
             type: 'success',
-            message: `Cập nhật trạng thái giải đấu thành "${status}" thành công!`
+            message: `Successfully updated tournament status to "${status}"!`
           });
           fetchData();
         } catch (err) {
           setFeedbackModal({
             show: true,
             type: 'error',
-            message: err.message || 'Lỗi khi cập nhật trạng thái.'
+            message: err.message || 'Error updating status.'
           });
         } finally {
           setLoading(false);
@@ -386,12 +386,12 @@ export default function TournamentsPanel() {
     });
   };
 
-  // Confirm Registration (Chốt danh sách)
+  // Confirm Registration (Lock list)
   const handleConfirmRegistration = (tournamentId) => {
     setConfirmModal({
       show: true,
-      title: 'Xác nhận chốt danh sách',
-      message: 'Bạn có chắc chắn muốn chốt danh sách thi đấu cho giải đấu này? Thao tác này sẽ khóa đăng ký, chuyển trạng thái vòng đua sang LOCKED_LIST và hoàn lại lệ phí cho các đơn chưa được duyệt.',
+      title: 'Confirm Lock List',
+      message: 'Are you sure you want to lock the participant list for this tournament? This action will close registrations, change the round status to LOCKED_LIST, and refund entry fees for unapproved requests.',
       onConfirm: async () => {
         try {
           setLoading(true);
@@ -399,14 +399,14 @@ export default function TournamentsPanel() {
           setFeedbackModal({
             show: true,
             type: 'success',
-            message: res.message || 'Chốt danh sách giải đấu thành công! Trận đấu đã chuyển sang trạng thái sẵn sàng đua (LOCKED_LIST).'
+            message: res.message || 'Roster locked successfully! The race status has been updated to LOCKED_LIST.'
           });
           fetchData();
         } catch (err) {
           setFeedbackModal({
             show: true,
             type: 'error',
-            message: err.message || 'Lỗi khi chốt danh sách thi đấu.'
+            message: err.message || 'Error locking participant list.'
           });
         } finally {
           setLoading(false);
@@ -432,11 +432,11 @@ export default function TournamentsPanel() {
           uploadedUrl = 'http://localhost:8080' + uploadedUrl;
         }
         setFormData(prev => ({ ...prev, imageUrl: uploadedUrl }));
-        setFeedbackModal({ show: true, type: 'success', message: 'Tải ảnh lên thành công!' });
+        setFeedbackModal({ show: true, type: 'success', message: 'Image uploaded successfully!' });
         setError('');
       }
     } catch (err) {
-      const errMsg = err.response?.data?.message || 'Lỗi tải ảnh lên.';
+      const errMsg = err.response?.data?.message || 'Error uploading image.';
       setError(errMsg);
     }
   };
@@ -462,7 +462,7 @@ export default function TournamentsPanel() {
       {/* Action Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaTrophy style={{ color: 'var(--ho-accent-gold-text)' }} /> Quản Lý Giải Đấu Đua Ngựa
+          <FaTrophy style={{ color: 'var(--ho-accent-gold-text)' }} /> Horse Racing Tournament Management
         </h2>
         {!showForm && (
           <button
@@ -470,7 +470,7 @@ export default function TournamentsPanel() {
             className="btn btn-success d-flex align-items-center gap-2 fw-bold"
             style={{ fontSize: '13px', padding: '6px 14px' }}
           >
-            <FaPlus /> Thêm Giải Đấu
+            <FaPlus /> Add Tournament
           </button>
         )}
       </div>
@@ -514,7 +514,7 @@ export default function TournamentsPanel() {
               )}
               <div className="d-flex justify-content-between align-items-center" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
                 <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)' }}>
-                  {isEditing ? 'Cập Nhật Giải Đấu' : 'Tạo Giải Đấu Mới'}
+                  {isEditing ? 'Update Tournament' : 'Create New Tournament'}
                 </h3>
                 <button
                   type="button"
@@ -532,7 +532,7 @@ export default function TournamentsPanel() {
                   {/* Left Col */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     <div className="form-group">
-                      <label className="ho-input-label">Tên giải đấu *</label>
+                      <label className="ho-input-label">Tournament Name *</label>
                       <input
                         type="text"
                         name="tournamentName"
@@ -540,13 +540,13 @@ export default function TournamentsPanel() {
                         onChange={handleInputChange}
                         required
                         className="ho-form-input text-dark fw-semibold"
-                        placeholder="Nhập tên giải đấu (VD: Spring Championship 2026)"
+                        placeholder="Enter tournament name (e.g., Spring Championship 2026)"
                       />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                       <AutocompleteDropdown
-                        label="Khu vực tổ chức"
+                        label="Host Region"
                         value={selectedRegion}
                         onChange={(val) => {
                           setSelectedRegion(val);
@@ -554,14 +554,14 @@ export default function TournamentsPanel() {
                           setFormData(prev => ({ ...prev, location: '' }));
                         }}
                         options={[...new Set(tracks.map(t => t.location).filter(Boolean))]}
-                        placeholder="Gõ hoặc chọn khu vực..."
+                        placeholder="Type or select region..."
                         onAddNew={handleAddNewRegion}
-                        addNewText="Thêm mới khu vực"
+                        addNewText="Add new region"
                         required
                       />
 
                       <TrackAutocompleteDropdown
-                        label="Sân thi đấu"
+                        label="Race Track"
                         value={selectedTrack}
                         onChange={(trackObj) => {
                           setSelectedTrack(trackObj);
@@ -571,9 +571,9 @@ export default function TournamentsPanel() {
                           }
                         }}
                         options={tracks.filter(t => t.location === selectedRegion)}
-                        placeholder="Gõ hoặc chọn sân thi đấu..."
+                        placeholder="Type or select track..."
                         onAddNew={handleAddNewTrackClick}
-                        addNewText="Tạo mới sân thi đấu"
+                        addNewText="Create new track"
                         disabled={!selectedRegion}
                         required
                       />
@@ -581,7 +581,7 @@ export default function TournamentsPanel() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                       <div className="form-group">
-                        <label className="ho-input-label">Bề mặt đường đua *</label>
+                        <label className="ho-input-label">Track Surface *</label>
                         <select
                           name="surfaceType"
                           value={formData.surfaceType}
@@ -589,14 +589,14 @@ export default function TournamentsPanel() {
                           required
                           className="ho-form-input text-dark fw-semibold"
                         >
-                          <option value="Grass">Grass (Cỏ)</option>
-                          <option value="Muddy">Muddy (Đất bùn)</option>
-                          <option value="Artificial">Artificial (Nhân tạo)</option>
+                          <option value="Grass">Grass</option>
+                          <option value="Muddy">Muddy</option>
+                          <option value="Artificial">Artificial</option>
                         </select>
                       </div>
 
                       <div className="form-group">
-                        <label className="ho-input-label">Hình dạng đường đua *</label>
+                        <label className="ho-input-label">Track Shape *</label>
                         <select
                           name="trackShape"
                           value={trackShape}
@@ -604,14 +604,14 @@ export default function TournamentsPanel() {
                           required
                           className="ho-form-input text-dark fw-semibold"
                         >
-                          <option value="STRAIGHT">STRAIGHT (Đường thẳng)</option>
-                          <option value="OVAL">OVAL (Đường tròn/oval)</option>
+                          <option value="STRAIGHT">STRAIGHT (Straight line)</option>
+                          <option value="OVAL">OVAL (Circular/oval)</option>
                         </select>
                       </div>
                     </div>
 
                     <div className="form-group">
-                      <label className="ho-input-label">Độ dài đường đua (m) *</label>
+                      <label className="ho-input-label">Track Distance (m) *</label>
                       <input
                         type="number"
                         name="distance"
@@ -620,12 +620,12 @@ export default function TournamentsPanel() {
                         required
                         min="400"
                         className="ho-form-input text-dark fw-semibold"
-                        placeholder="VD: 1200"
+                        placeholder="e.g., 1200"
                       />
                     </div>
 
                     <div className="form-group">
-                      <label className="ho-input-label">Mô tả giải đấu</label>
+                      <label className="ho-input-label">Tournament Description</label>
                       <textarea
                         name="description"
                         value={formData.description}
@@ -633,7 +633,7 @@ export default function TournamentsPanel() {
                         rows="3"
                         className="ho-form-input text-dark fw-semibold"
                         style={{ resize: 'vertical' }}
-                        placeholder="Mô tả tóm tắt thể lệ, cơ cấu hoặc thông tin giải đấu..."
+                        placeholder="Brief description of rules, format, or tournament info..."
                       />
                     </div>
 
@@ -641,7 +641,7 @@ export default function TournamentsPanel() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                       <div className="form-group">
-                        <label className="ho-input-label">Thời gian mở cổng đăng ký</label>
+                        <label className="ho-input-label">Registration Opening Time</label>
                         <input
                           type="datetime-local"
                           name="registrationOpeningTime"
@@ -651,7 +651,7 @@ export default function TournamentsPanel() {
                         />
                       </div>
                       <div className="form-group">
-                        <label className="ho-input-label">Thời gian đóng cổng đăng ký</label>
+                        <label className="ho-input-label">Registration Deadline</label>
                         <input
                           type="datetime-local"
                           name="registrationDeadline"
@@ -664,7 +664,7 @@ export default function TournamentsPanel() {
                     </div>
 
                     <div className="form-group">
-                      <label className="ho-input-label">Thời gian diễn ra vòng đua</label>
+                      <label className="ho-input-label">Official Race Time</label>
                       <input
                         type="datetime-local"
                         name="officialRaceTime"
@@ -679,7 +679,7 @@ export default function TournamentsPanel() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                       <div className="form-group">
-                        <label className="ho-input-label">Số ngựa tối thiểu *</label>
+                        <label className="ho-input-label">Min Horses *</label>
                         <input
                           type="number"
                           name="minSlots"
@@ -688,11 +688,11 @@ export default function TournamentsPanel() {
                           required
                           min="3"
                           className="ho-form-input text-dark fw-semibold"
-                          placeholder="VD: 3"
+                          placeholder="e.g., 3"
                         />
                       </div>
                       <div className="form-group">
-                        <label className="ho-input-label">Số ngựa tối đa *</label>
+                        <label className="ho-input-label">Max Horses *</label>
                         <input
                           type="number"
                           name="maxSlots"
@@ -701,14 +701,14 @@ export default function TournamentsPanel() {
                           required
                           min="3"
                           className="ho-form-input text-dark fw-semibold"
-                          placeholder="VD: 10"
+                          placeholder="e.g., 10"
                         />
                       </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                       <div className="form-group">
-                        <label className="ho-input-label">Lệ phí tham gia (VND) *</label>
+                        <label className="ho-input-label">Entry Fee (VND) *</label>
                         <input
                           type="number"
                           name="entryFee"
@@ -717,11 +717,11 @@ export default function TournamentsPanel() {
                           required
                           min="0"
                           className="ho-form-input text-dark fw-semibold"
-                          placeholder="VD: 500000"
+                          placeholder="e.g., 500000"
                         />
                       </div>
                       <div className="form-group">
-                        <label className="ho-input-label">Tiền cược tối thiểu (VND) *</label>
+                        <label className="ho-input-label">Min Bet Amount (VND) *</label>
                         <input
                           type="number"
                           name="minBetAmount"
@@ -730,14 +730,14 @@ export default function TournamentsPanel() {
                           required
                           min="0"
                           className="ho-form-input text-dark fw-semibold"
-                          placeholder="VD: 100000"
+                          placeholder="e.g., 100000"
                         />
                       </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
                       <div className="form-group">
-                        <label className="ho-input-label">Giải Nhất *</label>
+                        <label className="ho-input-label">First Prize *</label>
                         <input
                           type="number"
                           name="prizeFirst"
@@ -746,11 +746,11 @@ export default function TournamentsPanel() {
                           required
                           min="0"
                           className="ho-form-input text-dark fw-semibold"
-                          placeholder="VD: 10000000"
+                          placeholder="e.g., 10000000"
                         />
                       </div>
                       <div className="form-group">
-                        <label className="ho-input-label">Giải Nhì *</label>
+                        <label className="ho-input-label">Second Prize *</label>
                         <input
                           type="number"
                           name="prizeSecond"
@@ -759,11 +759,11 @@ export default function TournamentsPanel() {
                           required
                           min="0"
                           className="ho-form-input text-dark fw-semibold"
-                          placeholder="VD: 5000000"
+                          placeholder="e.g., 5000000"
                         />
                       </div>
                       <div className="form-group">
-                        <label className="ho-input-label">Giải Ba *</label>
+                        <label className="ho-input-label">Third Prize *</label>
                         <input
                           type="number"
                           name="prizeThird"
@@ -777,7 +777,7 @@ export default function TournamentsPanel() {
                     </div>
 
                     <div className="form-group">
-                      <label className="ho-input-label">Trọng tài chịu trách nhiệm *</label>
+                      <label className="ho-input-label">Assigned Referee *</label>
                       <select
                         name="refereeId"
                         value={formData.refereeId}
@@ -785,7 +785,7 @@ export default function TournamentsPanel() {
                         required
                         className="ho-form-input text-dark fw-semibold"
                       >
-                        <option value="">Chọn trọng tài...</option>
+                        <option value="">Select referee...</option>
                         {referees.map(r => (
                           <option key={r.id} value={r.id}>{r.fullName} ({r.email})</option>
                         ))}
@@ -793,7 +793,7 @@ export default function TournamentsPanel() {
                     </div>
 
                     <div className="form-group">
-                      <label className="ho-input-label">Ảnh Avatar Giải Đấu</label>
+                      <label className="ho-input-label">Tournament Avatar Image</label>
                       <div
                         className="position-relative overflow-hidden"
                         style={{
@@ -831,7 +831,7 @@ export default function TournamentsPanel() {
                                   setLightboxImage(formData.imageUrl);
                                   setIsZoomedIn(false);
                                 }}
-                                title="Phóng to ảnh"
+                                title="Zoom image"
                               >
                                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>zoom_in</span>
                               </button>
@@ -841,7 +841,7 @@ export default function TournamentsPanel() {
                                 className="btn btn-sm btn-light d-flex align-items-center justify-content-center"
                                 style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0 }}
                                 onClick={() => fileInputRef.current.click()}
-                                title="Đổi ảnh khác"
+                                title="Change image"
                               >
                                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
                               </button>
@@ -856,8 +856,8 @@ export default function TournamentsPanel() {
                             <span className="material-symbols-outlined mb-2" style={{ fontSize: '32px', color: 'var(--ho-accent-gold-text)' }}>
                               cloud_upload
                             </span>
-                            <p className="m-0 fw-bold" style={{ color: 'var(--ho-primary-dark)' }}>Nhấn để tải ảnh lên</p>
-                            <p className="m-0 small text-secondary">Hỗ trợ JPG, PNG, WEBP</p>
+                            <p className="m-0 fw-bold" style={{ color: 'var(--ho-primary-dark)' }}>Click to upload image</p>
+                            <p className="m-0 small text-secondary">Supports JPG, PNG, WEBP</p>
                           </div>
                         )}
                         <input
@@ -872,13 +872,13 @@ export default function TournamentsPanel() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
                       <BreedMultiSelectDropdown
-                        label="Giống ngựa cho phép"
+                        label="Allowed Horse Breeds"
                         value={formData.allowedClasses}
                         onChange={(val) => {
                           setFormData(prev => ({ ...prev, allowedClasses: val }));
                         }}
                         options={breeds.map(b => b.breedName)}
-                        placeholder="Chọn hoặc gõ giống ngựa rồi nhấn Enter..."
+                        placeholder="Select or type horse breed then press Enter..."
                         onAddNew={async (newBreed) => {
                           try {
                             setLoading(true);
@@ -886,9 +886,9 @@ export default function TournamentsPanel() {
                             const res = await axiosClient.get('/breeds/official');
                             const updatedBreeds = res.data || [];
                             setBreeds(updatedBreeds);
-                            setFeedbackModal({ show: true, type: 'success', message: `Thêm giống ngựa "${newBreed}" thành công!` });
+                            setFeedbackModal({ show: true, type: 'success', message: `Added horse breed "${newBreed}" successfully!` });
                           } catch (err) {
-                            alert(err.response?.data?.message || 'Không thể tạo giống ngựa mới.');
+                            alert(err.response?.data?.message || 'Could not create new horse breed.');
                           } finally {
                             setLoading(false);
                           }
@@ -898,18 +898,18 @@ export default function TournamentsPanel() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div className="form-group">
-                        <label className="ho-input-label">Độ tuổi</label>
+                        <label className="ho-input-label">Allowed Ages</label>
                         <input
                           type="text"
                           name="allowedAges"
                           value={formData.allowedAges}
                           onChange={handleInputChange}
                           className="ho-form-input text-dark fw-semibold"
-                          placeholder="VD: 3,4,5"
+                          placeholder="e.g., 3,4,5"
                         />
                       </div>
                       <div className="form-group">
-                        <label className="ho-input-label d-block mb-2">Giới tính</label>
+                        <label className="ho-input-label d-block mb-2">Allowed Genders</label>
                         <div style={{ display: 'flex', gap: '20px', alignItems: 'center', height: '38px' }}>
                           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--ho-primary-dark)', fontWeight: '600' }}>
                             <input
@@ -918,7 +918,7 @@ export default function TournamentsPanel() {
                               onChange={(e) => handleGenderCheckboxChange('MALE', e.target.checked)}
                               style={{ width: '16px', height: '16px', accentColor: 'var(--ho-primary-dark)' }}
                             />
-                            Đực (MALE)
+                            Male (MALE)
                           </label>
                           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--ho-primary-dark)', fontWeight: '600' }}>
                             <input
@@ -927,7 +927,7 @@ export default function TournamentsPanel() {
                               onChange={(e) => handleGenderCheckboxChange('FEMALE', e.target.checked)}
                               style={{ width: '16px', height: '16px', accentColor: 'var(--ho-primary-dark)' }}
                             />
-                            Cái (FEMALE)
+                            Female (FEMALE)
                           </label>
                         </div>
                       </div>
@@ -944,14 +944,14 @@ export default function TournamentsPanel() {
                   className="btn btn-outline-secondary btn-sm"
                   style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
                 >
-                  Hủy bỏ
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="btn btn-success btn-sm fw-bold"
                   style={{ padding: '8px 24px', fontSize: '13px', borderRadius: '8px' }}
                 >
-                  {isEditing ? 'Lưu Thay Đổi' : 'Tạo Giải Đấu'}
+                  {isEditing ? 'Save Changes' : 'Create Tournament'}
                 </button>
               </div>
             </form>
@@ -1006,7 +1006,7 @@ export default function TournamentsPanel() {
                   className="btn btn-outline-secondary btn-sm"
                   style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
                 >
-                  Hủy bỏ
+                  Cancel
                 </button>
                 <button
                   type="button"
@@ -1017,7 +1017,7 @@ export default function TournamentsPanel() {
                   className="btn btn-success btn-sm fw-bold"
                   style={{ padding: '8px 24px', fontSize: '13px', borderRadius: '8px' }}
                 >
-                  Xác nhận
+                  Confirm
                 </button>
               </div>
             </div>
@@ -1075,7 +1075,7 @@ export default function TournamentsPanel() {
               </div>
 
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
-                {feedbackModal.type === 'success' ? 'Thành Công!' : 'Thất Bại!'}
+                {feedbackModal.type === 'success' ? 'Success!' : 'Failed!'}
               </h3>
 
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -1088,7 +1088,7 @@ export default function TournamentsPanel() {
                 className={`btn ${feedbackModal.type === 'success' ? 'btn-success' : 'btn-danger'} fw-bold w-100`}
                 style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
               >
-                Xác nhận
+                Confirm
               </button>
             </div>
           </div>
@@ -1110,7 +1110,7 @@ export default function TournamentsPanel() {
           onClick={() => setIsFilterCollapsed(!isFilterCollapsed)}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--ho-primary-dark)', fontWeight: '600', fontSize: '14px' }}>
-            <FaFilter style={{ color: 'var(--ho-accent-gold-text)' }} /> Bộ lọc tìm kiếm
+            <FaFilter style={{ color: 'var(--ho-accent-gold-text)' }} /> Search Filters
           </div>
           <button
             type="button"
@@ -1124,11 +1124,11 @@ export default function TournamentsPanel() {
           <div className="row g-3" style={{ marginTop: '10px' }}>
           {/* Search Name */}
           <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tìm theo tên giải đấu</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search by Tournament Name</label>
             <input
               type="text"
               className="ho-form-input text-dark fw-semibold"
-              placeholder="Nhập tên giải đấu..."
+              placeholder="Enter tournament name..."
               value={searchName}
               onChange={(e) => setSearchName(e.target.value)}
               style={{ fontSize: '13px', height: '38px' }}
@@ -1137,11 +1137,11 @@ export default function TournamentsPanel() {
 
           {/* Search Location */}
           <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tìm theo địa điểm</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search by Location</label>
             <input
               type="text"
               className="ho-form-input text-dark fw-semibold"
-              placeholder="Nhập địa điểm, sân..."
+              placeholder="Enter location, track..."
               value={searchLocation}
               onChange={(e) => setSearchLocation(e.target.value)}
               style={{ fontSize: '13px', height: '38px' }}
@@ -1150,24 +1150,24 @@ export default function TournamentsPanel() {
 
           {/* Filter Status */}
           <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trạng thái giải đấu</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tournament Status</label>
             <select
               className="ho-form-input text-dark fw-semibold"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               style={{ fontSize: '13px', height: '38px', paddingRight: '24px' }}
             >
-              <option value="">Tất cả trạng thái</option>
-              <option value="Upcoming">Upcoming (Sắp diễn ra)</option>
-              <option value="Active">Active (Đang mở)</option>
-              <option value="Finished">Finished (Đã kết thúc)</option>
-              <option value="Cancelled">Cancelled (Đã hủy)</option>
+              <option value="">All Statuses</option>
+              <option value="Upcoming">Upcoming</option>
+              <option value="Active">Active</option>
+              <option value="Finished">Finished</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
           </div>
 
           {/* Date range from */}
           <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Từ ngày (Bắt đầu)</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Start Date</label>
             <input
               type="date"
               className="ho-form-input text-dark fw-semibold"
@@ -1179,7 +1179,7 @@ export default function TournamentsPanel() {
 
           {/* Date range to */}
           <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Đến ngày (Kết thúc)</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>End Date</label>
             <input
               type="date"
               className="ho-form-input text-dark fw-semibold"
@@ -1191,11 +1191,11 @@ export default function TournamentsPanel() {
 
           {/* Min Prize Filter */}
           <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Giải nhất từ (VND)</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Min First Prize (VND)</label>
             <input
               type="number"
               className="ho-form-input text-dark fw-semibold"
-              placeholder="VD: 5000000"
+              placeholder="e.g., 5000000"
               value={minPrizeFilter}
               onChange={(e) => setMinPrizeFilter(e.target.value)}
               style={{ fontSize: '13px', height: '38px' }}
@@ -1204,11 +1204,11 @@ export default function TournamentsPanel() {
 
           {/* Max Prize Filter */}
           <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Giải nhất đến (VND)</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Max First Prize (VND)</label>
             <input
               type="number"
               className="ho-form-input text-dark fw-semibold"
-              placeholder="VD: 15000000"
+              placeholder="e.g., 15000000"
               value={maxPrizeFilter}
               onChange={(e) => setMaxPrizeFilter(e.target.value)}
               style={{ fontSize: '13px', height: '38px' }}
@@ -1241,18 +1241,18 @@ export default function TournamentsPanel() {
       {/* Tournaments List Grid */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: 'var(--ho-primary-dark)', margin: 0 }}>
-          Danh Sách Giải Đấu Hiện Tại ({filteredTournaments.length})
+          Current Tournament List ({filteredTournaments.length})
         </h3>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ho-text-muted)' }}>Đang tải danh sách giải đấu...</div>
+          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ho-text-muted)' }}>Loading tournament list...</div>
         ) : tournaments.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--ho-border-gold)', borderRadius: '14px', color: 'var(--ho-text-muted)' }}>
-            Chưa có giải đấu nào được khởi tạo.
+            No tournaments have been created yet.
           </div>
         ) : filteredTournaments.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--ho-border-gold)', borderRadius: '14px', color: 'var(--ho-text-muted)' }}>
-            Không tìm thấy giải đấu nào khớp với điều kiện lọc tìm kiếm.
+            No tournaments match the search criteria.
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
@@ -1288,29 +1288,29 @@ export default function TournamentsPanel() {
                 </div>
 
                 <p className="text-secondary small m-0" style={{ lineClamp: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '38px', lineHeight: '1.5' }}>
-                  {t.description || 'Không có mô tả chi tiết.'}
+                  {t.description || 'No detailed description.'}
                 </p>
 
                 {/* Meta details */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', borderTop: '1px solid var(--ho-border-muted)', borderBottom: '1px solid var(--ho-border-muted)', padding: '12px 0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaMapMarkerAlt /> Địa điểm:</span>
-                    <span className="text-dark fw-semibold">{t.location || 'Chưa xác định'}</span>
+                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaMapMarkerAlt /> Location:</span>
+                    <span className="text-dark fw-semibold">{t.location || 'Undecided'}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaCalendarAlt /> Hạn đăng ký:</span>
-                    <span className="text-dark fw-semibold">{new Date(t.registrationDeadline).toLocaleString('vi-VN')}</span>
+                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaCalendarAlt /> Deadline:</span>
+                    <span className="text-dark fw-semibold">{new Date(t.registrationDeadline).toLocaleString('en-US')}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaDollarSign /> Lệ phí đăng ký:</span>
+                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaDollarSign /> Entry Fee:</span>
                     <span style={{ color: 'var(--ho-accent-gold-text)', fontWeight: '700' }}>{t.entryFee?.toLocaleString()} VND</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaTrophy /> Loại mặt sân:</span>
+                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaTrophy /> Surface Type:</span>
                     <span className="text-dark fw-semibold">{t.surfaceType || 'Grass'}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaTrophy /> Tổng Giải Nhất:</span>
+                    <span className="text-secondary" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><FaTrophy /> First Prize:</span>
                     <span className="text-success fw-bold">{t.prizeFirst?.toLocaleString()} VND</span>
                   </div>
                 </div>
@@ -1355,7 +1355,7 @@ export default function TournamentsPanel() {
                         cursor: 'pointer',
                         transition: '0.2s'
                       }}
-                      title="Sửa giải đấu"
+                      title="Edit tournament"
                     >
                       <FaEdit size="14" />
                     </button>
@@ -1374,7 +1374,7 @@ export default function TournamentsPanel() {
                         cursor: 'pointer',
                         transition: '0.2s'
                       }}
-                      title="Xóa giải đấu"
+                      title="Delete tournament"
                     >
                       <FaTrash size="14" />
                     </button>
@@ -1422,7 +1422,7 @@ export default function TournamentsPanel() {
             <form onSubmit={(e) => { e.preventDefault(); handleConfirmAddTrack(); }} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div className="d-flex justify-content-between align-items-center" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
                 <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)' }}>
-                  Thêm Sân Thi Đấu Mới
+                  Add New Track
                 </h3>
                 <button
                   type="button"
@@ -1436,26 +1436,26 @@ export default function TournamentsPanel() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <div className="form-group">
-                  <label className="ho-input-label">Tên sân thi đấu *</label>
+                  <label className="ho-input-label">Track name *</label>
                   <input
                     type="text"
                     required
                     value={newTrackName}
                     onChange={(e) => setNewTrackName(e.target.value)}
                     className="ho-form-input text-dark fw-semibold"
-                    placeholder="Nhập tên sân thi đấu (VD: Han River Arena)"
+                    placeholder="Enter track name (e.g., Han River Arena)"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label className="ho-input-label">Khu vực tổ chức *</label>
+                  <label className="ho-input-label">Host region *</label>
                   <input
                     type="text"
                     required
                     value={newTrackRegion}
                     onChange={(e) => setNewTrackRegion(e.target.value)}
                     className="ho-form-input text-dark fw-semibold"
-                    placeholder="Nhập khu vực (VD: Da Nang)"
+                    placeholder="Enter region (e.g., Da Nang)"
                   />
                 </div>
 
@@ -1468,14 +1468,14 @@ export default function TournamentsPanel() {
                   className="btn btn-outline-secondary btn-sm"
                   style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
                 >
-                  Hủy bỏ
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="btn btn-success btn-sm fw-bold"
                   style={{ padding: '8px 24px', fontSize: '13px', borderRadius: '8px' }}
                 >
-                  Xác nhận
+                  Confirm
                 </button>
               </div>
             </form>
@@ -1632,7 +1632,7 @@ function AutocompleteDropdown({
             ))
           ) : (
             <div style={{ padding: '8px 12px', fontSize: '13px', color: '#888' }}>
-              Không tìm thấy địa điểm nào
+              No locations found
             </div>
           )}
 
@@ -1765,7 +1765,7 @@ function TrackAutocompleteDropdown({
             ))
           ) : (
             <div style={{ padding: '8px 12px', fontSize: '13px', color: '#888' }}>
-              Không tìm thấy sân thi đấu nào
+              No tracks found
             </div>
           )}
 
@@ -1971,7 +1971,7 @@ function BreedMultiSelectDropdown({
             ))
           ) : (
             <div style={{ padding: '8px 12px', fontSize: '13px', color: '#888' }}>
-              Không còn giống ngựa nào để chọn
+              No more breeds to choose
             </div>
           )}
 
@@ -1997,7 +1997,7 @@ function BreedMultiSelectDropdown({
               onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(16, 185, 129, 0.1)'}
               onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(16, 185, 129, 0.05)'}
             >
-              + Thêm giống ngựa mới "{searchTerm.trim()}"
+              + Add new horse breed "{searchTerm.trim()}"
             </div>
           )}
         </div>

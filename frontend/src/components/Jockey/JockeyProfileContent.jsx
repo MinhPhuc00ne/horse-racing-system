@@ -67,7 +67,7 @@ export default function JockeyProfileContent() {
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     if (!formData.fullName.trim()) {
-      alert("Vui lòng điền đầy đủ Họ và tên.");
+      alert("Please enter your full name.");
       return;
     }
 
@@ -85,9 +85,9 @@ export default function JockeyProfileContent() {
       
       await updateBankAccountAPI(bankName, "", bankAccountNumber, "");
       
-      alert("Cập nhật hồ sơ kỵ sĩ thành công!");
+      alert("Jockey profile updated successfully!");
     } catch (err) {
-      alert("Cập nhật hồ sơ thất bại: " + err.message);
+      alert("Failed to update profile: " + err.message);
     }
   };
 
@@ -97,10 +97,10 @@ export default function JockeyProfileContent() {
       <div className="d-flex justify-content-between align-items-end border-bottom pb-3 mb-4" style={{ borderColor: 'var(--ho-border-muted)' }}>
         <div>
           <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
-            Hồ sơ Kỵ sĩ
+            Jockey Profile
           </h2>
           <p className="text-secondary small m-0">
-            Quản lý các thông số kỹ thuật, kỹ năng và thông tin liên lạc của bạn.
+            Manage your technical specs, skills, and contact details.
           </p>
         </div>
       </div>
@@ -125,19 +125,19 @@ export default function JockeyProfileContent() {
 
             <div className="w-100 rounded p-3 text-start mb-0" style={{ backgroundColor: 'var(--ho-bg-cream)', border: '1px solid var(--ho-border-muted)' }}>
               <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                <span className="fw-bold text-dark small">Kinh nghiệm:</span>
-                <span className="text-secondary fw-semibold small">{profile.experienceYears} năm</span>
+                <span className="fw-bold text-dark small">Experience:</span>
+                <span className="text-secondary fw-semibold small">{profile.experienceYears} years</span>
               </div>
               <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                <span className="fw-bold text-dark small">Số trận đã tham gia:</span>
-                <span className="text-secondary fw-semibold small">{profile.matchesPlayed || 0} trận</span>
+                <span className="fw-bold text-dark small">Matches Played:</span>
+                <span className="text-secondary fw-semibold small">{profile.matchesPlayed || 0} matches</span>
               </div>
               <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
                 <span className="fw-bold text-dark small">Email:</span>
                 <span className="text-secondary fw-semibold small text-truncate ms-2" style={{ maxWidth: '180px' }} title={profile.email}>{profile.email}</span>
               </div>
               <div className="d-flex justify-content-between py-1">
-                <span className="fw-bold text-dark small">Số điện thoại:</span>
+                <span className="fw-bold text-dark small">Phone Number:</span>
                 <span className="text-secondary fw-semibold small">{profile.phoneNumber || 'N/A'}</span>
               </div>
             </div>
@@ -148,13 +148,13 @@ export default function JockeyProfileContent() {
         <div className="col-12 col-lg-8">
             <div className="glass-card h-100">
               <h3 className="ho-font-epilogue fs-5 fw-bold mb-4" style={{ color: 'var(--ho-primary-dark)' }}>
-                Cập nhật thông tin chi tiết
+                Update Detailed Information
               </h3>
 
               <form onSubmit={handleProfileSubmit} className="d-flex flex-column gap-3 text-dark">
                 <div className="row g-3">
                   <div className="col-12 col-md-6">
-                    <label className="ho-input-label ho-font-grotesk">Họ và tên</label>
+                    <label className="ho-input-label ho-font-grotesk">Full Name</label>
                     <input
                       type="text"
                       className="ho-form-input text-dark"
@@ -163,7 +163,7 @@ export default function JockeyProfileContent() {
                     />
                   </div>
                   <div className="col-12 col-md-6">
-                    <label className="ho-input-label ho-font-grotesk">Email (Liên kết)</label>
+                    <label className="ho-input-label ho-font-grotesk">Email (Linked)</label>
                     <input
                       type="email"
                       className="ho-form-input text-dark"
@@ -175,7 +175,7 @@ export default function JockeyProfileContent() {
 
                 <div className="row g-3">
                   <div className="col-12 col-md-6">
-                    <label className="ho-input-label ho-font-grotesk">Số điện thoại</label>
+                    <label className="ho-input-label ho-font-grotesk">Phone Number</label>
                     <input
                       type="text"
                       className="ho-form-input text-dark"
@@ -184,7 +184,7 @@ export default function JockeyProfileContent() {
                     />
                   </div>
                   <div className="col-12 col-md-6">
-                    <label className="ho-input-label ho-font-grotesk">Số CMND / CCCD</label>
+                    <label className="ho-input-label ho-font-grotesk">ID Card / Passport Number</label>
                     <input
                       type="text"
                       className="ho-form-input text-dark"
@@ -196,7 +196,7 @@ export default function JockeyProfileContent() {
 
                 <div className="row g-3">
                   <div className="col-12 col-md-6">
-                    <label className="ho-input-label ho-font-grotesk">Ngày sinh</label>
+                    <label className="ho-input-label ho-font-grotesk">Date of Birth</label>
                     <input
                       type="date"
                       className="ho-form-input text-dark"
@@ -205,7 +205,7 @@ export default function JockeyProfileContent() {
                     />
                   </div>
                   <div className="col-12 col-md-6">
-                    <label className="ho-input-label ho-font-grotesk">Giấy phép nài ngựa (License)</label>
+                    <label className="ho-input-label ho-font-grotesk">Jockey License Number</label>
                     <input
                       type="text"
                       className="ho-form-input text-dark font-monospace"
@@ -217,7 +217,7 @@ export default function JockeyProfileContent() {
 
                 <div className="row g-3">
                   <div className="col-12 col-md-6">
-                    <label className="ho-input-label ho-font-grotesk">Kinh nghiệm (Năm)</label>
+                    <label className="ho-input-label ho-font-grotesk">Experience (Years)</label>
                     <input
                       type="number"
                       className="ho-form-input text-dark"
@@ -226,7 +226,7 @@ export default function JockeyProfileContent() {
                     />
                   </div>
                   <div className="col-12 col-md-6">
-                    <label className="ho-input-label ho-font-grotesk">Số trận đã tham gia</label>
+                    <label className="ho-input-label ho-font-grotesk">Matches Played</label>
                     <input
                       type="number"
                       className="ho-form-input text-dark"
@@ -238,24 +238,24 @@ export default function JockeyProfileContent() {
 
                 <div className="row g-3">
                   <div className="col-12 col-md-6">
-                    <label className="ho-input-label ho-font-grotesk">Tên Ngân Hàng</label>
+                    <label className="ho-input-label ho-font-grotesk">Bank Name</label>
                     <input
                       type="text"
                       className="ho-form-input text-dark"
                       value={bankName}
                       onChange={(e) => setBankName(e.target.value)}
-                      placeholder="Ví dụ: MBBank, Techcombank"
+                      placeholder="e.g., MBBank, Techcombank"
                       required
                     />
                   </div>
                   <div className="col-12 col-md-6">
-                    <label className="ho-input-label ho-font-grotesk">Số Tài Khoản</label>
+                    <label className="ho-input-label ho-font-grotesk">Account Number</label>
                     <input
                       type="text"
                       className="ho-form-input text-dark"
                       value={bankAccountNumber}
                       onChange={(e) => setBankAccountNumber(e.target.value)}
-                      placeholder="Nhập số tài khoản"
+                      placeholder="Enter account number"
                       required
                     />
                   </div>

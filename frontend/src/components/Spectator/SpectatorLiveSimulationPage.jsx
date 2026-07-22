@@ -27,7 +27,7 @@ export default function SpectatorLiveSimulationPage() {
           trackShape: active.trackShape || 'STRAIGHT',
           distance: active.distance || 1000,
           status: active.status,
-          raceTrackName: active.raceTrackName || 'Sân đua chính thức',
+          raceTrackName: active.raceTrackName || 'Official Racetrack',
           surfaceType: active.surfaceType || 'Turf'
         };
       }
@@ -75,7 +75,7 @@ export default function SpectatorLiveSimulationPage() {
     return (
       <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '60vh' }}>
         <div className="spinner-border text-success" role="status"></div>
-        <p className="text-secondary mt-3 small">Đang quét hệ thống Live TV...</p>
+        <p className="text-secondary mt-3 small">Scanning Live TV system...</p>
       </div>
     );
   }
@@ -107,7 +107,7 @@ export default function SpectatorLiveSimulationPage() {
               <span className="d-inline-block rounded-circle bg-danger animate-pulse" style={{ width: '6px', height: '6px' }}></span> OFFLINE
             </span>
           </div>
-          <p className="text-secondary small m-0">Kênh truyền hình trực tiếp các cuộc đua đang diễn ra trên hệ thống.</p>
+          <p className="text-secondary small m-0">Live broadcast channel for ongoing races in the system.</p>
         </div>
       </div>
 
@@ -140,17 +140,17 @@ export default function SpectatorLiveSimulationPage() {
             </span>
 
             <h4 className="fw-bold ho-font-epilogue mb-2 text-uppercase text-secondary tracking-widest" style={{ fontSize: '18px', color: 'rgba(255,255,255,0.7)', letterSpacing: '4px' }}>
-              HỆ THỐNG LIVE TV - CHƯA CÓ TRẬN ĐẤU ĐANG DIỄN RA
+              LIVE TV SYSTEM - NO ONGOING RACE
             </h4>
 
             <p className="text-secondary small px-4 mb-4" style={{ maxWidth: '500px', color: '#6b7280', fontSize: '13px', lineHeight: '1.6' }}>
-              Hiện chưa có cuộc đua nào trực tuyến. Khi Ban tổ chức / Trọng tài bắt đầu chuẩn bị một trận đấu mới, màn hình này sẽ tự động kết nối và phát trực tiếp sa bàn cuộc đua trong thời gian thực.
+              There are currently no races online. When the Organizer / Referee starts preparing a new match, this screen will automatically connect and broadcast the race board in real time.
             </p>
 
             {/* Pulse Indicator */}
             <div className="d-flex align-items-center gap-2 px-3 py-1.5 bg-dark bg-opacity-50" style={{ fontSize: '11px', color: '#9ca3af', borderRadius: '20px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
               <span className="spinner-grow spinner-grow-sm text-warning" role="status" style={{ width: '8px', height: '8px' }}></span>
-              <span>Đang lắng nghe tín hiệu từ Trọng tài...</span>
+              <span>Listening for signal from Referee...</span>
             </div>
           </div>
 

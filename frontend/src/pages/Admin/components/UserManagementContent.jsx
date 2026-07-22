@@ -35,8 +35,8 @@ export default function UserManagementContent() {
       const users = await getAllUsersAPI();
       setUsersList(users);
     } catch (err) {
-      console.error('Lỗi khi tải danh sách người dùng:', err);
-      setError('Không thể tải dữ liệu người dùng từ máy chủ.');
+      console.error('Error loading user list:', err);
+      setError('Could not load user data from the server.');
     } finally {
       setLoading(false);
     }
@@ -59,8 +59,8 @@ export default function UserManagementContent() {
     const newStatus = !userToToggle.enabled;
     setConfirmModal({
       show: true,
-      title: 'Xác nhận thay đổi trạng thái',
-      message: `Bạn có chắc chắn muốn ${newStatus ? 'MỞ KHÓA' : 'KHÓA'} tài khoản @${userToToggle.username} không?`,
+      title: 'Confirm status change',
+      message: `Are you sure you want to ${newStatus ? 'UNLOCK' : 'LOCK'} account @${userToToggle.username}?`,
       onConfirm: async () => {
         try {
           setLoading(true);
@@ -68,14 +68,14 @@ export default function UserManagementContent() {
           setFeedbackModal({
             show: true,
             type: 'success',
-            message: `Đã thay đổi trạng thái của tài khoản @${userToToggle.username} thành ${newStatus ? 'Hoạt động' : 'Tạm khóa'}.`
+            message: `Successfully changed account status of @${userToToggle.username} to ${newStatus ? 'Active' : 'Locked'}.`
           });
           loadUsers(); // Refresh list
         } catch (err) {
           setFeedbackModal({
             show: true,
             type: 'error',
-            message: err.message || 'Lỗi khi thay đổi trạng thái.'
+            message: err.message || 'Error changing status.'
           });
         } finally {
           setLoading(false);
@@ -98,7 +98,7 @@ export default function UserManagementContent() {
 
     // Validations
     if (!formData.username.trim() || !formData.email.trim() || !formData.fullName.trim()) {
-      setError('Vui lòng nhập đầy đủ các trường bắt buộc.');
+      setError('Please fill in all required fields.');
       return;
     }
 
@@ -110,7 +110,7 @@ export default function UserManagementContent() {
     );
 
     if (isDuplicate) {
-      setError('Tên tài khoản hoặc Email này đã tồn tại trong hệ thống.');
+      setError('This username or email already exists in the system.');
       return;
     }
 
@@ -120,20 +120,20 @@ export default function UserManagementContent() {
         setFeedbackModal({
           show: true,
           type: 'success',
-          message: `Cập nhật tài khoản @${formData.username} thành công!`
+          message: `Successfully updated account @${formData.username}!`
         });
       } else {
         await createUserAPI(formData);
         setFeedbackModal({
           show: true,
           type: 'success',
-          message: `Tạo mới tài khoản @${formData.username} thành công!`
+          message: `Successfully created account @${formData.username}!`
         });
       }
       resetForm();
       loadUsers(); // Refresh list
     } catch (err) {
-      setError(err.message || 'Đã xảy ra lỗi khi lưu thông tin người dùng.');
+      setError(err.message || 'An error occurred while saving user information.');
     }
   };
 
@@ -155,8 +155,8 @@ export default function UserManagementContent() {
   const handleDeleteClick = (user) => {
     setConfirmModal({
       show: true,
-      title: 'Xác nhận xóa tài khoản',
-      message: `Bạn có chắc chắn muốn xóa tài khoản @${user.username} không? Hành động này không thể hoàn tác.`,
+      title: 'Confirm delete account',
+      message: `Are you sure you want to delete account @${user.username}? This action cannot be undone.`,
       onConfirm: async () => {
         try {
           setLoading(true);
@@ -164,14 +164,14 @@ export default function UserManagementContent() {
           setFeedbackModal({
             show: true,
             type: 'success',
-            message: `Đã xóa thành công tài khoản @${user.username}.`
+            message: `Successfully deleted account @${user.username}.`
           });
           loadUsers(); // Refresh list
         } catch (err) {
           setFeedbackModal({
             show: true,
             type: 'error',
-            message: err.message || 'Lỗi khi xóa người dùng.'
+            message: err.message || 'Error deleting user.'
           });
         } finally {
           setLoading(false);
@@ -194,7 +194,7 @@ export default function UserManagementContent() {
   const columns = [
     {
       key: 'fullName',
-      label: 'Người dùng',
+      label: 'User',
       render: (item) => (
         <div className="d-flex align-items-center">
           <FaUserCircle className="me-2 text-secondary" style={{ fontSize: '28px' }} />
@@ -207,7 +207,7 @@ export default function UserManagementContent() {
     },
     {
       key: 'email',
-      label: 'Email / Điện thoại',
+      label: 'Email / Phone',
       render: (item) => (
         <div className="d-flex flex-column">
           <span className="text-secondary small">{item.email}</span>
@@ -217,7 +217,7 @@ export default function UserManagementContent() {
     },
     {
       key: 'role',
-      label: 'Vai trò',
+      label: 'Role',
       render: (item) => {
         let badgeClass = 'bg-secondary';
         if (item.role === 'ADMIN') badgeClass = 'bg-danger';
@@ -234,16 +234,16 @@ export default function UserManagementContent() {
     },
     {
       key: 'enabled',
-      label: 'Trạng thái',
+      label: 'Status',
       render: (item) => (
         <span className={`badge ${item.enabled ? 'bg-success' : 'bg-warning text-dark'}`} style={{ fontSize: '10px' }}>
-          {item.enabled ? 'Hoạt động' : 'Tạm khóa'}
+          {item.enabled ? 'Active' : 'Locked'}
         </span>
       )
     },
     {
       key: 'actions',
-      label: 'Hành động',
+      label: 'Actions',
       align: 'center',
       render: (item) => (
         <div className="d-flex justify-content-center gap-2">
@@ -260,7 +260,7 @@ export default function UserManagementContent() {
               alignItems: 'center',
               justifyContent: 'center'
             }}
-            title="Sửa thông tin"
+            title="Edit User"
           >
             <FaEdit size="12" />
           </button>
@@ -277,7 +277,7 @@ export default function UserManagementContent() {
               alignItems: 'center',
               justifyContent: 'center'
             }}
-            title="Xóa người dùng"
+            title="Delete User"
           >
             <FaTrash size="12" />
           </button>
@@ -293,10 +293,10 @@ export default function UserManagementContent() {
       <div className="d-flex justify-content-between align-items-end mb-4">
         <div>
           <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
-            Quản Lý Thành Viên
+            User Management
           </h2>
           <p className="text-secondary small m-0">
-            Xem danh sách, tìm kiếm, lọc và thực hiện các chức năng Thêm, Sửa, Xóa hoặc Khóa người dùng.
+            View list, search, filter, and perform Add, Edit, Delete, or Lock user functions.
           </p>
         </div>
 
@@ -306,7 +306,7 @@ export default function UserManagementContent() {
             className="btn btn-success d-flex align-items-center gap-2 fw-bold"
             style={{ fontSize: '13px', padding: '6px 14px' }}
           >
-            <FaPlus /> Thêm Thành Viên
+            <FaPlus /> Add Member
           </button>
         )}
       </div>
@@ -350,7 +350,7 @@ export default function UserManagementContent() {
               )}
               <div className="d-flex justify-content-between align-items-center" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
                 <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)' }}>
-                  {isEditing ? 'Cập Nhật Thông Tin Thành Viên' : 'Thêm Thành Viên Mới'}
+                  {isEditing ? 'Update Member Information' : 'Add New Member'}
                 </h3>
                 <button
                   type="button"
@@ -365,7 +365,7 @@ export default function UserManagementContent() {
               <div style={{ maxHeight: 'calc(80vh - 120px)', overflowY: 'auto', paddingRight: '4px' }} className="no-scrollbar">
                 <div className="row g-3">
                   <div className="col-12 col-md-6 form-group">
-                    <label className="ho-input-label">Tên tài khoản (Username) *</label>
+                    <label className="ho-input-label">Username *</label>
                     <input
                       type="text"
                       name="username"
@@ -373,13 +373,13 @@ export default function UserManagementContent() {
                       onChange={handleInputChange}
                       required
                       className="ho-form-input text-dark fw-semibold"
-                      placeholder="Nhập tên tài khoản (VD: spectator1)"
+                      placeholder="Enter username (e.g. spectator1)"
                       disabled={isEditing}
                     />
                   </div>
 
                   <div className="col-12 col-md-6 form-group">
-                    <label className="ho-input-label">Họ và tên *</label>
+                    <label className="ho-input-label">Full Name *</label>
                     <input
                       type="text"
                       name="fullName"
@@ -387,13 +387,13 @@ export default function UserManagementContent() {
                       onChange={handleInputChange}
                       required
                       className="ho-form-input text-dark fw-semibold"
-                      placeholder="Nhập họ và tên đầy đủ..."
+                      placeholder="Enter full name..."
                       disabled={isEditing}
                     />
                   </div>
 
                   <div className="col-12 col-md-6 form-group">
-                    <label className="ho-input-label">Email liên hệ *</label>
+                    <label className="ho-input-label">Contact Email *</label>
                     <input
                       type="email"
                       name="email"
@@ -401,26 +401,26 @@ export default function UserManagementContent() {
                       onChange={handleInputChange}
                       required
                       className="ho-form-input text-dark fw-semibold"
-                      placeholder="Nhập email..."
+                      placeholder="Enter email..."
                       disabled={isEditing}
                     />
                   </div>
 
                   <div className="col-12 col-md-6 form-group">
-                    <label className="ho-input-label">Số điện thoại</label>
+                    <label className="ho-input-label">Phone Number</label>
                     <input
                       type="text"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
                       className="ho-form-input text-dark fw-semibold"
-                      placeholder="Nhập số điện thoại..."
+                      placeholder="Enter phone number..."
                       disabled={isEditing}
                     />
                   </div>
 
                   <div className="col-12 col-md-6 form-group">
-                    <label className="ho-input-label">Vai trò hệ thống *</label>
+                    <label className="ho-input-label">System Role *</label>
                     <select
                       name="role"
                       value={formData.role}
@@ -428,11 +428,11 @@ export default function UserManagementContent() {
                       required
                       className="ho-form-input text-dark fw-semibold"
                     >
-                      <option value="SPECTATOR">SPECTATOR (Khán giả)</option>
-                      <option value="HORSE_OWNER">HORSE_OWNER (Chủ ngựa)</option>
-                      <option value="JOCKEY">JOCKEY (Kỵ sĩ)</option>
-                      <option value="RACE_REFEREE">RACE_REFEREE (Trọng tài)</option>
-                      <option value="ADMIN">ADMIN (Quản trị viên)</option>
+                      <option value="SPECTATOR">SPECTATOR (Spectator)</option>
+                      <option value="HORSE_OWNER">HORSE_OWNER (Horse Owner)</option>
+                      <option value="JOCKEY">JOCKEY (Jockey)</option>
+                      <option value="RACE_REFEREE">RACE_REFEREE (Referee)</option>
+                      <option value="ADMIN">ADMIN (Admin)</option>
                     </select>
                   </div>
 
@@ -449,7 +449,7 @@ export default function UserManagementContent() {
                         style={{ cursor: 'pointer' }}
                       />
                       <label className="form-check-label text-dark fw-bold ms-2" htmlFor="userEnabledSwitch" style={{ cursor: 'pointer', fontSize: '13px' }}>
-                        Tài khoản hoạt động
+                        Account active
                       </label>
                     </div>
                   </div>
@@ -463,14 +463,14 @@ export default function UserManagementContent() {
                   className="btn btn-outline-secondary btn-sm"
                   style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
                 >
-                  Hủy bỏ
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="btn btn-success btn-sm fw-bold"
                   style={{ padding: '8px 24px', fontSize: '13px', borderRadius: '8px' }}
                 >
-                  {isEditing ? 'Lưu Thay Đổi' : 'Thêm Thành Viên'}
+                  {isEditing ? 'Save Changes' : 'Add Member'}
                 </button>
               </div>
             </form>
@@ -525,7 +525,7 @@ export default function UserManagementContent() {
                   className="btn btn-outline-secondary btn-sm"
                   style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
                 >
-                  Hủy bỏ
+                  Cancel
                 </button>
                 <button
                   type="button"
@@ -536,7 +536,7 @@ export default function UserManagementContent() {
                   className="btn btn-success btn-sm fw-bold"
                   style={{ padding: '8px 24px', fontSize: '13px', borderRadius: '8px' }}
                 >
-                  Xác nhận
+                  Confirm
                 </button>
               </div>
             </div>
@@ -594,7 +594,7 @@ export default function UserManagementContent() {
               </div>
 
               <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
-                {feedbackModal.type === 'success' ? 'Thành Công!' : 'Thất Bại!'}
+                {feedbackModal.type === 'success' ? 'Success!' : 'Failed!'}
               </h3>
 
               <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
@@ -607,7 +607,7 @@ export default function UserManagementContent() {
                 className={`btn ${feedbackModal.type === 'success' ? 'btn-success' : 'btn-danger'} fw-bold w-100`}
                 style={{ marginTop: '10px', padding: '10px', fontSize: '14px', borderRadius: '8px' }}
               >
-                Xác nhận
+                Confirm
               </button>
             </div>
           </div>
@@ -624,7 +624,7 @@ export default function UserManagementContent() {
           <input
             type="text"
             className="ho-form-input text-dark fw-semibold"
-            placeholder="Tìm kiếm theo tên, email, tên tài khoản..."
+            placeholder="Search by name, email, username..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ paddingLeft: '40px', fontSize: '14px', height: '42px' }}
@@ -634,7 +634,7 @@ export default function UserManagementContent() {
         {/* Role Filter */}
         <div className="d-flex align-items-center gap-2" style={{ flex: '0 0 auto' }}>
           <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--ho-primary-dark)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
-            <FaFilter className="me-1" /> Lọc vai trò:
+            <FaFilter className="me-1" /> Filter by role:
           </span>
           <select
             className="ho-form-input text-dark fw-semibold"
@@ -642,7 +642,7 @@ export default function UserManagementContent() {
             onChange={(e) => setRoleFilter(e.target.value)}
             style={{ fontSize: '14px', minWidth: '150px', height: '42px', paddingRight: '24px' }}
           >
-            <option value="">Tất cả vai trò</option>
+            <option value="">All Roles</option>
             <option value="HORSE_OWNER">HORSE OWNER</option>
             <option value="JOCKEY">JOCKEY</option>
             <option value="RACE_REFEREE">RACE REFEREE</option>
@@ -653,7 +653,7 @@ export default function UserManagementContent() {
         {/* Status Filter */}
         <div className="d-flex align-items-center gap-2" style={{ flex: '0 0 auto' }}>
           <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--ho-primary-dark)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
-            <FaFilter className="me-1" /> Trạng thái:
+            <FaFilter className="me-1" /> Status:
           </span>
           <select
             className="ho-form-input text-dark fw-semibold"
@@ -661,9 +661,9 @@ export default function UserManagementContent() {
             onChange={(e) => setStatusFilter(e.target.value)}
             style={{ fontSize: '14px', minWidth: '150px', height: '42px', paddingRight: '24px' }}
           >
-            <option value="">Tất cả trạng thái</option>
-            <option value="active">Hoạt động</option>
-            <option value="locked">Tạm khóa</option>
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="locked">Locked</option>
           </select>
         </div>
 
@@ -672,12 +672,12 @@ export default function UserManagementContent() {
       {/* User Data Table */}
       <div className="glass-card">
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#a0aec0' }}>Đang tải danh sách thành viên...</div>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#a0aec0' }}>Loading user list...</div>
         ) : (
           <DataTable
             columns={columns}
             data={filteredUsers}
-            emptyMessage="Không tìm thấy thành viên nào khớp với điều kiện tìm kiếm."
+            emptyMessage="No members found matching the search criteria."
           />
         )}
       </div>

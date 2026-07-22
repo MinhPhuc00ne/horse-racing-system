@@ -16,7 +16,7 @@ export default function PaymentCallback() {
       }
 
       if (cancel === 'true') {
-        alert('Giao dịch đã bị hủy.');
+        alert('The transaction has been cancelled.');
         // Try to go back to profile based on role
         navigateBack();
         return;
@@ -25,13 +25,13 @@ export default function PaymentCallback() {
       try {
         const res = await checkDepositStatusAPI(orderCode);
         if (res.status === 'SUCCESS') {
-          alert('Thanh toán thành công! Số tiền đã được cộng vào ví.');
+          alert('Payment successful! The amount has been credited to your wallet.');
         } else {
-          alert(`Trạng thái thanh toán: ${res.status}. Vui lòng chờ hệ thống cập nhật.`);
+          alert(`Payment status: ${res.status}. Please wait for the system to update.`);
         }
       } catch (err) {
-        console.error('Lỗi khi kiểm tra giao dịch:', err);
-        alert('Có lỗi xảy ra khi kiểm tra giao dịch.');
+        console.error('Error checking transaction:', err);
+        alert('An error occurred while checking the transaction.');
       } finally {
         navigateBack();
       }
@@ -66,7 +66,7 @@ export default function PaymentCallback() {
     <div className="d-flex justify-content-center align-items-center min-vh-100" style={{ backgroundColor: '#02140b', color: 'white' }}>
       <div className="text-center">
         <div className="spinner-border text-success mb-3" role="status" style={{ width: '3rem', height: '3rem' }}></div>
-        <h4 className="ho-font-epilogue">Đang xử lý giao dịch... Vui lòng chờ!</h4>
+        <h4 className="ho-font-epilogue">Processing transaction... Please wait!</h4>
       </div>
     </div>
   );

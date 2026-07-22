@@ -167,14 +167,14 @@ export default function RaphaelHUD({ horses, environment, onComplete, onCancel, 
                 noticeContainerRef.current.style.animation = 'appearNotice 2.5s forwards';
             }
             audioManager.playSystemBoot();
-            updateSystemText("[ KHỞI ĐỘNG HỆ THỐNG TRÌNH DIỄN NGỰA ĐUA ]");
+            updateSystemText("[ INITIALIZING HORSE PRESENTATION SYSTEM ]");
 
             await wait(2500);
             if (isCancelled) return;
             triggerFlash(300);
             if (noticeContainerRef.current) noticeContainerRef.current.style.animation = '';
 
-            updateSystemText("Đang tải dữ liệu hồ sơ ngựa đua...");
+            updateSystemText("Loading racing horse profiles data...");
             if (mcWrapperRef.current) mcWrapperRef.current.style.animation = 'drawCircle 1.5s linear forwards';
 
             await wait(1500);
@@ -218,7 +218,7 @@ export default function RaphaelHUD({ horses, environment, onComplete, onCancel, 
                     fgHorseRef.current.style.opacity = '1';
                     fgHorseRef.current.classList.add('show-horse');
                 }
-                updateSystemText(`Bắt đầu giới thiệu: [${horse.name}]...`);
+                updateSystemText(`Starting presentation: [${horse.name}]...`);
 
                 await wait(1500);
                 if (isCancelled) return;
@@ -229,7 +229,7 @@ export default function RaphaelHUD({ horses, environment, onComplete, onCancel, 
 
                 await wait(1500);
                 if (isCancelled) return;
-                updateSystemText(`Trích xuất thông tin Đội Đua & Nài Ngựa [${horse.name}]...`);
+                updateSystemText(`Extracting Stable & Jockey data for [${horse.name}]...`);
                 if (panel2Ref.current) {
                     panel2Ref.current.style.animation = 'slideInRight 0.4s ease-out forwards';
                     audioManager.playSlideTick();
@@ -242,7 +242,7 @@ export default function RaphaelHUD({ horses, environment, onComplete, onCancel, 
                     panel3Ref.current.style.animation = 'slideInRight 0.4s ease-out forwards';
                     audioManager.playSlideTick();
                 }
-                updateSystemText(`Hiển thị phong độ gần đây của [${horse.name}].`);
+                updateSystemText(`Displaying recent form for [${horse.name}].`);
 
                 await wait(2500);
                 if (isCancelled) return;
@@ -260,7 +260,7 @@ export default function RaphaelHUD({ horses, environment, onComplete, onCancel, 
                 }
             }
 
-            updateSystemText("Đã giới thiệu xong. Chuẩn bị mở cổng đua!");
+            updateSystemText("Presentation complete. Preparing starting gates!");
             await wait(1200);
             if (isCancelled) return;
 
@@ -352,7 +352,7 @@ export default function RaphaelHUD({ horses, environment, onComplete, onCancel, 
                         e.target.style.boxShadow = '0 0 15px rgba(0, 204, 255, 0.2)';
                     }}
                 >
-                    ⏭️ Bỏ qua giới thiệu
+                    ⏭️ Skip Presentation
                 </button>
                 
                 {onCancel && (
@@ -384,7 +384,7 @@ export default function RaphaelHUD({ horses, environment, onComplete, onCancel, 
                             e.target.style.boxShadow = '0 0 15px rgba(239, 68, 68, 0.2)';
                         }}
                     >
-                        ✖ Đóng / Thoát
+                        ✖ Close / Exit
                     </button>
                 )}
             </div>
@@ -394,24 +394,24 @@ export default function RaphaelHUD({ horses, environment, onComplete, onCancel, 
                     {transitionStep === 1 && (
                         <div className="transition-logo-content" key="step1">
                             <img src={logo} alt="EquineElite Logo" className="hud-logo-icon-img" />
-                            <div className="hud-logo-title">BẠN ĐÃ SẴN SÀNG?</div>
-                            <div className="hud-logo-subtitle">HỆ THỐNG ĐÃ KÍCH HOẠT</div>
+                            <div className="hud-logo-title">ARE YOU READY?</div>
+                            <div className="hud-logo-subtitle">SYSTEM ACTIVE</div>
                             <div className="hud-glow-line"></div>
                         </div>
                     )}
                     {transitionStep === 2 && (
                         <div className="transition-logo-content" key="step2">
                             <img src={logo} alt="EquineElite Logo" className="hud-logo-icon-img" />
-                            <div className="hud-logo-title">HÃY ĐẶT CƯỢC</div>
-                            <div className="hud-logo-subtitle">CƠ HỘI CHIẾN THẮNG TRONG TẦM TAY</div>
+                            <div className="hud-logo-title">PLACE YOUR BETS</div>
+                            <div className="hud-logo-subtitle">YOUR WINNING OPPORTUNITY</div>
                             <div className="hud-glow-line"></div>
                         </div>
                     )}
                     {transitionStep === 3 && (
                         <div className="transition-logo-content" key="step3">
                             <img src={logo} alt="EquineElite Logo" className="hud-logo-icon-img" />
-                            <div className="hud-logo-title">CUỘC ĐUA BẮT ĐẦU</div>
-                            <div className="hud-logo-subtitle">CỔNG ĐUA CHUẨN BỊ MỞ</div>
+                            <div className="hud-logo-title">RACE START</div>
+                            <div className="hud-logo-subtitle">STARTING GATES PREPARING TO OPEN</div>
                             <div className="hud-glow-line"></div>
                         </div>
                     )}
@@ -503,41 +503,41 @@ export default function RaphaelHUD({ horses, environment, onComplete, onCancel, 
 
                 <div className="info-container">
                     <div className="info-panel" ref={panel1Ref}>
-                        <div className="panel-title">THÔNG TIN NGỰA ĐUA</div>
+                        <div className="panel-title">HORSE PROFILE INFO</div>
                         <div className="panel-data">
-                            <span>Mã định danh (ID)</span>
+                            <span>Identification ID</span>
                             <span className="highlight">#{currentHorse?.horseId || '00' + (Math.floor(Math.random() * 99))}</span>
                         </div>
                         <div className="panel-data">
-                            <span>Tuổi (Age)</span>
-                            <span className="highlight" style={{ color: '#ff8800' }}>{currentStats.age} Tuổi</span>
+                            <span>Age</span>
+                            <span className="highlight" style={{ color: '#ff8800' }}>{currentStats.age} Years Old</span>
                         </div>
                         <div className="panel-data">
-                            <span>Cân nặng (Weight)</span>
+                            <span>Weight</span>
                             <span className="highlight" style={{ color: '#00ffaa' }}>{currentHorse?.weight || '485.5'} kg</span>
                         </div>
                     </div>
 
                     <div className="info-panel" ref={panel2Ref}>
-                        <div className="panel-title">ĐỘI ĐUA & NÀI NGỰA</div>
+                        <div className="panel-title">STABLE & JOCKEY</div>
                         <div className="panel-data">
-                            <span>Chủ sở hữu:</span>
-                            <span className="highlight" style={{ fontSize: '16px', color: '#ffcc00' }}>{currentHorse?.ownerName || 'Tập đoàn Apex'}</span>
+                            <span>Owner:</span>
+                            <span className="highlight" style={{ fontSize: '16px', color: '#ffcc00' }}>{currentHorse?.ownerName || 'Apex Group'}</span>
                         </div>
                         <div className="panel-data">
-                            <span>Nài ngựa (Jockey):</span>
+                            <span>Jockey:</span>
                             <span className="highlight" style={{ fontSize: '16px', color: '#00ccff' }}>{currentHorse?.jockeyName || 'Unknown'}</span>
                         </div>
                     </div>
 
                     <div className="info-panel panel-3" ref={panel3Ref}>
-                        <div className="panel-title">PHONG ĐỘ (RECENT FORM)</div>
+                        <div className="panel-title">RECENT FORM</div>
                         <div className="panel-data" style={{ borderBottom: 'none', paddingBottom: '0' }}>
-                            <span>Tỉ lệ thắng (Win Rate):</span>
+                            <span>Win Rate:</span>
                             <span className="highlight-supreme" id="hud-statWinRate" style={{ fontSize: '24px' }}>{currentStats.winRate}</span>
                         </div>
                         <div className="panel-data" style={{ borderBottom: 'none', paddingTop: '5px' }}>
-                            <span>5 trận gần nhất:</span>
+                            <span>Last 5 Races:</span>
                             <div style={{ display: 'flex', gap: '5px' }}>
                                 {currentStats.recentForm.map((pos, idx) => {
                                     const bg = pos === 1 ? '#10b981' : pos === 2 ? '#f59e0b' : pos === 3 ? '#3b82f6' : '#ef4444';

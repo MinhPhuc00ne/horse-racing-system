@@ -14,12 +14,12 @@ import ConfirmResults from '../../components/RaceReferee/ConfirmResults';
 import RefereeProfileContent from '../../components/RaceReferee/RefereeProfileContent';
 
 const refereeNavLinks = [
-  { path: '/referee/home', label: 'Trang Chủ', icon: 'home' },
-  { path: '/referee/assigned-tournaments', label: 'Giải Đấu Của Tôi', icon: 'assignment' },
-  { path: '/referee/pre-race-check', label: 'Kiểm Tra Trước Trận', icon: 'fact_check' },
-  { path: '/referee/live-simulation', label: 'Mô Phỏng Trực Tiếp', icon: 'sports_score' },
-  { path: '/referee/confirm-results', label: 'Xác Nhận Kết Quả', icon: 'verified' },
-  { path: '/referee/violations', label: 'Cảnh Cáo & Vi Phạm', icon: 'gavel' }
+  { path: '/referee/home', label: 'Home', icon: 'home' },
+  { path: '/referee/assigned-tournaments', label: 'My Tournaments', icon: 'assignment' },
+  { path: '/referee/pre-race-check', label: 'Pre-Race Check', icon: 'fact_check' },
+  { path: '/referee/live-simulation', label: 'Live Simulation', icon: 'sports_score' },
+  { path: '/referee/confirm-results', label: 'Confirm Results', icon: 'verified' },
+  { path: '/referee/violations', label: 'Infractions & Violations', icon: 'gavel' }
 ];
 
 export default function RefereePage() {

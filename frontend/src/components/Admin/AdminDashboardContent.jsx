@@ -258,8 +258,8 @@ export default function AdminDashboardContent() {
             <div className="col-12 col-md-6 col-xl-3">
               <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
                 <div>
-                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Nạp & Rút Tiền Ví</h3>
-                  <p className="text-secondary small mb-2">So sánh dòng tiền Nạp vs Rút</p>
+                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Wallet Deposits & Withdrawals</h3>
+                  <p className="text-secondary small mb-2">Compare Deposit vs Withdrawal cash flows</p>
                 </div>
 
                 <div className="position-relative mt-2" style={{ height: '230px' }}>
@@ -272,8 +272,8 @@ export default function AdminDashboardContent() {
             <div className="col-12 col-md-6 col-xl-3">
               <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
                 <div>
-                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Phân Bổ Giống Ngựa</h3>
-                  <p className="text-secondary small mb-2">Tỷ lệ các giống ngựa trên hệ thống</p>
+                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Horse Breed Distribution</h3>
+                  <p className="text-secondary small mb-2">Ratio of horse breeds in the system</p>
                 </div>
 
                 <div className="d-flex align-items-center justify-content-center mt-2" style={{ height: '230px' }}>
@@ -286,8 +286,8 @@ export default function AdminDashboardContent() {
             <div className="col-12 col-md-6 col-xl-3">
               <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
                 <div>
-                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Trạng Thái Trận Đấu</h3>
-                  <p className="text-secondary small mb-2">Phân bổ trạng thái các vòng đua</p>
+                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Race Status Breakdown</h3>
+                  <p className="text-secondary small mb-2">Distribution of race round statuses</p>
                 </div>
 
                 <div className="position-relative mt-2" style={{ height: '230px' }}>
@@ -300,8 +300,8 @@ export default function AdminDashboardContent() {
             <div className="col-12 col-md-6 col-xl-3">
               <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
                 <div>
-                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Top Giải Thưởng</h3>
-                  <p className="text-secondary small mb-2">Các giải đấu có giải thưởng lớn nhất</p>
+                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Top Prize Pools</h3>
+                  <p className="text-secondary small mb-2">Tournaments with the largest prize pools</p>
                 </div>
 
                 <div className="position-relative mt-2" style={{ height: '230px' }}>

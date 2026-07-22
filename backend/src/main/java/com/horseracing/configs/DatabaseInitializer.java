@@ -392,9 +392,9 @@ public class DatabaseInitializer implements CommandLineRunner {
 
 //         // --- ENSURE DEMO SIMULATION RACE EXISTS ---
 //         try {
-//             Integer demoRaceCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM Race WHERE Race_Name = 'Trận Giả Lập 4 Ngựa (Demo)'", Integer.class);
+//             Integer demoRaceCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM Race WHERE Race_Name = '4-Horse Simulation Race (Demo)'", Integer.class);
 //             if (demoRaceCount == 0) {
-//                 log.info("Creating default 'Trận Giả Lập 4 Ngựa (Demo)' race...");
+//                 log.info("Creating default '4-Horse Simulation Race (Demo)' race...");
 // 
 //                 // Ensure users exist
 //                 jdbcTemplate.update("IF NOT EXISTS (SELECT 1 FROM Users WHERE Email = 'owner1@gmail.com') " +
@@ -416,7 +416,7 @@ public class DatabaseInitializer implements CommandLineRunner {
 // 
 //                 // Create jockey profiles & horses
 //                 Integer breedId = jdbcTemplate.queryForObject("SELECT TOP 1 ID FROM Horse_Breeds", Integer.class);
-//                 String[] horseNames = {"Xích Thố (Red Hare)", "Đầu Rồng (Dragon Head)", "Hắc Mã (Black Beauty)", "Bạch Long (White Dragon)"};
+//                 String[] horseNames = {"Red Hare", "Dragon Head", "Black Beauty", "White Dragon"};
 // 
 //                 for (int i = 1; i <= 4; i++) {
 //                     Integer jUserId = jdbcTemplate.queryForObject("SELECT TOP 1 ID FROM Users WHERE Email = 'jockey" + i + "@gmail.com'", Integer.class);
@@ -429,20 +429,20 @@ public class DatabaseInitializer implements CommandLineRunner {
 //                 }
 // 
 //                 // Create Tournament
-//                 Integer demoTExists = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM Tournaments WHERE Tournament_Name = 'Giải Giả Lập Đua Ngựa (Demo)'", Integer.class);
+//                 Integer demoTExists = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM Tournaments WHERE Tournament_Name = 'Horse Racing Simulation Tournament (Demo)'", Integer.class);
 //                 if (demoTExists == 0) {
 //                     jdbcTemplate.update("INSERT INTO Tournaments (Tournament_Name, Location, Official_Race_Time, Tournament_Status, Prize_Pool) " +
-//                             "VALUES ('Giải Giả Lập Đua Ngựa (Demo)', 'Trường đua Mỹ Đình (Demo)', '16:00:00', 'OPEN_FOR_REGISTER', 5000)");
+//                             "VALUES ('Horse Racing Simulation Tournament (Demo)', 'My Dinh Racetrack (Demo)', '16:00:00', 'OPEN_FOR_REGISTER', 5000)");
 //                 }
-//                 Integer tournamentId = jdbcTemplate.queryForObject("SELECT TOP 1 ID FROM Tournaments WHERE Tournament_Name = 'Giải Giả Lập Đua Ngựa (Demo)'", Integer.class);
+//                 Integer tournamentId = jdbcTemplate.queryForObject("SELECT TOP 1 ID FROM Tournaments WHERE Tournament_Name = 'Horse Racing Simulation Tournament (Demo)'", Integer.class);
 // 
 //                 // Create Race
 //                 Integer trackId = jdbcTemplate.queryForObject("SELECT TOP 1 ID FROM Race_Track WHERE Shape = 'OVAL'", Integer.class);
 //                 Integer refereeId = jdbcTemplate.queryForObject("SELECT TOP 1 ID FROM Users WHERE Email = 'referee@gmail.com'", Integer.class);
 // 
 //                 jdbcTemplate.update("INSERT INTO Race (Race_Name, Tournament_ID, Race_Track_ID, Referee_ID, Race_Date, Start_Time, End_Time, Race_Round, Weather, Race_Status, Race_Distance) " +
-//                         "VALUES ('Trận Giả Lập 4 Ngựa (Demo)', ?, ?, ?, GETDATE(), '16:00:00', '17:00:00', 1, 'Clear', 'LOCKED_LIST', 1000)", tournamentId, trackId, refereeId);
-//                 Integer raceId = jdbcTemplate.queryForObject("SELECT TOP 1 ID FROM Race WHERE Race_Name = 'Trận Giả Lập 4 Ngựa (Demo)'", Integer.class);
+//                         "VALUES ('4-Horse Simulation Race (Demo)', ?, ?, ?, GETDATE(), '16:00:00', '17:00:00', 1, 'Clear', 'LOCKED_LIST', 1000)", tournamentId, trackId, refereeId);
+//                 Integer raceId = jdbcTemplate.queryForObject("SELECT TOP 1 ID FROM Race WHERE Race_Name = '4-Horse Simulation Race (Demo)'", Integer.class);
 // 
 //                 // Create Participants
 //                 for (int i = 1; i <= 4; i++) {
@@ -456,7 +456,7 @@ public class DatabaseInitializer implements CommandLineRunner {
 //                             "VALUES (?, ?, ?, 'APPROVED', 0, 0, 0)", raceId, horseId, jockeyId);
 //                 }
 // 
-//                 log.info("Successfully initialized default 'Trận Giả Lập 4 Ngựa (Demo)'!");
+//                 log.info("Successfully initialized default '4-Horse Simulation Race (Demo)'!");
 //             }
 //         } catch (Exception e) {
 //             log.error("Failed to ensure demo race: " + e.getMessage(), e);
