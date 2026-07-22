@@ -30,16 +30,17 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers(String search, Role role, Boolean enabled) {
-        return userRepository.findAll().stream()
-                .filter(user -> user.getRole() != Role.ADMIN)
+        return userRepository.findAll().stream().filter(user -> user.getRole() != Role.ADMIN)
                 .filter(user -> role == null || user.getRole() == role)
                 .filter(user -> enabled == null || user.isEnabled() == enabled)
-                .filter(user -> search == null || search.isBlank() ||
-                        (user.getFullName() != null && user.getFullName().toLowerCase().contains(search.toLowerCase())) ||
-                        (user.getEmail() != null && user.getEmail().toLowerCase().contains(search.toLowerCase())) ||
-                        (user.getUsername() != null && user.getUsername().toLowerCase().contains(search.toLowerCase())))
-                .map(UserResponse::fromEntity)
-                .collect(Collectors.toList());
+                .filter(user -> search == null || search.isBlank()
+                        || (user.getFullName() != null
+                                && user.getFullName().toLowerCase().contains(search.toLowerCase()))
+                        || (user.getEmail() != null
+                                && user.getEmail().toLowerCase().contains(search.toLowerCase()))
+                        || (user.getUsername() != null
+                                && user.getUsername().toLowerCase().contains(search.toLowerCase())))
+                .map(UserResponse::fromEntity).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -65,17 +66,11 @@ public class UserService {
         Role role = request.getRole() != null ? request.getRole() : Role.SPECTATOR;
         boolean enabled = request.getEnabled() == null || request.getEnabled();
 
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
+        User user = User.builder().username(request.getUsername()).email(request.getEmail())
                 .fullName(request.getFullName())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phone(request.getPhone())
-                .avatarUrl(request.getAvatarUrl())
-                .role(role)
-                .provider(AuthProvider.LOCAL)
-                .enabled(enabled)
-                .build();
+                .password(passwordEncoder.encode(request.getPassword())).phone(request.getPhone())
+                .avatarUrl(request.getAvatarUrl()).role(role).provider(AuthProvider.LOCAL)
+                .enabled(enabled).build();
 
         user = userRepository.save(user);
 
@@ -94,10 +89,14 @@ public class UserService {
             throw new RuntimeException("Modifying account with ADMIN role is not allowed.");
         }
 
-        if (request.getFullName() != null) user.setFullName(request.getFullName());
-        if (request.getPhone() != null) user.setPhone(request.getPhone());
-        if (request.getAvatarUrl() != null) user.setAvatarUrl(request.getAvatarUrl());
-        if (request.getEnabled() != null) user.setEnabled(request.getEnabled());
+        if (request.getFullName() != null)
+            user.setFullName(request.getFullName());
+        if (request.getPhone() != null)
+            user.setPhone(request.getPhone());
+        if (request.getAvatarUrl() != null)
+            user.setAvatarUrl(request.getAvatarUrl());
+        if (request.getEnabled() != null)
+            user.setEnabled(request.getEnabled());
         if (request.getPassword() != null && !request.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
@@ -123,34 +122,29 @@ public class UserService {
 
         try {
             // Delete associated profiles first to avoid simple FK violations
-            horseOwnerProfileRepository.findByUserEmail(user.getEmail()).ifPresent(horseOwnerProfileRepository::delete);
-            jockeyProfileRepository.findByUserEmail(user.getEmail()).ifPresent(jockeyProfileRepository::delete);
+            horseOwnerProfileRepository.findByUserEmail(user.getEmail())
+                    .ifPresent(horseOwnerProfileRepository::delete);
+            jockeyProfileRepository.findByUserEmail(user.getEmail())
+                    .ifPresent(jockeyProfileRepository::delete);
             userRepository.delete(user);
         } catch (Exception e) {
-            throw new RuntimeException("Cannot delete user because they have active transactional data (bets, races, etc.). Consider deactivating/disabling the user instead.");
+            throw new RuntimeException(
+                    "Cannot delete user because they have active transactional data (bets, races, etc.). Consider deactivating/disabling the user instead.");
         }
     }
 
     private void createRoleProfileIfMissing(User user, Role role) {
         if (role == Role.HORSE_OWNER) {
             if (horseOwnerProfileRepository.findByUserEmail(user.getEmail()).isEmpty()) {
-                HorseOwnerProfile ownerProfile = HorseOwnerProfile.builder()
-                        .user(user)
-                        .phone(user.getPhone())
-                        .reputationStars(5.0)
-                        .approvalStatus("APPROVED")
-                        .build();
+                HorseOwnerProfile ownerProfile =
+                        HorseOwnerProfile.builder().user(user).phone(user.getPhone())
+                                .reputationStars(5.0).approvalStatus("APPROVED").build();
                 horseOwnerProfileRepository.save(ownerProfile);
             }
         } else if (role == Role.JOCKEY) {
             if (jockeyProfileRepository.findByUserEmail(user.getEmail()).isEmpty()) {
-                JockeyProfile jockeyProfile = JockeyProfile.builder()
-                        .user(user)
-                        .winRate(0.0)
-                        .experienceYear(0)
-                        .rankingScore(0)
-                        .approvalStatus("APPROVED")
-                        .build();
+                JockeyProfile jockeyProfile = JockeyProfile.builder().user(user).winRate(0.0)
+                        .experienceYear(0).rankingScore(0).approvalStatus("APPROVED").build();
                 jockeyProfileRepository.save(jockeyProfile);
             }
         }

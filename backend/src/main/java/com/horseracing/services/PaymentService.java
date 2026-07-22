@@ -36,7 +36,8 @@ public class PaymentService {
     private final WalletTransactionRepository walletTransactionRepository;
     private final WalletRepository walletRepository;
 
-    public ObjectNode createPaymentLink(User user, BigDecimal amount, String returnUrl, String cancelUrl) throws Exception {
+    public ObjectNode createPaymentLink(User user, BigDecimal amount, String returnUrl,
+            String cancelUrl) throws Exception {
         // Generate a unique order code (up to 53-bit integer). Unix timestamp is fine.
         long orderCode = System.currentTimeMillis();
 
@@ -44,21 +45,14 @@ public class PaymentService {
         walletService.createPendingDeposit(user, amount, orderCode);
 
         // Build item data
-        PaymentLinkItem item = PaymentLinkItem.builder()
-                .name("Wallet Deposit - " + user.getUsername())
-                .price(amount.longValue())
-                .quantity(1)
-                .build();
+        PaymentLinkItem item =
+                PaymentLinkItem.builder().name("Wallet Deposit - " + user.getUsername())
+                        .price(amount.longValue()).quantity(1).build();
 
         // Build payment data
         CreatePaymentLinkRequest paymentData = CreatePaymentLinkRequest.builder()
-                .orderCode(orderCode)
-                .amount(amount.longValue())
-                .description("Wallet Deposit")
-                .returnUrl(returnUrl)
-                .cancelUrl(cancelUrl)
-                .items(List.of(item))
-                .build();
+                .orderCode(orderCode).amount(amount.longValue()).description("Wallet Deposit")
+                .returnUrl(returnUrl).cancelUrl(cancelUrl).items(List.of(item)).build();
 
         CreatePaymentLinkResponse data = payOS.paymentRequests().create(paymentData);
 
@@ -81,11 +75,12 @@ public class PaymentService {
             // Verify webhook signature and extract data
             Webhook webhook = mapper.convertValue(webhookBody, Webhook.class);
             WebhookData data = payOS.webhooks().verify(webhook);
-            
+
             log.info("Received valid webhook for order code: {}", data.getOrderCode());
 
             if ("00".equals(data.getCode()) || data.getCode().equals("00")) {
-                Optional<WalletTransaction> optTx = walletTransactionRepository.findByPayosOrderCode(data.getOrderCode());
+                Optional<WalletTransaction> optTx =
+                        walletTransactionRepository.findByPayosOrderCode(data.getOrderCode());
                 if (optTx.isPresent()) {
                     WalletTransaction tx = optTx.get();
                     if ("PENDING".equals(tx.getStatus())) {
@@ -96,36 +91,41 @@ public class PaymentService {
                                 .orElse(tx.getWallet());
                         wallet.setBalance(wallet.getBalance().add(tx.getAmount()));
                         walletRepository.save(wallet);
-                        log.info("Successfully updated wallet balance for user: {}", wallet.getUser().getUsername());
+                        log.info("Successfully updated wallet balance for user: {}",
+                                wallet.getUser().getUsername());
                     }
                 } else {
                     log.warn("Transaction with order code {} not found.", data.getOrderCode());
                 }
             }
-            
+
             response.put("error", 0);
             response.put("message", "Ok");
             response.put("success", true);
             response.putNull("data");
             return response;
-            
+
         } catch (IllegalArgumentException | PayOSException e) {
             log.error("Webhook processing error: {}", e.getMessage(), e);
             // Allow PayOS dashboard webhook URL confirmation pings with test data
-            if (webhookBody != null && webhookBody.has("data") && webhookBody.get("data").has("accountNumber")) {
+            if (webhookBody != null && webhookBody.has("data")
+                    && webhookBody.get("data").has("accountNumber")) {
                 response.put("error", 0);
                 response.put("message", "Ok");
                 response.put("success", true);
                 response.putNull("data");
                 return response;
             }
-            throw new com.horseracing.exceptions.BusinessException("Invalid PayOS webhook signature", org.springframework.http.HttpStatus.BAD_REQUEST);
+            throw new com.horseracing.exceptions.BusinessException(
+                    "Invalid PayOS webhook signature",
+                    org.springframework.http.HttpStatus.BAD_REQUEST);
         }
     }
 
     @Transactional
     public String checkDepositStatus(long orderCode) {
-        Optional<WalletTransaction> optTx = walletTransactionRepository.findByPayosOrderCode(orderCode);
+        Optional<WalletTransaction> optTx =
+                walletTransactionRepository.findByPayosOrderCode(orderCode);
         if (optTx.isPresent()) {
             WalletTransaction tx = optTx.get();
             if ("SUCCESS".equals(tx.getStatus())) {
@@ -134,7 +134,7 @@ public class PaymentService {
             if ("FAILED".equals(tx.getStatus())) {
                 return "FAILED";
             }
-            
+
             // Query PayOS directly
             try {
                 PaymentLink paymentLinkData = payOS.paymentRequests().get(orderCode);
@@ -148,20 +148,25 @@ public class PaymentService {
                                 .orElse(tx.getWallet());
                         wallet.setBalance(wallet.getBalance().add(tx.getAmount()));
                         walletRepository.save(wallet);
-                        log.info("Successfully updated wallet balance via manual check for user: {}", wallet.getUser().getUsername());
+                        log.info(
+                                "Successfully updated wallet balance via manual check for user: {}",
+                                wallet.getUser().getUsername());
                     }
                     return "SUCCESS";
                 } else if ("CANCELLED".equals(payosStatus) || "EXPIRED".equals(payosStatus)) {
                     if ("PENDING".equals(tx.getStatus())) {
                         tx.setStatus("FAILED");
                         walletTransactionRepository.save(tx);
-                        log.info("Transaction {} marked as FAILED in database because PayOS status is: {}", orderCode, payosStatus);
+                        log.info(
+                                "Transaction {} marked as FAILED in database because PayOS status is: {}",
+                                orderCode, payosStatus);
                     }
                     return "FAILED";
                 }
                 return payosStatus;
             } catch (Exception e) {
-                log.error("Error checking payment status from PayOS for order {}: {}", orderCode, e.getMessage());
+                log.error("Error checking payment status from PayOS for order {}: {}", orderCode,
+                        e.getMessage());
             }
             return tx.getStatus();
         }
@@ -169,22 +174,24 @@ public class PaymentService {
     }
 
     /**
-     * Scheduled cleanup job: runs every 5 minutes to query status of pending PayOS deposits
-     * and automatically cancel/fail them if they have timed out or been cancelled.
+     * Scheduled cleanup job: runs every 5 minutes to query status of pending PayOS deposits and
+     * automatically cancel/fail them if they have timed out or been cancelled.
      */
     @org.springframework.scheduling.annotation.Scheduled(fixedRate = 300000) // Every 5 minutes
     @Transactional
     public void cleanupPendingDeposits() {
         log.info("Scheduled task: Starting cleanup of stuck pending PayOS deposits...");
         java.time.LocalDateTime cutoff = java.time.LocalDateTime.now().minusMinutes(15);
-        List<WalletTransaction> pendingTxs = walletTransactionRepository.findAllPendingPayosDepositsBefore(cutoff);
-        
+        List<WalletTransaction> pendingTxs =
+                walletTransactionRepository.findAllPendingPayosDepositsBefore(cutoff);
+
         for (WalletTransaction tx : pendingTxs) {
-            log.info("Processing cleanup for pending transaction ID: {}, Order Code: {}", tx.getId(), tx.getPayosOrderCode());
+            log.info("Processing cleanup for pending transaction ID: {}, Order Code: {}",
+                    tx.getId(), tx.getPayosOrderCode());
             try {
                 PaymentLink paymentLinkData = payOS.paymentRequests().get(tx.getPayosOrderCode());
                 String payosStatus = String.valueOf(paymentLinkData.getStatus());
-                
+
                 switch (payosStatus) {
                     case "PAID" -> {
                         tx.setStatus("SUCCESS");
@@ -193,32 +200,40 @@ public class PaymentService {
                         Wallet wallet = tx.getWallet();
                         wallet.setBalance(wallet.getBalance().add(tx.getAmount()));
                         walletRepository.save(wallet);
-                        log.info("Stuck transaction {} was actually PAID. Updated balance.", tx.getPayosOrderCode());
+                        log.info("Stuck transaction {} was actually PAID. Updated balance.",
+                                tx.getPayosOrderCode());
                     }
                     case "CANCELLED", "EXPIRED" -> {
                         tx.setStatus("FAILED");
                         walletTransactionRepository.save(tx);
-                        log.info("Stuck transaction {} marked as FAILED based on PayOS status: {}", tx.getPayosOrderCode(), payosStatus);
+                        log.info("Stuck transaction {} marked as FAILED based on PayOS status: {}",
+                                tx.getPayosOrderCode(), payosStatus);
                     }
                     default -> {
-                        // Still PENDING on PayOS side, but locally timed out (older than 15 minutes)
+                        // Still PENDING on PayOS side, but locally timed out (older than 15
+                        // minutes)
                         // Attempt to cancel payment link on PayOS side and mark as FAILED locally
                         try {
-                            payOS.paymentRequests().cancel(tx.getPayosOrderCode(), "Transaction timed out after 15 minutes");
-                            log.info("Successfully cancelled payment link on PayOS for order: {}", tx.getPayosOrderCode());
+                            payOS.paymentRequests().cancel(tx.getPayosOrderCode(),
+                                    "Transaction timed out after 15 minutes");
+                            log.info("Successfully cancelled payment link on PayOS for order: {}",
+                                    tx.getPayosOrderCode());
                         } catch (Exception e) {
-                            log.warn("Failed to cancel payment link on PayOS for order {}: {}", tx.getPayosOrderCode(), e.getMessage());
+                            log.warn("Failed to cancel payment link on PayOS for order {}: {}",
+                                    tx.getPayosOrderCode(), e.getMessage());
                         }
                         tx.setStatus("FAILED");
                         walletTransactionRepository.save(tx);
-                        log.info("Stuck transaction {} timed out locally and marked as FAILED.", tx.getPayosOrderCode());
+                        log.info("Stuck transaction {} timed out locally and marked as FAILED.",
+                                tx.getPayosOrderCode());
                     }
                 }
             } catch (Exception e) {
                 // If payment link not found or any other PayOS error, mark as FAILED locally
                 tx.setStatus("FAILED");
                 walletTransactionRepository.save(tx);
-                log.warn("Error querying PayOS for order {}. Marked as FAILED locally. Error: {}", tx.getPayosOrderCode(), e.getMessage());
+                log.warn("Error querying PayOS for order {}. Marked as FAILED locally. Error: {}",
+                        tx.getPayosOrderCode(), e.getMessage());
             }
         }
     }

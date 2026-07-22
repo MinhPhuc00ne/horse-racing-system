@@ -19,15 +19,13 @@ public class BreedService {
 
     @Transactional(readOnly = true)
     public List<BreedResponse> getAllBreeds() {
-        return horseBreedRepository.findAll().stream()
-                .map(BreedResponse::fromEntity)
+        return horseBreedRepository.findAll().stream().map(BreedResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<BreedResponse> getOfficialBreeds() {
-        return horseBreedRepository.findByIsOfficial(true).stream()
-                .map(BreedResponse::fromEntity)
+        return horseBreedRepository.findByIsOfficial(true).stream().map(BreedResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -36,9 +34,9 @@ public class BreedService {
         if (request.getBreedName() == null || request.getBreedName().trim().isEmpty()) {
             throw new RuntimeException("Breed name is required");
         }
-        
+
         String cleanName = request.getBreedName().trim();
-        
+
         HorseBreed existing = horseBreedRepository.findByBreedName(cleanName).orElse(null);
         if (existing != null) {
             // If it already exists and admin is trying to make it official, update it
@@ -49,15 +47,12 @@ public class BreedService {
             return BreedResponse.fromEntity(existing);
         }
 
-        HorseBreed breed = HorseBreed.builder()
-                .breedName(cleanName)
-                .isOfficial(isOfficial)
-                .build();
-                
+        HorseBreed breed = HorseBreed.builder().breedName(cleanName).isOfficial(isOfficial).build();
+
         breed = horseBreedRepository.save(breed);
         return BreedResponse.fromEntity(breed);
     }
-    
+
     @Transactional
     public void deleteBreed(Integer id) {
         HorseBreed breed = horseBreedRepository.findById(id)

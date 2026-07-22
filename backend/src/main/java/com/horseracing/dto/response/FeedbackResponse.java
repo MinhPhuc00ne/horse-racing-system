@@ -25,19 +25,17 @@ public class FeedbackResponse {
     private LocalDateTime updatedAt;
 
     public static FeedbackResponse fromEntity(Feedback feedback) {
-        if (feedback == null) return null;
-        return FeedbackResponse.builder()
-                .id(feedback.getId())
+        if (feedback == null)
+            return null;
+        return FeedbackResponse.builder().id(feedback.getId())
                 .userId(feedback.getUser() != null ? feedback.getUser().getId() : null)
                 .userFullName(feedback.getUser() != null ? feedback.getUser().getFullName() : null)
                 .userEmail(feedback.getUser() != null ? feedback.getUser().getEmail() : null)
-                .userRole(feedback.getUser() != null && feedback.getUser().getRole() != null ? feedback.getUser().getRole().name() : null)
-                .subject(feedback.getSubject())
-                .content(feedback.getContent())
-                .status(feedback.getStatus())
-                .adminNote(feedback.getAdminNote())
-                .createdAt(feedback.getCreatedAt())
-                .updatedAt(feedback.getUpdatedAt())
-                .build();
+                .userRole(feedback.getUser() != null && feedback.getUser().getRole() != null
+                        ? feedback.getUser().getRole().name()
+                        : null)
+                .subject(feedback.getSubject()).content(feedback.getContent())
+                .status(feedback.getStatus()).adminNote(feedback.getAdminNote())
+                .createdAt(feedback.getCreatedAt()).updatedAt(feedback.getUpdatedAt()).build();
     }
 }

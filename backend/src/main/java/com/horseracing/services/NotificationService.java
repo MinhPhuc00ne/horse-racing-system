@@ -29,14 +29,10 @@ public class NotificationService {
     private final Map<Integer, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
     @Transactional
-    public Notification sendNotification(User recipient, String title, String content, NotificationType type) {
-        Notification notification = Notification.builder()
-                .user(recipient)
-                .title(title)
-                .content(content)
-                .type(type)
-                .isRead(false)
-                .build();
+    public Notification sendNotification(User recipient, String title, String content,
+            NotificationType type) {
+        Notification notification = Notification.builder().user(recipient).title(title)
+                .content(content).type(type).isRead(false).build();
         Notification saved = notificationRepository.save(notification);
 
         // Push notification real-time via SSE
@@ -46,9 +42,7 @@ public class NotificationService {
             List<SseEmitter> deadEmitters = new ArrayList<>();
             for (SseEmitter emitter : userEmitters) {
                 try {
-                    emitter.send(SseEmitter.event()
-                            .name("NOTIFICATION")
-                            .data(payload));
+                    emitter.send(SseEmitter.event().name("NOTIFICATION").data(payload));
                 } catch (java.io.IOException | IllegalStateException e) {
                     deadEmitters.add(emitter);
                 }
@@ -60,7 +54,8 @@ public class NotificationService {
     }
 
     @Transactional
-    public Notification sendNotification(Integer recipientId, String title, String content, NotificationType type) {
+    public Notification sendNotification(Integer recipientId, String title, String content,
+            NotificationType type) {
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new RuntimeException("Recipient not found"));
         return sendNotification(recipient, title, content, type);
@@ -72,7 +67,8 @@ public class NotificationService {
 
         SseEmitter emitter = new SseEmitter(3600000L); // 1 hour timeout
 
-        List<SseEmitter> userEmitters = emitters.computeIfAbsent(user.getId(), k -> new CopyOnWriteArrayList<>());
+        List<SseEmitter> userEmitters =
+                emitters.computeIfAbsent(user.getId(), k -> new CopyOnWriteArrayList<>());
         userEmitters.add(emitter);
 
         emitter.onCompletion(() -> userEmitters.remove(emitter));
@@ -81,9 +77,7 @@ public class NotificationService {
 
         // Send a connection success event
         try {
-            emitter.send(SseEmitter.event()
-                    .name("CONNECT")
-                    .data("Connected successfully"));
+            emitter.send(SseEmitter.event().name("CONNECT").data("Connected successfully"));
         } catch (java.io.IOException | IllegalStateException e) {
             userEmitters.remove(emitter);
         }
@@ -104,8 +98,7 @@ public class NotificationService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId()).stream()
-                .map(NotificationResponse::fromEntity)
-                .collect(Collectors.toList());
+                .map(NotificationResponse::fromEntity).collect(Collectors.toList());
     }
 
     @Transactional
@@ -132,7 +125,8 @@ public class NotificationService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Notification> unread = notificationRepository.findByUserIdAndIsReadFalseOrderByCreatedAtDesc(user.getId());
+        List<Notification> unread =
+                notificationRepository.findByUserIdAndIsReadFalseOrderByCreatedAtDesc(user.getId());
         LocalDateTime now = LocalDateTime.now();
         for (Notification notification : unread) {
             notification.setIsRead(true);

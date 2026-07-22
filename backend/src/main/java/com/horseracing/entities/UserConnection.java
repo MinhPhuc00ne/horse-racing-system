@@ -7,9 +7,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_connections", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"requester_id", "recipient_id"})
-})
+@Table(name = "user_connections",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"requester_id", "recipient_id"})})
 @Getter
 @Setter
 @NoArgsConstructor

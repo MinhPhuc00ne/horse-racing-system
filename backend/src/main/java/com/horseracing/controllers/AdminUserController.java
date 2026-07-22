@@ -37,7 +37,8 @@ public class AdminUserController {
         try {
             return ResponseEntity.ok(userService.getUserById(id));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(404, e.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse(404, e.getMessage()));
         }
     }
 
@@ -52,8 +53,7 @@ public class AdminUserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(
-            @PathVariable Integer id,
+    public ResponseEntity<?> updateUser(@PathVariable Integer id,
             @Valid @RequestBody AdminUpdateUserRequest request) {
         try {
             UserResponse response = userService.updateUser(id, request);

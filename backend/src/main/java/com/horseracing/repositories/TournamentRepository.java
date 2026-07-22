@@ -18,4 +18,3 @@ public interface TournamentRepository extends JpaRepository<Tournament, Integer>
     @Query("SELECT COALESCE(SUM(t.totalPrize), 0) FROM Tournament t")
     BigDecimal sumTotalPrize();
 }
-

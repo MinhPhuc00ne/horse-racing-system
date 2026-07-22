@@ -19,7 +19,6 @@ import com.horseracing.dto.request.CreateRaceRequest;
 import com.horseracing.dto.request.CreateTournamentRequest;
 import com.horseracing.dto.request.UpdateTournamentRequest;
 import com.horseracing.dto.request.TrackRequest;
-import com.horseracing.dto.response.ErrorResponse;
 import com.horseracing.dto.response.MessageResponse;
 import com.horseracing.dto.response.RaceRegistrationResponse;
 import com.horseracing.dto.response.RaceResponse;
@@ -57,18 +56,19 @@ public class AdminRaceController {
     @GetMapping("/referees")
     public ResponseEntity<List<UserResponse>> getAllReferees() {
         List<UserResponse> referees = userRepository.findByRole(Role.RACE_REFEREE).stream()
-                .map(UserResponse::fromEntity)
-                .collect(Collectors.toList());
+                .map(UserResponse::fromEntity).collect(Collectors.toList());
         return ResponseEntity.ok(referees);
     }
 
     @GetMapping("/tracks")
-    public ResponseEntity<List<TrackResponse>> getAllTracks(@org.springframework.web.bind.annotation.RequestParam(required = false) String location) {
+    public ResponseEntity<List<TrackResponse>> getAllTracks(
+            @org.springframework.web.bind.annotation.RequestParam(
+                    required = false) String location) {
         List<TrackResponse> tracks = raceTrackRepository.findAll().stream()
-                .filter(track -> location == null || location.isBlank() || 
-                        (track.getLocation() != null && track.getLocation().equalsIgnoreCase(location)))
-                .map(TrackResponse::fromEntity)
-                .collect(Collectors.toList());
+                .filter(track -> location == null || location.isBlank()
+                        || (track.getLocation() != null
+                                && track.getLocation().equalsIgnoreCase(location)))
+                .map(TrackResponse::fromEntity).collect(Collectors.toList());
         return ResponseEntity.ok(tracks);
     }
 
@@ -79,7 +79,8 @@ public class AdminRaceController {
     }
 
     @PutMapping("/tracks/{id}")
-    public ResponseEntity<TrackResponse> updateTrack(@PathVariable Integer id, @Valid @RequestBody TrackRequest request) {
+    public ResponseEntity<TrackResponse> updateTrack(@PathVariable Integer id,
+            @Valid @RequestBody TrackRequest request) {
         TrackResponse response = trackService.updateTrack(id, request);
         return ResponseEntity.ok(response);
     }
@@ -91,7 +92,8 @@ public class AdminRaceController {
     }
 
     @PostMapping("/tournaments")
-    public ResponseEntity<TournamentResponse> createTournament(@Valid @RequestBody CreateTournamentRequest request) {
+    public ResponseEntity<TournamentResponse> createTournament(
+            @Valid @RequestBody CreateTournamentRequest request) {
         TournamentResponse response = tournamentService.createTournament(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -120,13 +122,15 @@ public class AdminRaceController {
     }
 
     @PutMapping("/tournaments/{id}")
-    public ResponseEntity<TournamentResponse> updateTournament(@PathVariable Integer id, @Valid @RequestBody UpdateTournamentRequest request) {
+    public ResponseEntity<TournamentResponse> updateTournament(@PathVariable Integer id,
+            @Valid @RequestBody UpdateTournamentRequest request) {
         TournamentResponse response = tournamentService.updateTournament(id, request);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/tournaments/{id}/status")
-    public ResponseEntity<TournamentResponse> updateTournamentStatus(@PathVariable Integer id, @RequestBody java.util.Map<String, String> body) {
+    public ResponseEntity<TournamentResponse> updateTournamentStatus(@PathVariable Integer id,
+            @RequestBody java.util.Map<String, String> body) {
         String status = body.get("status");
         if (status == null) {
             throw new RuntimeException("Status field is required");
@@ -144,12 +148,12 @@ public class AdminRaceController {
     @PostMapping("/tournaments/{tournamentId}/confirm-registration")
     public ResponseEntity<MessageResponse> confirmRegistration(@PathVariable Integer tournamentId) {
         raceRegistrationService.confirmRegistration(tournamentId);
-        return ResponseEntity.ok().body(new MessageResponse("Registrations confirmed successfully. Waiting list cleared and refunded."));
+        return ResponseEntity.ok().body(new MessageResponse(
+                "Registrations confirmed successfully. Waiting list cleared and refunded."));
     }
 
     @PutMapping("/races/{id}/status")
-    public ResponseEntity<MessageResponse> updateRaceStatus(
-            @PathVariable Integer id,
+    public ResponseEntity<MessageResponse> updateRaceStatus(@PathVariable Integer id,
             @RequestBody java.util.Map<String, String> body) {
         String status = body.get("status");
         if (status == null) {
@@ -157,10 +161,12 @@ public class AdminRaceController {
         }
         if ("FINISHED".equalsIgnoreCase(status)) {
             refereeService.confirmResults(id);
-            return ResponseEntity.ok().body(new MessageResponse("Race results confirmed, prize distribution and bet payouts completed successfully."));
+            return ResponseEntity.ok().body(new MessageResponse(
+                    "Race results confirmed, prize distribution and bet payouts completed successfully."));
         } else if ("CANCELLED".equalsIgnoreCase(status)) {
             refereeService.cancelRace(id);
-            return ResponseEntity.ok().body(new MessageResponse("Race cancelled successfully. Bets and registration entry fees have been refunded."));
+            return ResponseEntity.ok().body(new MessageResponse(
+                    "Race cancelled successfully. Bets and registration entry fees have been refunded."));
         } else {
             throw new RuntimeException("Invalid status. Must be FINISHED or CANCELLED");
         }

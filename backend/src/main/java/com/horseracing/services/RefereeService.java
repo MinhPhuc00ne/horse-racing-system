@@ -94,7 +94,8 @@ public class RefereeService {
 
     private TransactionTemplate transactionTemplate;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
-    private final ConcurrentHashMap<Integer, ScheduledFuture<?>> activeSimulations = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, ScheduledFuture<?>> activeSimulations =
+            new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
@@ -112,7 +113,8 @@ public class RefereeService {
         try {
             raceRepository.findAll().stream()
                     .filter(r -> "4-Horse Simulation Race (Demo)".equalsIgnoreCase(r.getRaceName()))
-                    .filter(r -> races.stream().noneMatch(existing -> existing.getId().equals(r.getId())))
+                    .filter(r -> races.stream()
+                            .noneMatch(existing -> existing.getId().equals(r.getId())))
                     .forEach(r -> {
                         r.setReferee(referee);
                         raceRepository.save(r);
@@ -128,14 +130,16 @@ public class RefereeService {
             boolean matches = false;
             if (status == null || status.isBlank()) {
                 matches = true;
-            } else if ("upcoming".equalsIgnoreCase(status) || "preparation".equalsIgnoreCase(status)) {
+            } else if ("upcoming".equalsIgnoreCase(status)
+                    || "preparation".equalsIgnoreCase(status)) {
                 matches = "Upcoming".equalsIgnoreCase(r.getStatus())
                         || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
                         || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
                         || "LOCKED_LIST".equalsIgnoreCase(r.getStatus());
             } else if ("running".equalsIgnoreCase(status) || "ongoing".equalsIgnoreCase(status)) {
                 matches = "RUNNING".equalsIgnoreCase(r.getStatus());
-            } else if ("finished".equalsIgnoreCase(status) || "completed".equalsIgnoreCase(status)) {
+            } else if ("finished".equalsIgnoreCase(status)
+                    || "completed".equalsIgnoreCase(status)) {
                 boolean hasFinishedSim = raceSimulationRepository.findByRaceId(r.getId()).stream()
                         .anyMatch(sim -> "FINISHED".equalsIgnoreCase(sim.getStatus()));
                 matches = "FINISHED".equalsIgnoreCase(r.getStatus()) || hasFinishedSim;
@@ -156,20 +160,25 @@ public class RefereeService {
         Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new RuntimeException("Tournament not found"));
 
-        if (tournament.getReferee() == null || !tournament.getReferee().getId().equals(referee.getId())) {
+        if (tournament.getReferee() == null
+                || !tournament.getReferee().getId().equals(referee.getId())) {
             throw new RuntimeException("You are not the assigned referee for this tournament");
         }
 
-        if (!"Active".equalsIgnoreCase(tournament.getTournamentStatus()) && !"Upcoming".equalsIgnoreCase(tournament.getTournamentStatus())) {
-            throw new RuntimeException("Cannot cancel assignment because the tournament is not in Active/Upcoming state");
+        if (!"Active".equalsIgnoreCase(tournament.getTournamentStatus())
+                && !"Upcoming".equalsIgnoreCase(tournament.getTournamentStatus())) {
+            throw new RuntimeException(
+                    "Cannot cancel assignment because the tournament is not in Active/Upcoming state");
         }
 
         List<Race> racesToCancel = raceRepository.findByTournamentId(tournamentId);
-        boolean listLocked = racesToCancel.stream().anyMatch(r -> 
-                !"OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) && !"Upcoming".equalsIgnoreCase(r.getStatus()));
-        
+        boolean listLocked = racesToCancel.stream()
+                .anyMatch(r -> !"OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
+                        && !"Upcoming".equalsIgnoreCase(r.getStatus()));
+
         if (listLocked) {
-            throw new RuntimeException("Cannot cancel assignment because the registration list has already been approved/locked by the Admin");
+            throw new RuntimeException(
+                    "Cannot cancel assignment because the registration list has already been approved/locked by the Admin");
         }
 
         tournament.setReferee(null);
@@ -187,17 +196,19 @@ public class RefereeService {
         try {
             List<User> adminUsers = userRepository.findByRole(Role.ADMIN);
             String title = "Referee Declined / Cancelled Assignment";
-            String refereeName = referee.getFullName() != null ? referee.getFullName() : referee.getUsername();
-            String content = String.format("Referee %s has cancelled assignment for tournament '%s' (ID: #%d). Please assign another referee.",
-                    refereeName,
-                    tournament.getTournamentName(),
-                    tournament.getId());
+            String refereeName =
+                    referee.getFullName() != null ? referee.getFullName() : referee.getUsername();
+            String content = String.format(
+                    "Referee %s has cancelled assignment for tournament '%s' (ID: #%d). Please assign another referee.",
+                    refereeName, tournament.getTournamentName(), tournament.getId());
 
             for (User admin : adminUsers) {
-                notificationService.sendNotification(admin, title, content, NotificationType.SYSTEM_ALERT);
+                notificationService.sendNotification(admin, title, content,
+                        NotificationType.SYSTEM_ALERT);
             }
         } catch (Exception e) {
-            log.error("Failed to send notification to admin users on referee cancel assignment: {}", e.getMessage());
+            log.error("Failed to send notification to admin users on referee cancel assignment: {}",
+                    e.getMessage());
         }
     }
 
@@ -207,8 +218,7 @@ public class RefereeService {
                 .orElseThrow(() -> new RuntimeException("Referee not found"));
 
         return tournamentRepository.findByRefereeId(referee.getId()).stream()
-                .map(TournamentResponse::fromEntity)
-                .collect(java.util.stream.Collectors.toList());
+                .map(TournamentResponse::fromEntity).collect(java.util.stream.Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -220,14 +230,20 @@ public class RefereeService {
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Race r : races) {
-            if ("CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "LOCKED_LIST".equalsIgnoreCase(r.getStatus())) {
-                List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(r.getId());
+            if ("CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
+                    || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
+                    || "LOCKED_LIST".equalsIgnoreCase(r.getStatus())) {
+                List<RaceParticipant> participants =
+                        raceParticipantRepository.findByRaceId(r.getId());
                 for (RaceParticipant p : participants) {
                     if ("PENDING_INSPECTION".equalsIgnoreCase(p.getStatus())) {
                         Map<String, Object> map = new HashMap<>();
                         map.put("id", p.getId());
                         map.put("horseName", p.getHorse().getName());
-                        map.put("breed", p.getHorse().getBreed() != null ? p.getHorse().getBreed().getBreedName() : "Unknown");
+                        map.put("breed",
+                                p.getHorse().getBreed() != null
+                                        ? p.getHorse().getBreed().getBreedName()
+                                        : "Unknown");
                         map.put("jockeyName", p.getJockey().getUser().getFullName());
                         map.put("weight", p.getJockey().getWeight());
                         map.put("status", p.getStatus());
@@ -241,7 +257,8 @@ public class RefereeService {
     }
 
     @Transactional
-    public void updateInspectionStatus(Integer participantId, String status, String reason, String refereeEmail) {
+    public void updateInspectionStatus(Integer participantId, String status, String reason,
+            String refereeEmail) {
         User referee = userRepository.findByEmail(refereeEmail)
                 .orElseThrow(() -> new RuntimeException("Referee not found"));
 
@@ -257,25 +274,25 @@ public class RefereeService {
 
         if ("REJECTED".equalsIgnoreCase(status)) {
             // Also notify owner and jockey
-            RaceRegistration reg = raceRegistrationRepository
-                    .findFirstByRaceIdAndHorseId(participant.getRace().getId(), participant.getHorse().getId())
-                    .orElse(null);
+            RaceRegistration reg = raceRegistrationRepository.findFirstByRaceIdAndHorseId(
+                    participant.getRace().getId(), participant.getHorse().getId()).orElse(null);
 
             if (reg != null) {
                 reg.setStatus("REJECTED");
                 raceRegistrationRepository.save(reg);
 
-                notificationService.sendNotification(
-                        reg.getOwner().getUser(),
+                notificationService.sendNotification(reg.getOwner().getUser(),
                         "Horse Failed Pre-Race Inspection",
-                        "Horse " + participant.getHorse().getName() + " was rejected from race " + participant.getRace().getRaceName() + " by the Referee. Reason: " + reason + ". Entry fee is non-refundable.",
-                        NotificationType.RACE_STATUS
-                );
+                        "Horse " + participant.getHorse().getName() + " was rejected from race "
+                                + participant.getRace().getRaceName() + " by the Referee. Reason: "
+                                + reason + ". Entry fee is non-refundable.",
+                        NotificationType.RACE_STATUS);
             }
 
             // Refund all spectator bets on this horse in this race
-            predictionPayoutService.refundBetsForParticipant(participant, reason,
-                    "Horse " + participant.getHorse().getName() + " failed pre-race inspection. The system has refunded 100% of your bet amount ({amount} VND) to your wallet.");
+            predictionPayoutService.refundBetsForParticipant(participant, reason, "Horse "
+                    + participant.getHorse().getName()
+                    + " failed pre-race inspection. The system has refunded 100% of your bet amount ({amount} VND) to your wallet.");
         }
     }
 
@@ -286,15 +303,19 @@ public class RefereeService {
 
         List<Race> races = raceRepository.findByRefereeId(referee.getId());
         long upcomingRaces = races.stream()
-                .filter(r -> "Upcoming".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "LOCKED_LIST".equalsIgnoreCase(r.getStatus()))
+                .filter(r -> "Upcoming".equalsIgnoreCase(r.getStatus())
+                        || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
+                        || "CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
+                        || "LOCKED_LIST".equalsIgnoreCase(r.getStatus()))
                 .count();
 
         long horsesToInspect = 0;
         for (Race r : races) {
-            if ("CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus()) || "LOCKED_LIST".equalsIgnoreCase(r.getStatus())) {
+            if ("CLOSED_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
+                    || "OPEN_FOR_REGISTER".equalsIgnoreCase(r.getStatus())
+                    || "LOCKED_LIST".equalsIgnoreCase(r.getStatus())) {
                 horsesToInspect += raceParticipantRepository.findByRaceId(r.getId()).stream()
-                        .filter(p -> "PENDING_INSPECTION".equalsIgnoreCase(p.getStatus()))
-                        .count();
+                        .filter(p -> "PENDING_INSPECTION".equalsIgnoreCase(p.getStatus())).count();
             }
         }
 
@@ -318,26 +339,23 @@ public class RefereeService {
 
         for (RaceParticipant p : participants) {
             JockeyProfile jockey = p.getJockey();
-            list.add(PreCheckResponse.ParticipantPreCheck.builder()
-                    .participantId(p.getId())
-                    .horseId(p.getHorse().getId())
-                    .horseName(p.getHorse().getName())
-                    .jockeyId(jockey.getId())
-                    .jockeyName(jockey.getUser().getFullName())
-                    .registeredWeight(jockey.getWeight())
-                    .actualWeight(jockey.getWeight()) // actualWeight can be updated via the weight endpoint
-                    .status(p.getStatus())
-                    .horseImageUrl(p.getHorse().getImageUrl())
-                    .build());
+            list.add(PreCheckResponse.ParticipantPreCheck.builder().participantId(p.getId())
+                    .horseId(p.getHorse().getId()).horseName(p.getHorse().getName())
+                    .jockeyId(jockey.getId()).jockeyName(jockey.getUser().getFullName())
+                    .registeredWeight(jockey.getWeight()).actualWeight(jockey.getWeight()) // actualWeight
+                                                                                           // can be
+                                                                                           // updated
+                                                                                           // via
+                                                                                           // the
+                                                                                           // weight
+                                                                                           // endpoint
+                    .status(p.getStatus()).horseImageUrl(p.getHorse().getImageUrl()).build());
         }
 
-        return PreCheckResponse.builder()
-                .raceId(race.getId())
-                .raceName(race.getRaceName())
-                .trackCondition(race.getRaceTrack() != null ? race.getRaceTrack().getShape() : "Unknown")
-                .weather(race.getWeather())
-                .participants(list)
-                .build();
+        return PreCheckResponse.builder().raceId(race.getId()).raceName(race.getRaceName())
+                .trackCondition(
+                        race.getRaceTrack() != null ? race.getRaceTrack().getShape() : "Unknown")
+                .weather(race.getWeather()).participants(list).build();
     }
 
     @Transactional
@@ -374,30 +392,35 @@ public class RefereeService {
         raceParticipantRepository.save(participant);
 
         RaceRegistration reg = raceRegistrationRepository
-                .findFirstByRaceIdAndHorseId(raceId, participant.getHorse().getId())
-                .orElse(null);
+                .findFirstByRaceIdAndHorseId(raceId, participant.getHorse().getId()).orElse(null);
         if (reg != null) {
             reg.setStatus("REJECTED");
             raceRegistrationRepository.save(reg);
 
             // Notify Owner and Jockey
-            notificationService.sendNotification(
-                    reg.getOwner().getUser(),
+            notificationService.sendNotification(reg.getOwner().getUser(),
                     "Disqualified Before Race",
-                    "Your pairing (Horse: " + participant.getHorse().getName() + ", Jockey: " + participant.getJockey().getUser().getFullName() + ") was disqualified from race " + participant.getRace().getRaceName() + " by the Referee due to rule violations. Reason: " + reason + ". Entry fee is non-refundable.",
-                    NotificationType.RACE_STATUS
-            );
-            notificationService.sendNotification(
-                    reg.getJockey().getUser(),
+                    "Your pairing (Horse: " + participant.getHorse().getName() + ", Jockey: "
+                            + participant.getJockey().getUser().getFullName()
+                            + ") was disqualified from race " + participant.getRace().getRaceName()
+                            + " by the Referee due to rule violations. Reason: " + reason
+                            + ". Entry fee is non-refundable.",
+                    NotificationType.RACE_STATUS);
+            notificationService.sendNotification(reg.getJockey().getUser(),
                     "Disqualified Before Race",
-                    "Your pairing (Horse: " + participant.getHorse().getName() + ", Jockey: " + participant.getJockey().getUser().getFullName() + ") was disqualified from race " + participant.getRace().getRaceName() + " by the Referee due to rule violations. Reason: " + reason + ". Entry fee is non-refundable.",
-                    NotificationType.RACE_STATUS
-            );
+                    "Your pairing (Horse: " + participant.getHorse().getName() + ", Jockey: "
+                            + participant.getJockey().getUser().getFullName()
+                            + ") was disqualified from race " + participant.getRace().getRaceName()
+                            + " by the Referee due to rule violations. Reason: " + reason
+                            + ". Entry fee is non-refundable.",
+                    NotificationType.RACE_STATUS);
         }
 
         // Refund all spectator bets on this horse in this race
-        predictionPayoutService.refundBetsForParticipant(participant, reason,
-                "Horse " + participant.getHorse().getName() + " was disqualified from race " + participant.getRace().getRaceName() + " prior to start. System refunded 100% of your bet ({amount} VND) to your wallet.");
+        predictionPayoutService.refundBetsForParticipant(participant, reason, "Horse "
+                + participant.getHorse().getName() + " was disqualified from race "
+                + participant.getRace().getRaceName()
+                + " prior to start. System refunded 100% of your bet ({amount} VND) to your wallet.");
     }
 
     @Transactional
@@ -408,17 +431,18 @@ public class RefereeService {
         String status = race.getStatus();
         boolean isValidStatus = "OPEN_FOR_REGISTER".equalsIgnoreCase(status)
                 || "CLOSED_FOR_REGISTER".equalsIgnoreCase(status)
-                || "LOCKED_LIST".equalsIgnoreCase(status)
-                || "RUNNING".equalsIgnoreCase(status)
+                || "LOCKED_LIST".equalsIgnoreCase(status) || "RUNNING".equalsIgnoreCase(status)
                 || "FINISHED".equalsIgnoreCase(status);
         if (!isValidStatus) {
-            throw new RuntimeException("Race status must be OPEN_FOR_REGISTER, CLOSED_FOR_REGISTER, LOCKED_LIST, RUNNING, or FINISHED to start");
+            throw new RuntimeException(
+                    "Race status must be OPEN_FOR_REGISTER, CLOSED_FOR_REGISTER, LOCKED_LIST, RUNNING, or FINISHED to start");
         }
 
         // Prevent restarting the simulation if it has already been started
         List<RaceSimulation> oldSims = raceSimulationRepository.findByRaceId(raceId);
         if (!oldSims.isEmpty()) {
-            throw new RuntimeException("Simulation has already been started for this race. Restarting is not allowed.");
+            throw new RuntimeException(
+                    "Simulation has already been started for this race. Restarting is not allowed.");
         }
 
         List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
@@ -427,13 +451,14 @@ public class RefereeService {
         boolean hasPendingInspection = participants.stream()
                 .anyMatch(p -> "PENDING_INSPECTION".equalsIgnoreCase(p.getStatus()));
         if (hasPendingInspection) {
-            throw new RuntimeException("Cannot start race. All participants must be inspected first.");
+            throw new RuntimeException(
+                    "Cannot start race. All participants must be inspected first.");
         }
 
         // Validate we have at least one approved participant to start the race simulation
         long approvedCount = participants.stream()
-                .filter(p -> "APPROVED".equalsIgnoreCase(p.getStatus()) 
-                        || "FINISHED".equalsIgnoreCase(p.getStatus()) 
+                .filter(p -> "APPROVED".equalsIgnoreCase(p.getStatus())
+                        || "FINISHED".equalsIgnoreCase(p.getStatus())
                         || "RACING".equalsIgnoreCase(p.getStatus()))
                 .count();
         if (approvedCount == 0) {
@@ -450,9 +475,11 @@ public class RefereeService {
         }
 
         // Reject and refund any remaining PENDING or PENDING_JOCKEY registrations
-        List<RaceRegistration> remainingRegs = raceRegistrationRepository.findByRaceId(raceId).stream()
-                .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus()) || "PENDING_JOCKEY".equalsIgnoreCase(r.getStatus()))
-                .collect(java.util.stream.Collectors.toList());
+        List<RaceRegistration> remainingRegs =
+                raceRegistrationRepository.findByRaceId(raceId).stream()
+                        .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus())
+                                || "PENDING_JOCKEY".equalsIgnoreCase(r.getStatus()))
+                        .collect(java.util.stream.Collectors.toList());
         BigDecimal entryFee = tournament.getEntryFee();
         for (RaceRegistration reg : remainingRegs) {
             reg.setStatus("REJECTED");
@@ -464,43 +491,29 @@ public class RefereeService {
                 wallet.setBalance(wallet.getBalance().add(entryFee));
                 walletRepository.save(wallet);
 
-                WalletTransaction transaction = WalletTransaction.builder()
-                        .wallet(wallet)
-                        .transactionType("REFUND")
-                        .amount(entryFee)
-                        .status("SUCCESS")
-                        .referenceType("RACE_REGISTRATION")
-                        .referenceId(reg.getId())
-                        .build();
+                WalletTransaction transaction = WalletTransaction.builder().wallet(wallet)
+                        .transactionType("REFUND").amount(entryFee).status("SUCCESS")
+                        .referenceType("RACE_REGISTRATION").referenceId(reg.getId()).build();
                 walletTransactionRepository.save(transaction);
             }
         }
 
-        RaceSimulation simulation = RaceSimulation.builder()
-                .race(race)
-                .startTime(LocalDateTime.now())
-                .status("RUNNING")
-                .currentTick(0)
-                .build();
+        RaceSimulation simulation = RaceSimulation.builder().race(race)
+                .startTime(LocalDateTime.now()).status("RUNNING").currentTick(0).build();
         simulation = raceSimulationRepository.save(simulation);
 
         for (RaceParticipant p : participants) {
-            if ("APPROVED".equalsIgnoreCase(p.getStatus()) 
-                    || "FINISHED".equalsIgnoreCase(p.getStatus()) 
+            if ("APPROVED".equalsIgnoreCase(p.getStatus())
+                    || "FINISHED".equalsIgnoreCase(p.getStatus())
                     || "RACING".equalsIgnoreCase(p.getStatus())) {
                 p.setStatus("RACING");
                 p.setFinishTime(null);
                 p.setFinalRank(null);
                 raceParticipantRepository.save(p);
 
-                SimulationHorseState state = SimulationHorseState.builder()
-                        .simulation(simulation)
-                        .horse(p.getHorse())
-                        .currentPosition(0.0)
-                        .speed(0.0)
-                        .stamina(100.0)
-                        .status("RACING")
-                        .build();
+                SimulationHorseState state = SimulationHorseState.builder().simulation(simulation)
+                        .horse(p.getHorse()).currentPosition(0.0).speed(0.0).stamina(100.0)
+                        .status("RACING").build();
                 simulationHorseStateRepository.save(state);
             }
         }
@@ -513,7 +526,8 @@ public class RefereeService {
         ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(() -> {
             try {
                 Object tickPayload = transactionTemplate.execute(status -> {
-                    RaceSimulation sim = raceSimulationRepository.findById(simulationId).orElse(null);
+                    RaceSimulation sim =
+                            raceSimulationRepository.findById(simulationId).orElse(null);
                     if (sim == null || !"RUNNING".equals(sim.getStatus())) {
                         return null; // Stop task
                     }
@@ -522,19 +536,24 @@ public class RefereeService {
                     raceSimulationRepository.save(sim);
 
                     Race race = sim.getRace();
-                    List<SimulationHorseState> states = simulationHorseStateRepository.findBySimulationId(simulationId);
+                    List<SimulationHorseState> states =
+                            simulationHorseStateRepository.findBySimulationId(simulationId);
 
                     boolean allFinishedOrDisqualified = true;
                     List<Map<String, Object>> horseStates = new ArrayList<>();
 
                     for (SimulationHorseState state : states) {
-                        List<RefereeFlag> flags = refereeFlagRepository.findBySimulationIdAndHorseId(simulationId, state.getHorse().getId());
+                        List<RefereeFlag> flags =
+                                refereeFlagRepository.findBySimulationIdAndHorseId(simulationId,
+                                        state.getHorse().getId());
                         List<Integer> flaggedPositions = new ArrayList<>();
                         for (RefereeFlag flag : flags) {
                             try {
                                 String desc = flag.getDescription();
                                 if (desc != null && desc.contains("at ") && desc.contains("%")) {
-                                    String numStr = desc.substring(desc.indexOf("at ") + 3, desc.indexOf("%")).trim();
+                                    String numStr = desc
+                                            .substring(desc.indexOf("at ") + 3, desc.indexOf("%"))
+                                            .trim();
                                     flaggedPositions.add(Integer.valueOf(numStr));
                                 }
                             } catch (NumberFormatException | IndexOutOfBoundsException e) {
@@ -542,7 +561,8 @@ public class RefereeService {
                             }
                         }
 
-                        if ("FINISHED".equals(state.getStatus()) || "DISQUALIFIED".equals(state.getStatus())) {
+                        if ("FINISHED".equals(state.getStatus())
+                                || "DISQUALIFIED".equals(state.getStatus())) {
                             Map<String, Object> hState = new HashMap<>();
                             hState.put("horseId", state.getHorse().getId());
                             hState.put("horseName", state.getHorse().getName());
@@ -558,8 +578,8 @@ public class RefereeService {
                         allFinishedOrDisqualified = false;
 
                         Horse horse = state.getHorse();
-                        RaceParticipant part = raceParticipantRepository.findByRaceIdAndHorseId(race.getId(), horse.getId())
-                                .orElse(null);
+                        RaceParticipant part = raceParticipantRepository
+                                .findByRaceIdAndHorseId(race.getId(), horse.getId()).orElse(null);
 
                         if (part == null || "DISQUALIFIED".equals(part.getStatus())) {
                             state.setStatus("DISQUALIFIED");
@@ -589,7 +609,8 @@ public class RefereeService {
                         double speed = 0.0;
                         if (sim.getCurrentTick() > 5) {
                             speed = (baseSpeed + variation) * staminaFactor;
-                            if (speed < 5.0) speed = 5.0;
+                            if (speed < 5.0)
+                                speed = 5.0;
                         }
 
                         state.setSpeed(speed);
@@ -627,16 +648,18 @@ public class RefereeService {
                         sim.setEndTime(LocalDateTime.now());
                         raceSimulationRepository.save(sim);
 
-                        List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(race.getId());
+                        List<RaceParticipant> participants =
+                                raceParticipantRepository.findByRaceId(race.getId());
                         List<ParticipantRankInfo> rankInfos = new ArrayList<>();
                         for (RaceParticipant p : participants) {
                             if ("DISQUALIFIED".equals(p.getStatus())) {
                                 continue;
                             }
-                            long flags = refereeFlagRepository.countBySimulationIdAndHorseId(sim.getId(), p.getHorse().getId());
+                            long flags = refereeFlagRepository.countBySimulationIdAndHorseId(
+                                    sim.getId(), p.getHorse().getId());
                             Integer ft = p.getFinishTime();
                             int finishTime = ft != null ? ft : 9999;
-                            int finalTime = finishTime + (int)(flags * 3);
+                            int finalTime = finishTime + (int) (flags * 3);
                             p.setFinishTime(finalTime);
 
                             rankInfos.add(new ParticipantRankInfo(p, finalTime));
@@ -689,7 +712,8 @@ public class RefereeService {
                     }
                 }
             } catch (Throwable t) {
-                log.error("Error occurred during race simulation for simulation ID: {}", simulationId, t);
+                log.error("Error occurred during race simulation for simulation ID: {}",
+                        simulationId, t);
                 cancelSimulation(simulationId);
             }
         }, 1, 1, TimeUnit.SECONDS);
@@ -710,8 +734,9 @@ public class RefereeService {
 
     @Transactional
     public void updatePov(Integer raceId, Integer horseId) {
-        RaceSimulation simulation = raceSimulationRepository.findFirstByRaceIdAndStatus(raceId, "RUNNING")
-                .orElseThrow(() -> new RuntimeException("No running simulation found"));
+        RaceSimulation simulation =
+                raceSimulationRepository.findFirstByRaceIdAndStatus(raceId, "RUNNING")
+                        .orElseThrow(() -> new RuntimeException("No running simulation found"));
         simulation.setPovHorseId(horseId);
         raceSimulationRepository.save(simulation);
     }
@@ -739,19 +764,17 @@ public class RefereeService {
                     });
         }
 
-        RefereeFlag flag = RefereeFlag.builder()
-                .referee(referee)
-                .horse(horse)
-                .simulation(simulation)
-                .violationType(request.getViolationType())
-                .description(request.getDescription())
-                .build();
+        RefereeFlag flag = RefereeFlag.builder().referee(referee).horse(horse)
+                .simulation(simulation).violationType(request.getViolationType())
+                .description(request.getDescription()).build();
         refereeFlagRepository.save(flag);
 
-        long count = refereeFlagRepository.countBySimulationIdAndHorseId(simulation.getId(), horse.getId());
+        long count = refereeFlagRepository.countBySimulationIdAndHorseId(simulation.getId(),
+                horse.getId());
         boolean disqualified = false;
-        RaceParticipant part = raceParticipantRepository.findByRaceIdAndHorseId(raceId, horse.getId())
-                .orElseThrow(() -> new RuntimeException("Participant not found"));
+        RaceParticipant part =
+                raceParticipantRepository.findByRaceIdAndHorseId(raceId, horse.getId())
+                        .orElseThrow(() -> new RuntimeException("Participant not found"));
 
         if (count >= 3) {
             disqualified = true;
@@ -759,47 +782,45 @@ public class RefereeService {
             part.setStatus("DISQUALIFIED");
             raceParticipantRepository.save(part);
 
-            SimulationHorseState state = simulationHorseStateRepository.findBySimulationIdAndHorseId(simulation.getId(), horse.getId())
+            SimulationHorseState state = simulationHorseStateRepository
+                    .findBySimulationIdAndHorseId(simulation.getId(), horse.getId())
                     .orElseThrow(() -> new RuntimeException("Simulation state not found"));
             state.setStatus("DISQUALIFIED");
             simulationHorseStateRepository.save(state);
         }
 
         if (disqualified) {
-            notificationService.sendNotification(
-                    horse.getOwner().getUser(),
+            notificationService.sendNotification(horse.getOwner().getUser(),
                     "Disqualified Due to 3 Penalty Flags",
-                    "Horse " + horse.getName() + " has been disqualified from race " + part.getRace().getRaceName() + " after receiving 3 penalty flags from the Referee.",
-                    NotificationType.RACE_STATUS
-            );
-            notificationService.sendNotification(
-                    part.getJockey().getUser(),
+                    "Horse " + horse.getName() + " has been disqualified from race "
+                            + part.getRace().getRaceName()
+                            + " after receiving 3 penalty flags from the Referee.",
+                    NotificationType.RACE_STATUS);
+            notificationService.sendNotification(part.getJockey().getUser(),
                     "Disqualified Due to 3 Penalty Flags",
-                    "Horse " + horse.getName() + " has been disqualified from race " + part.getRace().getRaceName() + " after receiving 3 penalty flags from the Referee.",
-                    NotificationType.RACE_STATUS
-            );
+                    "Horse " + horse.getName() + " has been disqualified from race "
+                            + part.getRace().getRaceName()
+                            + " after receiving 3 penalty flags from the Referee.",
+                    NotificationType.RACE_STATUS);
         } else {
-            notificationService.sendNotification(
-                    horse.getOwner().getUser(),
+            notificationService.sendNotification(horse.getOwner().getUser(),
                     "Track Penalty Warning",
-                    "Warning: Your horse " + horse.getName() + " received a penalty flag (" + request.getViolationType() + " - " + request.getDescription() + ") in race " + part.getRace().getRaceName() + ". Total flags: " + count + "/3. Added " + (count * 3) + " seconds time penalty.",
-                    NotificationType.RACE_STATUS
-            );
-            notificationService.sendNotification(
-                    part.getJockey().getUser(),
+                    "Warning: Your horse " + horse.getName() + " received a penalty flag ("
+                            + request.getViolationType() + " - " + request.getDescription()
+                            + ") in race " + part.getRace().getRaceName() + ". Total flags: "
+                            + count + "/3. Added " + (count * 3) + " seconds time penalty.",
+                    NotificationType.RACE_STATUS);
+            notificationService.sendNotification(part.getJockey().getUser(),
                     "Track Penalty Warning",
-                    "Warning: Your horse " + horse.getName() + " received a penalty flag (" + request.getViolationType() + " - " + request.getDescription() + ") in race " + part.getRace().getRaceName() + ". Total flags: " + count + "/3. Added " + (count * 3) + " seconds time penalty.",
-                    NotificationType.RACE_STATUS
-            );
+                    "Warning: Your horse " + horse.getName() + " received a penalty flag ("
+                            + request.getViolationType() + " - " + request.getDescription()
+                            + ") in race " + part.getRace().getRaceName() + ". Total flags: "
+                            + count + "/3. Added " + (count * 3) + " seconds time penalty.",
+                    NotificationType.RACE_STATUS);
         }
 
-        return FlagResponse.builder()
-                .flagId(flag.getId())
-                .horseId(horse.getId())
-                .totalFlags(count)
-                .penaltySeconds((int) (count * 3))
-                .isDisqualified(disqualified)
-                .build();
+        return FlagResponse.builder().flagId(flag.getId()).horseId(horse.getId()).totalFlags(count)
+                .penaltySeconds((int) (count * 3)).isDisqualified(disqualified).build();
     }
 
     @Transactional
@@ -807,22 +828,15 @@ public class RefereeService {
         User referee = userRepository.findByEmail(refereeEmail)
                 .orElseThrow(() -> new RuntimeException("Referee not found"));
 
-        Blacklist blacklist = Blacklist.builder()
-                .targetType(request.getTargetType())
-                .targetId(request.getTargetId())
-                .reason(request.getReason())
+        Blacklist blacklist = Blacklist.builder().targetType(request.getTargetType())
+                .targetId(request.getTargetId()).reason(request.getReason())
                 .startDate(request.getEndDate() != null ? LocalDate.now() : LocalDate.now())
-                .endDate(request.getEndDate())
-                .isPermanent(request.getIsPermanent())
-                .status("ACTIVE")
-                .build();
+                .endDate(request.getEndDate()).isPermanent(request.getIsPermanent())
+                .status("ACTIVE").build();
         blacklist = blacklistRepository.save(blacklist);
 
-        BanHistory history = BanHistory.builder()
-                .blacklist(blacklist)
-                .actionBy(referee)
-                .actionNote(request.getReason())
-                .build();
+        BanHistory history = BanHistory.builder().blacklist(blacklist).actionBy(referee)
+                .actionNote(request.getReason()).build();
         banHistoryRepository.save(history);
 
         if ("USER".equalsIgnoreCase(request.getTargetType())) {
@@ -831,24 +845,24 @@ public class RefereeService {
             target.setEnabled(false);
             userRepository.save(target);
 
-            notificationService.sendNotification(
-                    target,
-                    "Account Suspended / Blacklisted",
-                    "Your account has been suspended by the Referee. Reason: " + request.getReason() + ". Duration: " + (Boolean.TRUE.equals(request.getIsPermanent()) ? "Permanent" : request.getEndDate()) + ". Please contact Admin for support.",
-                    NotificationType.SYSTEM_ALERT
-            );
+            notificationService.sendNotification(target, "Account Suspended / Blacklisted",
+                    "Your account has been suspended by the Referee. Reason: " + request.getReason()
+                            + ". Duration: "
+                            + (Boolean.TRUE.equals(request.getIsPermanent()) ? "Permanent"
+                                    : request.getEndDate())
+                            + ". Please contact Admin for support.",
+                    NotificationType.SYSTEM_ALERT);
         } else if ("HORSE".equalsIgnoreCase(request.getTargetType())) {
             Horse target = horseRepository.findById(request.getTargetId())
                     .orElseThrow(() -> new RuntimeException("Target horse not found"));
             target.setStatus("INACTIVE");
             horseRepository.save(target);
 
-            notificationService.sendNotification(
-                    target.getOwner().getUser(),
-                    "Horse Blacklisted",
-                    "Your horse " + target.getName() + " has been blacklisted by the Referee. Reason: " + request.getReason() + ".",
-                    NotificationType.SYSTEM_ALERT
-            );
+            notificationService.sendNotification(target.getOwner().getUser(), "Horse Blacklisted",
+                    "Your horse " + target.getName()
+                            + " has been blacklisted by the Referee. Reason: " + request.getReason()
+                            + ".",
+                    NotificationType.SYSTEM_ALERT);
         }
     }
 
@@ -880,7 +894,8 @@ public class RefereeService {
         boolean hasFinishedSim = raceSimulationRepository.findByRaceId(raceId).stream()
                 .anyMatch(sim -> "FINISHED".equalsIgnoreCase(sim.getStatus()));
         if (!hasFinishedSim) {
-            throw new RuntimeException("Cannot confirm results. The race simulation has not finished yet.");
+            throw new RuntimeException(
+                    "Cannot confirm results. The race simulation has not finished yet.");
         }
 
         race.setStatus("FINISHED");
@@ -889,8 +904,8 @@ public class RefereeService {
         Tournament tournament = race.getTournament();
         if (tournament != null) {
             List<Race> races = raceRepository.findByTournamentId(tournament.getId());
-            boolean allFinished = races.stream()
-                    .allMatch(r -> "FINISHED".equalsIgnoreCase(r.getStatus()) || r.getId().equals(raceId));
+            boolean allFinished = races.stream().allMatch(
+                    r -> "FINISHED".equalsIgnoreCase(r.getStatus()) || r.getId().equals(raceId));
             if (allFinished) {
                 tournament.setTournamentStatus("Finished");
             }
@@ -899,9 +914,12 @@ public class RefereeService {
         // 1. Refund bets on disqualified/rejected participants
         List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
         for (RaceParticipant p : participants) {
-            if ("DISQUALIFIED".equalsIgnoreCase(p.getStatus()) || "REJECTED".equalsIgnoreCase(p.getStatus())) {
+            if ("DISQUALIFIED".equalsIgnoreCase(p.getStatus())
+                    || "REJECTED".equalsIgnoreCase(p.getStatus())) {
                 predictionPayoutService.refundBetsForParticipant(p, "DISQUALIFIED_OR_REJECTED",
-                        "Horse " + p.getHorse().getName() + " was disqualified or rejected in race " + race.getRaceName() + ". The system has refunded 100% of your bet ({amount} VND) to your wallet.");
+                        "Horse " + p.getHorse().getName() + " was disqualified or rejected in race "
+                                + race.getRaceName()
+                                + ". The system has refunded 100% of your bet ({amount} VND) to your wallet.");
             }
         }
 
@@ -918,11 +936,11 @@ public class RefereeService {
                     };
                 }
 
-                if (totalPrize == null) totalPrize = BigDecimal.ZERO;
+                if (totalPrize == null)
+                    totalPrize = BigDecimal.ZERO;
 
                 RaceRegistration reg = raceRegistrationRepository
-                        .findFirstByRaceIdAndHorseId(raceId, p.getHorse().getId())
-                        .orElse(null);
+                        .findFirstByRaceIdAndHorseId(raceId, p.getHorse().getId()).orElse(null);
 
                 if (reg != null && totalPrize.compareTo(BigDecimal.ZERO) > 0) {
                     Double ownerShare = reg.getOwnerSharePercent();
@@ -930,72 +948,65 @@ public class RefereeService {
                     Double jockeyShare = reg.getJockeySharePercent();
                     double jockeyPercent = jockeyShare != null ? jockeyShare : 0.0;
 
-                    BigDecimal ownerAmount = totalPrize.multiply(BigDecimal.valueOf(ownerPercent / 100.0));
-                    BigDecimal jockeyAmount = totalPrize.multiply(BigDecimal.valueOf(jockeyPercent / 100.0));
+                    BigDecimal ownerAmount =
+                            totalPrize.multiply(BigDecimal.valueOf(ownerPercent / 100.0));
+                    BigDecimal jockeyAmount =
+                            totalPrize.multiply(BigDecimal.valueOf(jockeyPercent / 100.0));
 
                     // Distribute to Owner
-                    Wallet ownerWallet = walletRepository.findByUserId(reg.getOwner().getUser().getId())
-                            .orElseGet(() -> {
-                                Wallet w = Wallet.builder().user(reg.getOwner().getUser()).balance(BigDecimal.ZERO).build();
+                    Wallet ownerWallet = walletRepository
+                            .findByUserId(reg.getOwner().getUser().getId()).orElseGet(() -> {
+                                Wallet w = Wallet.builder().user(reg.getOwner().getUser())
+                                        .balance(BigDecimal.ZERO).build();
                                 return walletRepository.save(w);
                             });
                     ownerWallet.setBalance(ownerWallet.getBalance().add(ownerAmount));
                     walletRepository.save(ownerWallet);
 
-                    WalletTransaction wtOwner = WalletTransaction.builder()
-                            .wallet(ownerWallet)
-                            .transactionType("PRIZE")
-                            .amount(ownerAmount)
-                            .status("SUCCESS")
-                            .referenceType("RACE_PARTICIPANT")
-                            .referenceId(p.getId())
-                            .build();
+                    WalletTransaction wtOwner = WalletTransaction.builder().wallet(ownerWallet)
+                            .transactionType("PRIZE").amount(ownerAmount).status("SUCCESS")
+                            .referenceType("RACE_PARTICIPANT").referenceId(p.getId()).build();
                     walletTransactionRepository.save(wtOwner);
 
                     // Distribute to Jockey
-                    Wallet jockeyWallet = walletRepository.findByUserId(reg.getJockey().getUser().getId())
-                            .orElseGet(() -> {
-                                Wallet w = Wallet.builder().user(reg.getJockey().getUser()).balance(BigDecimal.ZERO).build();
+                    Wallet jockeyWallet = walletRepository
+                            .findByUserId(reg.getJockey().getUser().getId()).orElseGet(() -> {
+                                Wallet w = Wallet.builder().user(reg.getJockey().getUser())
+                                        .balance(BigDecimal.ZERO).build();
                                 return walletRepository.save(w);
                             });
                     jockeyWallet.setBalance(jockeyWallet.getBalance().add(jockeyAmount));
                     walletRepository.save(jockeyWallet);
 
-                    WalletTransaction wtJockey = WalletTransaction.builder()
-                            .wallet(jockeyWallet)
-                            .transactionType("PRIZE")
-                            .amount(jockeyAmount)
-                            .status("SUCCESS")
-                            .referenceType("RACE_PARTICIPANT")
-                            .referenceId(p.getId())
-                            .build();
+                    WalletTransaction wtJockey = WalletTransaction.builder().wallet(jockeyWallet)
+                            .transactionType("PRIZE").amount(jockeyAmount).status("SUCCESS")
+                            .referenceType("RACE_PARTICIPANT").referenceId(p.getId()).build();
                     walletTransactionRepository.save(wtJockey);
 
                     // Save PrizeDistribution
-                    PrizeDistribution pd = PrizeDistribution.builder()
-                            .participant(p)
-                            .totalPrize(totalPrize)
-                            .ownerAmount(ownerAmount)
-                            .jockeyAmount(jockeyAmount)
-                            .platformFee(BigDecimal.ZERO)
-                            .status("DISTRIBUTED")
-                            .distributedAt(LocalDateTime.now())
-                            .build();
+                    PrizeDistribution pd = PrizeDistribution.builder().participant(p)
+                            .totalPrize(totalPrize).ownerAmount(ownerAmount)
+                            .jockeyAmount(jockeyAmount).platformFee(BigDecimal.ZERO)
+                            .status("DISTRIBUTED").distributedAt(LocalDateTime.now()).build();
                     prizeDistributionRepository.save(pd);
 
-                    notificationService.sendNotification(
-                            reg.getOwner().getUser(),
+                    notificationService.sendNotification(reg.getOwner().getUser(),
                             "Tournament Prize Received",
-                            "Congratulations! Horse " + p.getHorse().getName() + " and Jockey " + p.getJockey().getUser().getFullName() + " achieved Place " + p.getFinalRank() + " in race " + race.getRaceName() + ". Prize amount of " + ownerAmount + " VND has been credited to your wallet.",
-                            NotificationType.WALLET
-                    );
+                            "Congratulations! Horse " + p.getHorse().getName() + " and Jockey "
+                                    + p.getJockey().getUser().getFullName() + " achieved Place "
+                                    + p.getFinalRank() + " in race " + race.getRaceName()
+                                    + ". Prize amount of " + ownerAmount
+                                    + " VND has been credited to your wallet.",
+                            NotificationType.WALLET);
 
-                    notificationService.sendNotification(
-                            reg.getJockey().getUser(),
+                    notificationService.sendNotification(reg.getJockey().getUser(),
                             "Tournament Prize Received",
-                            "Congratulations! Horse " + p.getHorse().getName() + " and Jockey " + p.getJockey().getUser().getFullName() + " achieved Place " + p.getFinalRank() + " in race " + race.getRaceName() + ". Prize amount of " + jockeyAmount + " VND has been credited to your wallet.",
-                            NotificationType.WALLET
-                    );
+                            "Congratulations! Horse " + p.getHorse().getName() + " and Jockey "
+                                    + p.getJockey().getUser().getFullName() + " achieved Place "
+                                    + p.getFinalRank() + " in race " + race.getRaceName()
+                                    + ". Prize amount of " + jockeyAmount
+                                    + " VND has been credited to your wallet.",
+                            NotificationType.WALLET);
                 }
             }
         }
@@ -1009,12 +1020,14 @@ public class RefereeService {
         Race race = raceRepository.findById(raceId)
                 .orElseThrow(() -> new RuntimeException("Race not found"));
 
-        if ("FINISHED".equalsIgnoreCase(race.getStatus()) || "CANCELLED".equalsIgnoreCase(race.getStatus())) {
+        if ("FINISHED".equalsIgnoreCase(race.getStatus())
+                || "CANCELLED".equalsIgnoreCase(race.getStatus())) {
             throw new RuntimeException("Race is already finished or cancelled");
         }
 
         // 1. Stop any running simulation
-        Optional<RaceSimulation> activeSimOpt = raceSimulationRepository.findFirstByRaceIdAndStatus(raceId, "RUNNING");
+        Optional<RaceSimulation> activeSimOpt =
+                raceSimulationRepository.findFirstByRaceIdAndStatus(raceId, "RUNNING");
         if (activeSimOpt.isPresent()) {
             RaceSimulation sim = activeSimOpt.get();
             sim.setStatus("CANCELLED");
@@ -1034,43 +1047,38 @@ public class RefereeService {
         List<RaceRegistration> regs = raceRegistrationRepository.findByRaceId(raceId);
         BigDecimal entryFee = race.getTournament().getEntryFee();
         for (RaceRegistration reg : regs) {
-            if ("APPROVED".equalsIgnoreCase(reg.getStatus()) || "PENDING".equalsIgnoreCase(reg.getStatus()) || "PENDING_JOCKEY".equalsIgnoreCase(reg.getStatus())) {
+            if ("APPROVED".equalsIgnoreCase(reg.getStatus())
+                    || "PENDING".equalsIgnoreCase(reg.getStatus())
+                    || "PENDING_JOCKEY".equalsIgnoreCase(reg.getStatus())) {
                 reg.setStatus("CANCELLED");
                 raceRegistrationRepository.save(reg);
 
                 if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
                     Wallet wallet = walletRepository.findByUserId(reg.getOwner().getUser().getId())
                             .orElseGet(() -> {
-                                Wallet w = Wallet.builder().user(reg.getOwner().getUser()).balance(BigDecimal.ZERO).build();
+                                Wallet w = Wallet.builder().user(reg.getOwner().getUser())
+                                        .balance(BigDecimal.ZERO).build();
                                 return walletRepository.save(w);
                             });
                     wallet.setBalance(wallet.getBalance().add(entryFee));
                     walletRepository.save(wallet);
 
-                    WalletTransaction transaction = WalletTransaction.builder()
-                            .wallet(wallet)
-                            .transactionType("REFUND")
-                            .amount(entryFee)
-                            .status("SUCCESS")
-                            .referenceType("RACE_REGISTRATION")
-                            .referenceId(reg.getId())
-                            .build();
+                    WalletTransaction transaction = WalletTransaction.builder().wallet(wallet)
+                            .transactionType("REFUND").amount(entryFee).status("SUCCESS")
+                            .referenceType("RACE_REGISTRATION").referenceId(reg.getId()).build();
                     walletTransactionRepository.save(transaction);
                 }
 
-                notificationService.sendNotification(
-                        reg.getOwner().getUser(),
+                notificationService.sendNotification(reg.getOwner().getUser(),
                         "Race Cancelled & Fee Refunded",
-                        "Race " + race.getRaceName() + " was cancelled by organizers. Entry fee (" + (entryFee != null ? entryFee : BigDecimal.ZERO) + " VND) has been refunded to your wallet.",
-                        NotificationType.REGISTRATION
-                );
+                        "Race " + race.getRaceName() + " was cancelled by organizers. Entry fee ("
+                                + (entryFee != null ? entryFee : BigDecimal.ZERO)
+                                + " VND) has been refunded to your wallet.",
+                        NotificationType.REGISTRATION);
 
-                notificationService.sendNotification(
-                        reg.getJockey().getUser(),
-                        "Race Cancelled",
+                notificationService.sendNotification(reg.getJockey().getUser(), "Race Cancelled",
                         "Race " + race.getRaceName() + " was cancelled by organizers.",
-                        NotificationType.REGISTRATION
-                );
+                        NotificationType.REGISTRATION);
             }
         }
     }
@@ -1114,9 +1122,8 @@ public class RefereeService {
         // 1. Get all RefereeFlags
         List<RefereeFlag> flags = refereeFlagRepository.findAll();
         for (RefereeFlag flag : flags) {
-            String dateStr = flag.getCreatedAt() != null
-                    ? flag.getCreatedAt().toLocalDate().toString()
-                    : "";
+            String dateStr =
+                    flag.getCreatedAt() != null ? flag.getCreatedAt().toLocalDate().toString() : "";
 
             String raceName = flag.getSimulation() != null && flag.getSimulation().getRace() != null
                     ? flag.getSimulation().getRace().getRaceName()
@@ -1125,32 +1132,26 @@ public class RefereeService {
             String horseName = flag.getHorse() != null ? flag.getHorse().getName() : "N/A";
 
             String jockeyName = "N/A";
-            if (flag.getSimulation() != null && flag.getSimulation().getRace() != null && flag.getHorse() != null) {
-                Optional<RaceParticipant> partOpt = raceParticipantRepository.findByRaceIdAndHorseId(
-                        flag.getSimulation().getRace().getId(),
-                        flag.getHorse().getId()
-                );
-                if (partOpt.isPresent() && partOpt.get().getJockey() != null && partOpt.get().getJockey().getUser() != null) {
+            if (flag.getSimulation() != null && flag.getSimulation().getRace() != null
+                    && flag.getHorse() != null) {
+                Optional<RaceParticipant> partOpt =
+                        raceParticipantRepository.findByRaceIdAndHorseId(
+                                flag.getSimulation().getRace().getId(), flag.getHorse().getId());
+                if (partOpt.isPresent() && partOpt.get().getJockey() != null
+                        && partOpt.get().getJockey().getUser() != null) {
                     jockeyName = partOpt.get().getJockey().getUser().getFullName();
                 }
             }
 
-            list.add(ViolationResponse.builder()
-                    .id(flag.getId())
-                    .date(dateStr)
-                    .raceName(raceName)
-                    .horseName(horseName)
-                    .jockeyName(jockeyName)
-                    .violationType(flag.getViolationType())
-                    .status("FLAGGED")
-                    .build());
+            list.add(ViolationResponse.builder().id(flag.getId()).date(dateStr).raceName(raceName)
+                    .horseName(horseName).jockeyName(jockeyName)
+                    .violationType(flag.getViolationType()).status("FLAGGED").build());
         }
 
         // 2. Get all Blacklist entries
         List<Blacklist> blacklists = blacklistRepository.findAll();
         for (Blacklist bl : blacklists) {
-            String dateStr = bl.getCreatedAt() != null
-                    ? bl.getCreatedAt().toLocalDate().toString()
+            String dateStr = bl.getCreatedAt() != null ? bl.getCreatedAt().toLocalDate().toString()
                     : (bl.getStartDate() != null ? bl.getStartDate().toString() : "");
 
             String raceName = "N/A";
@@ -1163,7 +1164,8 @@ public class RefereeService {
                     Horse horse = horseOpt.get();
                     horseName = horse.getName();
 
-                    List<RaceParticipant> participants = raceParticipantRepository.findByHorseId(horse.getId());
+                    List<RaceParticipant> participants =
+                            raceParticipantRepository.findByHorseId(horse.getId());
                     if (!participants.isEmpty()) {
                         participants.sort((p1, p2) -> p2.getId().compareTo(p1.getId()));
                         RaceParticipant recent = participants.get(0);
@@ -1181,9 +1183,12 @@ public class RefereeService {
                     User user = userOpt.get();
                     jockeyName = user.getFullName();
 
-                    Optional<JockeyProfile> jockeyOpt = jockeyProfileRepository.findByUserId(user.getId());
+                    Optional<JockeyProfile> jockeyOpt =
+                            jockeyProfileRepository.findByUserId(user.getId());
                     if (jockeyOpt.isPresent()) {
-                        List<RaceParticipant> participants = raceParticipantRepository.findByJockeyUserEmailAndStatusNot(user.getEmail(), "DUMMY_STATUS_THAT_NOT_EXIST");
+                        List<RaceParticipant> participants =
+                                raceParticipantRepository.findByJockeyUserEmailAndStatusNot(
+                                        user.getEmail(), "DUMMY_STATUS_THAT_NOT_EXIST");
                         if (!participants.isEmpty()) {
                             participants.sort((p1, p2) -> p2.getId().compareTo(p1.getId()));
                             RaceParticipant recent = participants.get(0);
@@ -1198,21 +1203,16 @@ public class RefereeService {
                 }
             }
 
-            list.add(ViolationResponse.builder()
-                    .id(bl.getId())
-                    .date(dateStr)
-                    .raceName(raceName)
-                    .horseName(horseName)
-                    .jockeyName(jockeyName)
-                    .violationType(bl.getReason())
-                    .status("BLACKLISTED")
-                    .build());
+            list.add(ViolationResponse.builder().id(bl.getId()).date(dateStr).raceName(raceName)
+                    .horseName(horseName).jockeyName(jockeyName).violationType(bl.getReason())
+                    .status("BLACKLISTED").build());
         }
 
         // Sort by date descending, then id descending
         list.sort((v1, v2) -> {
             int dateCompare = v2.getDate().compareTo(v1.getDate());
-            if (dateCompare != 0) return dateCompare;
+            if (dateCompare != 0)
+                return dateCompare;
             return v2.getId().compareTo(v1.getId());
         });
 
@@ -1229,49 +1229,38 @@ public class RefereeService {
 
         List<RaceSimulation> simulations = raceSimulationRepository.findByRaceId(raceId);
         if (simulations.isEmpty()) {
-            return RaceSimulationStateResponse.builder()
-                    .simulationId(null)
-                    .raceId(raceId)
-                    .status("NOT_STARTED")
-                    .currentTick(0)
-                    .distance(distance)
-                    .horseStates(new ArrayList<>())
-                    .build();
+            return RaceSimulationStateResponse.builder().simulationId(null).raceId(raceId)
+                    .status("NOT_STARTED").currentTick(0).distance(distance)
+                    .horseStates(new ArrayList<>()).build();
         }
 
         // Get the latest simulation
         simulations.sort((s1, s2) -> s2.getId().compareTo(s1.getId()));
         RaceSimulation sim = simulations.get(0);
 
-        List<SimulationHorseState> states = simulationHorseStateRepository.findBySimulationId(sim.getId());
+        List<SimulationHorseState> states =
+                simulationHorseStateRepository.findBySimulationId(sim.getId());
         List<RaceSimulationStateResponse.HorseStateDto> horseStates = new ArrayList<>();
 
         for (SimulationHorseState state : states) {
             String jockeyName = "N/A";
-            Optional<RaceParticipant> partOpt = raceParticipantRepository.findByRaceIdAndHorseId(raceId, state.getHorse().getId());
-            if (partOpt.isPresent() && partOpt.get().getJockey() != null && partOpt.get().getJockey().getUser() != null) {
+            Optional<RaceParticipant> partOpt = raceParticipantRepository
+                    .findByRaceIdAndHorseId(raceId, state.getHorse().getId());
+            if (partOpt.isPresent() && partOpt.get().getJockey() != null
+                    && partOpt.get().getJockey().getUser() != null) {
                 jockeyName = partOpt.get().getJockey().getUser().getFullName();
             }
 
             horseStates.add(RaceSimulationStateResponse.HorseStateDto.builder()
-                    .horseId(state.getHorse().getId())
-                    .horseName(state.getHorse().getName())
-                    .jockeyName(jockeyName)
-                    .currentPosition(state.getCurrentPosition())
-                    .speed(state.getSpeed())
-                    .stamina(state.getStamina())
-                    .status(state.getStatus())
+                    .horseId(state.getHorse().getId()).horseName(state.getHorse().getName())
+                    .jockeyName(jockeyName).currentPosition(state.getCurrentPosition())
+                    .speed(state.getSpeed()).stamina(state.getStamina()).status(state.getStatus())
                     .build());
         }
 
-        return RaceSimulationStateResponse.builder()
-                .simulationId(sim.getId())
-                .raceId(raceId)
-                .status(sim.getStatus())
-                .currentTick(sim.getCurrentTick())
-                .distance(distance)
-                .horseStates(horseStates)
-                .build();
+        return RaceSimulationStateResponse.builder().simulationId(sim.getId()).raceId(raceId)
+                .status(sim.getStatus()).currentTick(sim.getCurrentTick()).distance(distance)
+                .horseStates(horseStates).build();
     }
 
     private static class ParticipantRankInfo {

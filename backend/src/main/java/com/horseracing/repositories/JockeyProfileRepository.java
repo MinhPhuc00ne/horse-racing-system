@@ -10,9 +10,12 @@ import java.util.Optional;
 
 public interface JockeyProfileRepository extends JpaRepository<JockeyProfile, Integer> {
     Optional<JockeyProfile> findByUser(User user);
+
     Optional<JockeyProfile> findByUserEmail(String email);
+
     Optional<JockeyProfile> findByUserId(Integer userId);
-    
+
     List<JockeyProfile> findAllByOrderByRankingScoreDescWinRateDesc();
+
     List<JockeyProfile> findAllByOrderByRankingScoreDescWinRateDesc(Pageable pageable);
 }

@@ -15,10 +15,7 @@ public class BreedResponse {
     private Boolean isOfficial;
 
     public static BreedResponse fromEntity(HorseBreed breed) {
-        return BreedResponse.builder()
-                .id(breed.getId())
-                .breedName(breed.getBreedName())
-                .isOfficial(breed.getIsOfficial())
-                .build();
+        return BreedResponse.builder().id(breed.getId()).breedName(breed.getBreedName())
+                .isOfficial(breed.getIsOfficial()).build();
     }
 }

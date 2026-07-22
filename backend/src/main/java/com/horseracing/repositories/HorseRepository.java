@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface HorseRepository extends JpaRepository<Horse, Integer> {
     List<Horse> findByOwnerId(Integer ownerId);
+
     List<Horse> findByOwnerUserEmail(String email);
 
     List<Horse> findAllByOrderBySpeedRatingDesc(Pageable pageable);

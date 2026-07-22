@@ -27,8 +27,8 @@ public class ConnectionController {
             Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            List<ConnectionUserResponse> directory = userConnectionService.getConnectionsDirectory(
-                    userDetails.getUsername(), query, role);
+            List<ConnectionUserResponse> directory = userConnectionService
+                    .getConnectionsDirectory(userDetails.getUsername(), query, role);
             return ResponseEntity.ok(directory);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -39,7 +39,8 @@ public class ConnectionController {
     public ResponseEntity<?> getFriends(Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            List<ConnectionUserResponse> friends = userConnectionService.getFriends(userDetails.getUsername());
+            List<ConnectionUserResponse> friends =
+                    userConnectionService.getFriends(userDetails.getUsername());
             return ResponseEntity.ok(friends);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -47,13 +48,12 @@ public class ConnectionController {
     }
 
     @PostMapping("/request")
-    public ResponseEntity<?> sendRequest(
-            @RequestParam Integer recipientId,
+    public ResponseEntity<?> sendRequest(@RequestParam Integer recipientId,
             Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            ConnectionUserResponse response = userConnectionService.sendRequest(
-                    userDetails.getUsername(), recipientId);
+            ConnectionUserResponse response =
+                    userConnectionService.sendRequest(userDetails.getUsername(), recipientId);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -61,14 +61,12 @@ public class ConnectionController {
     }
 
     @PutMapping("/request/{id}/respond")
-    public ResponseEntity<?> respondToRequest(
-            @PathVariable Integer id,
-            @RequestParam String action,
+    public ResponseEntity<?> respondToRequest(@PathVariable Integer id, @RequestParam String action,
             Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            ConnectionUserResponse response = userConnectionService.respondToRequest(
-                    userDetails.getUsername(), id, action);
+            ConnectionUserResponse response =
+                    userConnectionService.respondToRequest(userDetails.getUsername(), id, action);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -76,8 +74,7 @@ public class ConnectionController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteConnection(
-            @PathVariable Integer id,
+    public ResponseEntity<?> deleteConnection(@PathVariable Integer id,
             Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();

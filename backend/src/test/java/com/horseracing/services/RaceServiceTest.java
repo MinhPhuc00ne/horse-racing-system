@@ -101,8 +101,13 @@ public class RaceServiceTest {
 
     @Test
     void testSubmitRegistration_SharePercentInvalid() {
-        RegisterRaceRequest request = RegisterRaceRequest.builder().tournamentId(1).horseId(2).jockeyId(3)
-                .ownerSharePercent(70.0).jockeySharePercent(20.0) // 70 + 20 = 90% (invalid)
+        RegisterRaceRequest request = RegisterRaceRequest.builder().tournamentId(1).horseId(2)
+                .jockeyId(3).ownerSharePercent(70.0).jockeySharePercent(20.0) // 70
+                                                                              // +
+                                                                              // 20
+                                                                              // =
+                                                                              // 90%
+                                                                              // (invalid)
                 .build();
 
         Exception exception = assertThrows(RuntimeException.class,
@@ -127,7 +132,8 @@ public class RaceServiceTest {
                         .ownerSharePercent(70.0).jockeySharePercent(30.0).status("PENDING").build();
 
         when(raceRegistrationRepository.findById(1)).thenReturn(Optional.of(registration));
-        when(raceParticipantRepository.countByRaceId(1)).thenReturn(2L); // 2 existing participants
+        when(raceParticipantRepository.countByRaceId(1)).thenReturn(2L); // 2 existing
+                                                                         // participants
         when(raceRegistrationRepository.save(any(RaceRegistration.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 

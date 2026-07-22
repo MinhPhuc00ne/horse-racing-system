@@ -32,11 +32,11 @@ public class AdminBlacklistController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addBlacklist(
-            @Valid @RequestBody AddBlacklistRequest request,
+    public ResponseEntity<?> addBlacklist(@Valid @RequestBody AddBlacklistRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            BlacklistResponse response = adminBlacklistService.addBlacklist(request, userDetails.getUsername());
+            BlacklistResponse response =
+                    adminBlacklistService.addBlacklist(request, userDetails.getUsername());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -44,12 +44,12 @@ public class AdminBlacklistController {
     }
 
     @PutMapping("/{id}/unban")
-    public ResponseEntity<?> unbanBlacklist(
-            @PathVariable Integer id,
+    public ResponseEntity<?> unbanBlacklist(@PathVariable Integer id,
             @RequestBody(required = false) UnbanRequest unbanRequest,
             @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            BlacklistResponse response = adminBlacklistService.unbanBlacklist(id, userDetails.getUsername(), unbanRequest);
+            BlacklistResponse response = adminBlacklistService.unbanBlacklist(id,
+                    userDetails.getUsername(), unbanRequest);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));

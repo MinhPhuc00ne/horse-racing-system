@@ -51,10 +51,12 @@ public class ReportExportController {
     @GetMapping("/pdf/wallet-transactions")
     public ResponseEntity<byte[]> exportTransactionsPdf(Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        Wallet wallet = walletRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new com.horseracing.exceptions.BusinessException("User wallet not found.", HttpStatus.NOT_FOUND));
+        Wallet wallet = walletRepository.findByUserId(user.getId()).orElseThrow(
+                () -> new com.horseracing.exceptions.BusinessException("User wallet not found.",
+                        HttpStatus.NOT_FOUND));
 
-        List<WalletTransaction> transactions = walletTransactionRepository.findByWalletIdOrderByCreatedAtDesc(wallet.getId());
+        List<WalletTransaction> transactions =
+                walletTransactionRepository.findByWalletIdOrderByCreatedAtDesc(wallet.getId());
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             try (Document document = new Document(PageSize.A4)) {
@@ -62,8 +64,10 @@ public class ReportExportController {
                 document.open();
 
                 // Document Header
-                com.lowagie.text.Font titleFont = com.lowagie.text.FontFactory.getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD, 18);
-                Paragraph title = new Paragraph("LICH SU GIAO DICH VI DIEN TU\n(E-WALLET TRANSACTION HISTORY)", titleFont);
+                com.lowagie.text.Font titleFont = com.lowagie.text.FontFactory
+                        .getFont(com.lowagie.text.FontFactory.HELVETICA_BOLD, 18);
+                Paragraph title = new Paragraph(
+                        "LICH SU GIAO DICH VI DIEN TU\n(E-WALLET TRANSACTION HISTORY)", titleFont);
                 title.setAlignment(Element.ALIGN_CENTER);
                 document.add(title);
                 document.add(new Paragraph(" "));
@@ -71,14 +75,16 @@ public class ReportExportController {
                 // Metadata info
                 document.add(new Paragraph("Khach hang (Customer): " + user.getFullName()));
                 document.add(new Paragraph("Email: " + user.getEmail()));
-                document.add(new Paragraph("So du hien tai (Current Balance): " + wallet.getBalance() + " VND"));
-                document.add(new Paragraph("Ngay xuat bao cao (Export Date): " + LocalDateTime.now()));
+                document.add(new Paragraph(
+                        "So du hien tai (Current Balance): " + wallet.getBalance() + " VND"));
+                document.add(
+                        new Paragraph("Ngay xuat bao cao (Export Date): " + LocalDateTime.now()));
                 document.add(new Paragraph(" "));
 
                 // Create Table
                 PdfPTable table = new PdfPTable(5);
                 table.setWidthPercentage(100);
-                
+
                 // Header Row
                 table.addCell("ID");
                 table.addCell("Loai giao dich (Type)");
@@ -90,7 +96,8 @@ public class ReportExportController {
                 for (WalletTransaction tx : transactions) {
                     table.addCell(String.valueOf(tx.getId()));
                     table.addCell(tx.getTransactionType());
-                    table.addCell(tx.getAmount() != null ? tx.getAmount().toString() + " VND" : "0 VND");
+                    table.addCell(
+                            tx.getAmount() != null ? tx.getAmount().toString() + " VND" : "0 VND");
                     table.addCell(tx.getStatus());
                     table.addCell(tx.getCreatedAt() != null ? tx.getCreatedAt().toString() : "N/A");
                 }
@@ -101,7 +108,8 @@ public class ReportExportController {
             byte[] contents = out.toByteArray();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("attachment", "wallet_transactions_" + user.getId() + ".pdf");
+            headers.setContentDispositionFormData("attachment",
+                    "wallet_transactions_" + user.getId() + ".pdf");
             headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
 
             return new ResponseEntity<>(contents, headers, HttpStatus.OK);
@@ -114,23 +122,26 @@ public class ReportExportController {
     @GetMapping("/excel/wallet-transactions")
     public ResponseEntity<byte[]> exportTransactionsExcel(Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        Wallet wallet = walletRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new com.horseracing.exceptions.BusinessException("User wallet not found.", HttpStatus.NOT_FOUND));
+        Wallet wallet = walletRepository.findByUserId(user.getId()).orElseThrow(
+                () -> new com.horseracing.exceptions.BusinessException("User wallet not found.",
+                        HttpStatus.NOT_FOUND));
 
-        List<WalletTransaction> transactions = walletTransactionRepository.findByWalletIdOrderByCreatedAtDesc(wallet.getId());
+        List<WalletTransaction> transactions =
+                walletTransactionRepository.findByWalletIdOrderByCreatedAtDesc(wallet.getId());
 
-        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        try (Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Transactions");
 
             // Title block
             org.apache.poi.ss.usermodel.Row titleRow = sheet.createRow(0);
             org.apache.poi.ss.usermodel.Cell titleCell = titleRow.createCell(0);
             titleCell.setCellValue("LICH SU GIAO DICH VI DIEN TU (E-WALLET TRANSACTION HISTORY)");
-            
+
             org.apache.poi.ss.usermodel.Row infoRow1 = sheet.createRow(2);
             infoRow1.createCell(0).setCellValue("Khach hang (Customer):");
             infoRow1.createCell(1).setCellValue(user.getFullName());
-            
+
             org.apache.poi.ss.usermodel.Row infoRow2 = sheet.createRow(3);
             infoRow2.createCell(0).setCellValue("Email:");
             infoRow2.createCell(1).setCellValue(user.getEmail());
@@ -142,7 +153,7 @@ public class ReportExportController {
             // Header row
             org.apache.poi.ss.usermodel.Row headerRow = sheet.createRow(6);
             String[] columns = {"Transaction ID", "Type", "Amount (VND)", "Status", "Created Date"};
-            
+
             // Header style
             CellStyle headerStyle = workbook.createCellStyle();
             org.apache.poi.ss.usermodel.Font headerFont = workbook.createFont();
@@ -161,9 +172,11 @@ public class ReportExportController {
                 org.apache.poi.ss.usermodel.Row row = sheet.createRow(rowNum++);
                 row.createCell(0).setCellValue(tx.getId());
                 row.createCell(1).setCellValue(tx.getTransactionType());
-                row.createCell(2).setCellValue(tx.getAmount() != null ? tx.getAmount().doubleValue() : 0.0);
+                row.createCell(2)
+                        .setCellValue(tx.getAmount() != null ? tx.getAmount().doubleValue() : 0.0);
                 row.createCell(3).setCellValue(tx.getStatus());
-                row.createCell(4).setCellValue(tx.getCreatedAt() != null ? tx.getCreatedAt().toString() : "N/A");
+                row.createCell(4).setCellValue(
+                        tx.getCreatedAt() != null ? tx.getCreatedAt().toString() : "N/A");
             }
 
             // Autosize columns
@@ -176,7 +189,8 @@ public class ReportExportController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.setContentDispositionFormData("attachment", "wallet_transactions_" + user.getId() + ".xlsx");
+            headers.setContentDispositionFormData("attachment",
+                    "wallet_transactions_" + user.getId() + ".xlsx");
 
             return new ResponseEntity<>(contents, headers, HttpStatus.OK);
         } catch (IOException e) {
@@ -186,11 +200,14 @@ public class ReportExportController {
     }
 
     private User getAuthenticatedUser(Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails) {
+        if (authentication != null && authentication.isAuthenticated()
+                && authentication.getPrincipal() instanceof UserDetails) {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            return userRepository.findByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new com.horseracing.exceptions.BusinessException("User not found.", HttpStatus.NOT_FOUND));
+            return userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                    () -> new com.horseracing.exceptions.BusinessException("User not found.",
+                            HttpStatus.NOT_FOUND));
         }
-        throw new com.horseracing.exceptions.BusinessException("User not authenticated.", HttpStatus.UNAUTHORIZED);
+        throw new com.horseracing.exceptions.BusinessException("User not authenticated.",
+                HttpStatus.UNAUTHORIZED);
     }
 }

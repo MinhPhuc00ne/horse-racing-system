@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface RefereeFlagRepository extends JpaRepository<RefereeFlag, Integer> {
     List<RefereeFlag> findBySimulationId(Integer simulationId);
+
     List<RefereeFlag> findBySimulationIdAndHorseId(Integer simulationId, Integer horseId);
+
     long countBySimulationIdAndHorseId(Integer simulationId, Integer horseId);
 }

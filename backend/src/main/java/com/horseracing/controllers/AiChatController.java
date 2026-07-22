@@ -28,7 +28,8 @@ public class AiChatController {
     private final AiChatHistoryRepository aiChatHistoryRepository;
 
     @PostMapping
-    public ResponseEntity<?> chat(@RequestBody Map<String, Object> payload, Authentication authentication) {
+    public ResponseEntity<?> chat(@RequestBody Map<String, Object> payload,
+            Authentication authentication) {
         String message = (String) payload.get("message");
         if (message == null || message.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Message cannot be empty"));
@@ -38,30 +39,33 @@ public class AiChatController {
         Map<String, String> image = (Map<String, String>) payload.get("image");
 
         User user = null;
-        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails) {
+        if (authentication != null && authentication.isAuthenticated()
+                && authentication.getPrincipal() instanceof UserDetails) {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
         }
 
         String reply = aiChatService.chat(message, image, user);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(reply);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(reply);
     }
 
     @GetMapping("/history")
     public ResponseEntity<?> getChatHistory(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        if (authentication == null || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal() instanceof UserDetails)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Unauthorized"));
         }
-        
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "User not found"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "User not found"));
         }
 
-        List<AiChatHistory> history = aiChatHistoryRepository.findTop50ByUserIdOrderByCreatedAtDesc(user.getId());
+        List<AiChatHistory> history =
+                aiChatHistoryRepository.findTop50ByUserIdOrderByCreatedAtDesc(user.getId());
         Collections.reverse(history);
 
         List<Map<String, Object>> response = history.stream().map(h -> {
@@ -77,14 +81,17 @@ public class AiChatController {
 
     @DeleteMapping("/history")
     public ResponseEntity<?> clearChatHistory(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Unauthorized"));
+        if (authentication == null || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal() instanceof UserDetails)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Unauthorized"));
         }
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "User not found"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "User not found"));
         }
 
         aiChatHistoryRepository.deleteByUserId(user.getId());

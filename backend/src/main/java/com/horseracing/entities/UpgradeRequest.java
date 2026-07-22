@@ -84,7 +84,8 @@ public class UpgradeRequest {
     // Document URLs uploaded by the user
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "upgrade_request_documents", joinColumns = @JoinColumn(name = "upgrade_request_id"))
+    @CollectionTable(name = "upgrade_request_documents",
+            joinColumns = @JoinColumn(name = "upgrade_request_id"))
     @Column(name = "document_url", columnDefinition = "NVARCHAR(1000)")
     private List<String> documentUrls = new ArrayList<>();
 
@@ -96,4 +97,3 @@ public class UpgradeRequest {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 }
-

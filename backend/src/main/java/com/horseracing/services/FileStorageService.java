@@ -19,10 +19,10 @@ import java.util.UUID;
 public class FileStorageService {
 
     private final Path fileStorageLocation;
-    private static final List<String> ALLOWED_EXTENSIONS = List.of(".jpg", ".jpeg", ".png", ".webp", ".pdf");
-    private static final List<String> ALLOWED_MIME_TYPES = List.of(
-            "image/jpeg", "image/png", "image/webp", "application/pdf"
-    );
+    private static final List<String> ALLOWED_EXTENSIONS =
+            List.of(".jpg", ".jpeg", ".png", ".webp", ".pdf");
+    private static final List<String> ALLOWED_MIME_TYPES =
+            List.of("image/jpeg", "image/png", "image/webp", "application/pdf");
 
     public FileStorageService() {
         // Create the directory 'uploads' in the current project root if it doesn't exist
@@ -30,7 +30,8 @@ public class FileStorageService {
         try {
             Files.createDirectories(this.fileStorageLocation);
         } catch (Exception ex) {
-            throw new RuntimeException("Could not create the directory where the uploaded files will be stored.", ex);
+            throw new RuntimeException(
+                    "Could not create the directory where the uploaded files will be stored.", ex);
         }
     }
 
@@ -42,13 +43,18 @@ public class FileStorageService {
         // Validate MIME Content-Type
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
-            throw new BusinessException("Invalid file format. Allowed formats: JPEG, PNG, WEBP, PDF.", HttpStatus.BAD_REQUEST);
+            throw new BusinessException(
+                    "Invalid file format. Allowed formats: JPEG, PNG, WEBP, PDF.",
+                    HttpStatus.BAD_REQUEST);
         }
 
         // Normalize file name and prevent path traversal
-        String originalFileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+        String originalFileName =
+                StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         if (originalFileName.contains("..")) {
-            throw new BusinessException("Filename contains invalid path sequence: " + originalFileName, HttpStatus.BAD_REQUEST);
+            throw new BusinessException(
+                    "Filename contains invalid path sequence: " + originalFileName,
+                    HttpStatus.BAD_REQUEST);
         }
 
         // Validate extension
@@ -59,7 +65,9 @@ public class FileStorageService {
         }
 
         if (!ALLOWED_EXTENSIONS.contains(fileExtension)) {
-            throw new BusinessException("Invalid file extension. Allowed extensions: .jpg, .jpeg, .png, .webp, .pdf", HttpStatus.BAD_REQUEST);
+            throw new BusinessException(
+                    "Invalid file extension. Allowed extensions: .jpg, .jpeg, .png, .webp, .pdf",
+                    HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -72,7 +80,8 @@ public class FileStorageService {
 
             return "/uploads/" + newFileName;
         } catch (IOException ex) {
-            throw new RuntimeException("Could not store file " + originalFileName + ". Please try again!", ex);
+            throw new RuntimeException(
+                    "Could not store file " + originalFileName + ". Please try again!", ex);
         }
     }
 }

@@ -28,18 +28,11 @@ public class HorseResponse {
     private Boolean isNewbie;
 
     public static HorseResponse fromEntity(Horse h) {
-        if (h == null) return null;
-        return HorseResponse.builder()
-                .id(h.getId())
-                .name(h.getName())
-                .breedId(h.getBreed().getId())
-                .breedName(h.getBreed().getBreedName())
-                .age(h.getAge())
-                .gender(h.getGender())
-                .trainingStatus(h.getTrainingStatus())
-                .healthStatus(h.getHealthStatus())
-                .status(h.getStatus())
-                .imageUrl(h.getImageUrl())
-                .build();
+        if (h == null)
+            return null;
+        return HorseResponse.builder().id(h.getId()).name(h.getName()).breedId(h.getBreed().getId())
+                .breedName(h.getBreed().getBreedName()).age(h.getAge()).gender(h.getGender())
+                .trainingStatus(h.getTrainingStatus()).healthStatus(h.getHealthStatus())
+                .status(h.getStatus()).imageUrl(h.getImageUrl()).build();
     }
 }

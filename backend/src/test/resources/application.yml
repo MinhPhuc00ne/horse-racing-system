@@ -24,7 +24,6 @@ spring:
           starttls:
             enable: true
 
-
 server:
   port: 8080
 
@@ -40,4 +39,3 @@ app:
   activation-url: ${APP_ACTIVATION_URL:http://localhost:5173/verify-email}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
-

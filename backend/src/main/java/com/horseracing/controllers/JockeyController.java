@@ -23,7 +23,8 @@ public class JockeyController {
     public ResponseEntity<?> getProfile(Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            JockeyProfileResponse response = jockeyService.getJockeyProfile(userDetails.getUsername());
+            JockeyProfileResponse response =
+                    jockeyService.getJockeyProfile(userDetails.getUsername());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -31,10 +32,12 @@ public class JockeyController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestBody UpdateJockeyProfileRequest request, Authentication authentication) {
+    public ResponseEntity<?> updateProfile(@RequestBody UpdateJockeyProfileRequest request,
+            Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            JockeyProfileResponse response = jockeyService.updateJockeyProfile(userDetails.getUsername(), request);
+            JockeyProfileResponse response =
+                    jockeyService.updateJockeyProfile(userDetails.getUsername(), request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -52,13 +55,12 @@ public class JockeyController {
     }
 
     @PutMapping("/invitations/{id}/respond")
-    public ResponseEntity<?> respondToInvitation(
-            @PathVariable Integer id,
-            @RequestParam String action,
-            Authentication authentication) {
+    public ResponseEntity<?> respondToInvitation(@PathVariable Integer id,
+            @RequestParam String action, Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            return ResponseEntity.ok(jockeyService.respondToInvitation(userDetails.getUsername(), id, action));
+            return ResponseEntity
+                    .ok(jockeyService.respondToInvitation(userDetails.getUsername(), id, action));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }

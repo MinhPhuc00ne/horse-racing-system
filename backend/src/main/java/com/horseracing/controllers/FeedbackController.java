@@ -26,12 +26,12 @@ public class FeedbackController {
      */
     @PostMapping("/api/feedbacks")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> createFeedback(
-            @Valid @RequestBody CreateFeedbackRequest request,
+    public ResponseEntity<?> createFeedback(@Valid @RequestBody CreateFeedbackRequest request,
             Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            FeedbackResponse response = feedbackService.createFeedback(userDetails.getUsername(), request);
+            FeedbackResponse response =
+                    feedbackService.createFeedback(userDetails.getUsername(), request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -46,7 +46,8 @@ public class FeedbackController {
     public ResponseEntity<?> getMyFeedbacks(Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            List<FeedbackResponse> response = feedbackService.getUserFeedbacks(userDetails.getUsername());
+            List<FeedbackResponse> response =
+                    feedbackService.getUserFeedbacks(userDetails.getUsername());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -58,8 +59,7 @@ public class FeedbackController {
      */
     @GetMapping("/api/admin/feedbacks")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> getAllFeedbacks(
-            @RequestParam(required = false) String status,
+    public ResponseEntity<?> getAllFeedbacks(@RequestParam(required = false) String status,
             @RequestParam(required = false) String role,
             @RequestParam(required = false) String search) {
         try {
@@ -75,8 +75,7 @@ public class FeedbackController {
      */
     @PutMapping("/api/admin/feedbacks/{id}/resolve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> resolveFeedback(
-            @PathVariable Integer id,
+    public ResponseEntity<?> resolveFeedback(@PathVariable Integer id,
             @Valid @RequestBody ResolveFeedbackRequest request) {
         try {
             FeedbackResponse response = feedbackService.resolveFeedback(id, request);
@@ -91,8 +90,7 @@ public class FeedbackController {
      */
     @PutMapping("/api/admin/feedbacks/{id}/reject")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> rejectFeedback(
-            @PathVariable Integer id,
+    public ResponseEntity<?> rejectFeedback(@PathVariable Integer id,
             @Valid @RequestBody ResolveFeedbackRequest request) {
         try {
             FeedbackResponse response = feedbackService.rejectFeedback(id, request);

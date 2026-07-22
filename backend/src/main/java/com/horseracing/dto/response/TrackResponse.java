@@ -15,12 +15,9 @@ public class TrackResponse {
     private String shape;
 
     public static TrackResponse fromEntity(RaceTrack track) {
-        if (track == null) return null;
-        return TrackResponse.builder()
-                .id(track.getId())
-                .name(track.getName())
-                .location(track.getLocation())
-                .shape(track.getShape())
-                .build();
+        if (track == null)
+            return null;
+        return TrackResponse.builder().id(track.getId()).name(track.getName())
+                .location(track.getLocation()).shape(track.getShape()).build();
     }
 }

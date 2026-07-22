@@ -8,5 +8,6 @@ import java.util.Optional;
 
 public interface RaceSimulationRepository extends JpaRepository<RaceSimulation, Integer> {
     List<RaceSimulation> findByRaceId(Integer raceId);
+
     Optional<RaceSimulation> findFirstByRaceIdAndStatus(Integer raceId, String status);
 }

@@ -16,8 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Global exception handler to centralize error responses (#13).
- * Eliminates repetitive try-catch blocks in controllers.
+ * Global exception handler to centralize error responses (#13). Eliminates repetitive try-catch
+ * blocks in controllers.
  */
 @RestControllerAdvice
 @Slf4j
@@ -43,18 +43,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<ErrorResponse> handleDisabled(DisabledException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse(403, "Your account is not enabled. Please check your email for verification."));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(403,
+                "Your account is not enabled. Please check your email for verification."));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse(403, "You do not have permission to access this resource."));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                new ErrorResponse(403, "You do not have permission to access this resource."));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, Object>> handleValidation(
+            MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String field = ((FieldError) error).getField();
@@ -70,34 +71,34 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException ex) {
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+            org.springframework.dao.DataIntegrityViolationException ex) {
         log.error("Database constraint violation: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse(409, "Duplicate or invalid data entry. Please check your input."));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(409,
+                "Duplicate or invalid data entry. Please check your input."));
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntime(RuntimeException ex) {
         log.error("Unhandled RuntimeException: {}", ex.getMessage(), ex);
-        
+
         if (ex.getClass() == RuntimeException.class && ex.getMessage() != null) {
             String cleanMsg = ex.getMessage().trim();
-            if (!cleanMsg.toLowerCase().contains("sql") && 
-                !cleanMsg.toLowerCase().contains("database") && 
-                !cleanMsg.toLowerCase().contains("hibernate")) {
-                return ResponseEntity.badRequest()
-                        .body(new ErrorResponse(400, cleanMsg));
+            if (!cleanMsg.toLowerCase().contains("sql")
+                    && !cleanMsg.toLowerCase().contains("database")
+                    && !cleanMsg.toLowerCase().contains("hibernate")) {
+                return ResponseEntity.badRequest().body(new ErrorResponse(400, cleanMsg));
             }
         }
-        
-        return ResponseEntity.badRequest()
-                .body(new ErrorResponse(400, "An error occurred while processing your request. Please try again later."));
+
+        return ResponseEntity.badRequest().body(new ErrorResponse(400,
+                "An error occurred while processing your request. Please try again later."));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneral(Exception ex) {
         log.error("Unexpected error: {}", ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(500, "An internal server error occurred. Please try again later."));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(500,
+                "An internal server error occurred. Please try again later."));
     }
 }

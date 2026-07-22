@@ -27,21 +27,14 @@ public class RefereeRaceResponse {
     private String weather;
 
     public static RefereeRaceResponse fromEntity(Race r) {
-        if (r == null) return null;
-        return RefereeRaceResponse.builder()
-                .raceId(r.getId())
-                .tournamentId(r.getTournament().getId())
-                .raceName(r.getRaceName())
-                .tournamentName(r.getTournament().getTournamentName())
-                .raceDate(r.getRaceDate())
-                .startTime(r.getStartTime())
-                .endTime(r.getEndTime())
-                .status(r.getStatus())
-                .distance(r.getDistance())
-                .surfaceType(r.getSurfaceType())
-                .venue(r.getRaceTrack().getName())
-                .trackShape(r.getRaceTrack().getShape())
-                .weather(r.getWeather())
-                .build();
+        if (r == null)
+            return null;
+        return RefereeRaceResponse.builder().raceId(r.getId())
+                .tournamentId(r.getTournament().getId()).raceName(r.getRaceName())
+                .tournamentName(r.getTournament().getTournamentName()).raceDate(r.getRaceDate())
+                .startTime(r.getStartTime()).endTime(r.getEndTime()).status(r.getStatus())
+                .distance(r.getDistance()).surfaceType(r.getSurfaceType())
+                .venue(r.getRaceTrack().getName()).trackShape(r.getRaceTrack().getShape())
+                .weather(r.getWeather()).build();
     }
 }

@@ -25,4 +25,3 @@ public class OwnerProfileResponse {
     private LocalDate dateOfBirth;
     private List<String> documentUrls;
 }
-

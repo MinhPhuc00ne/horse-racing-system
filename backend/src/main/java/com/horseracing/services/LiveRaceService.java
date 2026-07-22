@@ -25,7 +25,8 @@ public class LiveRaceService {
         // Create an emitter with a 10 minutes timeout (standard race duration is much less)
         SseEmitter emitter = new SseEmitter(600_000L);
 
-        List<SseEmitter> emitters = raceEmitters.computeIfAbsent(raceId, k -> new CopyOnWriteArrayList<>());
+        List<SseEmitter> emitters =
+                raceEmitters.computeIfAbsent(raceId, k -> new CopyOnWriteArrayList<>());
         emitters.add(emitter);
 
         emitter.onCompletion(() -> {
@@ -43,14 +44,14 @@ public class LiveRaceService {
 
         // Send connection success event
         try {
-            emitter.send(SseEmitter.event()
-                    .name("CONNECT")
-                    .data("Subscribed to live race " + raceId));
+            emitter.send(
+                    SseEmitter.event().name("CONNECT").data("Subscribed to live race " + raceId));
         } catch (IOException | IllegalStateException e) {
             emitters.remove(emitter);
         }
 
-        log.info("Client subscribed successfully to race ID: {}. Active listeners: {}", raceId, emitters.size());
+        log.info("Client subscribed successfully to race ID: {}. Active listeners: {}", raceId,
+                emitters.size());
         return emitter;
     }
 
@@ -66,9 +67,7 @@ public class LiveRaceService {
         List<SseEmitter> deadEmitters = new ArrayList<>();
         for (SseEmitter emitter : emitters) {
             try {
-                emitter.send(SseEmitter.event()
-                        .name("RACE_TICK")
-                        .data(payload));
+                emitter.send(SseEmitter.event().name("RACE_TICK").data(payload));
             } catch (IOException | IllegalStateException e) {
                 deadEmitters.add(emitter);
             }
@@ -76,7 +75,8 @@ public class LiveRaceService {
 
         if (!deadEmitters.isEmpty()) {
             emitters.removeAll(deadEmitters);
-            log.info("Removed {} dead SSE emitters for race ID: {}. Remaining: {}", deadEmitters.size(), raceId, emitters.size());
+            log.info("Removed {} dead SSE emitters for race ID: {}. Remaining: {}",
+                    deadEmitters.size(), raceId, emitters.size());
         }
     }
 
@@ -90,12 +90,11 @@ public class LiveRaceService {
             return;
         }
 
-        log.info("Broadcasting race finished for race ID: {}. Completing {} SSE connections.", raceId, emitters.size());
+        log.info("Broadcasting race finished for race ID: {}. Completing {} SSE connections.",
+                raceId, emitters.size());
         for (SseEmitter emitter : emitters) {
             try {
-                emitter.send(SseEmitter.event()
-                        .name("RACE_FINISHED")
-                        .data(payload));
+                emitter.send(SseEmitter.event().name("RACE_FINISHED").data(payload));
                 emitter.complete();
             } catch (IOException | IllegalStateException e) {
                 // ignore, complete already handles cleanup if possible

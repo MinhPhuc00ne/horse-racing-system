@@ -43,7 +43,8 @@ public class AuthController {
      * frontend.
      */
     @PostMapping("/google")
-    public ResponseEntity<AuthResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+    public ResponseEntity<AuthResponse> googleLogin(
+            @Valid @RequestBody GoogleLoginRequest request) {
         AuthResponse response = authService.googleLogin(request);
         return ResponseEntity.ok(response);
     }
@@ -53,10 +54,10 @@ public class AuthController {
      */
     @PostMapping("/google/complete-profile")
     public ResponseEntity<UserResponse> completeGoogleProfile(
-            @Valid @RequestBody CompleteProfileRequest request,
-            Authentication authentication) {
+            @Valid @RequestBody CompleteProfileRequest request, Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        UserResponse response = authService.completeGoogleProfile(userDetails.getUsername(), request);
+        UserResponse response =
+                authService.completeGoogleProfile(userDetails.getUsername(), request);
         return ResponseEntity.ok(response);
     }
 
@@ -64,7 +65,8 @@ public class AuthController {
      * Refresh access token using a valid refresh token.
      */
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<AuthResponse> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request) {
         AuthResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(response);
     }
@@ -92,7 +94,8 @@ public class AuthController {
      * Update current authenticated user's profile info.
      */
     @PutMapping("/profile")
-    public ResponseEntity<UserResponse> updateProfile(@RequestBody java.util.Map<String, String> request, Authentication authentication) {
+    public ResponseEntity<UserResponse> updateProfile(
+            @RequestBody java.util.Map<String, String> request, Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         UserResponse response = authService.updateUserProfile(userDetails.getUsername(), request);
         return ResponseEntity.ok(response);
@@ -104,32 +107,38 @@ public class AuthController {
     @GetMapping("/verify")
     public ResponseEntity<MessageResponse> verifyAccount(@RequestParam("token") String token) {
         authService.verifyAccount(token);
-        return ResponseEntity.ok(new MessageResponse("Account activated successfully! You can now log in."));
+        return ResponseEntity
+                .ok(new MessageResponse("Account activated successfully! You can now log in."));
     }
 
     /**
      * Request a password reset OTP code.
      */
     @PostMapping("/forgot-password")
-    public ResponseEntity<MessageResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<MessageResponse> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);
-        return ResponseEntity.ok(new MessageResponse("Password reset OTP has been sent to your email."));
+        return ResponseEntity
+                .ok(new MessageResponse("Password reset OTP has been sent to your email."));
     }
 
     /**
      * Verify the password reset OTP code.
      */
     @PostMapping("/verify-reset-otp")
-    public ResponseEntity<MessageResponse> verifyResetOtp(@Valid @RequestBody VerifyOtpRequest request) {
+    public ResponseEntity<MessageResponse> verifyResetOtp(
+            @Valid @RequestBody VerifyOtpRequest request) {
         authService.verifyResetOtp(request);
-        return ResponseEntity.ok(new MessageResponse("OTP verified successfully. You can now set your new password."));
+        return ResponseEntity.ok(new MessageResponse(
+                "OTP verified successfully. You can now set your new password."));
     }
 
     /**
      * Reset password using OTP and the new password.
      */
     @PostMapping("/reset-password")
-    public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<MessageResponse> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
         return ResponseEntity.ok(new MessageResponse("Password updated successfully."));
     }
