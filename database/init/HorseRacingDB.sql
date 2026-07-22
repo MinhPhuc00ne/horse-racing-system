@@ -819,6 +819,31 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
+/****** Object:  Table [dbo].[referee_change_requests]    Script Date: 6/11/2026 2:23:38 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[referee_change_requests](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[referee_id] [int] NOT NULL,
+	[tournament_id] [int] NOT NULL,
+	[reason] [nvarchar](1000) NOT NULL,
+	[status] [nvarchar](50) NOT NULL,
+	[created_at] [datetime] NULL,
+	[updated_at] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[referee_change_requests] ADD  DEFAULT ('PENDING') FOR [status]
+GO
+ALTER TABLE [dbo].[referee_change_requests] ADD  DEFAULT (getdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[referee_change_requests] ADD  DEFAULT (getdate()) FOR [updated_at]
+GO
 ALTER TABLE [dbo].[ban_history] ADD  DEFAULT (getdate()) FOR [created_at]
 GO
 ALTER TABLE [dbo].[bets] ADD  DEFAULT ('PENDING') FOR [status]
@@ -1089,6 +1114,14 @@ REFERENCES [dbo].[users] ([id])
 GO
 ALTER TABLE [dbo].[ai_chat_histories]  WITH CHECK ADD FOREIGN KEY([user_id])
 REFERENCES [dbo].[users] ([id])
+GO
+ALTER TABLE [dbo].[referee_change_requests]  WITH CHECK ADD FOREIGN KEY([referee_id])
+REFERENCES [dbo].[users] ([id])
+GO
+ALTER TABLE [dbo].[referee_change_requests]  WITH CHECK ADD FOREIGN KEY([tournament_id])
+REFERENCES [dbo].[tournaments] ([id])
+GO
+ALTER TABLE [dbo].[referee_change_requests]  WITH CHECK ADD CHECK  (([status]='REJECTED' OR [status]='APPROVED' OR [status]='PENDING'))
 GO
 ALTER TABLE [dbo].[upgrade_requests]  WITH CHECK ADD CHECK  (([requested_role]='ADMIN' OR [requested_role]='RACE_REFEREE' OR [requested_role]='JOCKEY' OR [requested_role]='HORSE_OWNER' OR [requested_role]='SPECTATOR'))
 GO

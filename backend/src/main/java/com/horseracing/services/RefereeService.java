@@ -147,6 +147,34 @@ public class RefereeService {
         return result;
     }
 
+    @Transactional
+    public void cancelAssignment(Integer tournamentId, String refereeEmail) {
+        User referee = userRepository.findByEmail(refereeEmail)
+                .orElseThrow(() -> new RuntimeException("Referee not found"));
+
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+
+        if (tournament.getReferee() == null || !tournament.getReferee().getId().equals(referee.getId())) {
+            throw new RuntimeException("You are not the assigned referee for this tournament");
+        }
+
+        if (tournament.getRegistrationDeadline() != null && java.time.LocalDateTime.now().isAfter(tournament.getRegistrationDeadline())) {
+            throw new RuntimeException("Cannot cancel assignment after registration has closed");
+        }
+
+        tournament.setReferee(null);
+        tournamentRepository.save(tournament);
+
+        List<Race> races = raceRepository.findByTournamentId(tournamentId);
+        for (Race race : races) {
+            if (race.getReferee() != null && race.getReferee().getId().equals(referee.getId())) {
+                race.setReferee(null);
+                raceRepository.save(race);
+            }
+        }
+    }
+
     @Transactional(readOnly = true)
     public List<TournamentResponse> getAssignedTournaments(String refereeEmail) {
         User referee = userRepository.findByEmail(refereeEmail)

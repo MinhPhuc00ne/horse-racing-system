@@ -41,6 +41,19 @@ public class RefereeController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/tournaments/{tournamentId}/cancel-assignment")
+    public ResponseEntity<?> cancelAssignment(
+            @PathVariable Integer tournamentId,
+            Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        try {
+            refereeService.cancelAssignment(tournamentId, userDetails.getUsername());
+            return ResponseEntity.ok(new MessageResponse("Successfully cancelled assignment for the tournament."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        }
+    }
+
 
     @GetMapping("/inspect/horses")
     public ResponseEntity<List<Map<String, Object>>> getHorsesToInspect(Authentication authentication) {
