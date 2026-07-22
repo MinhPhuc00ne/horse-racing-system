@@ -51,14 +51,8 @@ public class ReportExportController {
     @GetMapping("/pdf/wallet-transactions")
     public ResponseEntity<byte[]> exportTransactionsPdf(Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Wallet wallet = walletRepository.findByUserId(user.getId()).orElse(null);
-        if (wallet == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        Wallet wallet = walletRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new com.horseracing.exceptions.BusinessException("User wallet not found.", HttpStatus.NOT_FOUND));
 
         List<WalletTransaction> transactions = walletTransactionRepository.findByWalletIdOrderByCreatedAtDesc(wallet.getId());
 
@@ -113,21 +107,15 @@ public class ReportExportController {
             return new ResponseEntity<>(contents, headers, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Error generating transaction PDF report", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new RuntimeException("Failed to generate PDF report: " + e.getMessage(), e);
         }
     }
 
     @GetMapping("/excel/wallet-transactions")
     public ResponseEntity<byte[]> exportTransactionsExcel(Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Wallet wallet = walletRepository.findByUserId(user.getId()).orElse(null);
-        if (wallet == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        Wallet wallet = walletRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new com.horseracing.exceptions.BusinessException("User wallet not found.", HttpStatus.NOT_FOUND));
 
         List<WalletTransaction> transactions = walletTransactionRepository.findByWalletIdOrderByCreatedAtDesc(wallet.getId());
 
@@ -193,15 +181,16 @@ public class ReportExportController {
             return new ResponseEntity<>(contents, headers, HttpStatus.OK);
         } catch (IOException e) {
             log.error("Error generating transaction Excel report", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new RuntimeException("Failed to generate Excel report: " + e.getMessage(), e);
         }
     }
 
     private User getAuthenticatedUser(Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails) {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            return userRepository.findByEmail(userDetails.getUsername()).orElse(null);
+            return userRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new com.horseracing.exceptions.BusinessException("User not found.", HttpStatus.NOT_FOUND));
         }
-        return null;
+        throw new com.horseracing.exceptions.BusinessException("User not authenticated.", HttpStatus.UNAUTHORIZED);
     }
 }
