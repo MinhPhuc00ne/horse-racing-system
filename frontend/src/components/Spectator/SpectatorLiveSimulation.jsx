@@ -191,10 +191,19 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
         setHorses(mappedHorses);
         visualHorses.current = mappedHorses.map(h => ({ ...h, visualProgress: h.progress, trail: [], bubbleText: '', bubbleTimer: 0 }));
 
-        // Load spectator bets for this race
-        const bets = await getMyBetsAPI();
-        const raceBets = (bets || []).filter(b => b.raceId === race.id || b.raceId === parseInt(race.id));
-        setMyBets(raceBets);
+        // Load spectator bets for this race if logged in
+        const token = localStorage.getItem('horse_racing_accessToken');
+        if (token) {
+          try {
+            const bets = await getMyBetsAPI();
+            const raceBets = (bets || []).filter(b => b.raceId === race.id || b.raceId === parseInt(race.id));
+            setMyBets(raceBets);
+          } catch (e) {
+            setMyBets([]);
+          }
+        } else {
+          setMyBets([]);
+        }
 
         // Auto start sequence
         setRacePhase('RAPHAEL');
