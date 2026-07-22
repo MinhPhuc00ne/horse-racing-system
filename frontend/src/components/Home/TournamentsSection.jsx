@@ -29,7 +29,7 @@ const tournaments = [
 
 export default function TournamentsSection() {
   return (
-    <section className="tournaments-section" aria-label="Upcoming tournaments">
+    <section id="tournaments" className="tournaments-section" aria-label="Upcoming tournaments">
       <div className="section-header-row">
         <div>
           <h2 className="section-main-title">Upcoming Tournaments</h2>
@@ -52,7 +52,7 @@ export default function TournamentsSection() {
               <p className="tournament-location">{tournament.location}</p>
               <div className="tournament-footer">
                 <span className="pool-amount">{tournament.pool}</span>
-                <button className="details-link-btn" type="button">Details →</button>
+                <button className="details-link-btn" type="button" onClick={() => window.location.href='/login'}>Bet Now →</button>
               </div>
             </div>
           </article>

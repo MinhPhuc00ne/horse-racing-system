@@ -5,6 +5,7 @@ import LoginForm from '../../components/Auth/LoginForm';
 import SignupForm from '../../components/Auth/SignupForm';
 import horseImage from '../../assets/horse_racing_statue.png';
 import horseSignupImage from '../../assets/horse_racing_action.png';
+import logo from '../../assets/logo.png';
 import './AuthPage.css';
 
 export default function AuthPage({ view }) {
@@ -14,7 +15,17 @@ export default function AuthPage({ view }) {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === 'ADMIN') navigate('/admin/dashboard');
+      const searchParams = new URLSearchParams(window.location.search);
+      let redirectUrl = searchParams.get('redirect') || sessionStorage.getItem('postLoginRedirect');
+      
+      if (redirectUrl) {
+        sessionStorage.removeItem('postLoginRedirect');
+        // If they are a spectator and the redirect was to public tournaments, redirect them to their dashboard version instead for better UX
+        if (user.role === 'SPECTATOR' && redirectUrl === '/tournaments') {
+            redirectUrl = '/spectator/tournaments';
+        }
+        navigate(redirectUrl);
+      } else if (user.role === 'ADMIN') navigate('/admin/dashboard');
       else if (user.role === 'HORSE_OWNER') navigate('/owner');
       else if (user.role === 'JOCKEY') navigate('/jockey');
       else if (user.role === 'RACE_REFEREE') navigate('/referee');
@@ -28,6 +39,11 @@ export default function AuthPage({ view }) {
 
   return (
     <div className={`auth-container ${isLogin ? 'mode-login' : 'mode-signup'}`}>
+      
+      {/* Absolute Logo at Top Left */}
+      <Link to="/" style={{ position: 'absolute', top: '24px', left: '32px', zIndex: 100, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+        <img src={logo} alt="Horse Racing Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+      </Link>
 
       {/* Background Forms Container - Forms stay statically in their halves */}
       <div className="auth-forms-container">
@@ -36,8 +52,8 @@ export default function AuthPage({ view }) {
           <div className="auth-form-wrapper">
             <Link to="/" style={{ textDecoration: 'none', display: 'block', cursor: 'pointer' }} className="auth-header-link">
               <div className="auth-header-content">
-                <h1 className="auth-title-brand">Horse Racing</h1>
-                <p className="auth-subtitle">The pinnacle of tournament excellence.</p>
+                <h1 className="auth-title-brand mb-1">Welcome Back</h1>
+                <p className="auth-subtitle mb-0">The pinnacle of tournament excellence.</p>
               </div>
             </Link>
             <LoginForm />
@@ -49,8 +65,8 @@ export default function AuthPage({ view }) {
           <div className="auth-form-wrapper">
             <Link to="/" style={{ textDecoration: 'none', display: 'block', cursor: 'pointer' }} className="auth-header-link">
               <div className="auth-header-content">
-                <h1 className="auth-title-brand">Join the Elite</h1>
-                <p className="auth-subtitle">Start your legacy in equine management.</p>
+                <h1 className="auth-title-brand mb-1">Join the Elite</h1>
+                <p className="auth-subtitle mb-0">Start your legacy in equine management.</p>
               </div>
             </Link>
             <SignupForm />

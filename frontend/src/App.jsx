@@ -18,6 +18,8 @@ const HorseOwnerPage = lazy(() => import('./pages/Horse-Owner/HorseOwnerPage'));
 const JockeyPage = lazy(() => import('./pages/Jockey/JockeyPage'));
 const RefereePage = lazy(() => import('./pages/Race-Referee/RefereePage'));
 const SpectatorPage = lazy(() => import('./pages/Spectator/SpectatorPage'));
+const SpectatorTournaments = lazy(() => import('./components/Spectator/SpectatorTournaments'));
+const SpectatorLiveSimulationPage = lazy(() => import('./components/Spectator/SpectatorLiveSimulationPage'));
 const UnauthorizedPage = lazy(() => import('./pages/Unauthorized/UnauthorizedPage'));
 const PaymentQRPage = lazy(() => import('./pages/Payment/PaymentQRPage'));
 const PaymentCallback = lazy(() => import('./pages/Payment/PaymentCallback'));
@@ -139,6 +141,8 @@ function App() {
                   {/* Landing Dashboard */}
                   <Route path="/" element={<Home />} />
                   <Route path="/home" element={<Navigate to="/" replace />} />
+                  <Route path="/tournaments" element={<SpectatorTournaments />} />
+                  <Route path="/live" element={<SpectatorLiveSimulationPage />} />
                 </Route>
 
                 {/* Catch-all fallback redirecting to root */}

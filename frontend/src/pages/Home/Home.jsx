@@ -81,8 +81,8 @@ const Home = () => {
         <HeroSection />
         <StatsSection />
         <TournamentsSection />
-        
-        <section className="leaderboards-section" aria-label="Elite rankings">
+
+        <section id="rankings" className="leaderboards-section" aria-label="Elite rankings">
           <div className="leaderboards-grid">
             <RankingBoard title="Elite Rankings: Horses" icon="♞" items={horseRankings} />
             <RankingBoard title="Elite Rankings: Jockeys" icon="♘" items={jockeyRankings} initials />

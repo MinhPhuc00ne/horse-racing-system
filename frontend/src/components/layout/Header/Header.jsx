@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { Navbar, Nav, Container, Badge, NavDropdown, Dropdown } from 'react-bootstrap';
 import { FiBell, FiSettings, FiLogOut, FiCheckSquare, FiAlertCircle, FiInfo, FiPlusCircle, FiTrendingUp, FiCreditCard } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../../contexts/AuthContext';
 import { NotificationContext } from '../../../contexts/NotificationContext';
 import logo from '../../../assets/logo.png';
@@ -10,6 +10,7 @@ const Header = () => {
   const { user, logout } = useContext(AuthContext);
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useContext(NotificationContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const username = user?.fullName || user?.name || user?.username || user?.email || '';
 
   const getNotificationIcon = (type) => {
@@ -67,11 +68,11 @@ const Header = () => {
 
         <Navbar.Collapse id="header-nav" className="justify-content-between">
           {/* MENU CHÍNH Ở GIỮA */}
-          <Nav className="mx-auto gap-lg-4 text-uppercase fw-semibold" style={{ fontSize: '0.8rem' }}>
-            <Nav.Link href="#live" className="text-warning border-bottom border-warning">Live Races</Nav.Link>
-            <Nav.Link href="#schedule" className="text-white-50">Schedule</Nav.Link>
-            <Nav.Link href="#standings" className="text-white-50">Standings</Nav.Link>
-            <Nav.Link href="#marketplace" className="text-white-50">Marketplace</Nav.Link>
+            <Nav className="mx-auto gap-lg-4 text-uppercase fw-semibold" style={{ fontSize: '0.8rem' }}>
+            <Nav.Link onClick={() => navigate('/tournaments')} className="text-white-50 cursor-pointer">Tournaments & Races</Nav.Link>
+            <Nav.Link onClick={() => navigate('/live')} className="text-white-50 cursor-pointer">Live Simulation</Nav.Link>
+            <Nav.Link onClick={() => navigate('/login?redirect=/spectator/wallet')} className="text-white-50 cursor-pointer">Wallet & Transactions</Nav.Link>
+            <Nav.Link href="#rankings" className="text-white-50 cursor-pointer">Ranking</Nav.Link>
           </Nav>
 
           {/* CỤM TÍNH NĂNG BÊN PHẢI */}
@@ -218,7 +219,7 @@ const Header = () => {
             ) : (
               <div className="d-flex align-items-center gap-2 ms-2">
                 <button 
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate(`/login?redirect=${location.pathname}`)}
                   className="btn btn-warning fw-bold px-3 shadow-sm"
                   style={{ 
                     fontSize: '0.85rem',
@@ -231,7 +232,7 @@ const Header = () => {
                   Login
                 </button>
                 <button 
-                  onClick={() => navigate('/signup')}
+                  onClick={() => navigate(`/signup?redirect=${location.pathname}`)}
                   className="btn btn-link text-white-50 text-decoration-none hover-white px-3 fw-semibold"
                   style={{ fontSize: '0.85rem' }}
                 >

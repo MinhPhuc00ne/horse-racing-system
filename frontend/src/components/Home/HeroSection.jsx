@@ -1,9 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import heroBg from '../../assets/background.jpg';
 
 export default function HeroSection() {
+  const navigate = useNavigate();
+
   return (
-    <section className="hero-section" aria-label="Equine competition hero">
+    <section id="live" className="hero-section" aria-label="Equine competition hero">
       <img src={heroBg} alt="Equestrian Racing" className="hero-bg-img" />
       <div className="hero-gradient-overlay" />
       <div className="hero-racing-lines" />
@@ -18,8 +21,10 @@ export default function HeroSection() {
             Quản lý, theo dõi và tham gia các giải đua ngựa độc quyền nhất thế giới theo thời gian thực. Nơi di sản giao thoa cùng công nghệ tối tân.
           </p>
           <div className="hero-btn-group">
-            <button className="btn-primary-luxury" type="button">Xem Đua Trực Tiếp</button>
-            <button className="btn-secondary-luxury" type="button">Tham Gia Giải Đấu</button>
+            <button className="btn-primary-luxury" type="button" onClick={() => navigate('/live')}>
+              <span className="pulse-dot" style={{ display: 'inline-block', marginRight: '8px', width: '8px', height: '8px', backgroundColor: '#fff', borderRadius: '50%' }} /> 
+              Xem Đua Trực Tiếp
+            </button>
           </div>
         </div>
 

@@ -38,6 +38,7 @@ export default function SpectatorTournaments() {
   const [showPhotoFinishModal, setShowPhotoFinishModal] = useState(false);
 
   const loadWalletAndBets = async () => {
+    if (!user) return; // Prevent API calls if not logged in
     try {
       const balanceRes = await getWalletBalanceAPI();
       setWalletBalance(balanceRes.balance || 0);
@@ -111,6 +112,12 @@ export default function SpectatorTournaments() {
 
   const handlePlaceBet = async (e) => {
     if (e) e.preventDefault();
+    if (!user) {
+      alert("Vui lòng đăng nhập để đặt cược.");
+      sessionStorage.setItem('postLoginRedirect', '/tournaments');
+      window.location.href = '/login?redirect=/tournaments';
+      return;
+    }
     if (!selectedParticipant) {
       alert("Vui lòng chọn ngựa và nài ngựa để đặt cược.");
       return;
@@ -430,6 +437,11 @@ export default function SpectatorTournaments() {
                           }}
                           onClick={() => {
                             if (!canSelect) return;
+                            if (!user) {
+                              sessionStorage.setItem('postLoginRedirect', '/tournaments');
+                              window.location.href = '/login?redirect=/tournaments';
+                              return;
+                            }
                             if (selectedParticipant?.id === p.id) {
                               setSelectedParticipant(null);
                             } else {
