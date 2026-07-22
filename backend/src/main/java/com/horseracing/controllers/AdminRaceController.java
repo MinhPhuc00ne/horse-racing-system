@@ -73,53 +73,33 @@ public class AdminRaceController {
     }
 
     @PostMapping("/tracks")
-    public ResponseEntity<?> createTrack(@Valid @RequestBody TrackRequest request) {
-        try {
-            TrackResponse response = trackService.createTrack(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<TrackResponse> createTrack(@Valid @RequestBody TrackRequest request) {
+        TrackResponse response = trackService.createTrack(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/tracks/{id}")
-    public ResponseEntity<?> updateTrack(@PathVariable Integer id, @Valid @RequestBody TrackRequest request) {
-        try {
-            TrackResponse response = trackService.updateTrack(id, request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<TrackResponse> updateTrack(@PathVariable Integer id, @Valid @RequestBody TrackRequest request) {
+        TrackResponse response = trackService.updateTrack(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/tracks/{id}")
-    public ResponseEntity<?> deleteTrack(@PathVariable Integer id) {
-        try {
-            trackService.deleteTrack(id);
-            return ResponseEntity.ok().body(new MessageResponse("Track deleted successfully"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<MessageResponse> deleteTrack(@PathVariable Integer id) {
+        trackService.deleteTrack(id);
+        return ResponseEntity.ok().body(new MessageResponse("Track deleted successfully"));
     }
 
     @PostMapping("/tournaments")
-    public ResponseEntity<?> createTournament(@Valid @RequestBody CreateTournamentRequest request) {
-        try {
-            TournamentResponse response = tournamentService.createTournament(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<TournamentResponse> createTournament(@Valid @RequestBody CreateTournamentRequest request) {
+        TournamentResponse response = tournamentService.createTournament(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/races")
-    public ResponseEntity<?> createRace(@Valid @RequestBody CreateRaceRequest request) {
-        try {
-            RaceResponse response = raceService.createRace(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<RaceResponse> createRace(@Valid @RequestBody CreateRaceRequest request) {
+        RaceResponse response = raceService.createRace(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/race-registrations")
@@ -128,100 +108,66 @@ public class AdminRaceController {
     }
 
     @PutMapping("/race-registrations/{id}/approve")
-    public ResponseEntity<?> approveRegistration(@PathVariable Integer id) {
-        try {
-            RaceRegistrationResponse response = raceRegistrationService.approveRegistration(id);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<RaceRegistrationResponse> approveRegistration(@PathVariable Integer id) {
+        RaceRegistrationResponse response = raceRegistrationService.approveRegistration(id);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/race-registrations/{id}/reject")
-    public ResponseEntity<?> rejectRegistration(@PathVariable Integer id) {
-        try {
-            RaceRegistrationResponse response = raceRegistrationService.rejectRegistration(id);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<RaceRegistrationResponse> rejectRegistration(@PathVariable Integer id) {
+        RaceRegistrationResponse response = raceRegistrationService.rejectRegistration(id);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/tournaments/{id}")
-    public ResponseEntity<?> updateTournament(@PathVariable Integer id, @Valid @RequestBody UpdateTournamentRequest request) {
-        try {
-            TournamentResponse response = tournamentService.updateTournament(id, request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<TournamentResponse> updateTournament(@PathVariable Integer id, @Valid @RequestBody UpdateTournamentRequest request) {
+        TournamentResponse response = tournamentService.updateTournament(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/tournaments/{id}/status")
-    public ResponseEntity<?> updateTournamentStatus(@PathVariable Integer id, @RequestBody java.util.Map<String, String> body) {
-        try {
-            String status = body.get("status");
-            if (status == null) {
-                return ResponseEntity.badRequest().body(new ErrorResponse(400, "Status field is required"));
-            }
-            TournamentResponse response = tournamentService.updateTournamentStatus(id, status);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+    public ResponseEntity<TournamentResponse> updateTournamentStatus(@PathVariable Integer id, @RequestBody java.util.Map<String, String> body) {
+        String status = body.get("status");
+        if (status == null) {
+            throw new RuntimeException("Status field is required");
         }
+        TournamentResponse response = tournamentService.updateTournamentStatus(id, status);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/tournaments/{id}")
-    public ResponseEntity<?> deleteTournament(@PathVariable Integer id) {
-        try {
-            tournamentService.deleteTournament(id);
-            return ResponseEntity.ok().body(new MessageResponse("Tournament deleted successfully"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<MessageResponse> deleteTournament(@PathVariable Integer id) {
+        tournamentService.deleteTournament(id);
+        return ResponseEntity.ok().body(new MessageResponse("Tournament deleted successfully"));
     }
 
     @PostMapping("/tournaments/{tournamentId}/confirm-registration")
-    public ResponseEntity<?> confirmRegistration(@PathVariable Integer tournamentId) {
-        try {
-            raceRegistrationService.confirmRegistration(tournamentId);
-            return ResponseEntity.ok().body(new MessageResponse("Registrations confirmed successfully. Waiting list cleared and refunded."));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+    public ResponseEntity<MessageResponse> confirmRegistration(@PathVariable Integer tournamentId) {
+        raceRegistrationService.confirmRegistration(tournamentId);
+        return ResponseEntity.ok().body(new MessageResponse("Registrations confirmed successfully. Waiting list cleared and refunded."));
     }
 
     @PutMapping("/races/{id}/status")
-    public ResponseEntity<?> updateRaceStatus(
+    public ResponseEntity<MessageResponse> updateRaceStatus(
             @PathVariable Integer id,
             @RequestBody java.util.Map<String, String> body) {
-        try {
-            String status = body.get("status");
-            if (status == null) {
-                return ResponseEntity.badRequest().body(new ErrorResponse(400, "Status field is required"));
-            }
-            if ("FINISHED".equalsIgnoreCase(status)) {
-                refereeService.confirmResults(id);
-                return ResponseEntity.ok().body(new MessageResponse("Race results confirmed, prize distribution and bet payouts completed successfully."));
-            } else if ("CANCELLED".equalsIgnoreCase(status)) {
-                refereeService.cancelRace(id);
-                return ResponseEntity.ok().body(new MessageResponse("Race cancelled successfully. Bets and registration entry fees have been refunded."));
-            } else {
-                return ResponseEntity.badRequest().body(new ErrorResponse(400, "Invalid status. Must be FINISHED or CANCELLED"));
-            }
-        } catch (RuntimeException e) {
-            log.error("Error setting race status: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
+        String status = body.get("status");
+        if (status == null) {
+            throw new RuntimeException("Status field is required");
+        }
+        if ("FINISHED".equalsIgnoreCase(status)) {
+            refereeService.confirmResults(id);
+            return ResponseEntity.ok().body(new MessageResponse("Race results confirmed, prize distribution and bet payouts completed successfully."));
+        } else if ("CANCELLED".equalsIgnoreCase(status)) {
+            refereeService.cancelRace(id);
+            return ResponseEntity.ok().body(new MessageResponse("Race cancelled successfully. Bets and registration entry fees have been refunded."));
+        } else {
+            throw new RuntimeException("Invalid status. Must be FINISHED or CANCELLED");
         }
     }
 
     @GetMapping("/races/{id}/prize-distributions")
     public ResponseEntity<?> getPrizeDistributions(@PathVariable Integer id) {
-        try {
-            return ResponseEntity.ok(refereeService.getPrizeDistributions(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+        return ResponseEntity.ok(refereeService.getPrizeDistributions(id));
     }
-
 }

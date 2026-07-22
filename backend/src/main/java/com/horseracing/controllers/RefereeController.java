@@ -43,18 +43,13 @@ public class RefereeController {
     }
 
     @PutMapping("/tournaments/{tournamentId}/cancel-assignment")
-    public ResponseEntity<?> cancelAssignment(
+    public ResponseEntity<MessageResponse> cancelAssignment(
             @PathVariable Integer tournamentId,
             Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        try {
-            refereeService.cancelAssignment(tournamentId, userDetails.getUsername());
-            return ResponseEntity.ok(new MessageResponse("Successfully cancelled assignment for the tournament."));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
-        }
+        refereeService.cancelAssignment(tournamentId, userDetails.getUsername());
+        return ResponseEntity.ok(new MessageResponse("Successfully cancelled assignment for the tournament."));
     }
-
 
     @GetMapping("/inspect/horses")
     public ResponseEntity<List<Map<String, Object>>> getHorsesToInspect(Authentication authentication) {
@@ -157,14 +152,9 @@ public class RefereeController {
     }
 
     @PostMapping("/races/{raceId}/confirm-results")
-    public ResponseEntity<?> confirmResults(@PathVariable Integer raceId) {
-        try {
-            refereeService.confirmResults(raceId);
-            return ResponseEntity.ok(new MessageResponse("Results confirmed. Prize distribution and bet payouts completed successfully."));
-        } catch (Exception e) {
-            log.error("Error confirming results for raceId {}: ", raceId, e);
-            return ResponseEntity.badRequest().body(new ErrorResponse(400, "Error confirming results: " + e.getMessage()));
-        }
+    public ResponseEntity<MessageResponse> confirmResults(@PathVariable Integer raceId) {
+        refereeService.confirmResults(raceId);
+        return ResponseEntity.ok(new MessageResponse("Results confirmed. Prize distribution and bet payouts completed successfully."));
     }
 
 
