@@ -307,26 +307,133 @@ public class DatabaseInitializer implements CommandLineRunner {
             if (breedId == null) return;
 
             String[] ownerUsernames = {"benimaru", "souei", "hakuro", "geld", "gabil", "rigurd", "gobta", "kaijin"};
-            String[][] horseTemplates = {
-                    {"Veldora", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "95.0", "90", "88", "Bay"},
-                    {"Red Flame", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "88.0", "85", "82", "Chestnut"},
-                    {"Red Lotus", "3", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "75.0", "70", "75", "Black"},
-                    {"White Flame", "6", "MALE", "COMPLETED", "FAIR", "RESTING", "82.0", "80", "78", "White"},
-                    {"Fire Dragon", "4", "FEMALE", "COMPLETED", "EXCELLENT", "ACTIVE", "90.0", "88", "85", "Palomino"},
-                    {"Nova Flame", "3", "MALE", "NOT_STARTED", "EXCELLENT", "ACTIVE", null, null, null, "Gray"},
-                    {"Fire Shadow", "7", "FEMALE", "COMPLETED", "INJURED", "INJURED", "70.0", "65", "60", "Roan"},
-                    {"Fire Ginseng", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", null, null, null, "Brown"}
+
+            // 10 Jujutsu Kaisen English named horses per owner with distinct Performance Metrics
+            String[][][] ownerHorseTemplates = {
+                    // benimaru (Owner 1)
+                    {
+                            {"Gojo Satoru", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "98.5", "95", "92", "Bay"},
+                            {"Limitless Void", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "96.0", "92", "90", "Black"},
+                            {"Hollow Purple", "3", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "94.2", "89", "88", "Chestnut"},
+                            {"Six Eyes", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "92.0", "90", "86", "White"},
+                            {"Infinity Shield", "4", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "89.5", "86", "84", "Gray"},
+                            {"Blue Sphere", "3", "MALE", "NOT_STARTED", "FAIR", "RESTING", "87.0", "84", "82", "Palomino"},
+                            {"Red Attraction", "5", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "85.5", "82", "80", "Roan"},
+                            {"Unbound Void", "4", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "83.0", "80", "78", "Brown"},
+                            {"Falling Snow", "7", "FEMALE", "COMPLETED", "INJURED", "INJURED", "79.5", "76", "74", "White"},
+                            {"Limitless Flash", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "91.0", "88", "85", "Dark Bay"}
+                    },
+                    // souei (Owner 2)
+                    {
+                            {"Ryomen Sukuna", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "99.0", "96", "94", "Dark Chestnut"},
+                            {"Malevolent Shrine", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "97.5", "94", "91", "Black"},
+                            {"Dismantle", "4", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "93.0", "88", "87", "Bay"},
+                            {"Cleave", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "91.5", "87", "89", "Gray"},
+                            {"Divine Flame", "5", "MALE", "COMPLETED", "GOOD", "ACTIVE", "90.0", "85", "83", "Chestnut"},
+                            {"King of Curses", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "88.5", "83", "81", "Roan"},
+                            {"Furnace Open", "4", "FEMALE", "NOT_STARTED", "FAIR", "RESTING", "86.0", "81", "79", "Palomino"},
+                            {"Spiderweb Slash", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "84.0", "79", "77", "Brown"},
+                            {"Binding Vow", "7", "MALE", "COMPLETED", "INJURED", "INJURED", "81.0", "78", "75", "Black"},
+                            {"Slicing Demon", "4", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "92.5", "89", "86", "Dun"}
+                    },
+                    // hakuro (Owner 3)
+                    {
+                            {"Yuji Itadori", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "93.5", "94", "88", "Chestnut"},
+                            {"Black Flash", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "95.0", "91", "90", "Black"},
+                            {"Divergent Fist", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "88.0", "86", "84", "Bay"},
+                            {"Tiger of West", "5", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "86.5", "85", "82", "Palomino"},
+                            {"Soul Striker", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "84.5", "83", "80", "Gray"},
+                            {"Vessel Spirit", "6", "MALE", "COMPLETED", "FAIR", "RESTING", "82.0", "81", "78", "Brown"},
+                            {"Spatial Impact", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "80.5", "79", "76", "Roan"},
+                            {"Unbreakable Will", "4", "MALE", "NOT_STARTED", "FAIR", "ACTIVE", "78.0", "77", "74", "Dark Bay"},
+                            {"Iron Fortress", "7", "MALE", "COMPLETED", "INJURED", "INJURED", "76.5", "74", "71", "White"},
+                            {"Cursed Spark", "3", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "90.0", "88", "86", "Chestnut"}
+                    },
+                    // geld (Owner 4)
+                    {
+                            {"Megumi Fushiguro", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "94.0", "90", "91", "Black"},
+                            {"Divine Mahoraga", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "98.0", "97", "93", "White"},
+                            {"Ten Shadows", "5", "MALE", "COMPLETED", "GOOD", "ACTIVE", "92.0", "89", "87", "Dark Bay"},
+                            {"Chimera Garden", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "89.0", "87", "85", "Gray"},
+                            {"Divine Dog", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "87.5", "84", "83", "Black"},
+                            {"Nue Lightning", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "85.0", "82", "81", "Palomino"},
+                            {"Great Serpent", "5", "MALE", "COMPLETED", "FAIR", "RESTING", "83.5", "80", "79", "Roan"},
+                            {"Max Elephant", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "81.5", "86", "76", "Gray"},
+                            {"Rabbit Escape", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "79.0", "75", "77", "White"},
+                            {"Shadow Step", "4", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "88.5", "86", "84", "Chestnut"}
+                    },
+                    // gabil (Owner 5)
+                    {
+                            {"Nobara Kugisaki", "3", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "91.0", "87", "89", "Chestnut"},
+                            {"Straw Doll", "4", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "89.5", "85", "86", "Bay"},
+                            {"Resonance", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "93.0", "89", "88", "Black"},
+                            {"Hairpin Strike", "3", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "87.0", "83", "84", "Roan"},
+                            {"Nail Barrage", "4", "MALE", "IN_PROGRESS", "FAIR", "RESTING", "85.5", "81", "82", "Gray"},
+                            {"Steel Hammer", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "83.0", "80", "78", "Dark Bay"},
+                            {"Voodoo Charm", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "81.0", "78", "76", "Palomino"},
+                            {"Curse Needle", "5", "FEMALE", "COMPLETED", "INJURED", "INJURED", "79.5", "76", "75", "Brown"},
+                            {"Iron Rose", "4", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "84.0", "82", "80", "Chestnut"},
+                            {"Soul Piercer", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "88.0", "86", "85", "Black"}
+                    },
+                    // rigurd (Owner 6)
+                    {
+                            {"Yuta Okkotsu", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "97.0", "95", "92", "Dark Bay"},
+                            {"Queen of Curses", "5", "FEMALE", "COMPLETED", "EXCELLENT", "ACTIVE", "96.0", "93", "91", "Black"},
+                            {"Rika Orimoto", "4", "FEMALE", "COMPLETED", "EXCELLENT", "ACTIVE", "94.5", "91", "89", "White"},
+                            {"Pure Love", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "92.5", "88", "87", "Chestnut"},
+                            {"Copy Technique", "5", "MALE", "COMPLETED", "GOOD", "ACTIVE", "90.5", "87", "85", "Bay"},
+                            {"Mutual Love", "6", "FEMALE", "COMPLETED", "FAIR", "RESTING", "88.0", "85", "83", "Gray"},
+                            {"Ring of Vow", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "86.0", "83", "81", "Palomino"},
+                            {"Katana Slash", "4", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "84.0", "81", "79", "Roan"},
+                            {"Special Grade", "7", "MALE", "COMPLETED", "INJURED", "INJURED", "82.5", "80", "77", "Dark Chestnut"},
+                            {"Boundless Energy", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "93.5", "92", "88", "Black"}
+                    },
+                    // gobta (Owner 7)
+                    {
+                            {"Toji Fushiguro", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "98.0", "94", "95", "Black"},
+                            {"Sorcerer Killer", "7", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "96.5", "92", "93", "Dark Bay"},
+                            {"Heavenly Restriction", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "95.0", "93", "91", "Gray"},
+                            {"Inverted Spear", "4", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "93.0", "89", "88", "Bay"},
+                            {"Playful Cloud", "5", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "91.0", "87", "86", "Chestnut"},
+                            {"Split Soul Katana", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "89.0", "85", "84", "Palomino"},
+                            {"Chain of Thousand", "3", "MALE", "NOT_STARTED", "FAIR", "RESTING", "87.0", "83", "82", "Roan"},
+                            {"Inventory Curse", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "85.0", "81", "80", "Black"},
+                            {"Apex Predator", "3", "MALE", "NOT_STARTED", "GOOD", "ACTIVE", "83.5", "79", "78", "Brown"},
+                            {"Zero Cursed Power", "4", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "90.0", "88", "87", "Dark Chestnut"}
+                    },
+                    // kaijin (Owner 8)
+                    {
+                            {"Kento Nanami", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "92.5", "91", "90", "Chestnut"},
+                            {"Ratio Technique", "4", "MALE", "COMPLETED", "GOOD", "ACTIVE", "90.5", "88", "88", "Bay"},
+                            {"Seven Three", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "88.5", "86", "86", "Dark Bay"},
+                            {"Overtime Unleashed", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "94.0", "93", "89", "Gray"},
+                            {"Blunt Blade", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "86.5", "84", "83", "Black"},
+                            {"Suguru Geto", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "95.5", "92", "91", "Dark Chestnut"},
+                            {"Cursed Manipulation", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "93.5", "90", "89", "Black"},
+                            {"Uzumaki Spiral", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "91.5", "88", "87", "Gray"},
+                            {"Night Parade", "3", "FEMALE", "NOT_STARTED", "FAIR", "RESTING", "87.5", "85", "83", "Palomino"},
+                            {"Aoi Todo", "4", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "89.5", "90", "85", "Bay"}
+                    }
             };
 
-            for (String username : ownerUsernames) {
+            for (int oIdx = 0; oIdx < ownerUsernames.length; oIdx++) {
+                String username = ownerUsernames[oIdx];
                 Integer uId = jdbcTemplate.queryForObject("SELECT id FROM users WHERE username = ?", Integer.class, username);
                 if (uId == null) continue;
                 Integer ownerId = jdbcTemplate.queryForObject("SELECT id FROM horse_owner_profiles WHERE user_id = ?", Integer.class, uId);
                 if (ownerId == null) continue;
 
                 Integer horseCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM horses WHERE owner_id = ?", Integer.class, ownerId);
-                if (horseCount != null && horseCount > 0) continue;
+                if (horseCount != null && horseCount >= 10) continue;
 
+                // Clear existing horses for clean re-seeding if incomplete or old dataset
+                if (horseCount != null && horseCount > 0) {
+                    jdbcTemplate.update("DELETE FROM bets WHERE participant_id IN (SELECT id FROM race_participants WHERE horse_id IN (SELECT id FROM horses WHERE owner_id = ?))", ownerId);
+                    jdbcTemplate.update("DELETE FROM race_participants WHERE horse_id IN (SELECT id FROM horses WHERE owner_id = ?)", ownerId);
+                    jdbcTemplate.update("DELETE FROM horses WHERE owner_id = ?", ownerId);
+                }
+
+                String[][] horseTemplates = ownerHorseTemplates[oIdx];
                 for (String[] ht : horseTemplates) {
                     Double spd = ht[6] != null ? Double.valueOf(ht[6]) : null;
                     Integer stm = ht[7] != null ? Integer.valueOf(ht[7]) : null;
