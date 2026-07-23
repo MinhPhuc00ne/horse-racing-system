@@ -27,6 +27,8 @@ import com.horseracing.repositories.RaceSimulationRepository;
 import com.horseracing.repositories.WalletRepository;
 import com.horseracing.repositories.WalletTransactionRepository;
 
+import com.horseracing.store.InMemoryRaceStore;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -40,6 +42,7 @@ public class BetService {
     private final WalletTransactionRepository walletTransactionRepository;
     private final BettingTransactionRepository bettingTransactionRepository;
     private final RaceSimulationRepository raceSimulationRepository;
+    private final InMemoryRaceStore inMemoryRaceStore;
 
     @Transactional
     public BetResponse placeBet(User user, PlaceBetRequest request) {
@@ -86,7 +89,12 @@ public class BetService {
                     HttpStatus.BAD_REQUEST);
         }
 
-        // Block placing bets if the simulation has already finished
+        // Block placing bets if simulation is currently running in RAM or has finished
+        if (inMemoryRaceStore.hasRunningRace(race.getId())) {
+            throw new BusinessException("The race is currently running and betting is closed.",
+                    HttpStatus.BAD_REQUEST);
+        }
+
         boolean isSimFinished = raceSimulationRepository.findByRaceId(race.getId()).stream()
                 .anyMatch(sim -> "FINISHED".equalsIgnoreCase(sim.getStatus()));
         if (isSimFinished) {
