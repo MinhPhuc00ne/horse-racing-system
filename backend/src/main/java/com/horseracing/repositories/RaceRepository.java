@@ -12,4 +12,6 @@ public interface RaceRepository extends JpaRepository<Race, Integer> {
     List<Race> findByTournamentId(Integer tournamentId);
 
     List<Race> findByRefereeId(Integer refereeId);
+
+    List<Race> findByStatus(String status);
 }
