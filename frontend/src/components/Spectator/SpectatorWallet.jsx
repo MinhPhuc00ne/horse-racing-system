@@ -6,8 +6,6 @@ import {
   withdrawAPI,
   getTransactionHistoryAPI,
   checkDepositStatusAPI,
-  exportTransactionsPdfAPI,
-  exportTransactionsExcelAPI,
   updateBankAccountAPI,
   cancelWithdrawalAPI,
 } from '../../services/wallet';
@@ -248,36 +246,6 @@ export default function SpectatorWallet({ hideHeader = false }) {
 
   const selectQuickAmount = (val) => {
     setDepositAmount(formatNumberWithCommas(val));
-  };
-
-  const handleExportPdf = async () => {
-    try {
-      const blob = await exportTransactionsPdfAPI();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'Transaction_History.pdf');
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-    } catch (error) {
-      alert(error.message || 'Error exporting PDF');
-    }
-  };
-
-  const handleExportExcel = async () => {
-    try {
-      const blob = await exportTransactionsExcelAPI();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'Transaction_History.xlsx');
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-    } catch (error) {
-      alert(error.message || 'Error exporting Excel');
-    }
   };
 
   return (

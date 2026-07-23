@@ -123,27 +123,3 @@ export async function checkDepositStatusAPI(orderCode) {
     throw new Error(errMsg, { cause: error });
   }
 }
-
-export async function exportTransactionsPdfAPI() {
-  try {
-    const response = await axiosClient.get('/wallets/transactions/export/pdf', {
-      responseType: 'blob', // Important for file download
-    });
-    return response.data;
-  } catch (error) {
-    const errMsg = error.response?.data?.message || 'Error exporting transaction PDF.';
-    throw new Error(errMsg, { cause: error });
-  }
-}
-
-export async function exportTransactionsExcelAPI() {
-  try {
-    const response = await axiosClient.get('/wallets/transactions/export/excel', {
-      responseType: 'blob', // Important for file download
-    });
-    return response.data;
-  } catch (error) {
-    const errMsg = error.response?.data?.message || 'Error exporting transaction Excel.';
-    throw new Error(errMsg, { cause: error });
-  }
-}
