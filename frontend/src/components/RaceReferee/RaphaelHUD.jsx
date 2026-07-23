@@ -269,21 +269,21 @@ export default function RaphaelHUD({ horses, environment, onComplete, onCancel, 
             audioManager.stopSfx('crowd');
             audioManager.playSfx('intro_heroic');
 
-            // Trigger Transition Step 1: "BẠN ĐÃ SẴN SÀNG?"
+            // Trigger Transition Step 1: "ARE YOU READY?"
             setShowTransitionLogo(true);
             setTransitionStep(1);
             
             await wait(3500); // 3.5 seconds
             if (isCancelled) return;
 
-            // Trigger Transition Step 2: "HÃY ĐẶT CƯỢC"
+            // Trigger Transition Step 2: "PLACE YOUR BETS"
             triggerFlash(150);
             setTransitionStep(2);
 
             await wait(3500); // 3.5 seconds
             if (isCancelled) return;
 
-            // Trigger Transition Step 3: "CUỘC ĐUA BẮT ĐẦU"
+            // Trigger Transition Step 3: "RACE START"
             triggerFlash(200);
             setTransitionStep(3);
 

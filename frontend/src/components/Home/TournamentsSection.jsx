@@ -31,7 +31,7 @@ const defaultMockTournaments = [
 export default function TournamentsSection({ tournaments = [] }) {
   const navigate = useNavigate();
 
-  // Logic trộn dữ liệu thực tế và mock
+  // Logic to merge real and mock data
   const realActiveUpcoming = tournaments.filter(
     t => t.tournamentStatus === 'Active' || t.tournamentStatus === 'OPEN_FOR_REGISTER' || t.tournamentStatus === 'Upcoming'
   );
@@ -48,9 +48,9 @@ export default function TournamentsSection({ tournaments = [] }) {
       const t = combinedReal[i];
       displayList.push({
         image: i === 0 ? tournament1 : i === 1 ? tournament2 : tournament3,
-        tag: t.tournamentStatus === 'Active' || t.tournamentStatus === 'OPEN_FOR_REGISTER' ? 'Đang Mở Cược' : (t.tournamentStatus === 'Finished' ? 'Đã Kết Thúc' : 'Sắp Diễn Ra'),
+        tag: t.tournamentStatus === 'Active' || t.tournamentStatus === 'OPEN_FOR_REGISTER' ? 'Open for Betting' : (t.tournamentStatus === 'Finished' ? 'Finished' : 'Upcoming'),
         title: t.tournamentName,
-        location: t.location || 'Trường đua hệ thống',
+        location: t.location || 'System Racetrack',
         pool: t.totalPrize ? `${t.totalPrize.toLocaleString()} VND` : '0 VND',
       });
     } else {

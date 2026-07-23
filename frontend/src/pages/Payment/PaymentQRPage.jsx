@@ -46,7 +46,7 @@ export default function PaymentQRPage() {
           } else {
             const profile = await getProfileAPI();
             if (profile?.bankAccountNumber) {
-              setBankAccount(`${profile.bankAccountNumber} (${profile.bankName || 'Ngân hàng'})`);
+              setBankAccount(`${profile.bankAccountNumber} (${profile.bankName || 'Bank'})`);
             }
           }
         } catch (err) {

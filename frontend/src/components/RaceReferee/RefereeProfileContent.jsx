@@ -23,21 +23,21 @@ const fallbackTransactions = [
     id: 'TX-REF-801',
     date: '2026-07-20 14:30',
     type: 'DEPOSIT',
-    event: 'Nạp tiền vào ví trọng tài qua PayOS Portal',
+    event: 'Referee wallet deposit via PayOS Portal',
     amount: 1000000,
   },
   {
     id: 'TX-REF-802',
     date: '2026-07-18 16:45',
     type: 'STIPEND',
-    event: 'Thù lao trọng tài chính - Giải Đấu Hoàng Gia Tempest',
+    event: 'Head Referee Stipend - Tempest Royal Tournament',
     amount: 5000000,
   },
   {
     id: 'TX-REF-803',
     date: '2026-07-15 09:15',
     type: 'WITHDRAWAL',
-    event: 'Rút tiền về tài khoản ngân hàng liên kết',
+    event: 'Withdrawal to linked bank account',
     amount: -2000000,
   },
 ];
@@ -59,7 +59,7 @@ export default function RefereeProfileContent() {
     dateOfBirth: '',
     licenseNumber: 'REF-LIC-2026-08',
     experienceYears: 5,
-    description: 'Trọng tài đường đua cấp quốc gia với hơn 5 năm kinh nghiệm điều hành và giám sát giải đấu chuyên nghiệp.',
+    description: 'National-level racetrack referee with over 5 years of experience officiating and supervising professional tournaments.',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
     avatarZoom: 1,
     avatarOffsetX: 0,
@@ -141,7 +141,7 @@ export default function RefereeProfileContent() {
           setTransactions(savedTx ? JSON.parse(savedTx) : fallbackTransactions);
         }
       } catch (err) {
-        console.error('Lỗi khi tải thông tin trọng tài:', err);
+        console.error('Error loading referee profile:', err);
       } finally {
         setLoading(false);
       }
@@ -202,9 +202,9 @@ export default function RefereeProfileContent() {
         }
       }
 
-      alert('Hồ sơ Trọng tài và thông tin ngân hàng đã được lưu thành công!');
+      alert('Referee profile and bank details saved successfully!');
     } catch (err) {
-      alert('Cập nhật hồ sơ thất bại: ' + err.message);
+      alert('Profile update failed: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -213,7 +213,7 @@ export default function RefereeProfileContent() {
   const handleDeposit = async () => {
     const amt = parseFloat(depositAmount.replace(/,/g, ''));
     if (isNaN(amt) || amt <= 0) {
-      alert('Vui lòng nhập số tiền nạp hợp lệ.');
+      alert('Please enter a valid deposit amount.');
       return;
     }
 
@@ -231,18 +231,18 @@ export default function RefereeProfileContent() {
       });
       setDepositAmount('');
     } catch (err) {
-      alert('Không thể tạo liên kết thanh toán: ' + err.message);
+      alert('Failed to create payment link: ' + err.message);
     }
   };
 
   const handleWithdraw = async () => {
     const amt = parseFloat(depositAmount.replace(/,/g, ''));
     if (isNaN(amt) || amt <= 0) {
-      alert('Vui lòng nhập số tiền rút hợp lệ.');
+      alert('Please enter a valid withdrawal amount.');
       return;
     }
     if (amt > walletBalance) {
-      alert('Số dư ví không đủ để thực hiện giao dịch rút tiền.');
+      alert('Insufficient wallet balance for withdrawal.');
       return;
     }
 
@@ -257,7 +257,7 @@ export default function RefereeProfileContent() {
         id: `TX-REF-${Date.now()}`,
         date: new Date().toISOString().replace('T', ' ').slice(0, 19),
         type: 'WITHDRAWAL',
-        event: 'Yêu cầu rút tiền về tài khoản ngân hàng liên kết',
+        event: 'Withdrawal request to linked bank account',
         amount: -amt,
       };
 
@@ -265,10 +265,10 @@ export default function RefereeProfileContent() {
       setTransactions(updatedTxs);
       localStorage.setItem('referee_transactions', JSON.stringify(updatedTxs));
 
-      alert(`Yêu cầu rút tiền ${amt.toLocaleString('vi-VN')} VND đã gửi thành công. Hệ thống sẽ xử lý trong giây lát.`);
+      alert(`Withdrawal request for ${amt.toLocaleString()} VND submitted successfully. System will process shortly.`);
       setDepositAmount('');
     } catch (err) {
-      alert('Rút tiền thất bại: ' + err.message);
+      alert('Withdrawal failed: ' + err.message);
     }
   };
 
@@ -292,7 +292,7 @@ export default function RefereeProfileContent() {
           }));
         }
       } catch (err) {
-        alert('Tải ảnh đại diện thất bại: ' + err.message);
+        alert('Avatar upload failed: ' + err.message);
       } finally {
         setUploading(false);
       }
@@ -336,7 +336,7 @@ export default function RefereeProfileContent() {
         <div className="spinner-border text-success mb-3" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
-        <div className="fw-bold fs-5">Đang tải hồ sơ trọng tài...</div>
+        <div className="fw-bold fs-5">Loading referee profile...</div>
       </div>
     );
   }
@@ -350,17 +350,17 @@ export default function RefereeProfileContent() {
       >
         <div>
           <h2 className="fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
-            Hồ Sơ & Ví Trọng Tài
+            Referee Profile & Wallet
           </h2>
           <p className="text-secondary small m-0">
-            Quản lý thông tin cá nhân, bằng cấp trọng tài, cấu hình ảnh đại diện và ví nạp/rút thù lao.
+            Manage personal details, referee credentials, avatar configuration, and stipend wallet.
           </p>
         </div>
         <span
           className="badge px-3 py-2 rounded-pill fw-bold text-uppercase"
           style={{ backgroundColor: '#0b4f32', color: '#fcd34d', fontSize: '12px', letterSpacing: '0.05em' }}
         >
-          Trọng Tài Chính Thức (Race Referee)
+          Official Race Referee
         </span>
       </div>
 
@@ -372,7 +372,7 @@ export default function RefereeProfileContent() {
               className="ho-font-epilogue fs-4 fw-bold border-bottom pb-3 mb-4"
               style={{ color: 'var(--ho-primary-dark)' }}
             >
-              Cấu Hình Hồ Sơ Trọng Tài
+              Referee Profile Configuration
             </h3>
 
             <form onSubmit={handleSaveProfile} className="d-flex flex-column gap-3 flex-grow-1">
@@ -410,7 +410,7 @@ export default function RefereeProfileContent() {
 
                 <div className="w-100">
                   <label className="ho-input-label text-center d-block mb-2 fw-bold">
-                    Chọn Ảnh Đại Diện (Avatar)
+                    Select Avatar Profile Picture
                   </label>
 
                   {/* Presets */}
@@ -455,7 +455,7 @@ export default function RefereeProfileContent() {
                       <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
                         {uploading ? 'sync' : 'upload'}
                       </span>
-                      {uploading ? 'Đang tải...' : 'Tải Ảnh Từ Máy Tính'}
+                      {uploading ? 'Uploading...' : 'Upload From Computer'}
                     </button>
                     <input
                       type="file"
@@ -469,7 +469,7 @@ export default function RefereeProfileContent() {
                   {/* Zoom & Reposition Controls */}
                   <div className="px-3 mb-2 w-100">
                     <div className="d-flex justify-content-between small fw-bold mb-1">
-                      <span>Thu / Phóng (Zoom)</span>
+                      <span>Zoom</span>
                       <span>{Math.round((formData.avatarZoom || 1) * 100)}%</span>
                     </div>
                     <input
@@ -485,7 +485,7 @@ export default function RefereeProfileContent() {
                       style={{ accentColor: 'var(--ho-accent-gold)' }}
                     />
                     <small className="text-secondary d-block text-center mt-1" style={{ fontSize: '10px' }}>
-                      Giữ chuột và kéo ảnh ở trên để điều chỉnh góc căn giữa
+                      Click and drag image above to reposition center
                     </small>
                   </div>
                 </div>
@@ -493,13 +493,13 @@ export default function RefereeProfileContent() {
 
               {/* Description / Bio */}
               <div>
-                <label className="ho-input-label">Tiểu Sử & Ghi Chú Kỹ Năng Trọng Tài</label>
+                <label className="ho-input-label">Biography & Referee Skill Notes</label>
                 <textarea
                   value={formData.description || ''}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="ho-form-input text-dark"
                   rows="3"
-                  placeholder="Nhập thông tin mô tả bản thân, chuyên môn đường đua..."
+                  placeholder="Enter bio, racetrack expertise, and notes..."
                   style={{ resize: 'none' }}
                 />
               </div>
@@ -507,7 +507,7 @@ export default function RefereeProfileContent() {
               {/* Personal Details */}
               <div className="row g-3">
                 <div className="col-12 col-sm-6">
-                  <label className="ho-input-label">Họ Và Tên</label>
+                  <label className="ho-input-label">Full Name</label>
                   <input
                     type="text"
                     value={formData.fullName}
@@ -517,7 +517,7 @@ export default function RefereeProfileContent() {
                   />
                 </div>
                 <div className="col-12 col-sm-6">
-                  <label className="ho-input-label">Số Điện Thoại</label>
+                  <label className="ho-input-label">Phone Number</label>
                   <input
                     type="tel"
                     value={formData.phoneNumber}
@@ -529,7 +529,7 @@ export default function RefereeProfileContent() {
               </div>
 
               <div>
-                <label className="ho-input-label">Địa Chỉ Email (Tài Khoản)</label>
+                <label className="ho-input-label">Email Address (Account)</label>
                 <input
                   type="email"
                   value={formData.email}
@@ -541,17 +541,17 @@ export default function RefereeProfileContent() {
 
               <div className="row g-3">
                 <div className="col-12 col-sm-6">
-                  <label className="ho-input-label">Số CMND / CCCD</label>
+                  <label className="ho-input-label">Identity / Passport Number</label>
                   <input
                     type="text"
                     value={formData.identityNumber}
                     onChange={(e) => setFormData({ ...formData, identityNumber: e.target.value })}
                     className="ho-form-input text-dark"
-                    placeholder="Ví dụ: 038090100026"
+                    placeholder="e.g. 038090100026"
                   />
                 </div>
                 <div className="col-12 col-sm-6">
-                  <label className="ho-input-label">Ngày Sinh</label>
+                  <label className="ho-input-label">Date of Birth</label>
                   <input
                     type="date"
                     value={formData.dateOfBirth}
@@ -563,7 +563,7 @@ export default function RefereeProfileContent() {
 
               <div className="row g-3">
                 <div className="col-12 col-sm-6">
-                  <label className="ho-input-label">Mã Thẻ Trọng Tài (License)</label>
+                  <label className="ho-input-label">Referee License Number</label>
                   <input
                     type="text"
                     value={formData.licenseNumber}
@@ -572,7 +572,7 @@ export default function RefereeProfileContent() {
                   />
                 </div>
                 <div className="col-12 col-sm-6">
-                  <label className="ho-input-label">Thâm Niên (Năm Kinh Nghiệm)</label>
+                  <label className="ho-input-label">Experience (Years)</label>
                   <input
                     type="number"
                     value={formData.experienceYears}
@@ -585,46 +585,46 @@ export default function RefereeProfileContent() {
               {/* Bank Account Information */}
               <div className="border-top pt-3 mt-3">
                 <h4 className="ho-font-epilogue fs-6 fw-bold mb-3" style={{ color: 'var(--ho-primary-dark)' }}>
-                  Thông Tin Ngân Hàng Thụ Hưởng Thù Lao
+                  Beneficiary Bank Account Details
                 </h4>
                 <div className="row g-3">
                   <div className="col-12 col-sm-6">
-                    <label className="ho-input-label">Tên Ngân Hàng</label>
+                    <label className="ho-input-label">Bank Name</label>
                     <input
                       type="text"
                       className="ho-form-input text-dark"
                       value={bankName}
                       onChange={(e) => setBankName(e.target.value)}
-                      placeholder="Ví dụ: MBBank, Techcombank"
+                      placeholder="e.g. Chase, HSBC, Citibank"
                       required
                     />
                   </div>
                   <div className="col-12 col-sm-6">
-                    <label className="ho-input-label">Số Tài Khoản</label>
+                    <label className="ho-input-label">Account Number</label>
                     <input
                       type="text"
                       className="ho-form-input text-dark font-monospace"
                       value={bankAccountNumber}
                       onChange={(e) => setBankAccountNumber(e.target.value)}
-                      placeholder="Nhập số tài khoản"
+                      placeholder="Enter account number"
                       required
                     />
                   </div>
                   <div className="col-12">
-                    <label className="ho-input-label">Tên Chủ Tài Khoản (Viết hoa không dấu)</label>
+                    <label className="ho-input-label">Account Holder Name (Uppercase)</label>
                     <input
                       type="text"
                       className="ho-form-input text-dark"
                       value={bankAccountHolderName}
                       onChange={(e) => setBankAccountHolderName(e.target.value)}
-                      placeholder="Ví dụ: GUY CRIMSON"
+                      placeholder="e.g. GUY CRIMSON"
                     />
                   </div>
                 </div>
               </div>
 
               <button type="submit" className="ho-btn ho-btn-dark-green w-100 py-3 mt-3 fw-bold" disabled={saving}>
-                {saving ? 'Đang lưu...' : 'Lưu Hồ Sơ Trọng Tài'}
+                {saving ? 'Saving...' : 'Save Referee Profile'}
               </button>
             </form>
           </div>
@@ -638,7 +638,7 @@ export default function RefereeProfileContent() {
               className="ho-font-epilogue fs-4 fw-bold border-bottom pb-3 mb-3"
               style={{ color: 'var(--ho-primary-dark)' }}
             >
-              Ví Trọng Tài
+              Referee Wallet
             </h3>
 
             <div
@@ -651,13 +651,13 @@ export default function RefereeProfileContent() {
                 className="text-uppercase fw-bold mb-1"
                 style={{ fontSize: '11px', letterSpacing: '0.1em', color: 'var(--ho-primary-light)' }}
               >
-                Số Dư Ví Khả Dụng
+                Available Wallet Balance
               </h4>
               <p className="ho-font-epilogue fs-2 fw-extrabold m-0" style={{ color: '#ffe088' }}>
-                {walletBalance.toLocaleString('vi-VN')} VND
+                {walletBalance.toLocaleString()} VND
               </p>
               <p className="text-secondary small m-0 mt-2 font-mono" style={{ fontSize: '11px', color: '#cbd5e1' }}>
-                Tài khoản ngân hàng liên kết: {bankAccountNumber ? `**** **** ${bankAccountNumber.slice(-4)}` : 'Chưa liên kết'}
+                Linked Bank Account: {bankAccountNumber ? `**** **** ${bankAccountNumber.slice(-4)}` : 'Not Linked'}
               </p>
             </div>
 
@@ -665,17 +665,17 @@ export default function RefereeProfileContent() {
             <div className="d-flex flex-column gap-3">
               <input
                 type="text"
-                placeholder="Nhập số tiền giao dịch (VND)..."
+                placeholder="Enter transaction amount (VND)..."
                 value={depositAmount}
                 onChange={(e) => setDepositAmount(formatInputWithCommas(e.target.value))}
                 className="ho-form-input fw-bold"
               />
               <div className="d-flex gap-2 w-100">
                 <button onClick={handleDeposit} className="ho-btn ho-btn-gold-solid flex-grow-1 py-2 px-4 fw-bold">
-                  Nạp Tiền (PayOS)
+                  Deposit (PayOS)
                 </button>
                 <button onClick={handleWithdraw} className="ho-btn ho-btn-gold-outline flex-grow-1 py-2 px-4 fw-bold">
-                  Rút Tiền Về Ngân Hàng
+                  Withdraw to Bank
                 </button>
               </div>
             </div>
@@ -687,12 +687,12 @@ export default function RefereeProfileContent() {
               className="ho-font-epilogue fs-4 fw-bold border-bottom pb-3 mb-3"
               style={{ color: 'var(--ho-primary-dark)' }}
             >
-              Lịch Sử Biến Động Số Dư
+              Balance Transaction History
             </h3>
 
             <div className="d-flex flex-column gap-3 overflow-y-auto pr-2" style={{ maxHeight: '350px' }}>
               {transactions.length === 0 ? (
-                <div className="text-center text-secondary py-4 small">Chưa có giao dịch nào được thực hiện.</div>
+                <div className="text-center text-secondary py-4 small">No transactions executed yet.</div>
               ) : (
                 transactions.map((tx, idx) => (
                   <div
@@ -705,24 +705,24 @@ export default function RefereeProfileContent() {
                   >
                     <div className="d-flex justify-content-between align-items-center border-bottom pb-1" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
                       <span className="fw-bold" style={{ color: 'var(--ho-primary-dark)' }}>
-                        {tx.event || tx.description || 'Giao dịch ví trọng tài'}
+                        {tx.event || tx.description || 'Referee wallet transaction'}
                       </span>
                       <span className="fw-bold text-uppercase" style={{ color: 'var(--ho-accent-gold-text)', fontSize: '10px' }}>
-                        {tx.date || tx.createdAt || 'Mới đây'}
+                        {tx.date || tx.createdAt || 'Recent'}
                       </span>
                     </div>
 
                     <div className="d-flex justify-content-between align-items-center">
-                      <span className="text-secondary">Loại giao dịch:</span>
+                      <span className="text-secondary">Transaction Type:</span>
                       <span className={`badge ${tx.amount > 0 ? 'bg-success' : 'bg-danger'}`}>
-                        {tx.type || (tx.amount > 0 ? 'NẬP TIỀN' : 'RÚT TIỀN')}
+                        {tx.type || (tx.amount > 0 ? 'DEPOSIT' : 'WITHDRAWAL')}
                       </span>
                     </div>
 
                     <div className="d-flex justify-content-between align-items-center">
-                      <span className="text-secondary">Số tiền:</span>
+                      <span className="text-secondary">Amount:</span>
                       <span className={`fw-bold ${tx.amount > 0 ? 'text-success' : 'text-danger'}`}>
-                        {tx.amount > 0 ? `+${tx.amount.toLocaleString('vi-VN')}` : tx.amount.toLocaleString('vi-VN')} VND
+                        {tx.amount > 0 ? `+${tx.amount.toLocaleString()}` : tx.amount.toLocaleString()} VND
                       </span>
                     </div>
                   </div>
