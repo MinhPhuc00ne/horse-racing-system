@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { sendChatMessageAPI, getChatHistoryAPI, clearChatHistoryAPI } from '../../services/aiChat';
+import { executeSafeAction, ACTION_TYPES } from '../../services/chatActionHandler';
+import { depositAPI } from '../../services/wallet';
 import '../../pages/Spectator/Spectator.css';
 import MarkdownRenderer from '../ui/MarkdownRenderer';
 
@@ -9,6 +12,7 @@ export default function SpectatorChatbot() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
+  const navigate = useNavigate();
 
   const loadHistory = async () => {
     try {
@@ -18,7 +22,7 @@ export default function SpectatorChatbot() {
       console.error("Failed to load chat history", err);
       // Fallback message if error
       setMessages([
-        { sender: 'AI', message: 'Hello! I am your AI assistant. How can I help you today?', createdAt: new Date().toISOString() }
+        { sender: 'AI', message: 'Xin chào! Tôi là trợ lý AI đua ngựa. Tôi có thể giúp gì cho bạn hôm nay?', createdAt: new Date().toISOString() }
       ]);
     } finally {
       setLoadingHistory(false);
@@ -37,6 +41,26 @@ export default function SpectatorChatbot() {
     scrollToBottom();
   }, [messages, sending]);
 
+  const handleActionConfirm = async (action) => {
+    if (!action || !action.type) return;
+
+    if (action.type === ACTION_TYPES.DEPOSIT_FUNDS) {
+      const amount = action.payload?.amount || 50000;
+      try {
+        const res = await depositAPI(amount);
+        if (res?.checkoutUrl) {
+          window.location.href = res.checkoutUrl;
+        } else {
+          alert(`Đã khởi tạo đơn nạp ${amount.toLocaleString()} VNĐ qua PayOS thành công!`);
+        }
+      } catch (err) {
+        alert('Lỗi tạo đơn nạp tiền: ' + (err.message || 'Thất bại'));
+      }
+    } else {
+      executeSafeAction(action, navigate);
+    }
+  };
+
   const handleSend = async (textToSend) => {
     const text = textToSend || inputText;
     if (!text || text.trim() === '') return;
@@ -54,11 +78,30 @@ export default function SpectatorChatbot() {
 
     try {
       const res = await sendChatMessageAPI(text);
-      const aiReply = res?.text || "Sorry, I encountered an issue processing your request.";
+      let aiReply = "Xin lỗi, không thể xử lý yêu cầu.";
+      let actionObj = null;
+
+      if (typeof res === 'object' && res !== null) {
+        aiReply = res.text || res.message || JSON.stringify(res);
+        actionObj = res.action || null;
+      } else if (typeof res === 'string') {
+        try {
+          const parsed = JSON.parse(res);
+          aiReply = parsed.text || res;
+          actionObj = parsed.action || null;
+        } catch (e) {
+          aiReply = res;
+        }
+      }
+
+      if (actionObj) {
+        executeSafeAction(actionObj, navigate);
+      }
       
       const aiMsg = {
         sender: 'AI',
         message: aiReply,
+        action: actionObj,
         createdAt: new Date().toISOString()
       };
       setMessages(prev => [...prev, aiMsg]);
@@ -76,14 +119,15 @@ export default function SpectatorChatbot() {
   };
 
   const handleClearHistory = async () => {
-    if (window.confirm("Are you sure you want to clear this chat history?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa lịch sử trò chuyện này?")) {
       try {
         await clearChatHistoryAPI();
+        localStorage.removeItem('ai_threads_guest');
         setMessages([
-          { sender: 'AI', message: 'Chat history cleared. How else can I help you?', createdAt: new Date().toISOString() }
+          { sender: 'AI', message: 'Đã xóa lịch sử trò chuyện. Tôi có thể hỗ trợ gì thêm cho bạn?', createdAt: new Date().toISOString() }
         ]);
       } catch (err) {
-        alert("Failed to clear chat history: " + err.message);
+        alert("Không thể xóa lịch sử: " + err.message);
       }
     }
   };
@@ -156,6 +200,28 @@ export default function SpectatorChatbot() {
                     <div className="message-content">
                       {isUser ? m.message : <MarkdownRenderer content={m.message} />}
                     </div>
+                    {m.action && (
+                      <div className="mt-2 pt-2 border-top border-secondary">
+                        {m.action.type === ACTION_TYPES.DEPOSIT_FUNDS && (
+                          <button 
+                            type="button" 
+                            className="btn btn-success btn-sm w-100 fw-bold"
+                            onClick={() => handleActionConfirm(m.action)}
+                          >
+                            💳 Xác nhận nạp {(m.action.payload?.amount || 50000).toLocaleString()} VNĐ qua PayOS
+                          </button>
+                        )}
+                        {m.action.type !== ACTION_TYPES.DEPOSIT_FUNDS && (
+                          <button 
+                            type="button" 
+                            className="btn btn-primary btn-sm w-100"
+                            onClick={() => handleActionConfirm(m.action)}
+                          >
+                            🚀 Đi tới trang / thực hiện thao tác
+                          </button>
+                        )}
+                      </div>
+                    )}
                     <div className="chat-bubble-meta">
                       {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
