@@ -108,18 +108,18 @@ public class PredictionPayoutService {
             }
         }
 
-        // Calculate WIN odds (Floor limit: 1.05)
-        BigDecimal oddsWin = BigDecimal.valueOf(1.05);
+        // Calculate WIN odds (Floor limit: 1.00)
+        BigDecimal oddsWin = BigDecimal.valueOf(1.00);
         if (totalWinOnWinner.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal computed = netWinPool.divide(totalWinOnWinner, 2, RoundingMode.HALF_UP);
-            if (computed.compareTo(BigDecimal.valueOf(1.05)) > 0) {
+            if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0) {
                 oddsWin = computed;
             }
         }
 
         // Calculate PLACE odds
-        BigDecimal oddsPlaceH1 = BigDecimal.valueOf(1.05);
-        BigDecimal oddsPlaceH2 = BigDecimal.valueOf(1.05);
+        BigDecimal oddsPlaceH1 = BigDecimal.valueOf(1.00);
+        BigDecimal oddsPlaceH2 = BigDecimal.valueOf(1.00);
 
         boolean hasPlaceH1 = totalPlaceOnH1.compareTo(BigDecimal.ZERO) > 0;
         boolean hasPlaceH2 = totalPlaceOnH2.compareTo(BigDecimal.ZERO) > 0;
@@ -129,24 +129,20 @@ public class PredictionPayoutService {
                     netPlacePool.divide(BigDecimal.valueOf(2), 4, RoundingMode.HALF_UP);
             BigDecimal computedH1 = halfPool.divide(totalPlaceOnH1, 2, RoundingMode.HALF_UP);
             BigDecimal computedH2 = halfPool.divide(totalPlaceOnH2, 2, RoundingMode.HALF_UP);
-            if (computedH1.compareTo(BigDecimal.valueOf(1.05)) > 0)
-                oddsPlaceH1 = computedH1;
-            if (computedH2.compareTo(BigDecimal.valueOf(1.05)) > 0)
-                oddsPlaceH2 = computedH2;
+            if (computedH1.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsPlaceH1 = computedH1;
+            if (computedH2.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsPlaceH2 = computedH2;
         } else if (hasPlaceH1) {
             BigDecimal computedH1 = netPlacePool.divide(totalPlaceOnH1, 2, RoundingMode.HALF_UP);
-            if (computedH1.compareTo(BigDecimal.valueOf(1.05)) > 0)
-                oddsPlaceH1 = computedH1;
+            if (computedH1.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsPlaceH1 = computedH1;
         } else if (hasPlaceH2) {
             BigDecimal computedH2 = netPlacePool.divide(totalPlaceOnH2, 2, RoundingMode.HALF_UP);
-            if (computedH2.compareTo(BigDecimal.valueOf(1.05)) > 0)
-                oddsPlaceH2 = computedH2;
+            if (computedH2.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsPlaceH2 = computedH2;
         }
 
         // Calculate SHOW odds
-        BigDecimal oddsShowH1 = BigDecimal.valueOf(1.05);
-        BigDecimal oddsShowH2 = BigDecimal.valueOf(1.05);
-        BigDecimal oddsShowH3 = BigDecimal.valueOf(1.05);
+        BigDecimal oddsShowH1 = BigDecimal.valueOf(1.00);
+        BigDecimal oddsShowH2 = BigDecimal.valueOf(1.00);
+        BigDecimal oddsShowH3 = BigDecimal.valueOf(1.00);
 
         int activeShowCount = 0;
         if (totalShowOnH1.compareTo(BigDecimal.ZERO) > 0)
@@ -161,18 +157,15 @@ public class PredictionPayoutService {
                     RoundingMode.HALF_UP);
             if (totalShowOnH1.compareTo(BigDecimal.ZERO) > 0) {
                 BigDecimal computed = sharePool.divide(totalShowOnH1, 2, RoundingMode.HALF_UP);
-                if (computed.compareTo(BigDecimal.valueOf(1.05)) > 0)
-                    oddsShowH1 = computed;
+                if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsShowH1 = computed;
             }
             if (totalShowOnH2.compareTo(BigDecimal.ZERO) > 0) {
                 BigDecimal computed = sharePool.divide(totalShowOnH2, 2, RoundingMode.HALF_UP);
-                if (computed.compareTo(BigDecimal.valueOf(1.05)) > 0)
-                    oddsShowH2 = computed;
+                if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsShowH2 = computed;
             }
             if (totalShowOnH3.compareTo(BigDecimal.ZERO) > 0) {
                 BigDecimal computed = sharePool.divide(totalShowOnH3, 2, RoundingMode.HALF_UP);
-                if (computed.compareTo(BigDecimal.valueOf(1.05)) > 0)
-                    oddsShowH3 = computed;
+                if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsShowH3 = computed;
             }
         }
 
@@ -182,7 +175,7 @@ public class PredictionPayoutService {
                 String type = bet.getBetType() != null ? bet.getBetType() : "WIN";
                 Integer partId = bet.getParticipant().getId();
                 boolean isWon = false;
-                BigDecimal odds = BigDecimal.valueOf(1.05);
+                BigDecimal odds = BigDecimal.valueOf(1.00);
 
                 if ("WIN".equalsIgnoreCase(type)) {
                     if (partId.equals(rank1Id)) {
