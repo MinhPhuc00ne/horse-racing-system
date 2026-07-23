@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FaRobot, FaTimes, FaTrashAlt, FaPaperPlane, FaPlus, FaHistory, FaCommentAlt, FaImage } from 'react-icons/fa';
 import { BsChatDotsFill } from 'react-icons/bs';
 import { sendChatMessageAPI, getChatHistoryAPI } from '../../../services/aiChat';
+import { executeSafeAction, ACTION_TYPES } from '../../../services/chatActionHandler';
+import { depositAPI } from '../../../services/wallet';
 import { AuthContext } from '../../../contexts/AuthContext';
 import './FloatingAiChat.css';
 import MarkdownRenderer from '../../ui/MarkdownRenderer';
@@ -238,12 +240,29 @@ export default function FloatingAiChat() {
     setIsSending(true);
 
     try {
-      const replyStr = await sendChatMessageAPI(userMessage || '[Image attached]', imagePayload);
-      const aiReplyText = typeof replyStr === 'string' 
-        ? replyStr 
-        : (replyStr.text || replyStr.response || replyStr.message || JSON.stringify(replyStr));
+      const replyObj = await sendChatMessageAPI(userMessage || '[Image attached]', imagePayload);
+      let aiReplyText = '';
+      let actionObj = null;
 
-      const newAiMsg = { sender: 'AI', text: aiReplyText };
+      if (typeof replyObj === 'object' && replyObj !== null) {
+        aiReplyText = replyObj.text || replyObj.message || JSON.stringify(replyObj);
+        actionObj = replyObj.action || null;
+      } else if (typeof replyObj === 'string') {
+        try {
+          const parsed = JSON.parse(replyObj);
+          aiReplyText = parsed.text || replyObj;
+          actionObj = parsed.action || null;
+        } catch (e) {
+          aiReplyText = replyObj;
+        }
+      }
+
+      // Automatically execute safe actions (navigation, form prefilling)
+      if (actionObj) {
+        executeSafeAction(actionObj, navigate);
+      }
+
+      const newAiMsg = { sender: 'AI', text: aiReplyText, action: actionObj };
       const finalMessages = [...updatedMessages, newAiMsg];
 
       const finalThreads = threads.map(t => {
@@ -255,7 +274,7 @@ export default function FloatingAiChat() {
       setThreads(finalThreads);
       localStorage.setItem(storageKey, JSON.stringify(finalThreads));
     } catch (error) {
-      const newAiErrorMsg = { sender: 'AI', text: 'Sorry, an error occurred while connecting to the AI. Please try again later.' };
+      const newAiErrorMsg = { sender: 'AI', text: 'Xin lỗi, đã xảy ra lỗi khi kết nối tới AI. Vui lòng thử lại sau.' };
       const finalMessages = [...updatedMessages, newAiErrorMsg];
       const finalThreads = threads.map(t => {
         if (t.id === activeThreadId) {
@@ -267,6 +286,26 @@ export default function FloatingAiChat() {
       localStorage.setItem(storageKey, JSON.stringify(finalThreads));
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleActionConfirm = async (action) => {
+    if (!action || !action.type) return;
+
+    if (action.type === ACTION_TYPES.DEPOSIT_FUNDS) {
+      const amount = action.payload?.amount || 50000;
+      try {
+        const res = await depositAPI(amount);
+        if (res?.checkoutUrl) {
+          window.location.href = res.checkoutUrl;
+        } else {
+          alert(`Đã khởi tạo đơn nạp ${amount.toLocaleString()} VNĐ qua PayOS thành công!`);
+        }
+      } catch (err) {
+        alert('Lỗi tạo đơn nạp tiền: ' + (err.message || 'Thất bại'));
+      }
+    } else {
+      executeSafeAction(action, navigate);
     }
   };
 
@@ -367,6 +406,48 @@ export default function FloatingAiChat() {
                         )}
                         {msg.image && (
                           <img src={msg.image} alt="Sent attachment" className="chat-bubble-image" />
+                        )}
+                        {msg.action && (
+                          <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                            {msg.action.type === ACTION_TYPES.DEPOSIT_FUNDS && (
+                              <button 
+                                type="button" 
+                                style={{
+                                  width: '100%',
+                                  padding: '8px 12px',
+                                  backgroundColor: '#10b981',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  fontWeight: 'bold',
+                                  cursor: 'pointer',
+                                  fontSize: '12px'
+                                }}
+                                onClick={() => handleActionConfirm(msg.action)}
+                              >
+                                💳 Xác nhận nạp {(msg.action.payload?.amount || 50000).toLocaleString()} VNĐ qua PayOS
+                              </button>
+                            )}
+                            {msg.action.type !== ACTION_TYPES.DEPOSIT_FUNDS && (
+                              <button 
+                                type="button" 
+                                style={{
+                                  width: '100%',
+                                  padding: '6px 12px',
+                                  backgroundColor: '#3b82f6',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  fontWeight: '500',
+                                  cursor: 'pointer',
+                                  fontSize: '12px'
+                                }}
+                                onClick={() => handleActionConfirm(msg.action)}
+                              >
+                                🚀 Đi tới trang / thực hiện thao tác
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
