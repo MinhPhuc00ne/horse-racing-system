@@ -11,6 +11,7 @@ import LiveSimulation from '../../components/RaceReferee/LiveSimulation';
 import Violations from '../../components/RaceReferee/Violations';
 import AssignedTournaments from './AssignedTournaments';
 import ConfirmResults from '../../components/RaceReferee/ConfirmResults';
+import RefereeProfileContent from '../../components/RaceReferee/RefereeProfileContent';
 
 const refereeNavLinks = [
   { path: '/referee/home', label: 'Home', icon: 'home' },
@@ -33,6 +34,7 @@ export default function RefereePage() {
         <Route path="live simulation" element={<LiveSimulation />} />
         <Route path="confirm-results" element={<ConfirmResults />} />
         <Route path="violations" element={<Violations />} />
+        <Route path="profile" element={<RefereeProfileContent />} />
       </Routes>
     </DashboardLayout>
   );

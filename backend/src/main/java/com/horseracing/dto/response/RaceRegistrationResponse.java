@@ -38,29 +38,32 @@ public class RaceRegistrationResponse {
     private BigDecimal totalPrize;
 
     public static RaceRegistrationResponse fromEntity(RaceRegistration rr) {
-        if (rr == null) return null;
-        return RaceRegistrationResponse.builder()
-                .id(rr.getId())
-                .raceId(rr.getRace().getId())
-                .raceName(rr.getRace().getRaceName())
-                .horseId(rr.getHorse().getId())
-                .horseName(rr.getHorse().getName())
-                .jockeyId(rr.getJockey().getId())
-                .jockeyName(rr.getJockey().getUser().getFullName())
-                .ownerId(rr.getOwner().getId())
-                .ownerName(rr.getOwner().getUser().getFullName())
-                .status(rr.getStatus())
+        if (rr == null)
+            return null;
+        return RaceRegistrationResponse.builder().id(rr.getId()).raceId(rr.getRace().getId())
+                .raceName(rr.getRace().getRaceName()).horseId(rr.getHorse().getId())
+                .horseName(rr.getHorse().getName()).jockeyId(rr.getJockey().getId())
+                .jockeyName(rr.getJockey().getUser().getFullName()).ownerId(rr.getOwner().getId())
+                .ownerName(rr.getOwner().getUser().getFullName()).status(rr.getStatus())
                 .ownerSharePercent(rr.getOwnerSharePercent())
-                .jockeySharePercent(rr.getJockeySharePercent())
-                .createdAt(rr.getCreatedAt())
-                .tournamentName(rr.getRace().getTournament() != null ? rr.getRace().getTournament().getTournamentName() : null)
+                .jockeySharePercent(rr.getJockeySharePercent()).createdAt(rr.getCreatedAt())
+                .tournamentName(rr.getRace().getTournament() != null
+                        ? rr.getRace().getTournament().getTournamentName()
+                        : null)
                 .stableName(rr.getOwner() != null ? rr.getOwner().getStableName() : null)
-                .horseBreed(rr.getHorse() != null && rr.getHorse().getBreed() != null ? rr.getHorse().getBreed().getBreedName() : null)
+                .horseBreed(rr.getHorse() != null && rr.getHorse().getBreed() != null
+                        ? rr.getHorse().getBreed().getBreedName()
+                        : null)
                 .raceDate(rr.getRace() != null ? rr.getRace().getRaceDate() : null)
                 .startTime(rr.getRace() != null ? rr.getRace().getStartTime() : null)
-                .location(rr.getRace() != null && rr.getRace().getRaceTrack() != null ? rr.getRace().getRaceTrack().getName() : 
-                          (rr.getRace() != null && rr.getRace().getTournament() != null ? rr.getRace().getTournament().getLocation() : null))
-                .totalPrize(rr.getRace() != null && rr.getRace().getTournament() != null ? rr.getRace().getTournament().getTotalPrize() : null)
+                .location(rr.getRace() != null && rr.getRace().getRaceTrack() != null
+                        ? rr.getRace().getRaceTrack().getName()
+                        : (rr.getRace() != null && rr.getRace().getTournament() != null
+                                ? rr.getRace().getTournament().getLocation()
+                                : null))
+                .totalPrize(rr.getRace() != null && rr.getRace().getTournament() != null
+                        ? rr.getRace().getTournament().getTotalPrize()
+                        : null)
                 .build();
     }
 }

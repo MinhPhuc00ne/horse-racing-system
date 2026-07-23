@@ -27,7 +27,8 @@ public class NotificationController {
     public ResponseEntity<?> getMyNotifications(Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            List<NotificationResponse> response = notificationService.getMyNotifications(userDetails.getUsername());
+            List<NotificationResponse> response =
+                    notificationService.getMyNotifications(userDetails.getUsername());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -38,7 +39,8 @@ public class NotificationController {
     public ResponseEntity<?> markAsRead(@PathVariable Integer id, Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            NotificationResponse response = notificationService.markAsRead(userDetails.getUsername(), id);
+            NotificationResponse response =
+                    notificationService.markAsRead(userDetails.getUsername(), id);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -50,7 +52,8 @@ public class NotificationController {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             notificationService.markAllAsRead(userDetails.getUsername());
-            return ResponseEntity.ok(new MessageResponse("All notifications marked as read successfully"));
+            return ResponseEntity
+                    .ok(new MessageResponse("All notifications marked as read successfully"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
         }
@@ -76,12 +79,9 @@ public class NotificationController {
     @PostMapping
     public ResponseEntity<?> sendManualNotification(@RequestBody SendNotificationRequest request) {
         try {
-            Notification notification = notificationService.sendNotification(
-                    request.getRecipientId(),
-                    request.getTitle(),
-                    request.getContent(),
-                    request.getType()
-            );
+            Notification notification =
+                    notificationService.sendNotification(request.getRecipientId(),
+                            request.getTitle(), request.getContent(), request.getType());
             return ResponseEntity.ok(NotificationResponse.fromEntity(notification));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));

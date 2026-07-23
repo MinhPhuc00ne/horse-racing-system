@@ -11,7 +11,7 @@ import java.util.List;
 public class UpgradeRequestSubmit {
     @NotNull(message = "Requested role is required")
     private Role requestedRole;
-    
+
     private String notes;
 
     private String fullName;
@@ -35,4 +35,3 @@ public class UpgradeRequestSubmit {
     // Documents
     private List<String> documentUrls;
 }
-

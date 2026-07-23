@@ -62,78 +62,77 @@ public class UpgradeRequestService {
         if (requestDto.getPhoneNumber() == null || requestDto.getPhoneNumber().trim().isEmpty()) {
             throw new RuntimeException("Phone number is required");
         }
-        if (requestDto.getIdentityNumber() == null || requestDto.getIdentityNumber().trim().isEmpty()) {
+        if (requestDto.getIdentityNumber() == null
+                || requestDto.getIdentityNumber().trim().isEmpty()) {
             throw new RuntimeException("Identity card / Passport number is required");
         }
 
         // Role-specific validation
         switch (role) {
             case JOCKEY -> {
-                if (requestDto.getWeight() == null || requestDto.getWeight() < 40 || requestDto.getWeight() > 80) {
+                if (requestDto.getWeight() == null || requestDto.getWeight() < 40
+                        || requestDto.getWeight() > 80) {
                     throw new RuntimeException("Jockey weight must be between 40 and 80 kg");
                 }
                 if (requestDto.getHeight() == null || requestDto.getHeight() <= 0) {
                     throw new RuntimeException("Jockey height must be a positive number");
                 }
-                if (requestDto.getLicenseNumber() == null || requestDto.getLicenseNumber().trim().isEmpty()) {
+                if (requestDto.getLicenseNumber() == null
+                        || requestDto.getLicenseNumber().trim().isEmpty()) {
                     throw new RuntimeException("Jockey license number is required");
                 }
             }
             case HORSE_OWNER -> {
-                if (requestDto.getStableName() == null || requestDto.getStableName().trim().isEmpty()) {
+                if (requestDto.getStableName() == null
+                        || requestDto.getStableName().trim().isEmpty()) {
                     throw new RuntimeException("Stable name is required");
                 }
-                if (requestDto.getStableAddress() == null || requestDto.getStableAddress().trim().isEmpty()) {
+                if (requestDto.getStableAddress() == null
+                        || requestDto.getStableAddress().trim().isEmpty()) {
                     throw new RuntimeException("Stable address is required");
                 }
             }
             case RACE_REFEREE -> {
-                if (requestDto.getCertificationNumber() == null || requestDto.getCertificationNumber().trim().isEmpty()) {
+                if (requestDto.getCertificationNumber() == null
+                        || requestDto.getCertificationNumber().trim().isEmpty()) {
                     throw new RuntimeException("Referee certification number is required");
                 }
-                if (requestDto.getExperienceYears() == null || requestDto.getExperienceYears() < 0) {
-                    throw new RuntimeException("Referee experience years must be a positive number");
+                if (requestDto.getExperienceYears() == null
+                        || requestDto.getExperienceYears() < 0) {
+                    throw new RuntimeException(
+                            "Referee experience years must be a positive number");
                 }
             }
             default -> {
             }
         }
 
-        java.util.List<String> documentUrls = requestDto.getDocumentUrls() != null ? 
-                requestDto.getDocumentUrls() : new java.util.ArrayList<>();
+        java.util.List<String> documentUrls =
+                requestDto.getDocumentUrls() != null ? requestDto.getDocumentUrls()
+                        : new java.util.ArrayList<>();
 
-        UpgradeRequest upgradeRequest = UpgradeRequest.builder()
-                .user(user)
-                .requestedRole(role)
-                .notes(requestDto.getNotes())
-                .status(RequestStatus.PENDING)
-                .fullName(requestDto.getFullName())
-                .dateOfBirth(requestDto.getDateOfBirth())
+        UpgradeRequest upgradeRequest = UpgradeRequest.builder().user(user).requestedRole(role)
+                .notes(requestDto.getNotes()).status(RequestStatus.PENDING)
+                .fullName(requestDto.getFullName()).dateOfBirth(requestDto.getDateOfBirth())
                 .phoneNumber(requestDto.getPhoneNumber())
-                .identityNumber(requestDto.getIdentityNumber())
-                .weight(requestDto.getWeight())
-                .height(requestDto.getHeight())
-                .licenseNumber(requestDto.getLicenseNumber())
-                .stableName(requestDto.getStableName())
-                .stableAddress(requestDto.getStableAddress())
+                .identityNumber(requestDto.getIdentityNumber()).weight(requestDto.getWeight())
+                .height(requestDto.getHeight()).licenseNumber(requestDto.getLicenseNumber())
+                .stableName(requestDto.getStableName()).stableAddress(requestDto.getStableAddress())
                 .certificationNumber(requestDto.getCertificationNumber())
-                .experienceYears(requestDto.getExperienceYears())
-                .documentUrls(documentUrls)
+                .experienceYears(requestDto.getExperienceYears()).documentUrls(documentUrls)
                 .build();
 
         upgradeRequest = upgradeRequestRepository.save(upgradeRequest);
 
         // Notify admins
-        List<User> admins = userRepository.findAll().stream()
-                .filter(u -> u.getRole() == Role.ADMIN)
+        List<User> admins = userRepository.findAll().stream().filter(u -> u.getRole() == Role.ADMIN)
                 .collect(Collectors.toList());
         for (User admin : admins) {
-            notificationService.sendNotification(
-                    admin,
-                    "New Account Upgrade Request",
-                    "User " + user.getFullName() + " has requested an account upgrade to " + role + ". Please review in the admin panel.",
-                    NotificationType.ROLE_UPGRADE
-            );
+            notificationService
+                    .sendNotification(admin, "New Account Upgrade Request",
+                            "User " + user.getFullName() + " has requested an account upgrade to "
+                                    + role + ". Please review in the admin panel.",
+                            NotificationType.ROLE_UPGRADE);
         }
 
         return UpgradeRequestResponse.fromEntity(upgradeRequest);
@@ -145,8 +144,7 @@ public class UpgradeRequestService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return upgradeRequestRepository.findByUserOrderByCreatedAtDesc(user).stream()
-                .map(UpgradeRequestResponse::fromEntity)
-                .collect(Collectors.toList());
+                .map(UpgradeRequestResponse::fromEntity).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -157,8 +155,7 @@ public class UpgradeRequestService {
         } else {
             requests = upgradeRequestRepository.findAll();
         }
-        return requests.stream()
-                .map(UpgradeRequestResponse::fromEntity)
+        return requests.stream().map(UpgradeRequestResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -175,33 +172,26 @@ public class UpgradeRequestService {
         User user = request.getUser();
         user.setRole(request.getRequestedRole());
         user.setPhone(request.getPhoneNumber());
-        
+
         userRepository.save(user);
 
         // Auto-create profiles (check for duplicates first)
         if (request.getRequestedRole() == Role.HORSE_OWNER) {
             if (horseOwnerProfileRepository.findByUserEmail(user.getEmail()).isEmpty()) {
-                HorseOwnerProfile ownerProfile = HorseOwnerProfile.builder()
-                        .user(user)
+                HorseOwnerProfile ownerProfile = HorseOwnerProfile.builder().user(user)
                         .stableName(request.getStableName())
-                        .stableAddress(request.getStableAddress())
-                        .phone(request.getPhoneNumber())
+                        .stableAddress(request.getStableAddress()).phone(request.getPhoneNumber())
                         .identityNumber(request.getIdentityNumber())
-                        .dateOfBirth(request.getDateOfBirth())
-                        .reputationStars(5.0)
-                        .approvalStatus("APPROVED")
-                        .build();
+                        .dateOfBirth(request.getDateOfBirth()).reputationStars(5.0)
+                        .approvalStatus("APPROVED").build();
                 horseOwnerProfileRepository.save(ownerProfile);
             }
         } else if (request.getRequestedRole() == Role.JOCKEY) {
             if (jockeyProfileRepository.findByUserEmail(user.getEmail()).isEmpty()) {
-                JockeyProfile jockeyProfile = JockeyProfile.builder()
-                        .user(user)
-                        .height(request.getHeight())
-                        .weight(request.getWeight())
+                JockeyProfile jockeyProfile = JockeyProfile.builder().user(user)
+                        .height(request.getHeight()).weight(request.getWeight())
                         .licenseNumber(request.getLicenseNumber())
-                        .experienceYear(request.getExperienceYears())
-                        .approvalStatus("APPROVED")
+                        .experienceYear(request.getExperienceYears()).approvalStatus("APPROVED")
                         .build();
                 jockeyProfileRepository.save(jockeyProfile);
             }
@@ -209,12 +199,10 @@ public class UpgradeRequestService {
 
         upgradeRequestRepository.save(request);
 
-        notificationService.sendNotification(
-                user,
-                "Account Upgrade Successful",
-                "Congratulations! Your account upgrade request to " + request.getRequestedRole() + " has been approved by the Administration. Please log in again to experience the new interface.",
-                NotificationType.ROLE_UPGRADE
-        );
+        notificationService.sendNotification(user, "Account Upgrade Successful",
+                "Congratulations! Your account upgrade request to " + request.getRequestedRole()
+                        + " has been approved by the Administration. Please log in again to experience the new interface.",
+                NotificationType.ROLE_UPGRADE);
 
         return UpgradeRequestResponse.fromEntity(request);
     }
@@ -233,12 +221,10 @@ public class UpgradeRequestService {
 
         upgradeRequestRepository.save(request);
 
-        notificationService.sendNotification(
-                request.getUser(),
-                "Account Upgrade Request Rejected",
-                "Your account upgrade request has been rejected. Reason: " + rejectDto.getRejectionReason(),
-                NotificationType.ROLE_UPGRADE
-        );
+        notificationService.sendNotification(request.getUser(), "Account Upgrade Request Rejected",
+                "Your account upgrade request has been rejected. Reason: "
+                        + rejectDto.getRejectionReason(),
+                NotificationType.ROLE_UPGRADE);
 
         return UpgradeRequestResponse.fromEntity(request);
     }

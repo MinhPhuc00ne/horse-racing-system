@@ -27,12 +27,12 @@ public class UpgradeRequestController {
      */
     @PostMapping
     @PreAuthorize("hasRole('SPECTATOR')")
-    public ResponseEntity<?> submitRequest(
-            @Valid @RequestBody UpgradeRequestSubmit requestDto,
+    public ResponseEntity<?> submitRequest(@Valid @RequestBody UpgradeRequestSubmit requestDto,
             Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            UpgradeRequestResponse response = upgradeRequestService.submitRequest(userDetails.getUsername(), requestDto);
+            UpgradeRequestResponse response =
+                    upgradeRequestService.submitRequest(userDetails.getUsername(), requestDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -46,7 +46,8 @@ public class UpgradeRequestController {
     public ResponseEntity<?> getUserRequests(Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            List<UpgradeRequestResponse> response = upgradeRequestService.getUserRequests(userDetails.getUsername());
+            List<UpgradeRequestResponse> response =
+                    upgradeRequestService.getUserRequests(userDetails.getUsername());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));

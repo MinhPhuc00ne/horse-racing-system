@@ -15,7 +15,7 @@ public class JockeyProfileResponse {
     private String email;
     private String phone;
     private String avatarUrl;
-    
+
     private Double height;
     private Double weight;
     private Double winRate;
@@ -24,6 +24,6 @@ public class JockeyProfileResponse {
     private String licenseNumber;
     private String bankAccount;
     private String approvalStatus;
-    
+
     private List<String> documentUrls;
 }

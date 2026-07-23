@@ -48,6 +48,9 @@ export default function PaymentCallback() {
           } else if (user.role === 'JOCKEY') {
             navigate('/jockey/profile', { replace: true });
             return;
+          } else if (user.role === 'RACE_REFEREE') {
+            navigate('/referee/profile', { replace: true });
+            return;
           }
         } catch (e) {
           console.error(e);

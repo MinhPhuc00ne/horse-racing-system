@@ -29,7 +29,8 @@ public class BetController {
     }
 
     @PostMapping
-    public ResponseEntity<BetResponse> placeBet(@Valid @RequestBody PlaceBetRequest request, Authentication authentication) {
+    public ResponseEntity<BetResponse> placeBet(@Valid @RequestBody PlaceBetRequest request,
+            Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
         BetResponse response = betService.placeBet(user, request);
         return ResponseEntity.ok(response);

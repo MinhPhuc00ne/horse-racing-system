@@ -25,7 +25,8 @@ public class PredictionPayoutService {
     private final UserRepository userRepository;
 
     /**
-     * Calculates and distributes payouts for a race using the Pari-Mutuel Option 1: Split-Pools system.
+     * Calculates and distributes payouts for a race using the Pari-Mutuel Option 1: Split-Pools
+     * system.
      *
      * @param raceId the ID of the race
      * @param participants the list of race participants containing their final rank
@@ -35,7 +36,7 @@ public class PredictionPayoutService {
     public void processPayouts(Integer raceId, List<RaceParticipant> participants, Race race) {
         log.info("Starting Pari-Mutuel prediction payout processing for race ID: {}", raceId);
         List<Bet> bets = betRepository.findByRaceId(raceId);
-        
+
         BigDecimal totalWinPool = BigDecimal.ZERO;
         BigDecimal totalPlacePool = BigDecimal.ZERO;
         BigDecimal totalShowPool = BigDecimal.ZERO;
@@ -124,7 +125,8 @@ public class PredictionPayoutService {
         boolean hasPlaceH2 = totalPlaceOnH2.compareTo(BigDecimal.ZERO) > 0;
 
         if (hasPlaceH1 && hasPlaceH2) {
-            BigDecimal halfPool = netPlacePool.divide(BigDecimal.valueOf(2), 4, RoundingMode.HALF_UP);
+            BigDecimal halfPool =
+                    netPlacePool.divide(BigDecimal.valueOf(2), 4, RoundingMode.HALF_UP);
             BigDecimal computedH1 = halfPool.divide(totalPlaceOnH1, 2, RoundingMode.HALF_UP);
             BigDecimal computedH2 = halfPool.divide(totalPlaceOnH2, 2, RoundingMode.HALF_UP);
             if (computedH1.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsPlaceH1 = computedH1;
@@ -143,12 +145,16 @@ public class PredictionPayoutService {
         BigDecimal oddsShowH3 = BigDecimal.valueOf(1.00);
 
         int activeShowCount = 0;
-        if (totalShowOnH1.compareTo(BigDecimal.ZERO) > 0) activeShowCount++;
-        if (totalShowOnH2.compareTo(BigDecimal.ZERO) > 0) activeShowCount++;
-        if (totalShowOnH3.compareTo(BigDecimal.ZERO) > 0) activeShowCount++;
+        if (totalShowOnH1.compareTo(BigDecimal.ZERO) > 0)
+            activeShowCount++;
+        if (totalShowOnH2.compareTo(BigDecimal.ZERO) > 0)
+            activeShowCount++;
+        if (totalShowOnH3.compareTo(BigDecimal.ZERO) > 0)
+            activeShowCount++;
 
         if (activeShowCount > 0) {
-            BigDecimal sharePool = netShowPool.divide(BigDecimal.valueOf(activeShowCount), 4, RoundingMode.HALF_UP);
+            BigDecimal sharePool = netShowPool.divide(BigDecimal.valueOf(activeShowCount), 4,
+                    RoundingMode.HALF_UP);
             if (totalShowOnH1.compareTo(BigDecimal.ZERO) > 0) {
                 BigDecimal computed = sharePool.divide(totalShowOnH1, 2, RoundingMode.HALF_UP);
                 if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsShowH1 = computed;
@@ -204,41 +210,39 @@ public class PredictionPayoutService {
                     bet.setPayoutAmount(payout);
                     betRepository.save(bet);
 
-                    Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
+                    Wallet wallet = walletRepository.findByUserIdWithLock(bet.getUser().getId())
                             .orElseGet(() -> {
-                                Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
+                                Wallet w = Wallet.builder().user(bet.getUser())
+                                        .balance(BigDecimal.ZERO).build();
                                 return walletRepository.save(w);
                             });
                     wallet.setBalance(wallet.getBalance().add(payout));
                     walletRepository.save(wallet);
 
-                    WalletTransaction transaction = WalletTransaction.builder()
-                            .wallet(wallet)
-                            .transactionType("PRIZE")
-                            .amount(payout)
-                            .status("SUCCESS")
-                            .referenceType("BET")
-                            .referenceId(bet.getId())
-                            .build();
+                    WalletTransaction transaction = WalletTransaction.builder().wallet(wallet)
+                            .transactionType("PRIZE").amount(payout).status("SUCCESS")
+                            .referenceType("BET").referenceId(bet.getId()).build();
                     walletTransactionRepository.save(transaction);
 
-                    notificationService.sendNotification(
-                            bet.getUser(),
+                    notificationService.sendNotification(bet.getUser(),
                             "Race Bet Won - Congratulations!",
-                            "Congratulations! You won your bet (" + type + ") in race " + race.getRaceName() + " with payout amount " + payout + " VND (based on odds " + odds + "). The amount has been credited to your wallet.",
-                            NotificationType.WALLET
-                    );
+                            "Congratulations! You won your bet (" + type + ") in race "
+                                    + race.getRaceName() + " with payout amount " + payout
+                                    + " VND (based on odds " + odds
+                                    + "). The amount has been credited to your wallet.",
+                            NotificationType.WALLET);
                 } else {
                     bet.setStatus("LOST");
                     bet.setPayoutAmount(BigDecimal.ZERO);
                     betRepository.save(bet);
 
-                    notificationService.sendNotification(
-                            bet.getUser(),
-                            "Race Bet Result",
-                            "Race result for " + race.getRaceName() + " has been confirmed by the Referee. Unfortunately, your bet (" + type + ") on horse " + bet.getParticipant().getHorse().getName() + " did not win. Better luck next time!",
-                            NotificationType.RACE_STATUS
-                    );
+                    notificationService.sendNotification(bet.getUser(), "Race Bet Result",
+                            "Race result for " + race.getRaceName()
+                                    + " has been confirmed by the Referee. Unfortunately, your bet ("
+                                    + type + ") on horse "
+                                    + bet.getParticipant().getHorse().getName()
+                                    + " did not win. Better luck next time!",
+                            NotificationType.RACE_STATUS);
                 }
             }
         }
@@ -248,7 +252,8 @@ public class PredictionPayoutService {
         BigDecimal totalPayout = BigDecimal.ZERO;
         for (Bet bet : bets) {
             if ("WON".equals(bet.getStatus())) {
-                totalPayout = totalPayout.add(bet.getPayoutAmount() != null ? bet.getPayoutAmount() : BigDecimal.ZERO);
+                totalPayout = totalPayout.add(
+                        bet.getPayoutAmount() != null ? bet.getPayoutAmount() : BigDecimal.ZERO);
             }
         }
 
@@ -256,68 +261,60 @@ public class PredictionPayoutService {
         if (adminBetRevenue.compareTo(BigDecimal.ZERO) > 0) {
             User admin = userRepository.findByRole(Role.ADMIN).stream().findFirst().orElse(null);
             if (admin != null) {
-                Wallet adminWallet = walletRepository.findByUserId(admin.getId())
-                        .orElseGet(() -> {
-                            Wallet w = Wallet.builder().user(admin).balance(BigDecimal.ZERO).build();
+                Wallet adminWallet =
+                        walletRepository.findByUserIdWithLock(admin.getId()).orElseGet(() -> {
+                            Wallet w =
+                                    Wallet.builder().user(admin).balance(BigDecimal.ZERO).build();
                             return walletRepository.save(w);
                         });
                 adminWallet.setBalance(adminWallet.getBalance().add(adminBetRevenue));
                 walletRepository.save(adminWallet);
 
-                WalletTransaction adminTx = WalletTransaction.builder()
-                        .wallet(adminWallet)
-                        .transactionType("ADMIN_REVENUE")
-                        .amount(adminBetRevenue)
-                        .status("SUCCESS")
-                        .referenceType("RACE")
-                        .referenceId(raceId)
-                        .build();
+                WalletTransaction adminTx = WalletTransaction.builder().wallet(adminWallet)
+                        .transactionType("ADMIN_REVENUE").amount(adminBetRevenue).status("SUCCESS")
+                        .referenceType("RACE").referenceId(raceId).build();
                 walletTransactionRepository.save(adminTx);
             }
         }
     }
 
     /**
-     * Refunds all pending bets for a specific race participant (e.g. if rejected or disqualified before race starts).
+     * Refunds all pending bets for a specific race participant (e.g. if rejected or disqualified
+     * before race starts).
      *
      * @param participant the race participant to refund bets for
      * @param reason the reason for rejection/disqualification
      * @param notificationMessage custom notification message to display to the user
      */
     @Transactional
-    public void refundBetsForParticipant(RaceParticipant participant, String reason, String notificationMessage) {
-        log.info("Refunding pending bets for participant ID: {}, horse: {}", participant.getId(), participant.getHorse().getName());
+    public void refundBetsForParticipant(RaceParticipant participant, String reason,
+            String notificationMessage) {
+        log.info("Refunding pending bets for participant ID: {}, horse: {}", participant.getId(),
+                participant.getHorse().getName());
         List<Bet> bets = betRepository.findByParticipantIdAndStatus(participant.getId(), "PENDING");
         for (Bet bet : bets) {
             bet.setStatus("REFUNDED");
             bet.setPayoutAmount(BigDecimal.ZERO);
             betRepository.save(bet);
 
-            Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
-                    .orElseGet(() -> {
-                        Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
+            Wallet wallet =
+                    walletRepository.findByUserIdWithLock(bet.getUser().getId()).orElseGet(() -> {
+                        Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO)
+                                .build();
                         return walletRepository.save(w);
                     });
 
             wallet.setBalance(wallet.getBalance().add(bet.getAmount()));
             walletRepository.save(wallet);
 
-            WalletTransaction transaction = WalletTransaction.builder()
-                    .wallet(wallet)
-                    .transactionType("REFUND")
-                    .amount(bet.getAmount())
-                    .status("SUCCESS")
-                    .referenceType("BET")
-                    .referenceId(bet.getId())
-                    .build();
+            WalletTransaction transaction = WalletTransaction.builder().wallet(wallet)
+                    .transactionType("REFUND").amount(bet.getAmount()).status("SUCCESS")
+                    .referenceType("BET").referenceId(bet.getId()).build();
             walletTransactionRepository.save(transaction);
 
-            notificationService.sendNotification(
-                    bet.getUser(),
-                    "Race Bet Refunded",
+            notificationService.sendNotification(bet.getUser(), "Race Bet Refunded",
                     notificationMessage.replace("{amount}", bet.getAmount().toString()),
-                    NotificationType.WALLET
-            );
+                    NotificationType.WALLET);
         }
     }
 
@@ -336,30 +333,25 @@ public class PredictionPayoutService {
                 bet.setPayoutAmount(BigDecimal.ZERO);
                 betRepository.save(bet);
 
-                Wallet wallet = walletRepository.findByUserId(bet.getUser().getId())
+                Wallet wallet = walletRepository.findByUserIdWithLock(bet.getUser().getId())
                         .orElseGet(() -> {
-                            Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO).build();
+                            Wallet w = Wallet.builder().user(bet.getUser()).balance(BigDecimal.ZERO)
+                                    .build();
                             return walletRepository.save(w);
                         });
                 wallet.setBalance(wallet.getBalance().add(bet.getAmount()));
                 walletRepository.save(wallet);
 
-                WalletTransaction transaction = WalletTransaction.builder()
-                        .wallet(wallet)
-                        .transactionType("REFUND")
-                        .amount(bet.getAmount())
-                        .status("SUCCESS")
-                        .referenceType("BET")
-                        .referenceId(bet.getId())
-                        .build();
+                WalletTransaction transaction = WalletTransaction.builder().wallet(wallet)
+                        .transactionType("REFUND").amount(bet.getAmount()).status("SUCCESS")
+                        .referenceType("BET").referenceId(bet.getId()).build();
                 walletTransactionRepository.save(transaction);
 
-                notificationService.sendNotification(
-                        bet.getUser(),
-                        "Race Bet Refunded",
-                        "Race " + race.getRaceName() + " was cancelled. The system refunded 100% of your bet (" + bet.getAmount() + " VND) to your wallet.",
-                        NotificationType.WALLET
-                );
+                notificationService.sendNotification(bet.getUser(), "Race Bet Refunded",
+                        "Race " + race.getRaceName()
+                                + " was cancelled. The system refunded 100% of your bet ("
+                                + bet.getAmount() + " VND) to your wallet.",
+                        NotificationType.WALLET);
             }
         }
     }

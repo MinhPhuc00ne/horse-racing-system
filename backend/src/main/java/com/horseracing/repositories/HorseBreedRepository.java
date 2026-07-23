@@ -9,5 +9,6 @@ import java.util.List;
 
 public interface HorseBreedRepository extends JpaRepository<HorseBreed, Integer> {
     Optional<HorseBreed> findByBreedName(String breedName);
+
     List<HorseBreed> findByIsOfficial(Boolean isOfficial);
 }

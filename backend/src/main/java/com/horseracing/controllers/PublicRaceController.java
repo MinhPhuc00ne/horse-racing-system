@@ -29,9 +29,11 @@ public class PublicRaceController {
     private final UserRepository userRepository;
 
     @GetMapping("/tournaments")
-    public ResponseEntity<List<TournamentResponse>> getAllTournaments(Authentication authentication) {
+    public ResponseEntity<List<TournamentResponse>> getAllTournaments(
+            Authentication authentication) {
         User user = null;
-        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof UserDetails userDetails) {
+        if (authentication != null && authentication.isAuthenticated()
+                && authentication.getPrincipal() instanceof UserDetails userDetails) {
             user = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
         }
         return ResponseEntity.ok(tournamentService.getAllTournaments(user));
@@ -65,8 +67,7 @@ public class PublicRaceController {
     @GetMapping("/races/{id}/participants")
     public ResponseEntity<List<ParticipantResponse>> getRaceParticipants(@PathVariable Integer id) {
         List<ParticipantResponse> participants = raceParticipantRepository.findByRaceId(id).stream()
-                .map(ParticipantResponse::fromEntity)
-                .collect(Collectors.toList());
+                .map(ParticipantResponse::fromEntity).collect(Collectors.toList());
         return ResponseEntity.ok(participants);
     }
 

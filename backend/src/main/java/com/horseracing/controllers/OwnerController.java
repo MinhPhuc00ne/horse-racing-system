@@ -27,7 +27,8 @@ public class OwnerController {
     private final RaceRegistrationService raceRegistrationService;
 
     @PostMapping("/horses")
-    public ResponseEntity<?> createHorse(@Valid @RequestBody CreateHorseRequest request, Authentication authentication) {
+    public ResponseEntity<?> createHorse(@Valid @RequestBody CreateHorseRequest request,
+            Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             HorseResponse response = horseService.createHorse(userDetails.getUsername(), request);
@@ -49,10 +50,13 @@ public class OwnerController {
     }
 
     @PutMapping("/horses/{id}")
-    public ResponseEntity<?> updateHorse(@PathVariable Integer id, @Valid @RequestBody com.horseracing.dto.request.UpdateHorseRequest request, Authentication authentication) {
+    public ResponseEntity<?> updateHorse(@PathVariable Integer id,
+            @Valid @RequestBody com.horseracing.dto.request.UpdateHorseRequest request,
+            Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            HorseResponse response = horseService.updateHorse(userDetails.getUsername(), id, request);
+            HorseResponse response =
+                    horseService.updateHorse(userDetails.getUsername(), id, request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -71,10 +75,12 @@ public class OwnerController {
     }
 
     @PostMapping("/race-registrations")
-    public ResponseEntity<?> submitRegistration(@Valid @RequestBody RegisterRaceRequest request, Authentication authentication) {
+    public ResponseEntity<?> submitRegistration(@Valid @RequestBody RegisterRaceRequest request,
+            Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            RaceRegistrationResponse response = raceRegistrationService.submitRegistration(userDetails.getUsername(), request);
+            RaceRegistrationResponse response =
+                    raceRegistrationService.submitRegistration(userDetails.getUsername(), request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -85,7 +91,8 @@ public class OwnerController {
     public ResponseEntity<?> getMyRegistrations(Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            List<RaceRegistrationResponse> response = raceRegistrationService.getRegistrationsByOwner(userDetails.getUsername());
+            List<RaceRegistrationResponse> response =
+                    raceRegistrationService.getRegistrationsByOwner(userDetails.getUsername());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -93,10 +100,12 @@ public class OwnerController {
     }
 
     @PutMapping("/race-registrations/{id}/cancel")
-    public ResponseEntity<?> cancelRegistration(@PathVariable Integer id, Authentication authentication) {
+    public ResponseEntity<?> cancelRegistration(@PathVariable Integer id,
+            Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            RaceRegistrationResponse response = raceRegistrationService.cancelRegistration(userDetails.getUsername(), id);
+            RaceRegistrationResponse response =
+                    raceRegistrationService.cancelRegistration(userDetails.getUsername(), id);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -104,10 +113,12 @@ public class OwnerController {
     }
 
     @PutMapping("/race-registrations/{id}")
-    public ResponseEntity<?> updateRegistration(@PathVariable Integer id, @Valid @RequestBody RegisterRaceRequest request, Authentication authentication) {
+    public ResponseEntity<?> updateRegistration(@PathVariable Integer id,
+            @Valid @RequestBody RegisterRaceRequest request, Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            RaceRegistrationResponse response = raceRegistrationService.updateRegistration(userDetails.getUsername(), id, request);
+            RaceRegistrationResponse response = raceRegistrationService
+                    .updateRegistration(userDetails.getUsername(), id, request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
@@ -126,10 +137,12 @@ public class OwnerController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestBody UpdateOwnerProfileRequest request, Authentication authentication) {
+    public ResponseEntity<?> updateProfile(@RequestBody UpdateOwnerProfileRequest request,
+            Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            OwnerProfileResponse response = horseService.updateOwnerProfile(userDetails.getUsername(), request);
+            OwnerProfileResponse response =
+                    horseService.updateOwnerProfile(userDetails.getUsername(), request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));

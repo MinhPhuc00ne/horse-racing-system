@@ -38,7 +38,7 @@ app:
     # Base64-encoded 256-bit secret key for HMAC-SHA256
     # IMPORTANT: Change this in production and use environment variables!
     secret: ${JWT_SECRET:dGhpc0lzQVZlcnlMb25nU2VjcmV0S2V5Rm9ySldUU2lnbmluZ1B1cnBvc2VzMTIzNDU2Nzg5MA==}
-    access-token-expiration: 900000 # 15 minutes (in milliseconds)
+    access-token-expiration: 86400000 # 24 hours (in milliseconds)
     refresh-token-expiration: 604800000 # 7 days (in milliseconds)
   google:
     # Replace with your actual Google OAuth2 Client ID and Secret

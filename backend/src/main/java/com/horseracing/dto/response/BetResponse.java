@@ -25,19 +25,15 @@ public class BetResponse {
     private LocalDateTime createdAt;
 
     public static BetResponse fromEntity(Bet bet) {
-        if (bet == null) return null;
-        return BetResponse.builder()
-                .id(bet.getId())
-                .userId(bet.getUser().getId())
-                .raceId(bet.getRace().getId())
-                .participantId(bet.getParticipant().getId())
-                .horseName(bet.getParticipant().getHorse() != null ? bet.getParticipant().getHorse().getName() : null)
-                .amount(bet.getAmount())
-                .odds(bet.getOdds())
-                .status(bet.getStatus())
-                .betType(bet.getBetType())
-                .payoutAmount(bet.getPayoutAmount())
-                .createdAt(bet.getCreatedAt())
-                .build();
+        if (bet == null)
+            return null;
+        return BetResponse.builder().id(bet.getId()).userId(bet.getUser().getId())
+                .raceId(bet.getRace().getId()).participantId(bet.getParticipant().getId())
+                .horseName(bet.getParticipant().getHorse() != null
+                        ? bet.getParticipant().getHorse().getName()
+                        : null)
+                .amount(bet.getAmount()).odds(bet.getOdds()).status(bet.getStatus())
+                .betType(bet.getBetType()).payoutAmount(bet.getPayoutAmount())
+                .createdAt(bet.getCreatedAt()).build();
     }
 }

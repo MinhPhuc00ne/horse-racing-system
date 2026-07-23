@@ -39,38 +39,30 @@ public class TournamentResponse {
     private LocalDateTime registrationOpeningTime;
     private LocalDateTime officialRaceTime;
     private String surfaceType;
+    private Double distance;
 
 
     public static TournamentResponse fromEntity(Tournament t) {
-        if (t == null) return null;
-        return TournamentResponse.builder()
-                .id(t.getId())
-                .tournamentName(t.getTournamentName())
-                .location(t.getLocation())
-                .description(t.getDescription())
-                .registrationDeadline(t.getRegistrationDeadline())
-                .maxSlots(t.getMaxSlots())
+        if (t == null)
+            return null;
+        return TournamentResponse.builder().id(t.getId()).tournamentName(t.getTournamentName())
+                .location(t.getLocation()).description(t.getDescription())
+                .registrationDeadline(t.getRegistrationDeadline()).maxSlots(t.getMaxSlots())
 
-                .totalPrize(t.getTotalPrize())
-                .tournamentStatus(t.getTournamentStatus())
-                .prizeFirst(t.getPrizeFirst())
-                .prizeSecond(t.getPrizeSecond())
-                .prizeThird(t.getPrizeThird())
-                .minBetAmount(t.getMinBetAmount())
+                .totalPrize(t.getTotalPrize()).tournamentStatus(t.getTournamentStatus())
+                .prizeFirst(t.getPrizeFirst()).prizeSecond(t.getPrizeSecond())
+                .prizeThird(t.getPrizeThird()).minBetAmount(t.getMinBetAmount())
                 .imageUrl(t.getImageUrl())
                 .refereeId(t.getReferee() != null ? t.getReferee().getId() : null)
                 .refereeName(t.getReferee() != null ? t.getReferee().getFullName() : null)
-                .entryFee(t.getEntryFee())
-                .minSlots(t.getMinSlots())
-                .allowedClasses(t.getAllowedClasses())
-                .allowedAges(t.getAllowedAges())
+                .entryFee(t.getEntryFee()).minSlots(t.getMinSlots())
+                .allowedClasses(t.getAllowedClasses()).allowedAges(t.getAllowedAges())
                 .allowedGenders(t.getAllowedGenders())
                 .registrationOpeningTime(t.getRegistrationOpeningTime())
-                .officialRaceTime(t.getOfficialRaceTime())
-                .surfaceType(t.getSurfaceType())
+                .officialRaceTime(t.getOfficialRaceTime()).surfaceType(t.getSurfaceType())
+                .distance(t.getDistance() != null ? t.getDistance() : 1200.0)
                 .createdAt(t.getCreatedAt())
 
-                .updatedAt(t.getUpdatedAt())
-                .build();
+                .updatedAt(t.getUpdatedAt()).build();
     }
 }

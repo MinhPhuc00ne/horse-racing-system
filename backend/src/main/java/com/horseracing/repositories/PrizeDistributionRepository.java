@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface PrizeDistributionRepository extends JpaRepository<PrizeDistribution, Integer> {
     List<PrizeDistribution> findByParticipantId(Integer participantId);
+
     List<PrizeDistribution> findByParticipantRaceId(Integer raceId);
 }

@@ -45,47 +45,43 @@ public class UserConnectionService {
         }
 
         // Check if connection already exists
-        Optional<UserConnection> existing = userConnectionRepository.findConnectionBetween(requester.getId(), recipientId);
+        Optional<UserConnection> existing =
+                userConnectionRepository.findConnectionBetween(requester.getId(), recipientId);
         if (existing.isPresent()) {
             UserConnection conn = existing.get();
             switch (conn.getStatus()) {
                 case "ACCEPTED" -> throw new RuntimeException("You are already connected");
-                case "PENDING" -> throw new RuntimeException("Connection request is already pending");
+                case "PENDING" -> throw new RuntimeException(
+                        "Connection request is already pending");
                 default -> {
                     // If rejected, we can reactivate it
                     conn.setStatus("PENDING");
                     conn.setRequester(requester);
                     conn.setRecipient(recipient);
                     conn = userConnectionRepository.save(conn);
-                    notificationService.sendNotification(
-                            recipient,
-                            "New Connection Request",
-                            "You received a new connection request from " + requester.getFullName() + " (Role: " + requester.getRole() + ").",
-                            NotificationType.CONNECTION
-                    );
+                    notificationService.sendNotification(recipient, "New Connection Request",
+                            "You received a new connection request from " + requester.getFullName()
+                                    + " (Role: " + requester.getRole() + ").",
+                            NotificationType.CONNECTION);
                     return mapToResponse(conn, requester);
                 }
             }
         }
 
-        UserConnection connection = UserConnection.builder()
-                .requester(requester)
-                .recipient(recipient)
-                .status("PENDING")
-                .build();
+        UserConnection connection = UserConnection.builder().requester(requester)
+                .recipient(recipient).status("PENDING").build();
 
         connection = userConnectionRepository.save(connection);
         notificationService.sendNotification(
-                recipient,
-                "New Connection Request",
-                "You received a new connection request from " + requester.getFullName() + " (Role: " + requester.getRole() + ").",
-                NotificationType.CONNECTION
-        );
+                recipient, "New Connection Request", "You received a new connection request from "
+                        + requester.getFullName() + " (Role: " + requester.getRole() + ").",
+                NotificationType.CONNECTION);
         return mapToResponse(connection, requester);
     }
 
     @Transactional
-    public ConnectionUserResponse respondToRequest(String recipientEmail, Integer connectionId, String action) {
+    public ConnectionUserResponse respondToRequest(String recipientEmail, Integer connectionId,
+            String action) {
         UserConnection connection = userConnectionRepository.findById(connectionId)
                 .orElseThrow(() -> new RuntimeException("Connection not found"));
 
@@ -100,25 +96,20 @@ public class UserConnectionService {
         if ("ACCEPT".equalsIgnoreCase(action)) {
             connection.setStatus("ACCEPTED");
             connection = userConnectionRepository.save(connection);
-            notificationService.sendNotification(
-                    connection.getRequester(),
+            notificationService.sendNotification(connection.getRequester(),
                     "Connection Request Accepted",
-                    connection.getRecipient().getFullName() + " accepted your connection request. You can now register for tournaments together.",
-                    NotificationType.CONNECTION
-            );
+                    connection.getRecipient().getFullName()
+                            + " accepted your connection request. You can now register for tournaments together.",
+                    NotificationType.CONNECTION);
             return mapToResponse(connection, connection.getRecipient());
         } else if ("REJECT".equalsIgnoreCase(action)) {
-            notificationService.sendNotification(
-                    connection.getRequester(),
+            notificationService.sendNotification(connection.getRequester(),
                     "Connection Request Rejected",
                     connection.getRecipient().getFullName() + " rejected your connection request.",
-                    NotificationType.CONNECTION
-            );
+                    NotificationType.CONNECTION);
             // Delete connection request so they can try again later
             userConnectionRepository.delete(connection);
-            return ConnectionUserResponse.builder()
-                    .friendStatus("NONE")
-                    .build();
+            return ConnectionUserResponse.builder().friendStatus("NONE").build();
         } else {
             throw new RuntimeException("Invalid action. Must be ACCEPT or REJECT");
         }
@@ -132,7 +123,8 @@ public class UserConnectionService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!connection.getRequester().getId().equals(user.getId()) && !connection.getRecipient().getId().equals(user.getId())) {
+        if (!connection.getRequester().getId().equals(user.getId())
+                && !connection.getRecipient().getId().equals(user.getId())) {
             throw new RuntimeException("You are not authorized to delete this connection");
         }
 
@@ -145,13 +137,13 @@ public class UserConnectionService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<UserConnection> connections = userConnectionRepository.findAllFriends(user.getId());
-        return connections.stream()
-                .map(conn -> mapToResponse(conn, user))
+        return connections.stream().map(conn -> mapToResponse(conn, user))
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<ConnectionUserResponse> getConnectionsDirectory(String email, String query, String roleFilter) {
+    public List<ConnectionUserResponse> getConnectionsDirectory(String email, String query,
+            String roleFilter) {
         User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -182,7 +174,8 @@ public class UserConnectionService {
             }
 
             // Find connection status
-            Optional<UserConnection> connOpt = userConnectionRepository.findConnectionBetween(currentUser.getId(), u.getId());
+            Optional<UserConnection> connOpt =
+                    userConnectionRepository.findConnectionBetween(currentUser.getId(), u.getId());
             String friendStatus = "NONE";
             Integer connectionId = null;
 
@@ -200,49 +193,45 @@ public class UserConnectionService {
                 }
             }
 
-            ConnectionUserResponse response = buildConnectionUserResponse(u, friendStatus, connectionId);
+            ConnectionUserResponse response =
+                    buildConnectionUserResponse(u, friendStatus, connectionId);
             directory.add(response);
         }
 
         return directory;
     }
 
-    private ConnectionUserResponse buildConnectionUserResponse(User user, String friendStatus, Integer connectionId) {
-        ConnectionUserResponse.ConnectionUserResponseBuilder builder = ConnectionUserResponse.builder()
-                .userId(user.getId())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .role(user.getRole().name())
-                .avatar(user.getAvatarUrl())
-                .friendStatus(friendStatus)
-                .connectionId(connectionId);
+    private ConnectionUserResponse buildConnectionUserResponse(User user, String friendStatus,
+            Integer connectionId) {
+        ConnectionUserResponse.ConnectionUserResponseBuilder builder = ConnectionUserResponse
+                .builder().userId(user.getId()).fullName(user.getFullName()).email(user.getEmail())
+                .phone(user.getPhone()).role(user.getRole().name()).avatar(user.getAvatarUrl())
+                .friendStatus(friendStatus).connectionId(connectionId);
 
         if (user.getRole() == Role.JOCKEY) {
-            Optional<JockeyProfile> jockeyOpt = jockeyProfileRepository.findByUserEmail(user.getEmail());
+            Optional<JockeyProfile> jockeyOpt =
+                    jockeyProfileRepository.findByUserEmail(user.getEmail());
             if (jockeyOpt.isPresent()) {
                 JockeyProfile jp = jockeyOpt.get();
-                builder.experienceYears(jp.getExperienceYear())
-                        .weight(jp.getWeight())
-                        .height(jp.getHeight())
-                        .licenseNumber(jp.getLicenseNumber());
+                builder.experienceYears(jp.getExperienceYear()).weight(jp.getWeight())
+                        .height(jp.getHeight()).licenseNumber(jp.getLicenseNumber());
             }
         } else if (user.getRole() == Role.HORSE_OWNER) {
-            Optional<HorseOwnerProfile> ownerOpt = horseOwnerProfileRepository.findByUserEmail(user.getEmail());
+            Optional<HorseOwnerProfile> ownerOpt =
+                    horseOwnerProfileRepository.findByUserEmail(user.getEmail());
             if (ownerOpt.isPresent()) {
                 HorseOwnerProfile op = ownerOpt.get();
-                builder.stableName(op.getStableName())
-                        .stableAddress(op.getStableAddress())
-                        .description(op.getDescription())
-                        .reputationStars(op.getReputationStars());
+                builder.stableName(op.getStableName()).stableAddress(op.getStableAddress())
+                        .description(op.getDescription()).reputationStars(op.getReputationStars());
             }
         }
 
-        List<String> documentUrls = upgradeRequestRepository.findByUserOrderByCreatedAtDesc(user).stream()
-                .filter(req -> req.getStatus() == com.horseracing.entities.enums.RequestStatus.APPROVED 
+        List<String> documentUrls = upgradeRequestRepository.findByUserOrderByCreatedAtDesc(user)
+                .stream()
+                .filter(req -> req
+                        .getStatus() == com.horseracing.entities.enums.RequestStatus.APPROVED
                         && req.getRequestedRole() == user.getRole())
-                .findFirst()
-                .map(req -> req.getDocumentUrls())
+                .findFirst().map(req -> req.getDocumentUrls())
                 .orElse(java.util.Collections.emptyList());
         builder.documentUrls(documentUrls);
 
@@ -250,7 +239,8 @@ public class UserConnectionService {
     }
 
     private ConnectionUserResponse mapToResponse(UserConnection conn, User relativeTo) {
-        User friend = conn.getRequester().getId().equals(relativeTo.getId()) ? conn.getRecipient() : conn.getRequester();
+        User friend = conn.getRequester().getId().equals(relativeTo.getId()) ? conn.getRecipient()
+                : conn.getRequester();
         String friendStatus = "NONE";
         if ("ACCEPTED".equals(conn.getStatus())) {
             friendStatus = "FRIEND";

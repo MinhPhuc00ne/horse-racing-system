@@ -10,10 +10,14 @@ import java.util.Optional;
 
 public interface WalletTransactionRepository extends JpaRepository<WalletTransaction, Integer> {
     List<WalletTransaction> findByWalletIdOrderByCreatedAtDesc(Integer walletId);
+
     Optional<WalletTransaction> findByPayosOrderCode(Long payosOrderCode);
+
     List<WalletTransaction> findByTransactionTypeOrderByCreatedAtDesc(String transactionType);
+
     long countByTransactionTypeAndStatus(String transactionType, String status);
 
     @Query("SELECT t FROM WalletTransaction t WHERE t.status = 'PENDING' AND t.transactionType = 'DEPOSIT' AND t.referenceType = 'PAYOS' AND t.createdAt < :cutoff")
-    List<WalletTransaction> findAllPendingPayosDepositsBefore(@Param("cutoff") LocalDateTime cutoff);
+    List<WalletTransaction> findAllPendingPayosDepositsBefore(
+            @Param("cutoff") LocalDateTime cutoff);
 }

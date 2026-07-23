@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface RaceRepository extends JpaRepository<Race, Integer> {
     List<Race> findByRaceTrackIdAndRaceDate(Integer raceTrackId, LocalDate raceDate);
+
     List<Race> findByTournamentId(Integer tournamentId);
+
     List<Race> findByRefereeId(Integer refereeId);
 }

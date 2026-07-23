@@ -61,7 +61,8 @@ public class AuthService {
         if (existingUserOpt.isPresent()) {
             User existingUser = existingUserOpt.get();
             if (existingUser.getProvider() == AuthProvider.GOOGLE) {
-                throw new RuntimeException("This email is already registered via Google. Please log in using Google.");
+                throw new RuntimeException(
+                        "This email is already registered via Google. Please log in using Google.");
             } else {
                 throw new RuntimeException("Email is already registered. Please log in.");
             }
@@ -72,8 +73,10 @@ public class AuthService {
 
         User user = User.builder().username(request.getUsername()).email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .fullName(request.getFullName())
-                .role(Role.SPECTATOR) // Always SPECTATOR on registration — role upgrades go through approval flow
+                .fullName(request.getFullName()).role(Role.SPECTATOR) // Always SPECTATOR on
+                                                                      // registration — role
+                                                                      // upgrades go through
+                                                                      // approval flow
                 .provider(AuthProvider.LOCAL).enabled(false).build();
 
         user = userRepository.save(user);
@@ -81,22 +84,16 @@ public class AuthService {
         // Generate 6-digit OTP code using SecureRandom
         String token = String.format("%06d", SECURE_RANDOM.nextInt(1000000));
 
-        VerificationToken verificationToken = VerificationToken.builder()
-                .token(token)
-                .user(user)
-                .expiryDate(LocalDateTime.now().plusMinutes(15))
-                .build();
+        VerificationToken verificationToken = VerificationToken.builder().token(token).user(user)
+                .expiryDate(LocalDateTime.now().plusMinutes(15)).build();
         verificationTokenRepository.save(verificationToken);
 
         // Send activation email asynchronously
-        emailService.sendVerificationEmail(user.getEmail(), user.getFullName(), activationUrl, token);
+        emailService.sendVerificationEmail(user.getEmail(), user.getFullName(), activationUrl,
+                token);
 
-        return AuthResponse.builder()
-                .accessToken(null)
-                .refreshToken(null)
-                .tokenType("Bearer")
-                .user(UserResponse.fromEntity(user))
-                .build();
+        return AuthResponse.builder().accessToken(null).refreshToken(null).tokenType("Bearer")
+                .user(UserResponse.fromEntity(user)).build();
     }
 
     /**
@@ -105,11 +102,13 @@ public class AuthService {
     @Transactional
     public void verifyAccount(String token) {
         VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid verification code. Please check again."));
+                .orElseThrow(() -> new RuntimeException(
+                        "Invalid verification code. Please check again."));
 
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             verificationTokenRepository.delete(verificationToken);
-            throw new RuntimeException("Verification code has expired. Please register again or request a new code.");
+            throw new RuntimeException(
+                    "Verification code has expired. Please register again or request a new code.");
         }
 
         User user = verificationToken.getUser();
@@ -127,23 +126,27 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Invalid email or password."));
 
         if (user.getProvider() == AuthProvider.GOOGLE) {
-            throw new RuntimeException("This account was registered via Google. Please use Google Login.");
+            throw new RuntimeException(
+                    "This account was registered via Google. Please use Google Login.");
         }
 
         try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    request.getEmail(), request.getPassword()));
         } catch (org.springframework.security.authentication.BadCredentialsException e) {
             throw new RuntimeException("Invalid email or password.");
         }
 
-        if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE").isPresent()) {
-            throw new RuntimeException("Your account has been locked or suspended due to terms violations.");
+        if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE")
+                .isPresent()) {
+            throw new RuntimeException(
+                    "Your account has been locked or suspended due to terms violations.");
         }
 
         // Explicit check: account must be verified via email
         if (!user.isEnabled()) {
-            throw new RuntimeException("Account is not activated. Please check your email for verification.");
+            throw new RuntimeException(
+                    "Account is not activated. Please check your email for verification.");
         }
 
         String accessToken = jwtUtils.generateAccessToken(user);
@@ -179,17 +182,22 @@ public class AuthService {
             if (existingUserOpt.isPresent()) {
                 User user = existingUserOpt.get();
                 if (user.getProvider() != AuthProvider.GOOGLE) {
-                    throw new RuntimeException("Email registered via standard account. Please log in with your password.");
+                    throw new RuntimeException(
+                            "Email registered via standard account. Please log in with your password.");
                 }
 
-                if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE").isPresent()) {
-                    throw new RuntimeException("Your account has been locked or suspended due to terms violations.");
+                if (blacklistRepository
+                        .findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE")
+                        .isPresent()) {
+                    throw new RuntimeException(
+                            "Your account has been locked or suspended due to terms violations.");
                 }
 
                 String accessToken = jwtUtils.generateAccessToken(user);
                 RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-                AuthResponse authResponse = new AuthResponse(accessToken, refreshToken.getToken(), UserResponse.fromEntity(user));
+                AuthResponse authResponse = new AuthResponse(accessToken, refreshToken.getToken(),
+                        UserResponse.fromEntity(user));
                 authResponse.setNewUser(false);
                 return authResponse;
             } else {
@@ -202,7 +210,8 @@ public class AuthService {
                 String accessToken = jwtUtils.generateAccessToken(newUser);
                 RefreshToken refreshToken = refreshTokenService.createRefreshToken(newUser);
 
-                AuthResponse authResponse = new AuthResponse(accessToken, refreshToken.getToken(), UserResponse.fromEntity(newUser));
+                AuthResponse authResponse = new AuthResponse(accessToken, refreshToken.getToken(),
+                        UserResponse.fromEntity(newUser));
                 authResponse.setNewUser(true);
                 return authResponse;
             }
@@ -216,17 +225,20 @@ public class AuthService {
      * Update profile details for a newly created Google account.
      */
     @Transactional
-    public UserResponse completeGoogleProfile(String email, com.horseracing.dto.request.CompleteProfileRequest request) {
+    public UserResponse completeGoogleProfile(String email,
+            com.horseracing.dto.request.CompleteProfileRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         if (user.getProvider() != AuthProvider.GOOGLE) {
             throw new RuntimeException("Only Google accounts can update profile via this API.");
         }
 
-        // Only allow changing username if it hasn't been explicitly set (it currently defaults to email)
+        // Only allow changing username if it hasn't been explicitly set (it currently defaults to
+        // email)
         // or just allow it if it's the first time
-        if (userRepository.existsByUsername(request.getUsername()) && !user.getUsername().equals(request.getUsername())) {
+        if (userRepository.existsByUsername(request.getUsername())
+                && !user.getUsername().equals(request.getUsername())) {
             throw new RuntimeException("Username is already taken");
         }
 
@@ -248,10 +260,12 @@ public class AuthService {
         refreshTokenService.verifyExpiration(refreshToken);
 
         User user = refreshToken.getUser();
-        if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE").isPresent()) {
-            throw new RuntimeException("Your account has been locked or suspended due to terms violations.");
+        if (blacklistRepository.findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE")
+                .isPresent()) {
+            throw new RuntimeException(
+                    "Your account has been locked or suspended due to terms violations.");
         }
-        
+
         String newAccessToken = jwtUtils.generateAccessToken(user);
 
         // Create new refresh token (token rotation for security)
@@ -288,18 +302,20 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Email does not exist in the system."));
 
         if (user.getProvider() != AuthProvider.LOCAL) {
-            throw new RuntimeException("This account logs in with " + user.getProvider() + ". Cannot reset password.");
+            throw new RuntimeException(
+                    "This account logs in with " + user.getProvider() + ". Cannot reset password.");
         }
 
         // Generate 6-digit OTP code using SecureRandom
         String otp = String.format("%06d", SECURE_RANDOM.nextInt(1000000));
 
-        PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(user)
-                .orElse(new PasswordResetToken());
-        
+        PasswordResetToken resetToken =
+                passwordResetTokenRepository.findByUser(user).orElse(new PasswordResetToken());
+
         resetToken.setUser(user);
         resetToken.setToken(otp);
         resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(10)); // 10 minutes expiry
+        resetToken.setFailedAttempts(0);
 
         passwordResetTokenRepository.save(resetToken);
 
@@ -310,7 +326,7 @@ public class AuthService {
     /**
      * Verify the reset password OTP without updating password.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public void verifyResetOtp(VerifyOtpRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Email does not exist in the system."));
@@ -318,12 +334,31 @@ public class AuthService {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Invalid or non-existent OTP code."));
 
-        if (!resetToken.getToken().equals(request.getOtp())) {
-            throw new RuntimeException("Incorrect OTP code.");
+        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new RuntimeException("OTP code has expired.");
         }
 
-        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("OTP code has expired.");
+        int attempts =
+                (resetToken.getFailedAttempts() != null ? resetToken.getFailedAttempts() : 0);
+        if (attempts >= 5) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new RuntimeException(
+                    "Maximum verification attempts exceeded. Please request a new OTP code.");
+        }
+
+        if (!resetToken.getToken().equals(request.getOtp())) {
+            attempts++;
+            resetToken.setFailedAttempts(attempts);
+            if (attempts >= 5) {
+                passwordResetTokenRepository.delete(resetToken);
+                throw new RuntimeException(
+                        "Incorrect OTP code. Maximum verification attempts exceeded. Please request a new OTP code.");
+            } else {
+                passwordResetTokenRepository.save(resetToken);
+                throw new RuntimeException(
+                        "Incorrect OTP code. Attempts remaining: " + (5 - attempts));
+            }
         }
     }
 
@@ -338,13 +373,31 @@ public class AuthService {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Invalid or non-existent OTP code."));
 
-        if (!resetToken.getToken().equals(request.getOtp())) {
-            throw new RuntimeException("Incorrect OTP code.");
-        }
-
         if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             passwordResetTokenRepository.delete(resetToken);
             throw new RuntimeException("OTP code has expired.");
+        }
+
+        int attempts =
+                (resetToken.getFailedAttempts() != null ? resetToken.getFailedAttempts() : 0);
+        if (attempts >= 5) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new RuntimeException(
+                    "Maximum verification attempts exceeded. Please request a new OTP code.");
+        }
+
+        if (!resetToken.getToken().equals(request.getOtp())) {
+            attempts++;
+            resetToken.setFailedAttempts(attempts);
+            if (attempts >= 5) {
+                passwordResetTokenRepository.delete(resetToken);
+                throw new RuntimeException(
+                        "Incorrect OTP code. Maximum verification attempts exceeded. Please request a new OTP code.");
+            } else {
+                passwordResetTokenRepository.save(resetToken);
+                throw new RuntimeException(
+                        "Incorrect OTP code. Attempts remaining: " + (5 - attempts));
+            }
         }
 
         // Update user's password
@@ -353,5 +406,37 @@ public class AuthService {
 
         // Delete the token so it cannot be reused
         passwordResetTokenRepository.delete(resetToken);
+    }
+
+    @Transactional
+    public UserResponse updateUserProfile(String email, java.util.Map<String, String> updates) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (updates.containsKey("fullName") && updates.get("fullName") != null) {
+            user.setFullName(updates.get("fullName"));
+        }
+        if (updates.containsKey("phone") && updates.get("phone") != null) {
+            user.setPhone(updates.get("phone"));
+        }
+        if (updates.containsKey("avatarUrl") && updates.get("avatarUrl") != null) {
+            user.setAvatarUrl(updates.get("avatarUrl"));
+        }
+        if (updates.containsKey("bankName") && updates.get("bankName") != null) {
+            user.setBankName(updates.get("bankName"));
+        }
+        if (updates.containsKey("bankBin") && updates.get("bankBin") != null) {
+            user.setBankBin(updates.get("bankBin"));
+        }
+        if (updates.containsKey("bankAccountNumber") && updates.get("bankAccountNumber") != null) {
+            user.setBankAccountNumber(updates.get("bankAccountNumber"));
+        }
+        if (updates.containsKey("bankAccountHolderName")
+                && updates.get("bankAccountHolderName") != null) {
+            user.setBankAccountHolderName(updates.get("bankAccountHolderName"));
+        }
+
+        userRepository.save(user);
+        return UserResponse.fromEntity(user);
     }
 }

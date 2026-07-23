@@ -21,16 +21,13 @@ public class NotificationResponse {
     private LocalDateTime readAt;
 
     public static NotificationResponse fromEntity(Notification notification) {
-        if (notification == null) return null;
-        return NotificationResponse.builder()
-                .id(notification.getId())
-                .userId(notification.getUser().getId())
-                .title(notification.getTitle())
+        if (notification == null)
+            return null;
+        return NotificationResponse.builder().id(notification.getId())
+                .userId(notification.getUser().getId()).title(notification.getTitle())
                 .content(notification.getContent())
                 .type(notification.getType() != null ? notification.getType().name() : null)
-                .isRead(notification.getIsRead())
-                .createdAt(notification.getCreatedAt())
-                .readAt(notification.getReadAt())
-                .build();
+                .isRead(notification.getIsRead()).createdAt(notification.getCreatedAt())
+                .readAt(notification.getReadAt()).build();
     }
 }

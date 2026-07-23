@@ -1,5 +1,5 @@
 
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import './Home.css';
@@ -13,7 +13,7 @@ const horseRankings = [
     rank: '01',
     avatar: '♞',
     name: 'Stellar Majesty',
-    detail: 'Royal Stable #4',
+    detail: 'Thoroughbred',
     metric: '98.4 Rating',
     status: 'Undefeated',
     featured: true,
@@ -22,7 +22,7 @@ const horseRankings = [
     rank: '02',
     avatar: '♞',
     name: 'Golden Phantom',
-    detail: 'Crescent Farms',
+    detail: 'Arabian',
     metric: '95.8 Rating',
     status: 'Rising',
   },
@@ -30,19 +30,19 @@ const horseRankings = [
     rank: '03',
     avatar: '♞',
     name: 'Emerald Baron',
-    detail: 'Highland Fields',
+    detail: 'Quarter Horse',
     metric: '94.6 Rating',
     status: 'In Form',
   },
 ];
 
-const jockeyRankings = [
+const defaultJockeyRankings = [
   {
     rank: '01',
     avatar: 'CS',
     name: 'Clarissa Sterling',
-    detail: 'Monaco Club',
-    metric: '245 Wins',
+    detail: 'Score: 2450',
+    metric: '78.5% Win',
     status: 'Top Seeding',
     featured: true,
   },
@@ -50,22 +50,34 @@ const jockeyRankings = [
     rank: '02',
     avatar: 'MR',
     name: 'Marcus Rhone',
-    detail: 'Silver Spur Team',
-    metric: '231 Wins',
+    detail: 'Score: 2310',
+    metric: '65.2% Win',
     status: 'Elite',
   },
   {
     rank: '03',
     avatar: 'ER',
     name: 'Elena Rodriguez',
-    detail: 'Valencia Range',
-    metric: '219 Wins',
+    detail: 'Score: 2190',
+    metric: '61.0% Win',
     status: 'Contender',
   },
 ];
 
 const Home = () => {
   const { isAuthenticated, user } = useContext(AuthContext);
+  const [tournaments, setTournaments] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/tournaments')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setTournaments(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   if (isAuthenticated && user) {
     if (user.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
@@ -78,13 +90,13 @@ const Home = () => {
     <div className="home-page-wrapper">
       <main className="home-canvas">
         <HeroSection />
-        <StatsSection />
-        <TournamentsSection />
+        <StatsSection tournaments={tournaments} />
+        <TournamentsSection tournaments={tournaments} />
 
         <section id="rankings" className="leaderboards-section" aria-label="Elite rankings">
           <div className="leaderboards-grid">
             <RankingBoard title="Elite Rankings: Horses" icon="♞" items={horseRankings} />
-            <RankingBoard title="Elite Rankings: Jockeys" icon="♘" items={jockeyRankings} initials />
+            <RankingBoard title="Elite Rankings: Jockeys" icon="♘" items={defaultJockeyRankings} initials />
           </div>
         </section>
       </main>

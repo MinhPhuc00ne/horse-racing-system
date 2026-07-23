@@ -76,6 +76,9 @@ public class Tournament {
     @Column(name = "surface_type", length = 50)
     private String surfaceType;
 
+    @Column(name = "distance")
+    private Double distance;
+
     @Column(name = "prize_first", precision = 38, scale = 2)
     private BigDecimal prizeFirst;
 

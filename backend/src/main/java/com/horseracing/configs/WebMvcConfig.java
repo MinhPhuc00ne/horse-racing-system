@@ -14,13 +14,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         Path uploadDir = Paths.get("uploads");
         String uploadPath = uploadDir.toAbsolutePath().toString();
-        
+
         // Ensure path ends with a separator for Spring's resource location resolver
         if (!uploadPath.endsWith("/") && !uploadPath.endsWith("\\")) {
             uploadPath += "/";
         }
-        
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadPath);
+
+        registry.addResourceHandler("/uploads/**").addResourceLocations("file:" + uploadPath);
     }
 }

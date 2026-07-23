@@ -25,11 +25,8 @@ public class TrackService {
             throw new RuntimeException("Shape must be STRAIGHT or OVAL");
         }
 
-        RaceTrack track = RaceTrack.builder()
-                .name(request.getName())
-                .location(request.getLocation())
-                .shape(shape.toUpperCase())
-                .build();
+        RaceTrack track = RaceTrack.builder().name(request.getName())
+                .location(request.getLocation()).shape(shape.toUpperCase()).build();
 
         return TrackResponse.fromEntity(raceTrackRepository.save(track));
     }
@@ -39,7 +36,8 @@ public class TrackService {
         RaceTrack track = raceTrackRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Race track not found"));
 
-        if (!"STRAIGHT".equalsIgnoreCase(request.getShape()) && !"OVAL".equalsIgnoreCase(request.getShape())) {
+        if (!"STRAIGHT".equalsIgnoreCase(request.getShape())
+                && !"OVAL".equalsIgnoreCase(request.getShape())) {
             throw new RuntimeException("Shape must be STRAIGHT or OVAL");
         }
 

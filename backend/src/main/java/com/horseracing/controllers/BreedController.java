@@ -33,12 +33,13 @@ public class BreedController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('HORSE_OWNER', 'ADMIN')")
-    public ResponseEntity<BreedResponse> createBreed(@Valid @RequestBody CreateBreedRequest request, Authentication authentication) {
+    public ResponseEntity<BreedResponse> createBreed(@Valid @RequestBody CreateBreedRequest request,
+            Authentication authentication) {
         boolean isOfficial = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         return ResponseEntity.ok(breedService.createBreed(request, isOfficial));
     }
-    
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteBreed(@PathVariable Integer id) {

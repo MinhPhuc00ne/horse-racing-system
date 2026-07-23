@@ -45,17 +45,18 @@ public class SecurityConfig {
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/api/test/public").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/tournaments/**").permitAll()
                         .requestMatchers("/api/races/**").permitAll()
                         .requestMatchers("/api/payments/payos/webhook").permitAll()
-                        .requestMatchers("/api/v1/chat/**").permitAll()
-                        .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/v1/chat/**").permitAll().requestMatchers("/error")
+                        .permitAll().anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

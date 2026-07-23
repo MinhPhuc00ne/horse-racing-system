@@ -20,20 +20,19 @@ const stats = [
     note: 'From elite stable systems',
   },
 ];
-
 export default function StatsSection() {
-  return (
-    <section className="stats-section" aria-label="Race statistics">
-      <div className="stats-grid">
-        {stats.map((stat) => (
-          <article className="stat-card" key={stat.label}>
-            <span className="stat-icon" aria-hidden="true">{stat.icon}</span>
-            <p className="stat-label">{stat.label}</p>
-            <h3 className="stat-number">{stat.value}</h3>
-            <p className="stat-trend">{stat.note}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
+return (
+  <section className="stats-section" aria-label="Race statistics">
+    <div className="stats-grid">
+      {stats.map((stat) => (
+        <article className="stat-card" key={stat.label}>
+          <span className="stat-icon" aria-hidden="true">{stat.icon}</span>
+          <p className="stat-label">{stat.label}</p>
+          <h3 className="stat-number">{stat.value}</h3>
+          <p className="stat-trend">{stat.note}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+);
 }

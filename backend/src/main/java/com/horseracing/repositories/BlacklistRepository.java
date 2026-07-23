@@ -8,5 +8,7 @@ import java.util.Optional;
 
 public interface BlacklistRepository extends JpaRepository<Blacklist, Integer> {
     List<Blacklist> findByTargetTypeAndTargetId(String targetType, Integer targetId);
-    Optional<Blacklist> findByTargetTypeAndTargetIdAndStatus(String targetType, Integer targetId, String status);
+
+    Optional<Blacklist> findByTargetTypeAndTargetIdAndStatus(String targetType, Integer targetId,
+            String status);
 }

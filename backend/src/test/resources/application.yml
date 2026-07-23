@@ -24,7 +24,6 @@ spring:
           starttls:
             enable: true
 
-
 server:
   port: 8080
 
@@ -32,7 +31,7 @@ server:
 app:
   jwt:
     secret: ${JWT_SECRET:test-jwt-secret-key-must-be-long-enough-for-hmac-sha256}
-    access-token-expiration: 900000 # 15 minutes (in milliseconds)
+    access-token-expiration: 86400000 # 24 hours (in milliseconds)
     refresh-token-expiration: 604800000 # 7 days (in milliseconds)
   google:
     client-id: ${GOOGLE_CLIENT_ID:test-google-client-id}
@@ -40,4 +39,3 @@ app:
   activation-url: ${APP_ACTIVATION_URL:http://localhost:5173/verify-email}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
-

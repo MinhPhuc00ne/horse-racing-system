@@ -51,8 +51,7 @@ public class AdminUpgradeRequestController {
      * Reject an upgrade request.
      */
     @PutMapping("/{id}/reject")
-    public ResponseEntity<?> rejectRequest(
-            @PathVariable Integer id,
+    public ResponseEntity<?> rejectRequest(@PathVariable Integer id,
             @Valid @RequestBody RejectUpgradeRequest rejectDto) {
         try {
             UpgradeRequestResponse response = upgradeRequestService.rejectRequest(id, rejectDto);

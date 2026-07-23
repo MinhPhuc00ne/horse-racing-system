@@ -51,30 +51,19 @@ public class UpgradeRequestResponse {
     private List<String> documentUrls;
 
     public static UpgradeRequestResponse fromEntity(UpgradeRequest request) {
-        return UpgradeRequestResponse.builder()
-                .id(request.getId())
-                .userId(request.getUser().getId())
-                .userEmail(request.getUser().getEmail())
+        return UpgradeRequestResponse.builder().id(request.getId())
+                .userId(request.getUser().getId()).userEmail(request.getUser().getEmail())
                 .userFullName(request.getUser().getFullName())
-                .requestedRole(request.getRequestedRole())
-                .status(request.getStatus())
-                .notes(request.getNotes())
-                .rejectionReason(request.getRejectionReason())
-                .createdAt(request.getCreatedAt())
-                .updatedAt(request.getUpdatedAt())
-                .fullName(request.getFullName())
-                .dateOfBirth(request.getDateOfBirth())
-                .phoneNumber(request.getPhoneNumber())
-                .identityNumber(request.getIdentityNumber())
-                .weight(request.getWeight())
-                .height(request.getHeight())
-                .licenseNumber(request.getLicenseNumber())
-                .stableName(request.getStableName())
+                .requestedRole(request.getRequestedRole()).status(request.getStatus())
+                .notes(request.getNotes()).rejectionReason(request.getRejectionReason())
+                .createdAt(request.getCreatedAt()).updatedAt(request.getUpdatedAt())
+                .fullName(request.getFullName()).dateOfBirth(request.getDateOfBirth())
+                .phoneNumber(request.getPhoneNumber()).identityNumber(request.getIdentityNumber())
+                .weight(request.getWeight()).height(request.getHeight())
+                .licenseNumber(request.getLicenseNumber()).stableName(request.getStableName())
                 .stableAddress(request.getStableAddress())
                 .certificationNumber(request.getCertificationNumber())
                 .experienceYears(request.getExperienceYears())
-                .documentUrls(request.getDocumentUrls())
-                .build();
+                .documentUrls(request.getDocumentUrls()).build();
     }
 }
-

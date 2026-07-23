@@ -22,17 +22,13 @@ public class ReportResponse {
     private LocalDateTime createdAt;
 
     public static ReportResponse fromEntity(Report report) {
-        if (report == null) return null;
-        return ReportResponse.builder()
-                .id(report.getId())
-                .reporterId(report.getReporter().getId())
+        if (report == null)
+            return null;
+        return ReportResponse.builder().id(report.getId()).reporterId(report.getReporter().getId())
                 .reporterName(report.getReporter().getFullName())
                 .reportedUserId(report.getReportedUser().getId())
-                .reportedUserName(report.getReportedUser().getFullName())
-                .reason(report.getReason())
-                .description(report.getDescription())
-                .status(report.getStatus())
-                .createdAt(report.getCreatedAt())
-                .build();
+                .reportedUserName(report.getReportedUser().getFullName()).reason(report.getReason())
+                .description(report.getDescription()).status(report.getStatus())
+                .createdAt(report.getCreatedAt()).build();
     }
 }

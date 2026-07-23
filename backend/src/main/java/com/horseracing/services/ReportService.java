@@ -29,12 +29,8 @@ public class ReportService {
             throw new RuntimeException("You cannot report yourself");
         }
 
-        Report report = Report.builder()
-                .reporter(reporter)
-                .reportedUser(reportedUser)
-                .reason(request.getReason())
-                .description(request.getDescription())
-                .status("PENDING")
+        Report report = Report.builder().reporter(reporter).reportedUser(reportedUser)
+                .reason(request.getReason()).description(request.getDescription()).status("PENDING")
                 .build();
 
         report = reportRepository.save(report);

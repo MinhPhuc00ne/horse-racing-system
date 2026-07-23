@@ -115,7 +115,7 @@ function handleLogoutRedirect() {
 (async () => {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1500); // Timeout 1.5 seconds
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout 5 seconds
     await fetch('http://localhost:8080/api/tournaments', { 
       signal: controller.signal,
       mode: 'cors'

@@ -38,13 +38,15 @@ public class AdminBlacklistService {
 
         for (Blacklist bl : blacklists) {
             // Apply status filter if provided
-            if (statusFilter != null && !statusFilter.isBlank() && !"ALL".equalsIgnoreCase(statusFilter)) {
+            if (statusFilter != null && !statusFilter.isBlank()
+                    && !"ALL".equalsIgnoreCase(statusFilter)) {
                 if (!statusFilter.equalsIgnoreCase(bl.getStatus())) {
                     continue;
                 }
             }
             // Apply targetType filter if provided
-            if (targetTypeFilter != null && !targetTypeFilter.isBlank() && !"ALL".equalsIgnoreCase(targetTypeFilter)) {
+            if (targetTypeFilter != null && !targetTypeFilter.isBlank()
+                    && !"ALL".equalsIgnoreCase(targetTypeFilter)) {
                 if (!targetTypeFilter.equalsIgnoreCase(bl.getTargetType())) {
                     continue;
                 }
@@ -86,21 +88,12 @@ public class AdminBlacklistService {
                 }
             }
 
-            responses.add(BlacklistResponse.builder()
-                    .id(bl.getId())
-                    .targetType(bl.getTargetType())
-                    .targetId(bl.getTargetId())
-                    .targetName(targetName)
-                    .targetDetail(targetDetail)
-                    .reason(bl.getReason())
-                    .startDate(bl.getStartDate())
-                    .endDate(bl.getEndDate())
-                    .isPermanent(bl.getIsPermanent())
-                    .status(bl.getStatus())
-                    .createdAt(bl.getCreatedAt())
-                    .actionByEmail(actionByEmail)
-                    .actionByName(actionByName)
-                    .build());
+            responses.add(BlacklistResponse.builder().id(bl.getId()).targetType(bl.getTargetType())
+                    .targetId(bl.getTargetId()).targetName(targetName).targetDetail(targetDetail)
+                    .reason(bl.getReason()).startDate(bl.getStartDate()).endDate(bl.getEndDate())
+                    .isPermanent(bl.getIsPermanent()).status(bl.getStatus())
+                    .createdAt(bl.getCreatedAt()).actionByEmail(actionByEmail)
+                    .actionByName(actionByName).build());
         }
 
         // Sort by ID descending (newest first)
@@ -113,22 +106,14 @@ public class AdminBlacklistService {
         User admin = userRepository.findByEmail(adminEmail)
                 .orElseThrow(() -> new RuntimeException("Admin user not found"));
 
-        Blacklist blacklist = Blacklist.builder()
-                .targetType(request.getTargetType())
-                .targetId(request.getTargetId())
-                .reason(request.getReason())
-                .startDate(LocalDate.now())
-                .endDate(request.getEndDate())
-                .isPermanent(request.getIsPermanent())
-                .status("ACTIVE")
-                .build();
+        Blacklist blacklist = Blacklist.builder().targetType(request.getTargetType())
+                .targetId(request.getTargetId()).reason(request.getReason())
+                .startDate(LocalDate.now()).endDate(request.getEndDate())
+                .isPermanent(request.getIsPermanent()).status("ACTIVE").build();
         blacklist = blacklistRepository.save(blacklist);
 
-        BanHistory history = BanHistory.builder()
-                .blacklist(blacklist)
-                .actionBy(admin)
-                .actionNote(request.getReason())
-                .build();
+        BanHistory history = BanHistory.builder().blacklist(blacklist).actionBy(admin)
+                .actionNote(request.getReason()).build();
         banHistoryRepository.save(history);
 
         String targetName = "N/A";
@@ -143,12 +128,14 @@ public class AdminBlacklistService {
             targetName = target.getFullName();
             targetDetail = target.getEmail();
 
-            notificationService.sendNotification(
-                    target,
-                    "Account Suspended / Blacklisted",
-                    "Your account has been blacklisted by Admin. Reason: " + request.getReason() + ". Duration: " + (Boolean.TRUE.equals(request.getIsPermanent()) ? "Permanent" : request.getEndDate()) + ".",
-                    NotificationType.SYSTEM_ALERT
-            );
+            notificationService
+                    .sendNotification(target, "Account Suspended / Blacklisted",
+                            "Your account has been blacklisted by Admin. Reason: "
+                                    + request.getReason() + ". Duration: "
+                                    + (Boolean.TRUE.equals(request.getIsPermanent()) ? "Permanent"
+                                            : request.getEndDate())
+                                    + ".",
+                            NotificationType.SYSTEM_ALERT);
         } else if ("HORSE".equalsIgnoreCase(request.getTargetType())) {
             Horse target = horseRepository.findById(request.getTargetId())
                     .orElseThrow(() -> new RuntimeException("Target horse not found"));
@@ -158,52 +145,42 @@ public class AdminBlacklistService {
             targetName = target.getName();
             if (target.getOwner() != null && target.getOwner().getUser() != null) {
                 targetDetail = "Owner: " + target.getOwner().getUser().getFullName();
-                notificationService.sendNotification(
-                        target.getOwner().getUser(),
+                notificationService.sendNotification(target.getOwner().getUser(),
                         "Horse Blacklisted",
-                        "Your horse " + target.getName() + " has been blacklisted by Admin. Reason: " + request.getReason() + ".",
-                        NotificationType.SYSTEM_ALERT
-                );
+                        "Your horse " + target.getName()
+                                + " has been blacklisted by Admin. Reason: " + request.getReason()
+                                + ".",
+                        NotificationType.SYSTEM_ALERT);
             }
         }
 
-        return BlacklistResponse.builder()
-                .id(blacklist.getId())
-                .targetType(blacklist.getTargetType())
-                .targetId(blacklist.getTargetId())
-                .targetName(targetName)
-                .targetDetail(targetDetail)
-                .reason(blacklist.getReason())
-                .startDate(blacklist.getStartDate())
-                .endDate(blacklist.getEndDate())
-                .isPermanent(blacklist.getIsPermanent())
-                .status(blacklist.getStatus())
-                .createdAt(blacklist.getCreatedAt())
-                .actionByEmail(admin.getEmail())
-                .actionByName(admin.getFullName())
-                .build();
+        return BlacklistResponse.builder().id(blacklist.getId())
+                .targetType(blacklist.getTargetType()).targetId(blacklist.getTargetId())
+                .targetName(targetName).targetDetail(targetDetail).reason(blacklist.getReason())
+                .startDate(blacklist.getStartDate()).endDate(blacklist.getEndDate())
+                .isPermanent(blacklist.getIsPermanent()).status(blacklist.getStatus())
+                .createdAt(blacklist.getCreatedAt()).actionByEmail(admin.getEmail())
+                .actionByName(admin.getFullName()).build();
     }
 
     @Transactional
-    public BlacklistResponse unbanBlacklist(Integer id, String adminEmail, UnbanRequest unbanRequest) {
+    public BlacklistResponse unbanBlacklist(Integer id, String adminEmail,
+            UnbanRequest unbanRequest) {
         User admin = userRepository.findByEmail(adminEmail)
                 .orElseThrow(() -> new RuntimeException("Admin user not found"));
 
-        Blacklist blacklist = blacklistRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Blacklist record not found with ID: " + id));
+        Blacklist blacklist = blacklistRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("Blacklist record not found with ID: " + id));
 
         blacklist.setStatus("INACTIVE"); // Change status to INACTIVE (unban)
         blacklist = blacklistRepository.save(blacklist);
 
-        String note = (unbanRequest != null && unbanRequest.getReason() != null && !unbanRequest.getReason().isBlank())
-                ? "Unbanned: " + unbanRequest.getReason()
-                : "Unbanned by Admin";
+        String note = (unbanRequest != null && unbanRequest.getReason() != null
+                && !unbanRequest.getReason().isBlank()) ? "Unbanned: " + unbanRequest.getReason()
+                        : "Unbanned by Admin";
 
-        BanHistory history = BanHistory.builder()
-                .blacklist(blacklist)
-                .actionBy(admin)
-                .actionNote(note)
-                .build();
+        BanHistory history =
+                BanHistory.builder().blacklist(blacklist).actionBy(admin).actionNote(note).build();
         banHistoryRepository.save(history);
 
         String targetName = "N/A";
@@ -219,12 +196,11 @@ public class AdminBlacklistService {
                 targetName = target.getFullName();
                 targetDetail = target.getEmail();
 
-                notificationService.sendNotification(
-                        target,
+                notificationService.sendNotification(target,
                         "Account Unlocked / Removed from Blacklist",
-                        "Your account has been unlocked and removed from Blacklist by Admin. " + note,
-                        NotificationType.SYSTEM_ALERT
-                );
+                        "Your account has been unlocked and removed from Blacklist by Admin. "
+                                + note,
+                        NotificationType.SYSTEM_ALERT);
             }
         } else if ("HORSE".equalsIgnoreCase(blacklist.getTargetType())) {
             Optional<Horse> horseOpt = horseRepository.findById(blacklist.getTargetId());
@@ -236,30 +212,21 @@ public class AdminBlacklistService {
                 targetName = target.getName();
                 if (target.getOwner() != null && target.getOwner().getUser() != null) {
                     targetDetail = "Owner: " + target.getOwner().getUser().getFullName();
-                    notificationService.sendNotification(
-                            target.getOwner().getUser(),
+                    notificationService.sendNotification(target.getOwner().getUser(),
                             "Horse Removed from Blacklist",
-                            "Your horse " + target.getName() + " has been removed from Blacklist by Admin. " + note,
-                            NotificationType.SYSTEM_ALERT
-                    );
+                            "Your horse " + target.getName()
+                                    + " has been removed from Blacklist by Admin. " + note,
+                            NotificationType.SYSTEM_ALERT);
                 }
             }
         }
 
-        return BlacklistResponse.builder()
-                .id(blacklist.getId())
-                .targetType(blacklist.getTargetType())
-                .targetId(blacklist.getTargetId())
-                .targetName(targetName)
-                .targetDetail(targetDetail)
-                .reason(blacklist.getReason())
-                .startDate(blacklist.getStartDate())
-                .endDate(blacklist.getEndDate())
-                .isPermanent(blacklist.getIsPermanent())
-                .status(blacklist.getStatus())
-                .createdAt(blacklist.getCreatedAt())
-                .actionByEmail(admin.getEmail())
-                .actionByName(admin.getFullName())
-                .build();
+        return BlacklistResponse.builder().id(blacklist.getId())
+                .targetType(blacklist.getTargetType()).targetId(blacklist.getTargetId())
+                .targetName(targetName).targetDetail(targetDetail).reason(blacklist.getReason())
+                .startDate(blacklist.getStartDate()).endDate(blacklist.getEndDate())
+                .isPermanent(blacklist.getIsPermanent()).status(blacklist.getStatus())
+                .createdAt(blacklist.getCreatedAt()).actionByEmail(admin.getEmail())
+                .actionByName(admin.getFullName()).build();
     }
 }

@@ -52,12 +52,13 @@ public class AiChatService {
     private final RestTemplate restTemplate = createRestTemplateWithTimeout();
 
     private static RestTemplate createRestTemplateWithTimeout() {
-        org.springframework.http.client.SimpleClientHttpRequestFactory factory = 
-            new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory =
+                new org.springframework.http.client.SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(30000); // 30 seconds
-        factory.setReadTimeout(30000);    // 30 seconds
+        factory.setReadTimeout(30000); // 30 seconds
         return new RestTemplate(factory);
     }
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private String systemPrompt = "";
@@ -66,7 +67,8 @@ public class AiChatService {
     public void init() {
         try {
             Resource resource = resourceLoader.getResource("classpath:prompts/system-prompt.txt");
-            try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
+            try (Reader reader =
+                    new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
                 this.systemPrompt = FileCopyUtils.copyToString(reader);
                 log.info("Loaded System Prompt successfully.");
             }
@@ -85,7 +87,18 @@ public class AiChatService {
     }
 
     public String chat(String userMessage, java.util.Map<String, String> image, User user) {
-        if (geminiApiKey == null || geminiApiKey.isEmpty() || geminiApiKey.contains("your-gemini-api-key")) {
+        if (userMessage == null || userMessage.isBlank()) {
+            ObjectNode errorNode = objectMapper.createObjectNode();
+            errorNode.put("text", "Please provide a valid question or message.");
+            return errorNode.toString();
+        }
+
+        if (userMessage.length() > 2000) {
+            userMessage = userMessage.substring(0, 2000);
+        }
+
+        if (geminiApiKey == null || geminiApiKey.isEmpty()
+                || geminiApiKey.contains("your-gemini-api-key")) {
             return "{\"text\": \"Error: Gemini API Key is not configured. Please add GEMINI_API_KEY to environment variables.\" }";
         }
 
@@ -96,18 +109,16 @@ public class AiChatService {
                 if (image != null && image.get("data") != null) {
                     messageToSave += " [Attached Image]";
                 }
-                AiChatHistory userMsg = AiChatHistory.builder()
-                        .user(user)
-                        .sender("USER")
-                        .message(messageToSave)
-                        .build();
+                AiChatHistory userMsg = AiChatHistory.builder().user(user).sender("USER")
+                        .message(messageToSave).build();
                 aiChatHistoryRepository.save(userMsg);
             } catch (Exception e) {
                 log.error("Error saving user message to database", e);
             }
         }
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel + ":generateContent?key=" + geminiApiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel
+                + ":generateContent?key=" + geminiApiKey;
 
         try {
             ObjectNode rootNode = objectMapper.createObjectNode();
@@ -115,10 +126,11 @@ public class AiChatService {
             // 2. Customize System Instruction based on user role and data
             String rolePrompt;
             if (user == null) {
-                rolePrompt = """
-                        
-                        Current user role: GUEST (Unauthenticated).
-                        Instruction: Advise them to log in or register an account to access full features like detailed tournament view, betting, and profile management.""";
+                rolePrompt =
+                        """
+
+                                Current user role: GUEST (Unauthenticated).
+                                Instruction: Advise them to log in or register an account to access full features like detailed tournament view, betting, and profile management.""";
             } else {
                 Role role = user.getRole();
                 String balanceInfo = "";
@@ -128,7 +140,8 @@ public class AiChatService {
                     balanceInfo = " (Current wallet balance: " + balance + " VND)";
                 }
                 rolePrompt = "\nCurrent user role: " + role.name() + " (Authenticated).\n"
-                        + "Account info: Name: " + user.getFullName() + ", Email: " + user.getEmail() + balanceInfo + ".\n";
+                        + "Account info: Name: " + user.getFullName() + ", Email: "
+                        + user.getEmail() + balanceInfo + ".\n";
 
                 rolePrompt += switch (role) {
                     case SPECTATOR -> "Guide Spectator: Answer and guide them on placing bets, deposit/withdraw via PayOS, viewing betting history and transaction logs directly on their dashboard.";
@@ -157,7 +170,8 @@ public class AiChatService {
             // 3. Build the contents array containing conversation log (up to 50 messages)
             ArrayNode contentsArray = objectMapper.createArrayNode();
             if (user != null) {
-                List<AiChatHistory> history = aiChatHistoryRepository.findTop50ByUserIdOrderByCreatedAtDesc(user.getId());
+                List<AiChatHistory> history =
+                        aiChatHistoryRepository.findTop50ByUserIdOrderByCreatedAtDesc(user.getId());
                 Collections.reverse(history); // chronological order
 
                 String lastRole = null;
@@ -168,7 +182,8 @@ public class AiChatService {
                     String role = h.getSender().equalsIgnoreCase("USER") ? "user" : "model";
                     String rawMessage = h.getMessage();
                     String cleanMessage = rawMessage;
-                    if (rawMessage != null && rawMessage.trim().startsWith("{") && rawMessage.trim().endsWith("}")) {
+                    if (rawMessage != null && rawMessage.trim().startsWith("{")
+                            && rawMessage.trim().endsWith("}")) {
                         try {
                             JsonNode parsed = objectMapper.readTree(rawMessage);
                             if (parsed.has("text")) {
@@ -179,7 +194,8 @@ public class AiChatService {
                     }
 
                     if (role.equals(lastRole)) {
-                        // Merge text into the previous content object's parts to ensure strict alternation
+                        // Merge text into the previous content object's parts to ensure strict
+                        // alternation
                         if (lastPartsArray != null && lastPartsArray.size() > 0) {
                             ObjectNode textPart = (ObjectNode) lastPartsArray.get(0);
                             String existingText = textPart.path("text").asText("");
@@ -198,8 +214,10 @@ public class AiChatService {
                         contentsArray.add(contentObj);
                     }
 
-                    // Attach image to the current user's message (which is at the end of the history list)
-                    if (i == history.size() - 1 && role.equals("user") && image != null && image.get("data") != null) {
+                    // Attach image to the current user's message (which is at the end of the
+                    // history list)
+                    if (i == history.size() - 1 && role.equals("user") && image != null
+                            && image.get("data") != null) {
                         if (lastPartsArray != null) {
                             ObjectNode imagePart = objectMapper.createObjectNode();
                             ObjectNode inlineData = objectMapper.createObjectNode();
@@ -212,7 +230,8 @@ public class AiChatService {
                 }
 
                 // Remove leading "model" messages to ensure the conversation starts with "user"
-                while (contentsArray.size() > 0 && "model".equals(contentsArray.get(0).path("role").asText())) {
+                while (contentsArray.size() > 0
+                        && "model".equals(contentsArray.get(0).path("role").asText())) {
                     contentsArray.remove(0);
                 }
             } else {
@@ -256,7 +275,12 @@ public class AiChatService {
                     JsonNode firstCandidate = candidates.get(0);
                     JsonNode parts = firstCandidate.path("content").path("parts");
                     if (parts.isArray() && parts.size() > 0) {
-                        replyText = parts.get(0).path("text").asText();
+                        for (JsonNode part : parts) {
+                            if (part.has("text") && !part.get("text").asText().isEmpty()) {
+                                replyText = part.get("text").asText();
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -264,13 +288,10 @@ public class AiChatService {
             // 4. Save AI's response to database if authenticated
             if (user != null) {
                 try {
-                    AiChatHistory aiReply = AiChatHistory.builder()
-                            .user(user)
-                            .sender("AI")
-                            .message(replyText)
-                            .build();
+                    AiChatHistory aiReply = AiChatHistory.builder().user(user).sender("AI")
+                            .message(replyText).build();
                     aiChatHistoryRepository.save(aiReply);
-                    
+
                     // Maintain only last 50 messages
                     aiChatHistoryRepository.keepOnlyLast50Messages(user.getId());
                 } catch (Exception e) {
@@ -284,19 +305,22 @@ public class AiChatService {
             return wrappedResponse.toString();
 
         } catch (org.springframework.web.client.HttpStatusCodeException e) {
-            log.error("HTTP error calling Gemini API: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error("HTTP error calling Gemini API: {} - {}", e.getStatusCode(),
+                    e.getResponseBodyAsString());
             ObjectNode errorNode = objectMapper.createObjectNode();
             String userFriendlyMessage = switch (e.getStatusCode().value()) {
                 case 429 -> "The AI system is receiving too many requests. Please try again in a few minutes.";
                 case 503 -> "The AI service is busy or temporarily unavailable. Please try again shortly.";
-                default -> "A system error occurred while connecting to AI (Error code: " + e.getStatusCode().value() + "). Please try again later.";
+                default -> "A system error occurred while connecting to AI (Error code: "
+                        + e.getStatusCode().value() + "). Please try again later.";
             };
             errorNode.put("text", userFriendlyMessage);
             return errorNode.toString();
         } catch (JsonProcessingException | RestClientException e) {
             log.error("Error calling Gemini API", e);
             ObjectNode errorNode = objectMapper.createObjectNode();
-            errorNode.put("text", "An error occurred while connecting to AI. Please try again later.");
+            errorNode.put("text",
+                    "An error occurred while connecting to AI. Please try again later.");
             return errorNode.toString();
         }
     }

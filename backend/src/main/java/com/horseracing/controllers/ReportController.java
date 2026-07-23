@@ -20,10 +20,12 @@ public class ReportController {
     private final ReportService reportService;
 
     @PostMapping
-    public ResponseEntity<?> createReport(@RequestBody ReportRequest request, Authentication authentication) {
+    public ResponseEntity<?> createReport(@RequestBody ReportRequest request,
+            Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            ReportResponse response = reportService.createReport(userDetails.getUsername(), request);
+            ReportResponse response =
+                    reportService.createReport(userDetails.getUsername(), request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));

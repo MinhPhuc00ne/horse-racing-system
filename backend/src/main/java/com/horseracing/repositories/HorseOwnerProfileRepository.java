@@ -8,5 +8,6 @@ import java.util.Optional;
 
 public interface HorseOwnerProfileRepository extends JpaRepository<HorseOwnerProfile, Integer> {
     Optional<HorseOwnerProfile> findByUser(User user);
+
     Optional<HorseOwnerProfile> findByUserEmail(String email);
 }

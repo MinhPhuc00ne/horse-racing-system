@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface RaceTrackRepository extends JpaRepository<RaceTrack, Integer> {
     Optional<RaceTrack> findByName(String name);
+
     boolean existsByName(String name);
 }

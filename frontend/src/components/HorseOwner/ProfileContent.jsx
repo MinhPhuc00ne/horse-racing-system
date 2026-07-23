@@ -25,6 +25,39 @@ export default function ProfileContent() {
   const [bankAccountHolderName, setBankAccountHolderName] = useState('');
   const [loadingBank, setLoadingBank] = useState(true);
 
+  // Profile form state
+  const [formData, setFormData] = useState({
+    fullName: profile?.fullName || '',
+    phoneNumber: profile?.phoneNumber || '',
+    email: profile?.email || '',
+    avatar: profile?.avatar || '',
+    stableName: profile?.stableName || '',
+    stableAddress: profile?.stableAddress || '',
+    description: profile?.description || '',
+    identityNumber: profile?.identityNumber || '',
+    dateOfBirth: profile?.dateOfBirth || '',
+    avatarZoom: profile?.avatarZoom || 1,
+    avatarOffsetX: profile?.avatarOffsetX || 0,
+    avatarOffsetY: profile?.avatarOffsetY || 0,
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: profile.fullName || '',
+        phoneNumber: profile.phoneNumber || '',
+        email: profile.email || '',
+        avatar: profile.avatar || prev.avatar,
+        stableName: profile.stableName || '',
+        stableAddress: profile.stableAddress || '',
+        description: profile.description || '',
+        identityNumber: profile.identityNumber || '',
+        dateOfBirth: profile.dateOfBirth || '',
+      }));
+    }
+  }, [profile]);
+
   useEffect(() => {
     const loadUserBankInfo = async () => {
       try {

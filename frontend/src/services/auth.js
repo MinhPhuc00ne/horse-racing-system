@@ -69,6 +69,16 @@ export async function getProfileAPI() {
   }
 }
 
+export async function updateUserProfileAPI(profileData) {
+  try {
+    const response = await axiosClient.put('/auth/profile', profileData);
+    return response.data; // UserResponse
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Failed to update user profile.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
 export async function googleLoginAPI(credential) {
   try {
     const response = await axiosClient.post('/auth/google', {

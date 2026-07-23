@@ -38,7 +38,8 @@ public class RaceService {
         }
 
         // Validate time sequence
-        if (request.getStartTime().isAfter(request.getEndTime()) || request.getStartTime().equals(request.getEndTime())) {
+        if (request.getStartTime().isAfter(request.getEndTime())
+                || request.getStartTime().equals(request.getEndTime())) {
             throw new RuntimeException("Start time must be before end time");
         }
 
@@ -46,13 +47,15 @@ public class RaceService {
                 .orElseThrow(() -> new RuntimeException("Tournament not found"));
 
         // Validate only 1 race per tournament is allowed
-        List<Race> existingTournamentRaces = raceRepository.findByTournamentId(request.getTournamentId());
+        List<Race> existingTournamentRaces =
+                raceRepository.findByTournamentId(request.getTournamentId());
         if (!existingTournamentRaces.isEmpty()) {
-            throw new RuntimeException("This tournament already has a race. Only 1 race is allowed per tournament.");
+            throw new RuntimeException(
+                    "This tournament already has a race. Only 1 race is allowed per tournament.");
         }
 
         // Validate tournament is not already finished
-        if ("Finished".equalsIgnoreCase(tournament.getTournamentStatus()) 
+        if ("Finished".equalsIgnoreCase(tournament.getTournamentStatus())
                 || "Cancelled".equalsIgnoreCase(tournament.getTournamentStatus())) {
             throw new RuntimeException("Cannot create race for a finished or cancelled tournament");
         }
@@ -68,12 +71,15 @@ public class RaceService {
                 .orElseThrow(() -> new RuntimeException("Race track not found"));
 
         // Check for timing overlaps on the same track on the same date
-        List<Race> existingRaces = raceRepository.findByRaceTrackIdAndRaceDate(request.getRaceTrackId(), request.getRaceDate());
+        List<Race> existingRaces = raceRepository
+                .findByRaceTrackIdAndRaceDate(request.getRaceTrackId(), request.getRaceDate());
         for (Race existing : existingRaces) {
             // Check if time intervals [startTime, endTime] overlap:
             // new.startTime < existing.endTime && new.endTime > existing.startTime
-            if (request.getStartTime().isBefore(existing.getEndTime()) && request.getEndTime().isAfter(existing.getStartTime())) {
-                throw new RuntimeException("Race timing overlaps with another race on the same track");
+            if (request.getStartTime().isBefore(existing.getEndTime())
+                    && request.getEndTime().isAfter(existing.getStartTime())) {
+                throw new RuntimeException(
+                        "Race timing overlaps with another race on the same track");
             }
         }
 
@@ -82,24 +88,18 @@ public class RaceService {
             referee = userRepository.findById(request.getRefereeId()).orElse(null);
         }
         if (referee == null || referee.getRole() != Role.RACE_REFEREE) {
-            referee = userRepository.findByRole(Role.RACE_REFEREE).stream().findFirst().orElse(null);
+            referee =
+                    userRepository.findByRole(Role.RACE_REFEREE).stream().findFirst().orElse(null);
         }
 
-        Race race = Race.builder()
-                .raceName(request.getRaceName())
-                .tournament(tournament)
-                .raceTrack(raceTrack)
-                .raceDate(request.getRaceDate())
-                .startTime(request.getStartTime())
-                .endTime(request.getEndTime())
-                .raceRound(request.getRaceRound())
-                .maxHorses(request.getMaxHorses())
-                .distance(request.getDistance())
-                .surfaceType(request.getSurfaceType())
-                .weather(request.getWeather())
-                .status("OPEN_FOR_REGISTER") // Set to open automatically
-                .referee(referee)
-                .build();
+        Race race = Race.builder().raceName(request.getRaceName()).tournament(tournament)
+                .raceTrack(raceTrack).raceDate(request.getRaceDate())
+                .startTime(request.getStartTime()).endTime(request.getEndTime())
+                .raceRound(request.getRaceRound()).maxHorses(request.getMaxHorses())
+                .distance(request.getDistance()).surfaceType(request.getSurfaceType())
+                .weather(request.getWeather()).status("OPEN_FOR_REGISTER") // Set to open
+                                                                           // automatically
+                .referee(referee).build();
 
         race = raceRepository.save(race);
         return RaceResponse.fromEntity(race);
@@ -108,8 +108,7 @@ public class RaceService {
     @Transactional(readOnly = true)
     public List<RaceResponse> getRacesByTournamentId(Integer tournamentId) {
         return raceRepository.findByTournamentId(tournamentId).stream()
-                .map(RaceResponse::fromEntity)
-                .collect(Collectors.toList());
+                .map(RaceResponse::fromEntity).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -123,7 +122,6 @@ public class RaceService {
     public List<RaceResponse> getActiveRaces() {
         return raceRepository.findAll().stream()
                 .filter(r -> "RUNNING".equalsIgnoreCase(r.getStatus()))
-                .map(RaceResponse::fromEntity)
-                .collect(Collectors.toList());
+                .map(RaceResponse::fromEntity).collect(Collectors.toList());
     }
 }

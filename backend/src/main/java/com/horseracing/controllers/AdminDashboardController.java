@@ -40,7 +40,8 @@ public class AdminDashboardController {
         long tournamentsCount = tournamentRepository.count();
         long racesCount = raceRepository.count();
         long pendingUpgradesCount = upgradeRequestRepository.countByStatus(RequestStatus.PENDING);
-        long pendingWithdrawalsCount = walletTransactionRepository.countByTransactionTypeAndStatus("WITHDRAW", "PENDING");
+        long pendingWithdrawalsCount =
+                walletTransactionRepository.countByTransactionTypeAndStatus("WITHDRAW", "PENDING");
 
         // 2. User Role Distribution
         Map<String, Long> roleDistribution = new LinkedHashMap<>();
@@ -51,7 +52,8 @@ public class AdminDashboardController {
         roleDistribution.put("Admins", userRepository.countByRole(Role.ADMIN));
 
         // 3. Platform Revenue (10% commission on bets placed, aggregated by Month)
-        String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+        String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct",
+                "Nov", "Dec"};
         Map<String, BigDecimal> monthlyRevenueMap = new LinkedHashMap<>();
         for (String m : months) {
             monthlyRevenueMap.put(m, BigDecimal.ZERO);
@@ -61,7 +63,8 @@ public class AdminDashboardController {
         for (Bet bet : allBets) {
             if (bet.getCreatedAt() != null && bet.getAmount() != null) {
                 String mName = bet.getCreatedAt().getMonth().name();
-                String mLabel = mName.substring(0, 1).toUpperCase() + mName.substring(1, 3).toLowerCase();
+                String mLabel =
+                        mName.substring(0, 1).toUpperCase() + mName.substring(1, 3).toLowerCase();
                 if (monthlyRevenueMap.containsKey(mLabel)) {
                     BigDecimal commission = bet.getAmount().multiply(new BigDecimal("0.1"));
                     monthlyRevenueMap.put(mLabel, monthlyRevenueMap.get(mLabel).add(commission));
@@ -71,7 +74,8 @@ public class AdminDashboardController {
 
         List<AdminDashboardStatsResponse.RevenueDataPoint> revenueDataList = new ArrayList<>();
         for (String m : months) {
-            revenueDataList.add(new AdminDashboardStatsResponse.RevenueDataPoint(m, monthlyRevenueMap.get(m)));
+            revenueDataList.add(
+                    new AdminDashboardStatsResponse.RevenueDataPoint(m, monthlyRevenueMap.get(m)));
         }
 
         // 4. Bet Volume per Tournament
@@ -85,17 +89,21 @@ public class AdminDashboardController {
 
         List<AdminDashboardStatsResponse.BetVolumeDataPoint> betVolumeList = new ArrayList<>();
         for (Map.Entry<String, Long> entry : tournamentBetCountMap.entrySet()) {
-            betVolumeList.add(new AdminDashboardStatsResponse.BetVolumeDataPoint(entry.getKey(), entry.getValue()));
+            betVolumeList.add(new AdminDashboardStatsResponse.BetVolumeDataPoint(entry.getKey(),
+                    entry.getValue()));
         }
         if (betVolumeList.isEmpty()) {
-            betVolumeList.add(new AdminDashboardStatsResponse.BetVolumeDataPoint("No Data Available", 0L));
+            betVolumeList.add(
+                    new AdminDashboardStatsResponse.BetVolumeDataPoint("No Data Available", 0L));
         }
 
         // --- NEW METRIC 1: Horse Breeds Distribution ---
         Map<String, Long> breedDistribution = new LinkedHashMap<>();
         List<Horse> horses = horseRepository.findAll();
         for (Horse h : horses) {
-            String bName = (h.getBreed() != null && h.getBreed().getBreedName() != null) ? h.getBreed().getBreedName() : "Other";
+            String bName = (h.getBreed() != null && h.getBreed().getBreedName() != null)
+                    ? h.getBreed().getBreedName()
+                    : "Other";
             breedDistribution.put(bName, breedDistribution.getOrDefault(bName, 0L) + 1);
         }
 
@@ -104,7 +112,8 @@ public class AdminDashboardController {
         List<Race> races = raceRepository.findAll();
         for (Race r : races) {
             String statusName = r.getStatus() != null ? r.getStatus() : "UNKNOWN";
-            raceStatusDistribution.put(statusName, raceStatusDistribution.getOrDefault(statusName, 0L) + 1);
+            raceStatusDistribution.put(statusName,
+                    raceStatusDistribution.getOrDefault(statusName, 0L) + 1);
         }
 
         // --- NEW METRIC 3: Monthly Wallet Transactions Trend (Deposit vs Withdraw) ---
@@ -119,22 +128,26 @@ public class AdminDashboardController {
         for (WalletTransaction tx : txs) {
             if (tx.getCreatedAt() != null && tx.getAmount() != null) {
                 String mName = tx.getCreatedAt().getMonth().name();
-                String mLabel = mName.substring(0, 1).toUpperCase() + mName.substring(1, 3).toLowerCase();
+                String mLabel =
+                        mName.substring(0, 1).toUpperCase() + mName.substring(1, 3).toLowerCase();
                 if (monthlyDepositMap.containsKey(mLabel)) {
-                    if ("TOPUP".equalsIgnoreCase(tx.getTransactionType()) || "DEPOSIT".equalsIgnoreCase(tx.getTransactionType())) {
-                        monthlyDepositMap.put(mLabel, monthlyDepositMap.get(mLabel).add(tx.getAmount()));
+                    if ("TOPUP".equalsIgnoreCase(tx.getTransactionType())
+                            || "DEPOSIT".equalsIgnoreCase(tx.getTransactionType())) {
+                        monthlyDepositMap.put(mLabel,
+                                monthlyDepositMap.get(mLabel).add(tx.getAmount()));
                     } else if ("WITHDRAW".equalsIgnoreCase(tx.getTransactionType())) {
-                        monthlyWithdrawMap.put(mLabel, monthlyWithdrawMap.get(mLabel).add(tx.getAmount()));
+                        monthlyWithdrawMap.put(mLabel,
+                                monthlyWithdrawMap.get(mLabel).add(tx.getAmount()));
                     }
                 }
             }
         }
 
-        List<AdminDashboardStatsResponse.TransactionTrendDataPoint> transactionTrendList = new ArrayList<>();
+        List<AdminDashboardStatsResponse.TransactionTrendDataPoint> transactionTrendList =
+                new ArrayList<>();
         for (String m : months) {
-            transactionTrendList.add(new AdminDashboardStatsResponse.TransactionTrendDataPoint(
-                    m, monthlyDepositMap.get(m), monthlyWithdrawMap.get(m)
-            ));
+            transactionTrendList.add(new AdminDashboardStatsResponse.TransactionTrendDataPoint(m,
+                    monthlyDepositMap.get(m), monthlyWithdrawMap.get(m)));
         }
 
         // --- NEW METRIC 4: Top Tournaments by Prize Pool ---
@@ -145,28 +158,24 @@ public class AdminDashboardController {
             return p2.compareTo(p1);
         });
 
-        List<AdminDashboardStatsResponse.TournamentPrizeDataPoint> tournamentPrizesList = new ArrayList<>();
+        List<AdminDashboardStatsResponse.TournamentPrizeDataPoint> tournamentPrizesList =
+                new ArrayList<>();
         for (int i = 0; i < Math.min(5, tournaments.size()); i++) {
             Tournament t = tournaments.get(i);
             BigDecimal pool = t.getTotalPrize() != null ? t.getTotalPrize() : BigDecimal.ZERO;
-            tournamentPrizesList.add(new AdminDashboardStatsResponse.TournamentPrizeDataPoint(t.getTournamentName(), pool));
+            tournamentPrizesList.add(new AdminDashboardStatsResponse.TournamentPrizeDataPoint(
+                    t.getTournamentName(), pool));
         }
 
         // Build Response
         AdminDashboardStatsResponse response = AdminDashboardStatsResponse.builder()
-                .usersCount(usersCount)
-                .tournamentsCount(tournamentsCount)
-                .racesCount(racesCount)
+                .usersCount(usersCount).tournamentsCount(tournamentsCount).racesCount(racesCount)
                 .pendingUpgradesCount(pendingUpgradesCount)
-                .pendingWithdrawalsCount(pendingWithdrawalsCount)
-                .roleDistribution(roleDistribution)
-                .revenueData(revenueDataList)
-                .betVolumeData(betVolumeList)
-                .breedDistribution(breedDistribution)
-                .raceStatusDistribution(raceStatusDistribution)
+                .pendingWithdrawalsCount(pendingWithdrawalsCount).roleDistribution(roleDistribution)
+                .revenueData(revenueDataList).betVolumeData(betVolumeList)
+                .breedDistribution(breedDistribution).raceStatusDistribution(raceStatusDistribution)
                 .transactionTrendData(transactionTrendList)
-                .tournamentPrizesData(tournamentPrizesList)
-                .build();
+                .tournamentPrizesData(tournamentPrizesList).build();
 
         return ResponseEntity.ok(response);
     }
