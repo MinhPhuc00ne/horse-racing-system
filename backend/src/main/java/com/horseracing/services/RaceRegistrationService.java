@@ -89,6 +89,8 @@ public class RaceRegistrationService {
         LocalDateTime now = LocalDateTime.now();
         Tournament tournament = race.getTournament();
         if (tournament.getRegistrationOpeningTime() != null
+                && !"OPEN_FOR_REGISTER".equalsIgnoreCase(tournament.getTournamentStatus())
+                && !"ACTIVE".equalsIgnoreCase(tournament.getTournamentStatus())
                 && now.isBefore(tournament.getRegistrationOpeningTime())) {
             throw new RuntimeException("Registration has not opened yet");
         }
@@ -432,6 +434,8 @@ public class RaceRegistrationService {
         LocalDateTime now = LocalDateTime.now();
         Tournament tournament = registration.getRace().getTournament();
         if (tournament.getRegistrationOpeningTime() != null
+                && !"OPEN_FOR_REGISTER".equalsIgnoreCase(tournament.getTournamentStatus())
+                && !"ACTIVE".equalsIgnoreCase(tournament.getTournamentStatus())
                 && now.isBefore(tournament.getRegistrationOpeningTime())) {
             throw new RuntimeException("Registration has not opened yet");
         }

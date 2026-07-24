@@ -80,7 +80,7 @@ export default function TournamentsPanel() {
   const [formData, setFormData] = useState(initialFormState);
 
   const handleGenderCheckboxChange = (gender, checked) => {
-    let currentGenders = formData.allowedGenders 
+    let currentGenders = formData.allowedGenders
       ? formData.allowedGenders.split(',').map(g => g.trim().toUpperCase()).filter(Boolean)
       : [];
     if (checked) {
@@ -96,11 +96,11 @@ export default function TournamentsPanel() {
     }));
   };
 
-  const isMaleChecked = formData.allowedGenders 
+  const isMaleChecked = formData.allowedGenders
     ? formData.allowedGenders.split(',').map(g => g.trim().toUpperCase()).includes('MALE')
     : false;
 
-  const isFemaleChecked = formData.allowedGenders 
+  const isFemaleChecked = formData.allowedGenders
     ? formData.allowedGenders.split(',').map(g => g.trim().toUpperCase()).includes('FEMALE')
     : false;
 
@@ -279,11 +279,69 @@ export default function TournamentsPanel() {
     try {
       if (isEditing) {
         const currentT = tournaments.find(t => t.id === editId);
-        const isUpcoming = currentT && (currentT.tournamentStatus === 'Upcoming' || !currentT.tournamentStatus);
-        
+        if (!currentT) return;
+
+        const status = (currentT.tournamentStatus || 'Upcoming').toUpperCase();
+        const isUpcoming = status === 'UPCOMING';
+        const isActive = status === 'ACTIVE' || status === 'OPEN_FOR_REGISTER';
+        const isFinished = status === 'FINISHED' || status === 'COMPLETED';
+        const isCancelled = status === 'CANCELLED';
+
+        // Helper to check if dates match (comparing up to minute level YYYY-MM-DDTHH:mm)
+        const datesMatch = (d1, d2) => {
+          if (!d1 && !d2) return true;
+          if (!d1 || !d2) return false;
+          return d1.substring(0, 16) === d2.substring(0, 16);
+        };
+
+        const otherFieldsChanged =
+          (formData.tournamentName ?? '') !== (currentT.tournamentName ?? '') ||
+          (formData.description ?? '') !== (currentT.description ?? '') ||
+          !datesMatch(formData.registrationDeadline, currentT.registrationDeadline) ||
+          !datesMatch(formData.registrationOpeningTime, currentT.registrationOpeningTime) ||
+          !datesMatch(formData.officialRaceTime, currentT.officialRaceTime) ||
+          Number(formData.maxSlots) !== Number(currentT.maxSlots) ||
+          Number(formData.minSlots) !== Number(currentT.minSlots) ||
+          (formData.allowedClasses ?? '') !== (currentT.allowedClasses ?? '') ||
+          Number(formData.prizeFirst) !== Number(currentT.prizeFirst) ||
+          Number(formData.prizeSecond) !== Number(currentT.prizeSecond) ||
+          Number(formData.prizeThird) !== Number(currentT.prizeThird) ||
+          Number(formData.minBetAmount) !== Number(currentT.minBetAmount) ||
+          Number(formData.entryFee) !== Number(currentT.entryFee) ||
+          (formData.surfaceType ?? 'Grass') !== (currentT.surfaceType ?? 'Grass') ||
+          (formData.distance ? Number(formData.distance) : '') !== (currentT.distance ? Number(currentT.distance) : '') ||
+          (selectedTrack ? selectedTrack.name : '') !== (currentT.location ?? '');
+
+        const refereeChanged = Number(formData.refereeId) !== Number(currentT.refereeId);
+
+        // 1. Reject editing details other than Referee for Active, Finished, Cancelled
+        if (otherFieldsChanged && (isActive || isFinished || isCancelled)) {
+          setFeedbackModal({
+            show: true,
+            type: 'error',
+            message: 'Cannot edit tournament details once it is Active, Finished, or Cancelled.',
+          });
+          return;
+        }
+
+        // 2. Changing referee is only allowed for Upcoming & Active status (Reject for Finished & Cancelled)
+        if (refereeChanged && (isFinished || isCancelled)) {
+          setFeedbackModal({
+            show: true,
+            type: 'error',
+            message: 'Cannot assign or change referee for Finished or Cancelled tournaments.',
+          });
+          return;
+        }
+
+        // 3. Process API call
         if (!isUpcoming) {
-          await assignRefereeAPI(editId, formattedData.refereeId);
-          setFeedbackModal({ show: true, type: 'success', message: 'Referee assigned/updated successfully for Active tournament!' });
+          if (refereeChanged) {
+            await assignRefereeAPI(editId, formattedData.refereeId);
+            setFeedbackModal({ show: true, type: 'success', message: 'Referee assigned/updated successfully for Active tournament!' });
+          } else {
+            setFeedbackModal({ show: true, type: 'success', message: 'No changes detected.' });
+          }
         } else {
           await updateTournamentAPI(editId, formattedData);
           setFeedbackModal({ show: true, type: 'success', message: 'Tournament updated successfully!' });
@@ -1126,11 +1184,11 @@ export default function TournamentsPanel() {
 
       {/* Filter & Search Toolbar */}
       <div className="glass-card mb-2 p-3" style={{ border: '1px solid var(--ho-border-gold)', borderRadius: '12px' }}>
-        <div 
-          style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
             cursor: 'pointer',
             paddingBottom: isFilterCollapsed ? '0px' : '12px',
             borderBottom: isFilterCollapsed ? 'none' : '1px solid rgba(212, 175, 55, 0.2)'
@@ -1150,121 +1208,121 @@ export default function TournamentsPanel() {
 
         {!isFilterCollapsed && (
           <div className="row g-3" style={{ marginTop: '10px' }}>
-          {/* Search Name */}
-          <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search by Tournament Name</label>
-            <input
-              type="text"
-              className="ho-form-input text-dark fw-semibold"
-              placeholder="Enter tournament name..."
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-              style={{ fontSize: '13px', height: '38px' }}
-            />
-          </div>
+            {/* Search Name */}
+            <div className="col-12 col-md-3">
+              <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search by Tournament Name</label>
+              <input
+                type="text"
+                className="ho-form-input text-dark fw-semibold"
+                placeholder="Enter tournament name..."
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                style={{ fontSize: '13px', height: '38px' }}
+              />
+            </div>
 
-          {/* Search Location */}
-          <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search by Location</label>
-            <input
-              type="text"
-              className="ho-form-input text-dark fw-semibold"
-              placeholder="Enter location, track..."
-              value={searchLocation}
-              onChange={(e) => setSearchLocation(e.target.value)}
-              style={{ fontSize: '13px', height: '38px' }}
-            />
-          </div>
+            {/* Search Location */}
+            <div className="col-12 col-md-3">
+              <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search by Location</label>
+              <input
+                type="text"
+                className="ho-form-input text-dark fw-semibold"
+                placeholder="Enter location, track..."
+                value={searchLocation}
+                onChange={(e) => setSearchLocation(e.target.value)}
+                style={{ fontSize: '13px', height: '38px' }}
+              />
+            </div>
 
-          {/* Filter Status */}
-          <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tournament Status</label>
-            <select
-              className="ho-form-input text-dark fw-semibold"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ fontSize: '13px', height: '38px', paddingRight: '24px' }}
-            >
-              <option value="">All Statuses</option>
-              <option value="Upcoming">Upcoming</option>
-              <option value="Active">Active</option>
-              <option value="Finished">Finished</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-          </div>
+            {/* Filter Status */}
+            <div className="col-12 col-md-3">
+              <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tournament Status</label>
+              <select
+                className="ho-form-input text-dark fw-semibold"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                style={{ fontSize: '13px', height: '38px', paddingRight: '24px' }}
+              >
+                <option value="">All Statuses</option>
+                <option value="Upcoming">Upcoming</option>
+                <option value="Active">Active</option>
+                <option value="Finished">Finished</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
 
-          {/* Date range from */}
-          <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Start Date</label>
-            <input
-              type="date"
-              className="ho-form-input text-dark fw-semibold"
-              value={startDateFilter}
-              onChange={(e) => setStartDateFilter(e.target.value)}
-              style={{ fontSize: '13px', height: '38px' }}
-            />
-          </div>
+            {/* Date range from */}
+            <div className="col-12 col-md-3">
+              <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Start Date</label>
+              <input
+                type="date"
+                className="ho-form-input text-dark fw-semibold"
+                value={startDateFilter}
+                onChange={(e) => setStartDateFilter(e.target.value)}
+                style={{ fontSize: '13px', height: '38px' }}
+              />
+            </div>
 
-          {/* Date range to */}
-          <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>End Date</label>
-            <input
-              type="date"
-              className="ho-form-input text-dark fw-semibold"
-              value={endDateFilter}
-              onChange={(e) => setEndDateFilter(e.target.value)}
-              style={{ fontSize: '13px', height: '38px' }}
-            />
-          </div>
+            {/* Date range to */}
+            <div className="col-12 col-md-3">
+              <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>End Date</label>
+              <input
+                type="date"
+                className="ho-form-input text-dark fw-semibold"
+                value={endDateFilter}
+                onChange={(e) => setEndDateFilter(e.target.value)}
+                style={{ fontSize: '13px', height: '38px' }}
+              />
+            </div>
 
-          {/* Min Prize Filter */}
-          <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Min First Prize (VND)</label>
-            <input
-              type="number"
-              className="ho-form-input text-dark fw-semibold"
-              placeholder="e.g., 5000000"
-              value={minPrizeFilter}
-              onChange={(e) => setMinPrizeFilter(e.target.value)}
-              style={{ fontSize: '13px', height: '38px' }}
-            />
-          </div>
+            {/* Min Prize Filter */}
+            <div className="col-12 col-md-3">
+              <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Min First Prize (VND)</label>
+              <input
+                type="number"
+                className="ho-form-input text-dark fw-semibold"
+                placeholder="e.g., 5000000"
+                value={minPrizeFilter}
+                onChange={(e) => setMinPrizeFilter(e.target.value)}
+                style={{ fontSize: '13px', height: '38px' }}
+              />
+            </div>
 
-          {/* Max Prize Filter */}
-          <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Max First Prize (VND)</label>
-            <input
-              type="number"
-              className="ho-form-input text-dark fw-semibold"
-              placeholder="e.g., 15000000"
-              value={maxPrizeFilter}
-              onChange={(e) => setMaxPrizeFilter(e.target.value)}
-              style={{ fontSize: '13px', height: '38px' }}
-            />
-          </div>
+            {/* Max Prize Filter */}
+            <div className="col-12 col-md-3">
+              <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Max First Prize (VND)</label>
+              <input
+                type="number"
+                className="ho-form-input text-dark fw-semibold"
+                placeholder="e.g., 15000000"
+                value={maxPrizeFilter}
+                onChange={(e) => setMaxPrizeFilter(e.target.value)}
+                style={{ fontSize: '13px', height: '38px' }}
+              />
+            </div>
 
-          {/* Clear Filter Button */}
-          <div className="col-12 col-md-3 d-flex align-items-end">
-            <button
-              type="button"
-              className="btn btn-outline-secondary w-100 fw-bold d-flex align-items-center justify-content-center gap-2"
-              onClick={() => {
-                setSearchName('');
-                setSearchLocation('');
-                setStatusFilter('');
-                setStartDateFilter('');
-                setEndDateFilter('');
-                setMinPrizeFilter('');
-                setMaxPrizeFilter('');
-              }}
-              style={{ height: '38px', fontSize: '13px', borderRadius: '8px' }}
-            >
-              Reset
-            </button>
+            {/* Clear Filter Button */}
+            <div className="col-12 col-md-3 d-flex align-items-end">
+              <button
+                type="button"
+                className="btn btn-outline-secondary w-100 fw-bold d-flex align-items-center justify-content-center gap-2"
+                onClick={() => {
+                  setSearchName('');
+                  setSearchLocation('');
+                  setStatusFilter('');
+                  setStartDateFilter('');
+                  setEndDateFilter('');
+                  setMinPrizeFilter('');
+                  setMaxPrizeFilter('');
+                }}
+                style={{ height: '38px', fontSize: '13px', borderRadius: '8px' }}
+              >
+                Reset
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
 
       {/* Tournaments List Grid */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
