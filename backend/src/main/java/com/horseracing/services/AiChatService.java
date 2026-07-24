@@ -155,9 +155,8 @@ public class AiChatService {
 
             String finalSystemInstruction = this.systemPrompt + "\n" + rolePrompt + "\n"
                     + "IMPORTANT OUTPUT CONSTRAINTS:\n"
-                    + "- AUTOMATICALLY DETECT user language and respond in the SAME language (Vietnamese preferred for Vietnamese queries).\n"
-                    + "- If user is missing required fields for an action (e.g. deposit amount, bank name/account number), ask in text for missing info FIRST.\n"
-                    + "- When performing form fill / action, reply with structured JSON containing 'text' and 'action'.\n"
+                    + "- Respond in clear English text or standard Markdown format.\n"
+                    + "- DO NOT output raw JSON containing structured action commands unless required.\n"
                     + "- Assist strictly on Horse Racing Management System features. Politely decline off-topic queries.";
 
             ObjectNode systemInstruction = objectMapper.createObjectNode();
@@ -168,15 +167,12 @@ public class AiChatService {
             systemInstruction.set("parts", sysParts);
             rootNode.set("system_instruction", systemInstruction);
 
-            // 3. Build the contents array containing conversation log (up to 10 latest messages for performance)
+            // 3. Build the contents array containing conversation log (up to 50 messages)
             ArrayNode contentsArray = objectMapper.createArrayNode();
             if (user != null) {
                 List<AiChatHistory> history =
                         aiChatHistoryRepository.findTop50ByUserIdOrderByCreatedAtDesc(user.getId());
                 Collections.reverse(history); // chronological order
-                if (history.size() > 10) {
-                    history = history.subList(history.size() - 10, history.size());
-                }
 
                 String lastRole = null;
                 ArrayNode lastPartsArray = null;
@@ -218,7 +214,8 @@ public class AiChatService {
                         contentsArray.add(contentObj);
                     }
 
-                    // Attach image to the current user's message
+                    // Attach image to the current user's message (which is at the end of the
+                    // history list)
                     if (i == history.size() - 1 && role.equals("user") && image != null
                             && image.get("data") != null) {
                         if (lastPartsArray != null) {
@@ -232,7 +229,7 @@ public class AiChatService {
                     }
                 }
 
-                // Remove leading "model" messages to ensure conversation starts with "user"
+                // Remove leading "model" messages to ensure the conversation starts with "user"
                 while (contentsArray.size() > 0
                         && "model".equals(contentsArray.get(0).path("role").asText())) {
                     contentsArray.remove(0);
@@ -269,7 +266,7 @@ public class AiChatService {
 
             ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
 
-            String replyText = "Xin lỗi, hiện tại không thể kết nối tới trợ lý AI.";
+            String replyText = "Sorry, I am unable to get a response from AI at this moment.";
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 JsonNode jsonResponse = objectMapper.readTree(response.getBody());
@@ -302,8 +299,10 @@ public class AiChatService {
                 }
             }
 
-            // 5. Parse reply text for Action JSON vs Plain Text
-            return buildStructuredResponse(replyText);
+            // 5. Structure response for the client (JSON Wrapping)
+            ObjectNode wrappedResponse = objectMapper.createObjectNode();
+            wrappedResponse.put("text", replyText);
+            return wrappedResponse.toString();
 
         } catch (org.springframework.web.client.HttpStatusCodeException e) {
             log.error("HTTP error calling Gemini API: {} - {}", e.getStatusCode(),
@@ -324,47 +323,5 @@ public class AiChatService {
                     "An error occurred while connecting to AI. Please try again later.");
             return errorNode.toString();
         }
-    }
-
-    private String buildStructuredResponse(String replyText) {
-        if (replyText == null || replyText.isBlank()) {
-            ObjectNode res = objectMapper.createObjectNode();
-            res.put("text", "Không nhận được phản hồi từ AI.");
-            res.set("action", null);
-            return res.toString();
-        }
-
-        String cleaned = replyText.trim();
-        if (cleaned.startsWith("```json")) {
-            cleaned = cleaned.substring(7);
-        } else if (cleaned.startsWith("```")) {
-            cleaned = cleaned.substring(3);
-        }
-        if (cleaned.endsWith("```")) {
-            cleaned = cleaned.substring(0, cleaned.length() - 3);
-        }
-        cleaned = cleaned.trim();
-
-        if (cleaned.startsWith("{") && cleaned.endsWith("}")) {
-            try {
-                JsonNode parsed = objectMapper.readTree(cleaned);
-                if (parsed.has("text")) {
-                    ObjectNode res = objectMapper.createObjectNode();
-                    res.put("text", parsed.get("text").asText());
-                    if (parsed.has("action") && !parsed.get("action").isNull()) {
-                        res.set("action", parsed.get("action"));
-                    } else {
-                        res.set("action", null);
-                    }
-                    return res.toString();
-                }
-            } catch (Exception ignored) {
-            }
-        }
-
-        ObjectNode res = objectMapper.createObjectNode();
-        res.put("text", replyText);
-        res.set("action", null);
-        return res.toString();
     }
 }
