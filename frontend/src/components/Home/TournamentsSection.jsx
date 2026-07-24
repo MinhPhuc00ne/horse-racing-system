@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import tournament1 from '../../assets/background1.jpg';
 import tournament2 from '../../assets/background2.jpg';
@@ -30,33 +30,46 @@ const defaultMockTournaments = [
 
 export default function TournamentsSection({ tournaments = [] }) {
   const navigate = useNavigate();
+  const [startIndex, setStartIndex] = useState(0);
 
-  // Logic to merge real and mock data
-  const realActiveUpcoming = tournaments.filter(
-    t => t.tournamentStatus === 'Active' || t.tournamentStatus === 'OPEN_FOR_REGISTER' || t.tournamentStatus === 'Upcoming'
-  );
-  
-  const realOthers = tournaments.filter(
-    t => !(t.tournamentStatus === 'Active' || t.tournamentStatus === 'OPEN_FOR_REGISTER' || t.tournamentStatus === 'Upcoming')
-  );
-
-  const combinedReal = [...realActiveUpcoming, ...realOthers];
+  // Logic to merge real and mock data - any tournament status is fine
+  const combinedReal = tournaments;
+  const totalItemsCount = 6;
+  const maxIndex = totalItemsCount - 3; // 3 visible cards at a time
 
   const displayList = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < totalItemsCount; i++) {
     if (combinedReal[i]) {
       const t = combinedReal[i];
       displayList.push({
-        image: i === 0 ? tournament1 : i === 1 ? tournament2 : tournament3,
-        tag: t.tournamentStatus === 'Active' || t.tournamentStatus === 'OPEN_FOR_REGISTER' ? 'Open for Betting' : (t.tournamentStatus === 'Finished' ? 'Finished' : 'Upcoming'),
+        image: i % 3 === 0 ? tournament1 : i % 3 === 1 ? tournament2 : tournament3,
+        tag: (() => {
+          const s = t.tournamentStatus?.toUpperCase();
+          if (s === 'ACTIVE' || s === 'OPEN_FOR_REGISTER') return 'Open for Betting';
+          if (s === 'FINISHED' || s === 'COMPLETED') return 'Finished';
+          return 'Upcoming';
+        })(),
         title: t.tournamentName,
         location: t.location || 'System Racetrack',
         pool: t.totalPrize ? `${t.totalPrize.toLocaleString()} VND` : '0 VND',
       });
     } else {
-      displayList.push(defaultMockTournaments[i]);
+      // pad with mock data
+      const mockIndex = i % defaultMockTournaments.length;
+      displayList.push(defaultMockTournaments[mockIndex]);
     }
   }
+
+  const handlePrev = () => {
+    setStartIndex((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleNext = () => {
+    setStartIndex((prev) => Math.min(prev + 1, maxIndex));
+  };
+
+  // Get currently visible cards
+  const visibleTournaments = displayList.slice(startIndex, startIndex + 3);
 
   return (
     <section id="tournaments" className="tournaments-section" aria-label="Upcoming tournaments">
@@ -65,15 +78,31 @@ export default function TournamentsSection({ tournaments = [] }) {
           <h2 className="section-main-title">Upcoming Tournaments</h2>
           <p className="section-subtitle">The most prestigious events in the racing calendar.</p>
         </div>
-        <div className="carousel-controls" aria-hidden="true">
-          <button className="control-btn" type="button">‹</button>
-          <button className="control-btn" type="button">›</button>
+        <div className="carousel-controls">
+          <button 
+            className="control-btn" 
+            type="button" 
+            onClick={handlePrev}
+            disabled={startIndex === 0}
+            style={{ opacity: startIndex === 0 ? 0.35 : 1, cursor: startIndex === 0 ? 'not-allowed' : 'pointer' }}
+          >
+            ‹
+          </button>
+          <button 
+            className="control-btn" 
+            type="button" 
+            onClick={handleNext}
+            disabled={startIndex === maxIndex}
+            style={{ opacity: startIndex === maxIndex ? 0.35 : 1, cursor: startIndex === maxIndex ? 'not-allowed' : 'pointer' }}
+          >
+            ›
+          </button>
         </div>
       </div>
 
       <div className="tournaments-grid">
-        {displayList.map((tournament, idx) => (
-          <article className="tournament-card" key={idx}>
+        {visibleTournaments.map((tournament, idx) => (
+          <article className="tournament-card" key={startIndex + idx}>
             <img src={tournament.image} alt={tournament.title} className="tournament-card-img" />
             <div className="tournament-card-overlay" />
             <div className="tournament-card-content">
