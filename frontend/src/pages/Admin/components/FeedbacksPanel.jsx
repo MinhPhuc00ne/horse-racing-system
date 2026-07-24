@@ -130,8 +130,8 @@ export default function FeedbacksPanel() {
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaCommentDots style={{ color: 'var(--ho-accent-gold-text)' }} /> Receive & Respond to Feedback (Feedbacks)
+        <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <FaCommentDots style={{ color: '#d4af37' }} /> Receive & Respond to Feedback (Feedbacks)
         </h2>
       </div>
 
@@ -140,25 +140,25 @@ export default function FeedbacksPanel() {
         <div className="row g-3">
           {/* Search Term */}
           <div className="col-12 col-md-5">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search Feedback</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#cbd5e1' }}>Search Feedback</label>
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
-                className="ho-form-input text-dark fw-semibold"
+                className="ho-form-input fw-semibold"
                 placeholder="Search by name, email, subject, content..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ fontSize: '13px', height: '38px', paddingLeft: '35px' }}
               />
-              <FaSearch style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--ho-text-muted)', fontSize: '14px' }} />
+              <FaSearch style={{ position: 'absolute', left: '12px', top: '12px', color: '#d4af37', fontSize: '14px' }} />
             </div>
           </div>
 
-          {/* Role Filter */}
+          {/* Sender Role Filter */}
           <div className="col-12 col-md-3">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sender Role</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#cbd5e1' }}>Sender Role</label>
             <select
-              className="ho-form-input text-dark fw-semibold"
+              className="ho-form-input fw-semibold"
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
               style={{ fontSize: '13px', height: '38px' }}
@@ -174,9 +174,9 @@ export default function FeedbacksPanel() {
 
           {/* Status Filter */}
           <div className="col-12 col-md-2">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#cbd5e1' }}>Status</label>
             <select
-              className="ho-form-input text-dark fw-semibold"
+              className="ho-form-input fw-semibold"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               style={{ fontSize: '13px', height: '38px' }}
@@ -192,7 +192,7 @@ export default function FeedbacksPanel() {
           <div className="col-12 col-md-2 d-flex align-items-end">
             <button
               type="button"
-              className="btn btn-outline-secondary w-100 fw-bold d-flex align-items-center justify-content-center"
+              className="btn btn-outline-light w-100 fw-bold d-flex align-items-center justify-content-center"
               onClick={() => {
                 setSearchTerm('');
                 setRoleFilter('');
@@ -208,44 +208,44 @@ export default function FeedbacksPanel() {
 
       {/* Main Feedback List Section */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: 'var(--ho-primary-dark)', margin: 0 }}>
+        <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: '#d4af37', margin: 0 }}>
           Feedback List ({feedbacks.length})
         </h3>
 
-        <div style={{ overflowX: 'auto', background: '#ffffff', border: '1px solid var(--ho-border-gold)', borderRadius: '12px' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+        <div style={{ overflowX: 'auto', background: 'rgba(12, 34, 20, 0.85)', border: '1px solid var(--ho-border-gold)', borderRadius: '12px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px', color: '#ffffff' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--ho-border-gold)', background: 'rgba(0,56,32,0.04)' }}>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Feedback ID</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Contributor</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Role</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Subject</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Submit Time</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Status</th>
-                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Actions</th>
+              <tr style={{ borderBottom: '1px solid var(--ho-border-gold)', background: 'rgba(0,0,0,0.2)' }}>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Feedback ID</th>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Contributor</th>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Role</th>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Subject</th>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Submit Time</th>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Status</th>
+                <th style={{ padding: '16px', textAlign: 'center', color: '#d4af37', fontWeight: '700' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '30px', textAlign: 'center', color: 'var(--ho-primary-dark)', fontWeight: '600' }}>
+                  <td colSpan={7} style={{ padding: '30px', textAlign: 'center', color: '#cbd5e1', fontWeight: '600' }}>
                     Loading feedback data...
                   </td>
                 </tr>
               ) : feedbacks.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '24px', textAlign: 'center', color: 'var(--ho-text-muted)' }}>
+                  <td colSpan={7} style={{ padding: '24px', textAlign: 'center', color: '#cbd5e1' }}>
                     No feedback recorded matches the filters.
                   </td>
                 </tr>
               ) : (
                 feedbacks.map((fb) => (
-                  <tr key={fb.id} style={{ borderBottom: '1px solid var(--ho-border-muted)', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 56, 32, 0.02)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                    <td style={{ padding: '16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>#{fb.id}</td>
+                  <tr key={fb.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                    <td style={{ padding: '16px', fontWeight: '700', color: '#ffffff' }}>#{fb.id}</td>
                     <td style={{ padding: '16px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ color: 'var(--ho-text-dark)', fontWeight: '600' }}>{fb.userFullName || 'Anonymous'}</span>
-                        <span style={{ color: 'var(--ho-text-muted)', fontSize: '12px' }}>{fb.userEmail || ''}</span>
+                        <span style={{ color: '#ffffff', fontWeight: '600' }}>{fb.userFullName || 'Anonymous'}</span>
+                        <span style={{ color: '#cbd5e1', fontSize: '12px' }}>{fb.userEmail || ''}</span>
                       </div>
                     </td>
                     <td style={{ padding: '16px' }}>

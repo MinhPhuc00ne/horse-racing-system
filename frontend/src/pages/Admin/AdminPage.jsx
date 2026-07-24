@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import '../Horse-Owner/HorseOwner.css'; // Reuses HorseOwner premium CSS variables and styles
+import './AdminTheme.css'; // High contrast overrides for Admin Dark Theme
 
 // Import Admin content panels
 import AdminDashboardContent from '../../components/Admin/AdminDashboardContent';

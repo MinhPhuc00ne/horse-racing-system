@@ -95,14 +95,14 @@ export default function ConfirmResults() {
     <>
       <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
         <div className="mb-4">
-          <h2 className="ho-font-epilogue fs-3 fw-bold text-dark mb-1">Confirm Results</h2>
-          <p className="text-secondary small">Review race outcomes and authorize prize distribution.</p>
+          <h2 className="ho-font-epilogue fs-3 fw-bold text-white mb-1">Confirm Results</h2>
+          <p className="small" style={{ color: '#cbd5e1' }}>Review race outcomes and authorize prize distribution.</p>
         </div>
 
         <div className="row g-4">
           <div className="col-12 col-lg-6">
             <div className="glass-card">
-              <h4 className="ho-font-epilogue fs-5 fw-bold text-dark mb-3">Completed Races</h4>
+              <h4 className="ho-font-epilogue fs-5 fw-bold text-white mb-3">Completed Races</h4>
               {loading ? (
                 <div className="text-secondary">Loading...</div>
               ) : (
@@ -113,16 +113,16 @@ export default function ConfirmResults() {
 
           <div className="col-12 col-lg-6">
             <div className="glass-card h-100">
-              <h4 className="ho-font-epilogue fs-5 fw-bold text-dark mb-3">Race Results</h4>
+              <h4 className="ho-font-epilogue fs-5 fw-bold text-white mb-3">Race Results</h4>
               {!selectedRace ? (
-                <div className="text-secondary fst-italic text-center py-5 border rounded bg-light">
+                <div className="fst-italic text-center py-5 rounded" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', color: '#cbd5e1', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
                   Select a race from the left to view its results.
                 </div>
               ) : loadingResults ? (
                 <div className="text-secondary">Loading results...</div>
               ) : (
                 <div>
-                  <h5 className="text-primary mb-3">{selectedRace.raceName}</h5>
+                  <h5 className="text-warning mb-3">{selectedRace.raceName}</h5>
                   <DataTable columns={resultColumns} data={results} emptyMessage="No results available." />
                   <div className="mt-4 text-end">
                     <button className="ho-btn ho-btn-gold-solid py-2 px-4" onClick={handleConfirm}>
@@ -143,15 +143,15 @@ export default function ConfirmResults() {
               className="material-symbols-outlined mb-2" 
               style={{ 
                 fontSize: '56px', 
-                color: notification.type === 'success' ? 'var(--ho-primary-medium)' : 'var(--ho-error-text)' 
+                color: notification.type === 'success' ? '#10b981' : '#ef4444' 
               }}
             >
               {notification.type === 'success' ? 'verified' : 'error'}
             </span>
-            <h3 className="ho-font-epilogue fs-5 fw-bold text-dark mb-2">
+            <h3 className="ho-font-epilogue fs-5 fw-bold text-white mb-2">
               {notification.type === 'success' ? 'Confirmation Success' : 'Action Failed'}
             </h3>
-            <p className="text-secondary small mb-4">{notification.message}</p>
+            <p className="small mb-4" style={{ color: '#cbd5e1' }}>{notification.message}</p>
             <button 
               className={`ho-btn ${notification.type === 'success' ? 'ho-btn-gold-solid' : 'ho-btn-outline-danger'} w-100 py-2`} 
               onClick={() => setNotification(null)}

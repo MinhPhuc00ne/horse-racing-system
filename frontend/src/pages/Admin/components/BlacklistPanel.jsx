@@ -168,10 +168,10 @@ export default function BlacklistPanel() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', padding: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h3 className="fw-bold mb-1 d-flex align-items-center gap-2 text-dark">
+          <h3 className="fw-bold mb-1 d-flex align-items-center gap-2 text-white">
             <FaShieldAlt className="text-danger" /> Blacklist & Ban Management
           </h3>
-          <p className="text-muted small mb-0">
+          <p className="small mb-0" style={{ color: '#cbd5e1' }}>
             Monitor and manage account suspensions and horse bans across the system.
           </p>
         </div>
@@ -200,20 +200,20 @@ export default function BlacklistPanel() {
 
       <div className="row g-3">
         <div className="col-12 col-md-6 col-lg-3">
-          <div className="card border-0 shadow-sm p-3 bg-white">
+          <div className="glass-card p-3">
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div className="bg-light p-3 rounded-circle text-secondary fs-4"><FaBan /></div>
+              <div className="p-3 rounded-circle text-warning fs-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }}><FaBan /></div>
               <div>
-                <span className="text-muted small text-uppercase fw-bold">Total Records</span>
-                <h3 className="fw-bold text-dark mt-1 mb-0">{totalCount}</h3>
+                <span className="small text-uppercase fw-bold" style={{ color: '#cbd5e1' }}>Total Records</span>
+                <h3 className="fw-bold text-white mt-1 mb-0">{totalCount}</h3>
               </div>
             </div>
           </div>
         </div>
         <div className="col-12 col-md-6 col-lg-3">
-          <div className="card border-0 shadow-sm p-3 bg-danger bg-opacity-75 text-white">
+          <div className="glass-card p-3" style={{ border: '1px solid rgba(239, 68, 68, 0.4)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div className="bg-white bg-opacity-25 p-3 rounded-circle text-white fs-4"><FaBan /></div>
+              <div className="bg-danger bg-opacity-25 p-3 rounded-circle text-danger fs-4"><FaBan /></div>
               <div>
                 <span className="text-white small text-uppercase fw-bold">Active Bans</span>
                 <h3 className="fw-bold text-white mt-1 mb-0">{activeCount}</h3>
@@ -222,22 +222,22 @@ export default function BlacklistPanel() {
           </div>
         </div>
         <div className="col-12 col-md-6 col-lg-3">
-          <div className="card border-0 shadow-sm p-3 bg-white">
+          <div className="glass-card p-3">
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <div className="bg-warning bg-opacity-10 p-3 rounded-circle text-warning fs-4"><FaUserSlash /></div>
               <div>
-                <span className="text-muted small text-uppercase fw-bold">Banned Accounts</span>
+                <span className="small text-uppercase fw-bold" style={{ color: '#cbd5e1' }}>Banned Accounts</span>
                 <h3 className="fw-bold text-warning mt-1 mb-0">{userBanCount}</h3>
               </div>
             </div>
           </div>
         </div>
         <div className="col-12 col-md-6 col-lg-3">
-          <div className="card border-0 shadow-sm p-3 bg-white">
+          <div className="glass-card p-3">
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <div className="bg-info bg-opacity-10 p-3 rounded-circle text-info fs-4"><FaHorseHead /></div>
               <div>
-                <span className="text-muted small text-uppercase fw-bold">Banned Horses</span>
+                <span className="small text-uppercase fw-bold" style={{ color: '#cbd5e1' }}>Banned Horses</span>
                 <h3 className="fw-bold text-info mt-1 mb-0">{horseBanCount}</h3>
               </div>
             </div>
@@ -245,7 +245,7 @@ export default function BlacklistPanel() {
         </div>
       </div>
 
-      <div className="card border-0 shadow-sm rounded-3">
+      <div className="glass-card">
         <div className="card-body p-3">
           <div className="row g-3 align-items-center">
             <div className="col-12 col-md-5">
@@ -278,14 +278,14 @@ export default function BlacklistPanel() {
         </div>
       </div>
 
-      <div className="card border-0 shadow-sm rounded-3">
-        <div className="card-body p-0">
+      <div className="glass-card">
+        <div className="p-0">
           {loading ? (
             <div className="text-center py-5"><div className="spinner-border text-danger"></div></div>
           ) : (
             <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-light">
+              <table className="table align-middle mb-0">
+                <thead>
                   <tr>
                     <th>Target</th>
                     <th>Details</th>
@@ -300,16 +300,16 @@ export default function BlacklistPanel() {
                   {filteredBlacklists.map((item) => (
                     <tr key={item.id}>
                       <td>
-                        <span className={`badge ${item.targetType === 'USER' ? 'bg-warning' : 'bg-info'} bg-opacity-10 text-dark`}>
+                        <span className={`badge ${item.targetType === 'USER' ? 'bg-warning text-dark' : 'bg-info text-dark'} fw-bold`}>
                           {item.targetType}
                         </span>
                       </td>
                       <td>
-                        <div className="fw-bold">{item.targetName}</div>
-                        <small className="text-muted">{item.targetDetail}</small>
+                        <div className="fw-bold text-white">{item.targetName}</div>
+                        <small style={{ color: '#cbd5e1' }}>{item.targetDetail}</small>
                       </td>
-                      <td>{item.reason}</td>
-                      <td>
+                      <td style={{ color: '#cbd5e1' }}>{item.reason}</td>
+                      <td style={{ color: '#cbd5e1' }}>
                         {item.isPermanent ? 'Permanent' : <div>To: {item.endDate}</div>}
                       </td>
                       <td className="text-center">
@@ -317,10 +317,10 @@ export default function BlacklistPanel() {
                           {item.status}
                         </span>
                       </td>
-                      <td>{item.actionByName}</td>
+                      <td style={{ color: '#cbd5e1' }}>{item.actionByName || 'N/A'}</td>
                       <td className="text-end pe-3">
                         {item.status === 'ACTIVE' && (
-                          <button className="btn btn-outline-success btn-sm" onClick={() => { setSelectedItemForUnban(item); setShowUnbanModal(true); }}>
+                          <button className="btn btn-outline-success btn-sm fw-bold" onClick={() => { setSelectedItemForUnban(item); setShowUnbanModal(true); }}>
                             <FaUndo /> Unban
                           </button>
                         )}

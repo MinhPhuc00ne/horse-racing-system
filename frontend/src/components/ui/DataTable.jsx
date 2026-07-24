@@ -9,7 +9,7 @@ import React from 'react';
 export default function DataTable({ columns, data, emptyMessage = 'No data available' }) {
   if (!data || data.length === 0) {
     return (
-      <div className="text-center py-4 text-secondary fst-italic border rounded bg-light">
+      <div className="text-center py-4 fst-italic rounded" style={{ background: 'rgba(0,0,0,0.2)', color: '#cbd5e1', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
         {emptyMessage}
       </div>
     );
@@ -17,15 +17,15 @@ export default function DataTable({ columns, data, emptyMessage = 'No data avail
 
   return (
     <div className="table-responsive">
-      <table className="table table-hover align-middle mb-0" style={{ borderCollapse: 'collapse', border: 'none' }}>
-        <thead style={{ borderBottom: '2px solid rgba(0,0,0,0.06)' }}>
+      <table className="table table-hover align-middle mb-0" style={{ borderCollapse: 'collapse', border: 'none', color: '#ffffff' }}>
+        <thead style={{ borderBottom: '2px solid rgba(212, 175, 55, 0.3)' }}>
           <tr>
             {columns.map((col, index) => (
               <th 
                 key={index} 
                 scope="col" 
-                className={`py-3 fw-bold text-secondary text-uppercase ${col.align === 'right' ? 'text-end' : col.align === 'center' ? 'text-center' : 'text-start'}`}
-                style={{ fontSize: '11px', letterSpacing: '0.05em' }}
+                className={`py-3 fw-bold text-uppercase ${col.align === 'right' ? 'text-end' : col.align === 'center' ? 'text-center' : 'text-start'}`}
+                style={{ fontSize: '11px', letterSpacing: '0.05em', color: '#d4af37' }}
               >
                 {col.label}
               </th>
@@ -39,7 +39,7 @@ export default function DataTable({ columns, data, emptyMessage = 'No data avail
                 <td 
                   key={colIndex} 
                   className={`py-3 ${col.align === 'right' ? 'text-end' : col.align === 'center' ? 'text-center' : 'text-start'}`}
-                  style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}
+                  style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', color: '#f8fafc' }}
                 >
                   {col.render ? col.render(item) : item[col.key]}
                 </td>

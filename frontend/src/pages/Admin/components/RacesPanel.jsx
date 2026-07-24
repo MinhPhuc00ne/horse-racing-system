@@ -217,8 +217,8 @@ export default function RacesPanel() {
       
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaFlag style={{ color: 'var(--ho-accent-gold-text)' }} /> Approve Tournament Registrations (Horse Owner & Jockey)
+        <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <FaFlag style={{ color: '#d4af37' }} /> Approve Tournament Registrations (Horse Owner & Jockey)
         </h2>
       </div>
 
@@ -227,25 +227,25 @@ export default function RacesPanel() {
         <div className="row g-3">
           {/* Search Term */}
           <div className="col-12 col-md-6">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search Registrations</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#cbd5e1' }}>Search Registrations</label>
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
-                className="ho-form-input text-dark fw-semibold"
+                className="ho-form-input fw-semibold"
                 placeholder="Search by horse, jockey, owner, tournament, request #..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ fontSize: '13px', height: '38px', paddingLeft: '35px' }}
               />
-              <FaSearch style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--ho-text-muted)', fontSize: '14px' }} />
+              <FaSearch style={{ position: 'absolute', left: '12px', top: '12px', color: '#d4af37', fontSize: '14px' }} />
             </div>
           </div>
 
           {/* Status Filter */}
           <div className="col-12 col-md-4">
-            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</label>
+            <label className="ho-input-label d-block mb-1" style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#cbd5e1' }}>Status</label>
             <select
-              className="ho-form-input text-dark fw-semibold"
+              className="ho-form-input fw-semibold"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               style={{ fontSize: '13px', height: '38px' }}
@@ -261,7 +261,7 @@ export default function RacesPanel() {
           <div className="col-12 col-md-2 d-flex align-items-end">
             <button
               type="button"
-              className="btn btn-outline-secondary w-100 fw-bold d-flex align-items-center justify-content-center"
+              className="btn btn-outline-light w-100 fw-bold d-flex align-items-center justify-content-center"
               onClick={() => {
                 setSearchTerm('');
                 setStatusFilter('');
@@ -276,50 +276,50 @@ export default function RacesPanel() {
 
       {/* Main Registrations Section */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: 'var(--ho-primary-dark)', margin: 0 }}>
+        <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: '#d4af37', margin: 0 }}>
           Registration List ({filteredRegistrations.length})
         </h3>
 
         {loadingReg ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--ho-text-muted)' }}>Loading registration list...</div>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#cbd5e1' }}>Loading registration list...</div>
         ) : filteredRegistrations.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', background: 'rgba(255,255,255,0.7)', border: '1px solid var(--ho-border-gold)', borderRadius: '14px', color: 'var(--ho-text-muted)' }}>
+          <div style={{ textAlign: 'center', padding: '40px', background: 'rgba(12, 34, 20, 0.7)', border: '1px solid var(--ho-border-gold)', borderRadius: '14px', color: '#cbd5e1' }}>
             No registrations found matching the filters.
           </div>
         ) : (
-          <div style={{ overflowX: 'auto', background: '#ffffff', border: '1px solid var(--ho-border-gold)', borderRadius: '12px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+          <div style={{ overflowX: 'auto', background: 'rgba(12, 34, 20, 0.85)', border: '1px solid var(--ho-border-gold)', borderRadius: '12px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px', color: '#ffffff' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--ho-border-gold)', background: 'rgba(0,56,32,0.04)' }}>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Request #</th>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Tournament (Race)</th>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Horse</th>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Horse Owner</th>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Jockey</th>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Revenue Split (Jockey / Owner)</th>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Status</th>
-                  <th style={{ padding: '16px', textAlign: 'center', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Actions</th>
+                <tr style={{ borderBottom: '1px solid var(--ho-border-gold)', background: 'rgba(0,0,0,0.2)' }}>
+                  <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Request #</th>
+                  <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Tournament (Race)</th>
+                  <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Horse</th>
+                  <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Horse Owner</th>
+                  <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Jockey</th>
+                  <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Revenue Split (Jockey / Owner)</th>
+                  <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Status</th>
+                  <th style={{ padding: '16px', textAlign: 'center', color: '#d4af37', fontWeight: '700' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRegistrations.map((reg) => (
-                  <tr key={reg.id} style={{ borderBottom: '1px solid var(--ho-border-muted)', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 56, 32, 0.02)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                    <td style={{ padding: '16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>#{reg.id}</td>
+                  <tr key={reg.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                    <td style={{ padding: '16px', fontWeight: '700', color: '#ffffff' }}>#{reg.id}</td>
                     <td style={{ padding: '16px' }}>
-                      <span className="fw-bold d-block text-dark">{reg.tournamentName || 'Tournament'}</span>
-                      <span className="text-secondary small">{reg.raceName}</span>
+                      <span className="fw-bold d-block text-white">{reg.tournamentName || 'Tournament'}</span>
+                      <span className="text-secondary small" style={{ color: '#cbd5e1' }}>{reg.raceName}</span>
                     </td>
                     <td style={{ padding: '16px' }}>
-                      <span className="fw-bold d-block text-dark">{reg.horseName}</span>
-                      <span className="text-secondary small">{reg.horseBreed || 'Thoroughbred'}</span>
+                      <span className="fw-bold d-block text-white">{reg.horseName}</span>
+                      <span className="text-secondary small" style={{ color: '#cbd5e1' }}>{reg.horseBreed || 'Thoroughbred'}</span>
                     </td>
                     <td style={{ padding: '16px' }}>
-                      <span className="fw-bold d-block text-dark">{reg.ownerName || 'Unknown Owner'}</span>
+                      <span className="fw-bold d-block text-white">{reg.ownerName || 'Unknown Owner'}</span>
                     </td>
                     <td style={{ padding: '16px' }}>
-                      <span className="fw-bold d-block text-dark">{reg.jockeyName}</span>
+                      <span className="fw-bold d-block text-white">{reg.jockeyName}</span>
                     </td>
-                    <td style={{ padding: '16px', color: 'var(--ho-text-muted)' }}>{reg.jockeySharePercent}% / {reg.ownerSharePercent}%</td>
+                    <td style={{ padding: '16px', color: '#cbd5e1' }}>{reg.jockeySharePercent}% / {reg.ownerSharePercent}%</td>
                     <td style={{ padding: '16px' }}>
                       <span style={{
                         padding: '3px 8px',

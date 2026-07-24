@@ -197,10 +197,10 @@ export default function UserManagementContent() {
       label: 'User',
       render: (item) => (
         <div className="d-flex align-items-center">
-          <FaUserCircle className="me-2 text-secondary" style={{ fontSize: '28px' }} />
+          <FaUserCircle className="me-2 text-warning" style={{ fontSize: '28px' }} />
           <div className="d-flex flex-column">
-            <span className="fw-bold text-dark">{item.fullName}</span>
-            <span className="text-muted small" style={{ fontSize: '11px' }}>@{item.username}</span>
+            <span className="fw-bold text-white">{item.fullName}</span>
+            <span className="small" style={{ fontSize: '11px', color: '#cbd5e1' }}>@{item.username}</span>
           </div>
         </div>
       )
@@ -210,8 +210,8 @@ export default function UserManagementContent() {
       label: 'Email / Phone',
       render: (item) => (
         <div className="d-flex flex-column">
-          <span className="text-secondary small">{item.email}</span>
-          <span className="text-muted small" style={{ fontSize: '11px' }}>{item.phone}</span>
+          <span className="small" style={{ color: '#cbd5e1' }}>{item.email}</span>
+          <span className="small" style={{ fontSize: '11px', color: '#cbd5e1' }}>{item.phone || 'N/A'}</span>
         </div>
       )
     },
@@ -292,10 +292,10 @@ export default function UserManagementContent() {
       {/* Title & Action Buttons */}
       <div className="d-flex justify-content-between align-items-end mb-4">
         <div>
-          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
+          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#ffffff' }}>
             User Management
           </h2>
-          <p className="text-secondary small m-0">
+          <p className="text-secondary small m-0" style={{ color: '#cbd5e1' }}>
             View list, search, filter, and perform Add, Edit, Delete, or Lock user functions.
           </p>
         </div>
@@ -320,7 +320,8 @@ export default function UserManagementContent() {
             left: 0,
             width: '100vw',
             height: '100vh',
-            backgroundColor: 'transparent',
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(3px)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -329,14 +330,14 @@ export default function UserManagementContent() {
           onClick={resetForm}
         >
           <div
-            className="glass-card"
+            className="admin-modal-card"
             style={{
               width: '100%',
               maxWidth: '650px',
               padding: '24px',
-              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-              border: '1px solid var(--ho-border-gold, #D4AF37)',
-              background: '#ffffff',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
+              border: '1px solid rgba(212, 175, 55, 0.4)',
+              background: '#0c2214',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out'
             }}
@@ -348,8 +349,8 @@ export default function UserManagementContent() {
                   <FaInfoCircle /> {error}
                 </div>
               )}
-              <div className="d-flex justify-content-between align-items-center" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
-                <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)' }}>
+              <div className="d-flex justify-content-between align-items-center" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '12px' }}>
+                <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: '#ffffff' }}>
                   {isEditing ? 'Update Member Information' : 'Add New Member'}
                 </h3>
                 <button
@@ -498,31 +499,31 @@ export default function UserManagementContent() {
           onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: null })}
         >
           <div
-            className="glass-card"
+            className="admin-modal-card text-center"
             style={{
               width: '100%',
               maxWidth: '450px',
               padding: '24px',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
-              border: '1px solid var(--ho-border-gold, #D4AF37)',
-              background: '#ffffff',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
+              border: '1px solid rgba(212, 175, 55, 0.4)',
+              background: '#0c2214',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out'
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '10px' }}>
+              <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: '#ffffff', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '10px' }}>
                 {confirmModal.title}
               </h3>
-              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5', color: '#cbd5e1' }}>
                 {confirmModal.message}
               </p>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
                 <button
                   type="button"
                   onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: null })}
-                  className="btn btn-outline-secondary btn-sm"
+                  className="btn btn-outline-light btn-sm"
                   style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
                 >
                   Cancel
@@ -554,7 +555,7 @@ export default function UserManagementContent() {
             left: 0,
             width: '100vw',
             height: '100vh',
-            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
             backdropFilter: 'blur(3px)',
             display: 'flex',
             justifyContent: 'center',
@@ -564,14 +565,14 @@ export default function UserManagementContent() {
           onClick={() => setFeedbackModal({ show: false, type: 'success', message: '' })}
         >
           <div
-            className="glass-card text-center"
+            className="admin-modal-card text-center"
             style={{
               width: '100%',
               maxWidth: '400px',
               padding: '30px 24px',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
               border: `1px solid ${feedbackModal.type === 'success' ? '#10b981' : '#ef4444'}`,
-              background: '#ffffff',
+              background: '#0c2214',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out'
             }}
@@ -593,11 +594,11 @@ export default function UserManagementContent() {
                 {feedbackModal.type === 'success' ? <FaCheckCircle size="36" /> : <FaInfoCircle size="36" />}
               </div>
 
-              <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
+              <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: '#ffffff' }}>
                 {feedbackModal.type === 'success' ? 'Success!' : 'Failed!'}
               </h3>
 
-              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5', color: '#cbd5e1' }}>
                 {feedbackModal.message}
               </p>
 
@@ -620,10 +621,10 @@ export default function UserManagementContent() {
 
         {/* Search Input */}
         <div style={{ position: 'relative', flex: '1 1 auto', minWidth: '280px' }}>
-          <FaSearch style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--ho-primary-medium)', opacity: 0.7 }} />
+          <FaSearch style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#d4af37', opacity: 0.8 }} />
           <input
             type="text"
-            className="ho-form-input text-dark fw-semibold"
+            className="ho-form-input fw-semibold"
             placeholder="Search by name, email, username..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -633,11 +634,11 @@ export default function UserManagementContent() {
 
         {/* Role Filter */}
         <div className="d-flex align-items-center gap-2" style={{ flex: '0 0 auto' }}>
-          <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--ho-primary-dark)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: '13px', fontWeight: '700', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
             <FaFilter className="me-1" /> Filter by role:
           </span>
           <select
-            className="ho-form-input text-dark fw-semibold"
+            className="ho-form-input fw-semibold"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
             style={{ fontSize: '14px', minWidth: '150px', height: '42px', paddingRight: '24px' }}
@@ -652,11 +653,11 @@ export default function UserManagementContent() {
 
         {/* Status Filter */}
         <div className="d-flex align-items-center gap-2" style={{ flex: '0 0 auto' }}>
-          <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--ho-primary-dark)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: '13px', fontWeight: '700', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
             <FaFilter className="me-1" /> Status:
           </span>
           <select
-            className="ho-form-input text-dark fw-semibold"
+            className="ho-form-input fw-semibold"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             style={{ fontSize: '14px', minWidth: '150px', height: '42px', paddingRight: '24px' }}

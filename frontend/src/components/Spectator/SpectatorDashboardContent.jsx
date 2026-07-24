@@ -156,64 +156,64 @@ export default function SpectatorDashboardContent() {
 
             <div className="row g-4 mt-2">
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small d-block mb-1">Username</span>
-                  <span className="fw-bold text-dark fs-5">{user?.username || 'N/A'}</span>
+                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>Username</span>
+                  <span className="fw-bold text-white fs-5">{user?.username || 'N/A'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small d-block mb-1">Full Name</span>
-                  <span className="fw-bold text-dark fs-5">{user?.fullName || 'N/A'}</span>
+                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>Full Name</span>
+                  <span className="fw-bold text-white fs-5">{user?.fullName || 'N/A'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small d-block mb-1">Email Address</span>
-                  <span className="fw-bold text-dark fs-5 text-truncate d-block">{user?.email || 'N/A'}</span>
+                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>Email Address</span>
+                  <span className="fw-bold text-white fs-5 text-truncate d-block">{user?.email || 'N/A'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small d-block mb-1">Phone Number</span>
-                  <span className="fw-bold text-dark fs-5">{user?.phone || 'Not provided'}</span>
+                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>Phone Number</span>
+                  <span className="fw-bold text-white fs-5">{user?.phone || 'Not provided'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small d-block mb-1">System Role</span>
-                  <span className="badge text-uppercase font-weight-bold d-inline-block" style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: 'var(--ho-accent-gold-text)' }}>
+                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>System Role</span>
+                  <span className="badge text-uppercase font-weight-bold d-inline-block" style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: '#d4af37' }}>
                     {user?.role || 'SPECTATOR'}
                   </span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ background: '#ffffff', borderColor: 'var(--ho-border-gold)' }}>
-                  <span className="text-secondary small d-block mb-1">Join Date</span>
-                  <span className="fw-bold text-dark fs-5">{formatDate(user?.createdAt)}</span>
+                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>Join Date</span>
+                  <span className="fw-bold text-white fs-5">{formatDate(user?.createdAt)}</span>
                 </div>
               </div>
             </div>
 
-            <hr className="my-4" style={{ borderColor: 'var(--ho-border-gold, #cbd5e0)' }} />
+            <hr className="my-4" style={{ borderColor: 'rgba(212, 175, 55, 0.3)' }} />
             
-            <h4 className="ho-font-epilogue fs-6 fw-bold text-dark mb-3">
+            <h4 className="ho-font-epilogue fs-6 fw-bold text-white mb-3">
               <span className="material-symbols-outlined align-middle me-1 text-success" style={{ fontSize: '20px' }}>account_balance</span>
               Beneficiary Bank Information
             </h4>
 
-            <form onSubmit={handleSaveBank} className="text-dark">
+            <form onSubmit={handleSaveBank}>
               <div className="row g-3">
                 <div className="col-12 col-md-6">
                   <label className="ho-input-label ho-font-grotesk fw-bold mb-2">Bank Name</label>
                   <input
                     type="text"
-                    className="ho-form-input text-dark"
+                    className="ho-form-input"
                     value={bankName}
                     onChange={(e) => setBankName(e.target.value)}
                     placeholder="e.g. Chase, Bank of America"
@@ -224,7 +224,7 @@ export default function SpectatorDashboardContent() {
                   <label className="ho-input-label ho-font-grotesk fw-bold mb-2">Account Number</label>
                   <input
                     type="text"
-                    className="ho-form-input text-dark"
+                    className="ho-form-input"
                     value={bankAccountNumber}
                     onChange={(e) => setBankAccountNumber(e.target.value)}
                     placeholder="Enter account number"
@@ -263,7 +263,7 @@ export default function SpectatorDashboardContent() {
 
           {/* Quick Upgrade Status Card */}
           <div className="glass-card flex-grow-1">
-            <h4 className="ho-font-epilogue fs-6 fw-bold text-dark mb-3">
+            <h4 className="ho-font-epilogue fs-6 fw-bold text-white mb-3">
               Role Upgrade Request
             </h4>
 
@@ -272,14 +272,14 @@ export default function SpectatorDashboardContent() {
             ) : latestRequest ? (
               <div className="d-flex flex-column gap-2">
                 <div className="d-flex justify-content-between align-items-center">
-                  <span className="small text-secondary">Requested Role:</span>
+                  <span className="small" style={{ color: '#cbd5e1' }}>Requested Role:</span>
                   <span className="badge bg-secondary text-uppercase small">
                     {latestRequest.requestedRole?.replace('_', ' ')}
                   </span>
                 </div>
 
                 <div className="d-flex justify-content-between align-items-center">
-                  <span className="small text-secondary">Status:</span>
+                  <span className="small" style={{ color: '#cbd5e1' }}>Status:</span>
                   <span className={`badge ${
                     latestRequest.status === 'PENDING' ? 'bg-warning text-dark' :
                     latestRequest.status === 'APPROVED' ? 'bg-success' :
@@ -291,8 +291,8 @@ export default function SpectatorDashboardContent() {
                 </div>
 
                 <div className="d-flex justify-content-between align-items-center">
-                  <span className="small text-secondary">Submission Date:</span>
-                  <span className="small text-dark fw-bold">{formatDate(latestRequest.createdAt)}</span>
+                  <span className="small" style={{ color: '#cbd5e1' }}>Submission Date:</span>
+                  <span className="small text-white fw-bold">{formatDate(latestRequest.createdAt)}</span>
                 </div>
 
                 {latestRequest.status === 'REJECTED' && latestRequest.rejectionReason && (

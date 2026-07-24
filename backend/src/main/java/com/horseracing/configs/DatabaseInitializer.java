@@ -269,15 +269,20 @@ public class DatabaseInitializer implements CommandLineRunner {
                             "INSERT INTO users (username, email, password, full_name, phone, provider, role, enabled) VALUES (?, ?, ?, ?, ?, 'LOCAL', 'SPECTATOR', 1)",
                             blacklisted[i], blacklisted[i + 1], commonPassword, blacklisted[i + 2], blacklisted[i + 3]
                     );
-                    Integer uId = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = ?", Integer.class, blacklisted[i + 1]);
-                    if (uId != null) {
-                        Integer blCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM blacklist WHERE target_id = ?", Integer.class, uId);
-                        if (blCount == null || blCount == 0) {
-                            jdbcTemplate.update(
-                                    "INSERT INTO blacklist (target_type, target_id, reason, start_date, is_permanent, status, created_at) VALUES ('USER', ?, ?, GETDATE(), 1, 'ACTIVE', GETDATE())",
-                                    uId, blacklisted[i + 4]
-                            );
-                        }
+                }
+                Integer uId = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = ?", Integer.class, blacklisted[i + 1]);
+                if (uId != null) {
+                    Integer blCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM blacklist WHERE target_id = ?", Integer.class, uId);
+                    if (blCount == null || blCount == 0) {
+                        jdbcTemplate.update(
+                                "INSERT INTO blacklist (target_type, target_id, reason, start_date, is_permanent, status, created_at) VALUES ('USER', ?, ?, GETDATE(), 1, 'ACTIVE', GETDATE())",
+                                uId, blacklisted[i + 4]
+                        );
+                    } else {
+                        jdbcTemplate.update(
+                                "UPDATE blacklist SET reason = ? WHERE target_id = ?",
+                                blacklisted[i + 4], uId
+                        );
                     }
                 }
             }
@@ -605,6 +610,11 @@ public class DatabaseInitializer implements CommandLineRunner {
             jdbcTemplate.update("UPDATE tournaments SET tournament_name = 'Rimuru Autumn Derby', location = 'Tempest City', description = 'Premier autumn speed race open for all qualified stables' WHERE id = 3 OR tournament_name LIKE '%Rimuru%'");
             jdbcTemplate.update("UPDATE tournaments SET tournament_name = 'Ingrassia Winter Cup', location = 'Ingrassia Racetrack', description = 'Grand winter tournament on synthetic turf' WHERE id = 4 OR tournament_name LIKE '%Ingrassia%'");
             jdbcTemplate.update("UPDATE tournaments SET location = 'Tempest Racetrack' WHERE location LIKE '%SÃ¢n%' OR location LIKE '%Sân%' OR location LIKE '%ThÃ³ng%' OR location LIKE '%Thắng%'");
+
+            // Sanitize and update existing blacklist reasons to English
+            jdbcTemplate.update("UPDATE blacklist SET reason = 'Violation of terms of service and fraudulent activity at Tempest' WHERE target_id = (SELECT id FROM users WHERE username = 'clayman') OR reason LIKE '%Vi ph%' OR reason LIKE '%Thao t%' OR reason LIKE '%mojibake%' OR reason LIKE '%c% c%c%'");
+            jdbcTemplate.update("UPDATE blacklist SET reason = 'Disrupting racetrack order and intentional misconduct' WHERE target_id = (SELECT id FROM users WHERE username = 'footman') OR reason LIKE '%Qu%y r%i%'");
+            jdbcTemplate.update("UPDATE blacklist SET reason = 'Illegal betting manipulation' WHERE target_id = (SELECT id FROM users WHERE username = 'laplace')");
 
             jdbcTemplate.update("UPDATE races SET race_name = 'Tempest Royal Sprint 1000m' WHERE id = 1 OR race_name LIKE '%Tempest%'");
             jdbcTemplate.update("UPDATE races SET race_name = 'Jura Championship 1600m' WHERE id = 2 OR race_name LIKE '%Jura%'");

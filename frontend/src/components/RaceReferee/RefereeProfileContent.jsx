@@ -523,7 +523,7 @@ export default function RefereeProfileContent() {
                 <textarea
                   value={formData.description || ''}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="ho-form-input text-dark"
+                  className="ho-form-input"
                   rows="3"
                   placeholder="Enter bio, racetrack expertise, and notes..."
                   style={{ resize: 'none' }}
@@ -538,7 +538,7 @@ export default function RefereeProfileContent() {
                     type="text"
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="ho-form-input text-dark"
+                    className="ho-form-input"
                     required
                   />
                 </div>
@@ -548,7 +548,7 @@ export default function RefereeProfileContent() {
                     type="tel"
                     value={formData.phoneNumber}
                     onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                    className="ho-form-input text-dark"
+                    className="ho-form-input"
                     required
                   />
                 </div>
@@ -560,8 +560,8 @@ export default function RefereeProfileContent() {
                   type="email"
                   value={formData.email}
                   disabled
-                  className="ho-form-input text-secondary"
-                  style={{ cursor: 'not-allowed', backgroundColor: '#f1f5f9' }}
+                  className="ho-form-input"
+                  style={{ cursor: 'not-allowed', backgroundColor: 'rgba(255, 255, 255, 0.08)', color: '#cbd5e1' }}
                 />
               </div>
 
@@ -572,7 +572,7 @@ export default function RefereeProfileContent() {
                     type="text"
                     value={formData.identityNumber}
                     onChange={(e) => setFormData({ ...formData, identityNumber: e.target.value })}
-                    className="ho-form-input text-dark"
+                    className="ho-form-input"
                     placeholder="e.g. 038090100026"
                   />
                 </div>
@@ -582,7 +582,7 @@ export default function RefereeProfileContent() {
                     type="date"
                     value={formData.dateOfBirth}
                     onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                    className="ho-form-input text-dark"
+                    className="ho-form-input"
                   />
                 </div>
               </div>
@@ -594,7 +594,7 @@ export default function RefereeProfileContent() {
                     type="text"
                     value={formData.licenseNumber}
                     onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
-                    className="ho-form-input text-dark font-monospace"
+                    className="ho-form-input font-monospace"
                   />
                 </div>
                 <div className="col-12 col-sm-6">
@@ -603,14 +603,14 @@ export default function RefereeProfileContent() {
                     type="number"
                     value={formData.experienceYears}
                     onChange={(e) => setFormData({ ...formData, experienceYears: parseInt(e.target.value) || 0 })}
-                    className="ho-form-input text-dark"
+                    className="ho-form-input"
                   />
                 </div>
               </div>
 
               {/* Bank Account Information */}
               <div className="border-top pt-3 mt-3">
-                <h4 className="ho-font-epilogue fs-6 fw-bold mb-3" style={{ color: 'var(--ho-primary-dark)' }}>
+                <h4 className="ho-font-epilogue fs-6 fw-bold mb-3" style={{ color: '#ffffff' }}>
                   Beneficiary Bank Account Details
                 </h4>
                 <div className="row g-3">
@@ -618,7 +618,7 @@ export default function RefereeProfileContent() {
                     <label className="ho-input-label">Bank Name</label>
                     <input
                       type="text"
-                      className="ho-form-input text-dark"
+                      className="ho-form-input"
                       value={bankName}
                       onChange={(e) => setBankName(e.target.value)}
                       placeholder="e.g. Chase, HSBC, Citibank"
@@ -629,7 +629,7 @@ export default function RefereeProfileContent() {
                     <label className="ho-input-label">Account Number</label>
                     <input
                       type="text"
-                      className="ho-form-input text-dark font-monospace"
+                      className="ho-form-input font-monospace"
                       value={bankAccountNumber}
                       onChange={(e) => setBankAccountNumber(e.target.value)}
                       placeholder="Enter account number"
@@ -640,7 +640,7 @@ export default function RefereeProfileContent() {
                     <label className="ho-input-label">Account Holder Name (Uppercase)</label>
                     <input
                       type="text"
-                      className="ho-form-input text-dark"
+                      className="ho-form-input"
                       value={bankAccountHolderName}
                       onChange={(e) => setBankAccountHolderName(e.target.value)}
                       placeholder="e.g. GUY CRIMSON"
@@ -662,7 +662,7 @@ export default function RefereeProfileContent() {
           <div className="glass-card p-4">
             <h3
               className="ho-font-epilogue fs-4 fw-bold border-bottom pb-3 mb-3"
-              style={{ color: 'var(--ho-primary-dark)' }}
+              style={{ color: '#ffffff' }}
             >
               Referee Wallet
             </h3>
@@ -670,19 +670,20 @@ export default function RefereeProfileContent() {
             <div
               className="rounded-3 p-4 mb-4 d-flex flex-column shadow-sm"
               style={{
-                background: 'linear-gradient(135deg, var(--ho-primary-dark), var(--ho-primary-medium))',
+                background: 'linear-gradient(135deg, #07150c, #0c2214)',
+                border: '1px solid rgba(212, 175, 55, 0.3)',
               }}
             >
               <h4
                 className="text-uppercase fw-bold mb-1"
-                style={{ fontSize: '11px', letterSpacing: '0.1em', color: 'var(--ho-primary-light)' }}
+                style={{ fontSize: '11px', letterSpacing: '0.1em', color: '#95d4ac' }}
               >
                 Available Wallet Balance
               </h4>
               <p className="ho-font-epilogue fs-2 fw-extrabold m-0" style={{ color: '#ffe088' }}>
                 {walletBalance.toLocaleString()} VND
               </p>
-              <p className="text-secondary small m-0 mt-2 font-mono" style={{ fontSize: '11px', color: '#cbd5e1' }}>
+              <p className="small m-0 mt-2 font-mono" style={{ fontSize: '11px', color: '#cbd5e1' }}>
                 Linked Bank Account: {bankAccountNumber ? `**** **** ${bankAccountNumber.slice(-4)}` : 'Not Linked'}
               </p>
             </div>
@@ -711,7 +712,7 @@ export default function RefereeProfileContent() {
           <div className="glass-card p-4">
             <h3
               className="ho-font-epilogue fs-4 fw-bold border-bottom pb-3 mb-3"
-              style={{ color: 'var(--ho-primary-dark)' }}
+              style={{ color: '#ffffff' }}
             >
               Balance Transaction History
             </h3>
@@ -725,28 +726,28 @@ export default function RefereeProfileContent() {
                     key={tx.id || idx}
                     className="p-3 border rounded small d-flex flex-column gap-2"
                     style={{
-                      backgroundColor: 'var(--ho-bg-cream)',
-                      borderColor: 'var(--ho-border-muted)',
+                      backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                      borderColor: 'rgba(212, 175, 55, 0.2)',
                     }}
                   >
-                    <div className="d-flex justify-content-between align-items-center border-bottom pb-1" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                      <span className="fw-bold" style={{ color: 'var(--ho-primary-dark)' }}>
+                    <div className="d-flex justify-content-between align-items-center border-bottom pb-1" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+                      <span className="fw-bold" style={{ color: '#ffffff' }}>
                         {tx.event || tx.description || 'Referee wallet transaction'}
                       </span>
-                      <span className="fw-bold text-uppercase" style={{ color: 'var(--ho-accent-gold-text)', fontSize: '10px' }}>
+                      <span className="fw-bold text-uppercase" style={{ color: '#f59e0b', fontSize: '10px' }}>
                         {tx.date || tx.createdAt || 'Recent'}
                       </span>
                     </div>
 
                     <div className="d-flex justify-content-between align-items-center">
-                      <span className="text-secondary">Transaction Type:</span>
+                      <span style={{ color: '#cbd5e1' }}>Transaction Type:</span>
                       <span className={`badge ${tx.amount > 0 ? 'bg-success' : 'bg-danger'}`}>
                         {tx.type || (tx.amount > 0 ? 'DEPOSIT' : 'WITHDRAWAL')}
                       </span>
                     </div>
 
                     <div className="d-flex justify-content-between align-items-center">
-                      <span className="text-secondary">Amount:</span>
+                      <span style={{ color: '#cbd5e1' }}>Amount:</span>
                       <span className={`fw-bold ${tx.amount > 0 ? 'text-success' : 'text-danger'}`}>
                         {tx.amount > 0 ? `+${tx.amount.toLocaleString()}` : tx.amount.toLocaleString()} VND
                       </span>

@@ -21,7 +21,7 @@ export default function RaceEntriesContent() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateRegId, setUpdateRegId] = useState(null);
 
-  // Filter only READY horses (case-insensitive)
+  // Filter only READY horses
   const readyHorses = horses.filter(h => h.status && h.status.toUpperCase() === 'READY');
   // Filter only jockeys who are friends
   const friendJockeys = systemUsers.filter(u => u.role === 'JOCKEY' && u.friendStatus === 'FRIEND');
@@ -31,10 +31,9 @@ export default function RaceEntriesContent() {
     setIsUpdating(false);
     setUpdateRegId(null);
 
-    // Filter eligible horses by race allowedClasses
     const allowed = race.allowedClasses ? race.allowedClasses.split(',').map(s => s.trim().toUpperCase()) : [];
     const eligibleHorses = readyHorses.filter(h => {
-      if (allowed.length === 0) return true; // if no restriction, allow all
+      if (allowed.length === 0) return true;
       return h.breed && allowed.includes(h.breed.trim().toUpperCase());
     });
 
@@ -58,11 +57,9 @@ export default function RaceEntriesContent() {
       return h.breed && allowed.includes(h.breed.trim().toUpperCase());
     });
 
-    // Find currently registered horse if present in user stable, else fallback to first eligible
     const currentHorse = horses.find(h => h.name === race.myRegistration.horseName);
     const horseIdVal = currentHorse ? currentHorse.id : (eligibleHorses.length > 0 ? eligibleHorses[0].id : '');
 
-    // Find currently registered jockey if present in friends list
     const currentJockey = systemUsers.find(u => u.fullName === race.myRegistration.jockeyName);
     const jockeyIdVal = currentJockey ? currentJockey.id : (friendJockeys.length > 0 ? friendJockeys[0].id : '');
 
@@ -89,7 +86,6 @@ export default function RaceEntriesContent() {
       setLoading(true);
       await cancelRaceRegistrationAPI(reg.id);
 
-      // Clean local storage
       const savedLocal = localStorage.getItem('owner_registered_races') || '[]';
       const localList = JSON.parse(savedLocal).filter(l => l.raceId !== reg.raceId);
       localStorage.setItem('owner_registered_races', JSON.stringify(localList));
@@ -141,7 +137,6 @@ export default function RaceEntriesContent() {
       const selectedHorseObj = horses.find(h => h.id === parseInt(formData.horseId));
       const selectedJockeyObj = systemUsers.find(j => j.id === parseInt(formData.jockeyId));
 
-      // Save locally to local storage for persistence across reloads
       const savedLocal = localStorage.getItem('owner_registered_races') || '[]';
       let localList = JSON.parse(savedLocal);
       if (isUpdating) {
@@ -173,14 +168,15 @@ export default function RaceEntriesContent() {
 
   return (
     <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
-      {/* Title */}
-      <div className="d-flex justify-content-between align-items-end mb-4">
+      {/* Title Header */}
+      <div className="d-flex justify-content-between align-items-end mb-4 p-4 rounded-4" style={{ backgroundColor: '#0c2214', border: '1px solid rgba(212,175,55,0.3)', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
         <div>
-          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
-            Upcoming Tournaments
+          <span className="badge bg-warning text-dark fw-bold mb-2" style={{ fontSize: '0.75rem' }}>HORSE OWNER SUITE</span>
+          <h2 className="ho-font-epilogue fs-3 fw-bold text-white mb-1" style={{ color: '#ffffff' }}>
+            Upcoming Tournaments & Race Entries
           </h2>
-          <p className="text-secondary small m-0">
-            Register your horses to participate in prestigious cup tournaments.
+          <p className="text-white-50 small m-0" style={{ color: '#94a3b8' }}>
+            Register your thoroughbred horses to participate in prestigious cup tournaments.
           </p>
         </div>
       </div>
@@ -198,61 +194,63 @@ export default function RaceEntriesContent() {
                 interactive={true}
               >
                 {race.imageUrl && (
-                  <div style={{ width: '100%', height: '120px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--ho-border-gold)', marginBottom: '10px' }}>
+                  <div style={{ width: '100%', height: '120px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(212, 175, 55, 0.3)', marginBottom: '10px' }}>
                     <img src={race.imageUrl.startsWith('/') ? `http://localhost:8080${race.imageUrl}` : race.imageUrl} alt={race.tournamentName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 )}
                 <div className="d-flex flex-column gap-2 mb-3">
-                  <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span className="fw-bold text-dark">Location:</span>
-                    <span className="text-end text-truncate ms-2" style={{ maxWidth: '150px' }}>{race.location}</span>
+                  <div className="d-flex justify-content-between py-1 border-bottom border-secondary">
+                    <span className="fw-bold text-white">Location:</span>
+                    <span className="text-end text-truncate ms-2 text-white-50" style={{ maxWidth: '150px' }}>{race.location}</span>
                   </div>
-                  <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span className="fw-bold text-dark">Track Type:</span>
-                    <span>{race.trackType}</span>
+                  <div className="d-flex justify-content-between py-1 border-bottom border-secondary">
+                    <span className="fw-bold text-white">Track Type:</span>
+                    <span className="text-white-50">{race.trackType}</span>
                   </div>
-                  <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span className="fw-bold text-dark">Prize Pool:</span>
-                    <span className="fw-bold" style={{ color: 'var(--ho-primary-medium)' }}>{race.prizePool}</span>
+                  <div className="d-flex justify-content-between py-1 border-bottom border-secondary">
+                    <span className="fw-bold text-white">Prize Pool:</span>
+                    <span className="fw-bold text-warning">{race.prizePool}</span>
                   </div>
-                  <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span className="fw-bold text-dark">Track Shape:</span>
-                    <span>{String(race.trackShape).toUpperCase() === 'OVAL' ? 'Oval Track' : 'Straight Track'}</span>
+                  <div className="d-flex justify-content-between py-1 border-bottom border-secondary">
+                    <span className="fw-bold text-white">Track Shape:</span>
+                    <span className="text-white-50">{String(race.trackShape).toUpperCase() === 'OVAL' ? 'Oval Track' : 'Straight Track'}</span>
                   </div>
-                  <div className="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span className="fw-bold text-dark">Entry Fee:</span>
-                    <span>{race.entryFee ? `${race.entryFee.toLocaleString()} VND` : 'Free'}</span>
+                  <div className="d-flex justify-content-between py-1 border-bottom border-secondary">
+                    <span className="fw-bold text-white">Entry Fee:</span>
+                    <span className="text-white-50">{race.entryFee ? `${race.entryFee.toLocaleString()} VND` : 'Free'}</span>
                   </div>
                   <div className="d-flex justify-content-between py-1 align-items-center mb-2">
-                    <span className="fw-bold text-dark">Status:</span>
+                    <span className="fw-bold text-white">Status:</span>
                     <StatusBadge status={race.myRegistration ? (race.myRegistration.status === 'APPROVED' ? 'READY' : race.myRegistration.status) : race.status} />
                   </div>
-                  <div className="p-2 rounded mt-1" style={{ background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.3)' }}>
-                    <div className="d-flex align-items-center gap-2 mb-1">
-                      <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--ho-accent-gold-text)' }}>info</span>
-                      <span className="fw-bold" style={{ color: 'var(--ho-primary-dark)', fontSize: '13px' }}>Allowed Breeds:</span>
+
+                  {/* ALLOWED BREEDS HIGH-CONTRAST BOX */}
+                  <div className="p-2.5 rounded-3 mt-1" style={{ background: 'rgba(212, 175, 55, 0.12)', border: '1px solid rgba(212, 175, 55, 0.35)' }}>
+                    <div className="d-flex align-items-center gap-2 mb-1.5">
+                      <span className="material-symbols-outlined text-warning" style={{ fontSize: '18px' }}>info</span>
+                      <span className="fw-bold text-warning" style={{ fontSize: '13px' }}>Allowed Breeds:</span>
                     </div>
-                    <div className="fw-semibold ms-4" style={{ color: 'var(--ho-accent-gold-text)', fontSize: '14px' }}>
+                    <div className="fw-semibold ms-4" style={{ fontSize: '13px' }}>
                       {race.allowedClasses ? race.allowedClasses.split(',').map(c => c.trim()).map((c, idx) => (
-                        <span key={idx} className="badge bg-light text-dark border me-1 mb-1">{c}</span>
-                      )) : <span className="badge bg-light text-dark border">All breeds allowed</span>}
+                        <span key={idx} className="badge bg-dark text-warning border border-warning me-1 mb-1 px-2 py-1">{c}</span>
+                      )) : <span className="badge bg-dark text-warning border border-warning px-2 py-1">All breeds allowed</span>}
                     </div>
                   </div>
                 </div>
 
                 {race.myRegistration ? (
                   <div className="d-flex flex-column gap-2 w-100">
-                    <div className="p-2 rounded border" style={{ backgroundColor: 'rgba(0,0,0,0.02)', fontSize: '13px', borderColor: 'var(--ho-border-gold)' }}>
+                    <div className="p-3 rounded-3 border" style={{ backgroundColor: '#051009', fontSize: '13px', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
                       <div className="d-flex justify-content-between mb-1">
-                        <span className="text-secondary fw-semibold">Horse:</span>
-                        <span className="fw-bold text-dark">{race.myRegistration.horseName}</span>
+                        <span className="text-white-50 fw-semibold">Horse:</span>
+                        <span className="fw-bold text-white">{race.myRegistration.horseName}</span>
                       </div>
                       <div className="d-flex justify-content-between mb-1">
-                        <span className="text-secondary fw-semibold">Jockey:</span>
-                        <span className="fw-bold text-dark">{race.myRegistration.jockeyName}</span>
+                        <span className="text-white-50 fw-semibold">Jockey:</span>
+                        <span className="fw-bold text-white">{race.myRegistration.jockeyName}</span>
                       </div>
-                      <div className="d-flex justify-content-between align-items-center">
-                        <span className="text-secondary fw-semibold">Status:</span>
+                      <div className="d-flex justify-content-between align-items-center mt-2">
+                        <span className="text-white-50 fw-semibold">Status:</span>
                         <span className="badge" style={{
                           backgroundColor: race.myRegistration.status === 'APPROVED' ? 'rgba(16, 185, 129, 0.15)' : race.myRegistration.status === 'PENDING' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)',
                           color: race.myRegistration.status === 'APPROVED' ? '#10b981' : race.myRegistration.status === 'PENDING' ? '#f59e0b' : '#3b82f6',
@@ -266,11 +264,11 @@ export default function RaceEntriesContent() {
                         </span>
                       </div>
                     </div>
-                    <div className="d-flex gap-2 w-100">
+                    <div className="d-flex gap-2 w-100 mt-2">
                       <button
                         onClick={() => handleUpdateClick(race)}
-                        className="ho-btn ho-btn-outline-dark-green w-50 py-2 fw-bold"
-                        style={{ border: '1px solid var(--ho-primary-dark)', borderRadius: '8px', color: 'var(--ho-primary-dark)', background: 'transparent' }}
+                        className="btn btn-outline-warning w-50 py-2 fw-bold"
+                        style={{ borderRadius: '8px' }}
                         disabled={race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER'}
                       >
                         Change Info
@@ -278,25 +276,24 @@ export default function RaceEntriesContent() {
                       <button
                         onClick={() => handleCancelClick(race.myRegistration)}
                         className="btn btn-danger w-50 py-2 fw-bold text-white"
-                        style={{ borderRadius: '8px', backgroundColor: '#ef4444', border: 'none' }}
-                        disabled={race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER'}
+                        style={{ borderRadius: '8px' }}
                       >
-                        Withdraw
+                        Cancel
                       </button>
                     </div>
                   </div>
                 ) : (
                   <button
                     onClick={() => handleRegisterClick(race)}
-                    className={`ho-btn ${(race.status === 'Active' || race.status === 'OPEN_FOR_REGISTER') ? 'ho-btn-gold-solid' : 'btn-secondary'} w-100 py-2 fw-bold`}
+                    className="btn fw-bold w-100 py-2.5 shadow-sm text-dark mt-auto"
+                    style={{
+                      background: 'linear-gradient(135deg, #ffd700 0%, #d4af37 100%)',
+                      border: 'none',
+                      borderRadius: '8px'
+                    }}
                     disabled={race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER'}
-                    style={(race.status !== 'Active' && race.status !== 'OPEN_FOR_REGISTER') ? { backgroundColor: '#cccccc', color: '#666666', border: '1px solid #bbbbbb', cursor: 'not-allowed' } : {}}
                   >
-                    {(race.status === 'Active' || race.status === 'OPEN_FOR_REGISTER')
-                      ? 'Register'
-                      : race.status === 'Upcoming'
-                        ? 'Not Open Yet'
-                        : 'Registration Closed'}
+                    {race.status === 'FINISHED' ? 'REGISTRATION CLOSED' : 'REGISTER'}
                   </button>
                 )}
               </DataCard>
@@ -305,142 +302,105 @@ export default function RaceEntriesContent() {
         })}
       </div>
 
-      {/* Modal Dialog */}
-      {showModal && createPortal(
-        <div className="modal-overlay" style={{ zIndex: 1050 }} onClick={() => !loading && setShowModal(false)}>
-          <div className="modal-content-custom animate-scale-up" onClick={(e) => e.stopPropagation()}>
-            <h3 className="ho-font-epilogue fs-4 fw-bold mb-4" style={{ color: 'var(--ho-primary-dark)' }}>
-              {isUpdating ? 'Update Registration for' : 'Register for'} {selectedRace?.tournamentName}
-            </h3>
-
-            <div className="d-flex flex-column gap-4 mb-4">
-              {/* Select Horse */}
-              <div>
-                <label className="ho-input-label ho-font-grotesk">
-                  Select Horse <span className="text-secondary small fw-normal">(Only displaying breeds allowed & ready)</span>
-                </label>
-                <select
-                  value={formData.horseId}
-                  onChange={(e) => setFormData({ ...formData, horseId: e.target.value })}
-                  className="ho-form-input fw-semibold text-dark"
-                >
-                  {(() => {
-                    const allowed = selectedRace?.allowedClasses ? selectedRace.allowedClasses.split(',').map(s => s.trim().toUpperCase()) : [];
-                    const eligibleHorses = readyHorses.filter(h => {
-                      if (allowed.length === 0) return true;
-                      return h.breed && allowed.includes(h.breed.trim().toUpperCase());
-                    });
-
-                    if (eligibleHorses.length === 0) {
-                      return <option value="">No eligible horses available (Horses must be in Ready status and match breed {selectedRace?.allowedClasses})</option>;
-                    }
-                    return eligibleHorses.map(h => (
-                      <option key={h.id} value={h.id}>{h.name} ({h.breed})</option>
-                    ));
-                  })()}
-                </select>
+      {/* Registration Modal */}
+      {showModal && selectedRace && createPortal(
+        <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 9999 }}>
+          <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-content text-white" style={{ backgroundColor: '#0c2214', border: '1px solid #d4af37' }}>
+              <div className="modal-header border-secondary" style={{ backgroundColor: '#07150c' }}>
+                <h5 className="modal-title fw-bold text-warning">
+                  {isUpdating ? 'Update Race Registration' : 'Register Horse for Race'}
+                </h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
-
-              {/* Select Jockey */}
-              <div>
-                <label className="ho-input-label ho-font-grotesk">
-                  Select Jockey <span className="text-secondary small fw-normal">(Only displaying jockeys in your connections)</span>
-                </label>
-                <select
-                  value={formData.jockeyId}
-                  onChange={(e) => setFormData({ ...formData, jockeyId: e.target.value })}
-                  className="ho-form-input fw-semibold text-dark"
-                >
-                  {friendJockeys.length === 0 && <option value="">No jockeys in connections</option>}
-                  {friendJockeys.map(j => (
-                    <option key={j.id} value={j.id}>{j.fullName} (Win Rate: {j.winRate}%)</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Profit Sharing */}
-              <div className="row g-3">
-                <div className="col-6">
-                  <label className="ho-input-label ho-font-grotesk">
-                    Horse Owner (%)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={formData.ownerShare}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value) || 0;
-                      setFormData({ ...formData, ownerShare: val, jockeyShare: 100 - val });
-                    }}
-                    className="ho-form-input text-dark fw-bold"
-                  />
+              <div className="modal-body p-4">
+                <div className="mb-3 p-3 rounded" style={{ backgroundColor: '#051009', border: '1px solid rgba(212,175,55,0.2)' }}>
+                  <h6 className="fw-bold text-white m-0">{selectedRace.tournamentName}</h6>
+                  <span className="text-white-50 small">{selectedRace.location} • Prize: {selectedRace.prizePool}</span>
                 </div>
-                <div className="col-6">
-                  <label className="ho-input-label ho-font-grotesk">
-                    Jockey (%)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={formData.jockeyShare}
-                    onChange={(e) => {
-                      const val = parseFloat(e.target.value) || 0;
-                      setFormData({ ...formData, jockeyShare: val, ownerShare: 100 - val });
-                    }}
-                    className="ho-form-input text-dark fw-bold"
-                  />
+
+                <div className="row g-3 mb-4">
+                  <div className="col-12 col-md-6">
+                    <label className="text-white-50 small mb-1 fw-bold">Select Horse</label>
+                    <select
+                      className="form-select text-white"
+                      value={formData.horseId}
+                      onChange={(e) => setFormData({ ...formData, horseId: e.target.value })}
+                      style={{ backgroundColor: '#051009', border: '1px solid rgba(212,175,55,0.3)' }}
+                    >
+                      <option value="" disabled>-- Select a ready horse --</option>
+                      {readyHorses.map(h => (
+                        <option key={h.id} value={h.id}>{h.name} ({h.breed || 'Thoroughbred'})</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-12 col-md-6">
+                    <label className="text-white-50 small mb-1 fw-bold">Select Jockey (From Friends)</label>
+                    <select
+                      className="form-select text-white"
+                      value={formData.jockeyId}
+                      onChange={(e) => setFormData({ ...formData, jockeyId: e.target.value })}
+                      style={{ backgroundColor: '#051009', border: '1px solid rgba(212,175,55,0.3)' }}
+                    >
+                      <option value="" disabled>-- Select a jockey --</option>
+                      {friendJockeys.map(j => (
+                        <option key={j.id} value={j.id}>{j.fullName}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-6">
+                    <label className="text-white-50 small mb-1">Owner Prize Share (%)</label>
+                    <input
+                      type="number"
+                      className="form-control text-white"
+                      value={formData.ownerShare}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        setFormData({ ...formData, ownerShare: val, jockeyShare: 100 - val });
+                      }}
+                      style={{ backgroundColor: '#051009', border: '1px solid rgba(212,175,55,0.3)' }}
+                    />
+                  </div>
+
+                  <div className="col-6">
+                    <label className="text-white-50 small mb-1">Jockey Prize Share (%)</label>
+                    <input
+                      type="number"
+                      className="form-control text-white"
+                      value={formData.jockeyShare}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        setFormData({ ...formData, jockeyShare: val, ownerShare: 100 - val });
+                      }}
+                      style={{ backgroundColor: '#051009', border: '1px solid rgba(212,175,55,0.3)' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-end gap-2">
+                  <button className="btn btn-outline-secondary text-white" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button className="btn btn-warning fw-bold text-dark" onClick={handleConfirm} disabled={loading}>
+                    {loading ? 'Submitting...' : 'Confirm Registration'}
+                  </button>
                 </div>
               </div>
-            </div>
-
-            {/* Actions */}
-            <div className="d-flex justify-content-end gap-3 align-items-center">
-              <button
-                onClick={() => { setShowModal(false); setIsUpdating(false); setUpdateRegId(null); }}
-                className="ho-btn-link text-uppercase tracking-wider small fw-bold"
-                style={{ textDecoration: 'none' }}
-                disabled={loading}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirm}
-                className="ho-btn ho-btn-gold-solid py-2 px-4 fw-bold"
-                disabled={loading || readyHorses.length === 0 || friendJockeys.length === 0}
-              >
-                {loading ? 'Processing...' : (isUpdating ? 'Confirm Changes' : 'Confirm Registration')}
-              </button>
             </div>
           </div>
         </div>,
         document.body
       )}
 
-      {/* Registration Success Modal Dialog */}
+      {/* Success Modal */}
       {showSuccessModal && createPortal(
-        <div className="modal-overlay" style={{ zIndex: 1050 }} onClick={() => setShowSuccessModal(false)}>
-          <div className="modal-content-custom animate-scale-up text-center" style={{ maxWidth: '450px', padding: '2.5rem 2rem' }} onClick={(e) => e.stopPropagation()}>
-            <span className="material-symbols-outlined text-success mb-3" style={{ fontSize: '48px' }}>
-              check_circle
-            </span>
-            <h3 className="ho-font-epilogue fs-5 fw-bold mb-2" style={{ color: 'var(--ho-primary-dark)' }}>
-              Registration Successful
-            </h3>
-            <p className="text-secondary small fw-medium mb-4" style={{ lineHeight: '1.5' }}>
-              {successMsg}
-            </p>
-
-            <div className="d-flex justify-content-center pt-2">
-              <button
-                type="button"
-                onClick={() => setShowSuccessModal(false)}
-                className="ho-btn ho-btn-gold-solid py-2 px-5 fw-bold text-uppercase"
-                style={{ fontSize: '12px', letterSpacing: '0.5px' }}
-              >
-                OK
-              </button>
+        <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 9999 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content text-white text-center p-4" style={{ backgroundColor: '#0c2214', border: '1px solid #d4af37' }}>
+              <span className="material-symbols-outlined text-warning display-4 mb-2">check_circle</span>
+              <h4 className="fw-bold text-white mb-2">Success!</h4>
+              <p className="text-white-50 mb-4">{successMsg}</p>
+              <button className="btn btn-warning fw-bold px-4 text-dark mx-auto" onClick={() => setShowSuccessModal(false)}>OK</button>
             </div>
           </div>
         </div>,

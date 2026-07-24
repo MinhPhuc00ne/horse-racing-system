@@ -73,7 +73,7 @@ export default function AdminDashboardContent() {
     {
       key: 'fullName',
       label: 'Full Name',
-      render: (item) => <span className="fw-semibold text-dark">{item.fullName}</span>
+      render: (item) => <span className="fw-semibold text-white">{item.fullName}</span>
     },
     {
       key: 'requestedRole',
@@ -96,18 +96,19 @@ export default function AdminDashboardContent() {
     {
       key: 'submittedAt',
       label: 'Date Submitted',
-      render: (item) => <span className="text-secondary small">{item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A'}</span>
+      render: (item) => <span className="small" style={{ color: '#cbd5e1' }}>{item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A'}</span>
     }
   ];
 
   return (
     <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
-      {/* Title */}
-      <div className="mb-4">
-        <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
+      {/* Title Header */}
+      <div className="mb-4 p-4 rounded-4" style={{ backgroundColor: '#0c2214', border: '1px solid rgba(212, 175, 55, 0.3)', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
+        <span className="badge bg-warning text-dark fw-bold mb-2" style={{ fontSize: '0.75rem' }}>ADMIN CONTROL CONSOLE</span>
+        <h2 className="ho-font-epilogue fs-3 fw-bold text-white mb-1" style={{ color: '#ffffff' }}>
           Admin Administration System
         </h2>
-        <p className="text-secondary small m-0">
+        <p className="text-white-50 small m-0" style={{ color: '#94a3b8' }}>
           Overview of tournament statistics, user account management, and financial charts.
         </p>
       </div>
@@ -133,7 +134,7 @@ export default function AdminDashboardContent() {
                 <h3 className="ho-font-grotesk text-uppercase fw-bold text-secondary mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
                   Total Users
                 </h3>
-                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: 'var(--ho-primary-dark)' }}>
+                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#ffffff' }}>
                   {stats.usersCount}
                 </p>
                 <div className="mt-2 small text-secondary">
@@ -151,7 +152,7 @@ export default function AdminDashboardContent() {
                 <h3 className="ho-font-grotesk text-uppercase fw-bold text-secondary mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
                   Active Tournaments
                 </h3>
-                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: 'var(--ho-primary-dark)' }}>
+                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#ffffff' }}>
                   {stats.tournamentsCount}
                 </p>
                 <div className="mt-2 small text-secondary">
@@ -169,7 +170,7 @@ export default function AdminDashboardContent() {
                 <h3 className="ho-font-grotesk text-uppercase fw-bold text-secondary mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
                   Entry Registrations
                 </h3>
-                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: 'var(--ho-primary-dark)' }}>
+                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#ffffff' }}>
                   {stats.racesCount}
                 </p>
                 <div className="mt-2 small text-secondary">
@@ -187,7 +188,7 @@ export default function AdminDashboardContent() {
                 <h3 className="ho-font-grotesk text-uppercase fw-bold text-secondary mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
                   Upgrade Requests
                 </h3>
-                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: 'var(--ho-primary-dark)' }}>
+                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#ffffff' }}>
                   {stats.pendingUpgradesCount}
                 </p>
                 <div className="mt-2 small text-warning fw-semibold">
@@ -205,7 +206,7 @@ export default function AdminDashboardContent() {
                 <h3 className="ho-font-grotesk text-uppercase fw-bold text-secondary mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
                   Withdrawal Transactions
                 </h3>
-                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: 'var(--ho-primary-dark)' }}>
+                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#ffffff' }}>
                   {stats.pendingWithdrawalsCount}
                 </p>
                 <div className="mt-2 small text-warning fw-semibold">
@@ -318,7 +319,7 @@ export default function AdminDashboardContent() {
             <div className="col-12 col-lg-6">
               <div className="glass-card h-100">
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h3 className="ho-font-epilogue fs-5 fw-bold m-0" style={{ color: 'var(--ho-primary-dark)' }}>
+                  <h3 className="ho-font-epilogue fs-5 fw-bold m-0" style={{ color: '#ffffff' }}>
                     Recent Role Upgrade Requests
                   </h3>
                   <button
@@ -338,10 +339,10 @@ export default function AdminDashboardContent() {
             <div className="col-12 col-lg-6">
               <div className="glass-card h-100 d-flex flex-column justify-content-between">
                 <div>
-                  <h3 className="ho-font-epilogue fs-5 fw-bold mb-3" style={{ color: 'var(--ho-primary-dark)' }}>
+                  <h3 className="ho-font-epilogue fs-5 fw-bold mb-3" style={{ color: '#ffffff' }}>
                     Admin Quick Actions
                   </h3>
-                  <p className="text-secondary small mb-4">
+                  <p className="text-secondary small mb-4" style={{ color: '#cbd5e1' }}>
                     Administrators have privileges to manage tournaments, financials, and system permissions.
                   </p>
                   

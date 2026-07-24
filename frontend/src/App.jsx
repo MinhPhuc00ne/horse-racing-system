@@ -23,12 +23,15 @@ const SpectatorLiveSimulationPage = lazy(() => import('./components/Spectator/Sp
 const UnauthorizedPage = lazy(() => import('./pages/Unauthorized/UnauthorizedPage'));
 const PaymentQRPage = lazy(() => import('./pages/Payment/PaymentQRPage'));
 const PaymentCallback = lazy(() => import('./pages/Payment/PaymentCallback'));
+const CareersPage = lazy(() => import('./pages/Careers/CareersPage'));
+const RulesPage = lazy(() => import('./pages/Rules/RulesPage'));
+const NewsPage = lazy(() => import('./pages/News/NewsPage'));
 
 const MainLayout = () => {
   return (
-    <div className="app-layout">
+    <div className="app-layout" style={{ backgroundColor: '#051009', color: '#fff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Header />
-      <main className="app-main">
+      <main className="app-main" style={{ flexGrow: 1 }}>
         <Outlet />
       </main>
       <Footer />
@@ -66,55 +69,14 @@ function App() {
                 </PageTransition>
               }>
                 <Routes>
-                  {/* Public Authentication Routes */}
+                  {/* Public Authentication Routes (Without MainLayout) */}
                   <Route path="/login" element={<AuthPage view="login" />} />
                   <Route path="/signup" element={<AuthPage view="signup" />} />
                   <Route path="/verify-account" element={<VerifyAccountPage />} />
                   <Route path="/verify-email" element={<VerifyAccountPage />} />
                   <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-                  {/* Standalone Horse Owner Dashboard Suite */}
-                  <Route
-                    path="/owner/*"
-                    element={
-                      <ProtectedRoute allowedRoles={["HORSE_OWNER"]}>
-                        <HorseOwnerPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/horseowner/dashboard" element={<Navigate to="/owner" replace />} />
-
-                  {/* Jockey Nested Dashboard Layout */}
-                  <Route
-                    path="/jockey/*"
-                    element={
-                      <ProtectedRoute allowedRoles={["JOCKEY"]}>
-                        <JockeyPage />
-                      </ProtectedRoute>
-                    }
-                  />
-
-                  {/* Referee Nested Dashboard Layout */}
-                  <Route
-                    path="/referee/*"
-                    element={
-                      <ProtectedRoute allowedRoles={["RACE_REFEREE"]}>
-                        <RefereePage />
-                      </ProtectedRoute>
-                    }
-                  />
-
-                  {/* Spectator Nested Dashboard Layout */}
-                  <Route
-                    path="/spectators/*"
-                    element={
-                      <ProtectedRoute allowedRoles={["SPECTATOR", "HORSE_OWNER", "JOCKEY", "RACE_REFEREE"]}>
-                        <SpectatorPage />
-                      </ProtectedRoute>
-                    }
-                  />
-
-                  {/* Standalone Admin Dashboard Suite */}
+                  {/* Dedicated Admin Portal Route (Without Global Top Header - Sidebar Only) */}
                   <Route
                     path="/admin/*"
                     element={
@@ -124,25 +86,67 @@ function App() {
                     }
                   />
 
-                  {/* Payment Route */}
-                  <Route
-                    path="/payment-qr"
-                    element={
-                      <ProtectedRoute allowedRoles={["HORSE_OWNER", "JOCKEY"]}>
-                        <PaymentQRPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/payment-success" element={<PaymentCallback />} />
-                  <Route path="/payment-cancel" element={<PaymentCallback />} />
-
-                  {/* Public and Protected Routes enclosed in MainLayout */}
+                  {/* ALL System & Role Routes enclosed in MainLayout */}
                   <Route element={<MainLayout />}>
                     {/* Landing Dashboard */}
                     <Route path="/" element={<Home />} />
                     <Route path="/home" element={<Navigate to="/" replace />} />
                     <Route path="/tournaments" element={<SpectatorTournaments />} />
                     <Route path="/live" element={<SpectatorLiveSimulationPage />} />
+                    <Route path="/careers" element={<CareersPage />} />
+                    <Route path="/rules" element={<RulesPage />} />
+                    <Route path="/news" element={<NewsPage />} />
+
+                    {/* Role Dashboard Suites (All wrapped in MainLayout) */}
+                    <Route
+                      path="/owner/*"
+                      element={
+                        <ProtectedRoute allowedRoles={["HORSE_OWNER"]}>
+                          <HorseOwnerPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/horseowner/dashboard" element={<Navigate to="/owner" replace />} />
+
+                    <Route
+                      path="/jockey/*"
+                      element={
+                        <ProtectedRoute allowedRoles={["JOCKEY"]}>
+                          <JockeyPage />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/referee/*"
+                      element={
+                        <ProtectedRoute allowedRoles={["RACE_REFEREE"]}>
+                          <RefereePage />
+                        </ProtectedRoute>
+                      }
+                    />
+
+                    <Route
+                      path="/spectators/*"
+                      element={
+                        <ProtectedRoute allowedRoles={["SPECTATOR", "HORSE_OWNER", "JOCKEY", "RACE_REFEREE"]}>
+                          <SpectatorPage />
+                        </ProtectedRoute>
+                      }
+                    />
+
+
+                    {/* Payment Routes */}
+                    <Route
+                      path="/payment-qr"
+                      element={
+                        <ProtectedRoute allowedRoles={["HORSE_OWNER", "JOCKEY"]}>
+                          <PaymentQRPage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/payment-success" element={<PaymentCallback />} />
+                    <Route path="/payment-cancel" element={<PaymentCallback />} />
                   </Route>
 
                   {/* Catch-all fallback redirecting to root */}
