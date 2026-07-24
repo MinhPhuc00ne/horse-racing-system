@@ -222,10 +222,10 @@ export default function SpectatorUpgradeRole() {
     <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
       
       {/* Title */}
-      <div className="mb-4">
-        <span className="role-badge">SPECTATOR ROLE</span>
-        <h2 className="ho-font-epilogue fs-3 fw-bold text-dark mb-1">Account Upgrade</h2>
-        <p className="text-secondary small">Become an official member with the role of Horse Owner, Jockey, or Race Referee.</p>
+      <div className="mb-4 p-4 rounded-4" style={{ backgroundColor: '#0c2214', border: '1px solid rgba(212, 175, 55, 0.3)', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
+        <span className="badge bg-warning text-dark fw-bold mb-2" style={{ fontSize: '0.75rem' }}>SPECTATOR ROLE</span>
+        <h2 className="ho-font-epilogue fs-3 fw-bold text-white mb-1" style={{ color: '#ffffff' }}>Account Upgrade</h2>
+        <p className="text-white-50 small m-0" style={{ color: '#94a3b8' }}>Become an official member with the role of Horse Owner, Jockey, or Race Referee.</p>
       </div>
 
       <div className="row g-4 justify-content-center">

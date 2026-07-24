@@ -154,14 +154,22 @@
   box-shadow: 0 0 0 1px var(--ho-accent-gold);
 }
 
-/* Premium Cards */
 .glass-card {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--ho-border-gold);
-  border-radius: 0.75rem;
+  background: #0c2214;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.glass-card h1, .glass-card h2, .glass-card h3, .glass-card h4, .glass-card h5, .glass-card h6 {
+  color: #ffffff !important;
+}
+
+.glass-card p, .glass-card span.text-secondary {
+  color: #94a3b8 !important;
 }
 
 .glass-card-interactive {

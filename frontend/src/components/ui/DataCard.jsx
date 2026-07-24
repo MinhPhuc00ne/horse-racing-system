@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Reusable DataCard component for displaying items in a grid
+ * Reusable DataCard component for displaying items in a grid with dark-gold theme high contrast
  * @param {string} title - Main title
  * @param {string} subtitle - Subtitle (e.g. date, category)
  * @param {ReactNode} actions - Optional action buttons/elements
@@ -14,11 +14,11 @@ export default function DataCard({ title, subtitle, actions, children, interacti
       {/* Header */}
       <div className="mb-3 d-flex justify-content-between align-items-start gap-2">
         <div>
-          <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
+          <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: '#ffffff' }}>
             {title}
           </h3>
           {subtitle && (
-            <p className="ho-font-grotesk fw-bold text-uppercase m-0" style={{ color: 'var(--ho-accent-gold-text)', fontSize: '11px', letterSpacing: '0.05em' }}>
+            <p className="ho-font-grotesk fw-bold text-uppercase m-0" style={{ color: '#ffd700', fontSize: '11px', letterSpacing: '0.05em' }}>
               {subtitle}
             </p>
           )}
@@ -31,7 +31,7 @@ export default function DataCard({ title, subtitle, actions, children, interacti
       </div>
       
       {/* Body */}
-      <div className="flex-grow-1 d-flex flex-column gap-2 text-secondary small">
+      <div className="flex-grow-1 d-flex flex-column gap-2 text-white-50 small">
         {children}
       </div>
     </div>

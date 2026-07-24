@@ -252,10 +252,10 @@ export default function SpectatorWallet({ hideHeader = false }) {
     <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
       {/* Title */}
       {!hideHeader && (
-        <div className="mb-4">
-          <span className="role-badge">SPECTATOR ROLE</span>
-          <h2 className="ho-font-epilogue fs-3 fw-bold text-dark mb-1">My Wallet & Transactions</h2>
-          <p className="text-secondary small">
+        <div className="mb-4 p-4 rounded-4" style={{ backgroundColor: '#0c2214', border: '1px solid rgba(212, 175, 55, 0.3)', boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
+          <span className="badge bg-warning text-dark fw-bold mb-2" style={{ fontSize: '0.75rem' }}>SPECTATOR ROLE</span>
+          <h2 className="ho-font-epilogue fs-3 fw-bold text-white mb-1" style={{ color: '#ffffff' }}>My Wallet & Transactions</h2>
+          <p className="text-white-50 small m-0" style={{ color: '#94a3b8' }}>
             Manage your funds, make deposits via VietQR, or request cash withdrawals.
           </p>
         </div>
