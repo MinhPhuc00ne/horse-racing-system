@@ -87,8 +87,8 @@ export default function PreRaceCheck() {
     <>
       <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
         <div className="mb-4">
-          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>Pre-Race Check</h2>
-          <p className="text-secondary small">Verify the health and technical condition of horses and jockeys before allowing them to race.</p>
+          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#ffffff' }}>Pre-Race Check</h2>
+          <p className="small" style={{ color: '#cbd5e1' }}>Verify the health and technical condition of horses and jockeys before allowing them to race.</p>
         </div>
 
         <div className="glass-card">
@@ -107,15 +107,15 @@ export default function PreRaceCheck() {
               className="material-symbols-outlined mb-2" 
               style={{ 
                 fontSize: '56px', 
-                color: notification.type === 'success' ? 'var(--ho-primary-medium)' : 'var(--ho-error-text)' 
+                color: notification.type === 'success' ? '#10b981' : '#ef4444' 
               }}
             >
               {notification.type === 'success' ? 'verified' : 'error'}
             </span>
-            <h3 className="ho-font-epilogue fs-5 fw-bold text-dark mb-2">
+            <h3 className="ho-font-epilogue fs-5 fw-bold text-white mb-2">
               {notification.type === 'success' ? 'Success' : 'Action Failed'}
             </h3>
-            <p className="text-secondary small mb-4">{notification.message}</p>
+            <p className="small mb-4" style={{ color: '#cbd5e1' }}>{notification.message}</p>
             <button 
               className={`ho-btn ${notification.type === 'success' ? 'ho-btn-gold-solid' : 'ho-btn-outline-danger'} w-100 py-2`} 
               onClick={() => setNotification(null)}

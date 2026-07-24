@@ -200,8 +200,8 @@ export default function SpectatorUpgradeRole() {
               <span className="material-symbols-outlined text-success mb-3" style={{ fontSize: '64px' }}>
                 check_circle
               </span>
-              <h3 className="ho-font-epilogue fs-4 fw-bold text-dark mb-2">Account Upgraded Successfully!</h3>
-              <p className="text-secondary mb-4 mx-auto" style={{ maxWidth: '500px' }}>
+              <h3 className="ho-font-epilogue fs-4 fw-bold text-white mb-2">Account Upgraded Successfully!</h3>
+              <p className="mb-4 mx-auto" style={{ maxWidth: '500px', color: '#cbd5e1' }}>
                 Your account has been approved and activated with the role of <strong>{roleName}</strong>. 
                 You do not need to submit any further upgrade requests.
               </p>
@@ -241,10 +241,10 @@ export default function SpectatorUpgradeRole() {
                 <span className="badge bg-warning text-dark text-uppercase mb-2 py-1 px-3" style={{ fontSize: '12px' }}>
                   Under Review
                 </span>
-                <p className="text-dark m-0 small">
+                <p className="text-white m-0 small">
                   Your upgrade request to <strong>{myRequest.requestedRole.replace('_', ' ')}</strong> is pending approval.
                 </p>
-                <p className="text-secondary small mt-1 italic" style={{ fontSize: '12px' }}>
+                <p className="small mt-1 italic" style={{ fontSize: '12px', color: '#cbd5e1' }}>
                   Updates will be shown here once the Admin has reviewed your documents.
                 </p>
               </div>
@@ -256,7 +256,7 @@ export default function SpectatorUpgradeRole() {
                 <span className="badge bg-success text-white text-uppercase mb-2 py-1 px-3" style={{ fontSize: '12px' }}>
                   Request Approved!
                 </span>
-                <p className="text-dark m-0 small">
+                <p className="text-white m-0 small">
                   Your upgrade request has been approved. Please check and activate your new role from the notifications menu (bell icon) in the top-right corner.
                 </p>
               </div>
@@ -273,7 +273,7 @@ export default function SpectatorUpgradeRole() {
 
             {(!myRequest || myRequest.status === 'REJECTED') && (
               <form onSubmit={handleRequestUpgrade} className="d-flex flex-column gap-4">
-                <p className="text-secondary small m-0" style={{ fontSize: '13.5px' }}>
+                <p className="small m-0" style={{ fontSize: '13.5px', color: '#cbd5e1' }}>
                   Fill in the information below and upload verification documents to upgrade your account.
                 </p>
                 
@@ -283,8 +283,8 @@ export default function SpectatorUpgradeRole() {
                   <select 
                     value={requestedRole} 
                     onChange={(e) => setRequestedRole(e.target.value)}
-                    className="form-select"
-                    style={{ padding: '10px 15px', borderRadius: '8px', border: '1px solid #c0c9c0' }}
+                    className="ho-form-input text-white fw-bold"
+                    style={{ padding: '10px 15px', backgroundColor: '#0c2214' }}
                   >
                     <option value="HORSE_OWNER">Horse Owner</option>
                     <option value="JOCKEY">Jockey</option>

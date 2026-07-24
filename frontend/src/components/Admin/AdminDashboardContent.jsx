@@ -73,7 +73,7 @@ export default function AdminDashboardContent() {
     {
       key: 'fullName',
       label: 'Full Name',
-      render: (item) => <span className="fw-semibold text-dark">{item.fullName}</span>
+      render: (item) => <span className="fw-semibold text-white">{item.fullName}</span>
     },
     {
       key: 'requestedRole',
@@ -96,7 +96,7 @@ export default function AdminDashboardContent() {
     {
       key: 'submittedAt',
       label: 'Date Submitted',
-      render: (item) => <span className="text-secondary small">{item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A'}</span>
+      render: (item) => <span className="small" style={{ color: '#cbd5e1' }}>{item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A'}</span>
     }
   ];
 
@@ -319,7 +319,7 @@ export default function AdminDashboardContent() {
             <div className="col-12 col-lg-6">
               <div className="glass-card h-100">
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h3 className="ho-font-epilogue fs-5 fw-bold m-0" style={{ color: 'var(--ho-primary-dark)' }}>
+                  <h3 className="ho-font-epilogue fs-5 fw-bold m-0" style={{ color: '#ffffff' }}>
                     Recent Role Upgrade Requests
                   </h3>
                   <button
@@ -339,10 +339,10 @@ export default function AdminDashboardContent() {
             <div className="col-12 col-lg-6">
               <div className="glass-card h-100 d-flex flex-column justify-content-between">
                 <div>
-                  <h3 className="ho-font-epilogue fs-5 fw-bold mb-3" style={{ color: 'var(--ho-primary-dark)' }}>
+                  <h3 className="ho-font-epilogue fs-5 fw-bold mb-3" style={{ color: '#ffffff' }}>
                     Admin Quick Actions
                   </h3>
-                  <p className="text-secondary small mb-4">
+                  <p className="text-secondary small mb-4" style={{ color: '#cbd5e1' }}>
                     Administrators have privileges to manage tournaments, financials, and system permissions.
                   </p>
                   

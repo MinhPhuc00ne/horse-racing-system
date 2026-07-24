@@ -94,12 +94,12 @@ export default function JockeyProfileContent() {
   return (
     <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
       {/* Title */}
-      <div className="d-flex justify-content-between align-items-end border-bottom pb-3 mb-4" style={{ borderColor: 'var(--ho-border-muted)' }}>
+      <div className="d-flex justify-content-between align-items-end border-bottom pb-3 mb-4" style={{ borderColor: 'rgba(212, 175, 55, 0.25)' }}>
         <div>
-          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
+          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1 text-white">
             Jockey Profile
           </h2>
-          <p className="text-secondary small m-0">
+          <p className="small m-0" style={{ color: '#cbd5e1' }}>
             Manage your technical specs, skills, and contact details.
           </p>
         </div>
@@ -113,32 +113,32 @@ export default function JockeyProfileContent() {
             <div className="rounded-circle overflow-hidden border shadow-sm mb-3" style={{ width: '120px', height: '120px', borderColor: 'var(--ho-accent-gold)', flexShrink: 0 }}>
               <img src={profile.avatar} alt={profile.fullName} className="w-100 h-100 object-fit-cover" />
             </div>
-            <h3 className="fw-bold fs-5 mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
+            <h3 className="fw-bold fs-5 mb-1 text-white">
               {profile.fullName}
             </h3>
-            <span className="ho-font-grotesk fw-bold text-uppercase text-secondary small mb-3" style={{ letterSpacing: '0.05em' }}>
+            <span className="ho-font-grotesk fw-bold text-uppercase small mb-3" style={{ letterSpacing: '0.05em', color: '#cbd5e1' }}>
               JOCKEY ROLE
             </span>
-            <p className="text-secondary small px-3 mb-4" style={{ fontStyle: 'italic', lineHeight: '1.4' }}>
+            <p className="small px-3 mb-4" style={{ fontStyle: 'italic', lineHeight: '1.4', color: '#cbd5e1' }}>
               "{profile.description}"
             </p>
 
-            <div className="w-100 rounded p-3 text-start mb-0" style={{ backgroundColor: 'var(--ho-bg-cream)', border: '1px solid var(--ho-border-muted)' }}>
-              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                <span className="fw-bold text-dark small">Experience:</span>
-                <span className="text-secondary fw-semibold small">{profile.experienceYears} years</span>
+            <div className="w-100 rounded p-3 text-start mb-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', border: '1px solid rgba(212, 175, 55, 0.25)' }}>
+              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+                <span className="fw-bold text-white small">Experience:</span>
+                <span className="fw-semibold small" style={{ color: '#cbd5e1' }}>{profile.experienceYears} years</span>
               </div>
-              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                <span className="fw-bold text-dark small">Matches Played:</span>
-                <span className="text-secondary fw-semibold small">{profile.matchesPlayed || 0} matches</span>
+              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+                <span className="fw-bold text-white small">Matches Played:</span>
+                <span className="fw-semibold small" style={{ color: '#cbd5e1' }}>{profile.matchesPlayed || 0} matches</span>
               </div>
-              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-                <span className="fw-bold text-dark small">Email:</span>
-                <span className="text-secondary fw-semibold small text-truncate ms-2" style={{ maxWidth: '180px' }} title={profile.email}>{profile.email}</span>
+              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+                <span className="fw-bold text-white small">Email:</span>
+                <span className="fw-semibold small text-truncate ms-2" style={{ maxWidth: '180px', color: '#cbd5e1' }} title={profile.email}>{profile.email}</span>
               </div>
               <div className="d-flex justify-content-between py-1">
-                <span className="fw-bold text-dark small">Phone Number:</span>
-                <span className="text-secondary fw-semibold small">{profile.phoneNumber || 'N/A'}</span>
+                <span className="fw-bold text-white small">Phone Number:</span>
+                <span className="fw-semibold small" style={{ color: '#cbd5e1' }}>{profile.phoneNumber || 'N/A'}</span>
               </div>
             </div>
           </div>
@@ -147,17 +147,17 @@ export default function JockeyProfileContent() {
         {/* Right column - Main view details */}
         <div className="col-12 col-lg-8">
             <div className="glass-card h-100">
-              <h3 className="ho-font-epilogue fs-5 fw-bold mb-4" style={{ color: 'var(--ho-primary-dark)' }}>
+              <h3 className="ho-font-epilogue fs-5 fw-bold mb-4 text-white">
                 Update Detailed Information
               </h3>
 
-              <form onSubmit={handleProfileSubmit} className="d-flex flex-column gap-3 text-dark">
+              <form onSubmit={handleProfileSubmit} className="d-flex flex-column gap-3">
                 <div className="row g-3">
                   <div className="col-12 col-md-6">
                     <label className="ho-input-label ho-font-grotesk">Full Name</label>
                     <input
                       type="text"
-                      className="ho-form-input text-dark"
+                      className="ho-form-input"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     />
@@ -166,7 +166,8 @@ export default function JockeyProfileContent() {
                     <label className="ho-input-label ho-font-grotesk">Email (Linked)</label>
                     <input
                       type="email"
-                      className="ho-form-input text-dark"
+                      className="ho-form-input"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)', color: '#cbd5e1' }}
                       value={profile.email}
                       disabled
                     />
@@ -178,7 +179,7 @@ export default function JockeyProfileContent() {
                     <label className="ho-input-label ho-font-grotesk">Phone Number</label>
                     <input
                       type="text"
-                      className="ho-form-input text-dark"
+                      className="ho-form-input"
                       value={formData.phoneNumber}
                       onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                     />
@@ -187,7 +188,7 @@ export default function JockeyProfileContent() {
                     <label className="ho-input-label ho-font-grotesk">ID Card / Passport Number</label>
                     <input
                       type="text"
-                      className="ho-form-input text-dark"
+                      className="ho-form-input"
                       value={formData.identityNumber}
                       onChange={(e) => setFormData({ ...formData, identityNumber: e.target.value })}
                     />
@@ -199,7 +200,7 @@ export default function JockeyProfileContent() {
                     <label className="ho-input-label ho-font-grotesk">Date of Birth</label>
                     <input
                       type="date"
-                      className="ho-form-input text-dark"
+                      className="ho-form-input"
                       value={formData.dateOfBirth}
                       onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                     />
@@ -208,7 +209,7 @@ export default function JockeyProfileContent() {
                     <label className="ho-input-label ho-font-grotesk">Jockey License Number</label>
                     <input
                       type="text"
-                      className="ho-form-input text-dark font-monospace"
+                      className="ho-form-input font-monospace"
                       value={formData.licenseNumber}
                       onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
                     />
@@ -220,7 +221,7 @@ export default function JockeyProfileContent() {
                     <label className="ho-input-label ho-font-grotesk">Experience (Years)</label>
                     <input
                       type="number"
-                      className="ho-form-input text-dark"
+                      className="ho-form-input"
                       value={formData.experienceYears}
                       onChange={(e) => setFormData({ ...formData, experienceYears: parseInt(e.target.value) || 0 })}
                     />
@@ -229,7 +230,7 @@ export default function JockeyProfileContent() {
                     <label className="ho-input-label ho-font-grotesk">Matches Played</label>
                     <input
                       type="number"
-                      className="ho-form-input text-dark"
+                      className="ho-form-input"
                       value={formData.matchesPlayed}
                       onChange={(e) => setFormData({ ...formData, matchesPlayed: parseInt(e.target.value) || 0 })}
                     />
@@ -241,7 +242,7 @@ export default function JockeyProfileContent() {
                     <label className="ho-input-label ho-font-grotesk">Bank Name</label>
                     <input
                       type="text"
-                      className="ho-form-input text-dark"
+                      className="ho-form-input"
                       value={bankName}
                       onChange={(e) => setBankName(e.target.value)}
                       placeholder="e.g., MBBank, Techcombank"
@@ -252,7 +253,7 @@ export default function JockeyProfileContent() {
                     <label className="ho-input-label ho-font-grotesk">Account Number</label>
                     <input
                       type="text"
-                      className="ho-form-input text-dark"
+                      className="ho-form-input"
                       value={bankAccountNumber}
                       onChange={(e) => setBankAccountNumber(e.target.value)}
                       placeholder="Enter account number"
@@ -264,7 +265,7 @@ export default function JockeyProfileContent() {
                 <div>
                   <label className="ho-input-label ho-font-grotesk">Biography & Skill Notes</label>
                   <textarea
-                    className="ho-form-input text-dark"
+                    className="ho-form-input"
                     rows="3"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}

@@ -53,8 +53,8 @@ export default function RoleDonutChart({ roleDistribution }) {
           </PieChart>
         </ResponsiveContainer>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
-           <div style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--ho-primary-dark)' }}>{totalUsers}</div>
-           <div style={{ fontSize: '8px', color: '#718096', letterSpacing: '0.05em' }}>TOTAL USERS</div>
+           <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#ffffff' }}>{totalUsers}</div>
+           <div style={{ fontSize: '8px', color: '#94a3b8', letterSpacing: '0.05em' }}>TOTAL USERS</div>
         </div>
       </div>
       
@@ -62,7 +62,7 @@ export default function RoleDonutChart({ roleDistribution }) {
         {data.map((entry) => (
           <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: ROLE_COLORS[entry.name] || '#718096' }} />
-            <span style={{ color: '#718096' }}>{entry.name.substring(0, 4)}: <strong>{entry.value}</strong></span>
+            <span style={{ color: '#cbd5e1' }}>{entry.name.substring(0, 4)}: <strong>{entry.value}</strong></span>
           </div>
         ))}
       </div>

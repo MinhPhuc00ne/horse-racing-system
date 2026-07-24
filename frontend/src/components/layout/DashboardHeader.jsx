@@ -329,7 +329,7 @@ export default function DashboardHeader({ user, profile, navLinks, logout }) {
             className="btn btn-sm btn-outline-dark d-flex align-items-center gap-1 me-1 fw-semibold shadow-sm"
             onClick={() => navigate('/')}
             style={{ fontSize: '0.8rem', borderRadius: '6px', backgroundColor: '#ffffff', color: '#07150c', border: '1px solid #c0c9c0' }}
-            title="Quay về trang chủ hệ thống"
+            title="Return to System Public Homepage"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>home</span>
             <span className="d-none d-sm-inline">Public Site</span>

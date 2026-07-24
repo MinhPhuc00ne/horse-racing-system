@@ -248,8 +248,8 @@
 
 /* Sidebar Nav Styles for Admin */
 .admin-sidebar {
-  background-color: var(--ho-primary-dark, #003820) !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #07150c !important;
+  border-right: 1px solid rgba(212, 175, 55, 0.25) !important;
   box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease;
   z-index: 10;

@@ -111,16 +111,16 @@ export default function Violations() {
       <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
           <div>
-            <h2 className="ho-font-epilogue fs-3 fw-bold text-dark mb-1">Violations & Flags</h2>
-            <p className="text-secondary small m-0">Report and manage race infractions.</p>
+            <h2 className="ho-font-epilogue fs-3 fw-bold text-white mb-1">Violations & Flags</h2>
+            <p className="small m-0" style={{ color: '#cbd5e1' }}>Report and manage race infractions.</p>
           </div>
           <div className="d-flex align-items-center gap-2" style={{ minWidth: '280px' }}>
-            <label className="text-secondary small mb-0 fw-bold" style={{ whiteSpace: 'nowrap' }}>Filter by Race:</label>
+            <label className="small mb-0 fw-bold" style={{ whiteSpace: 'nowrap', color: '#cbd5e1' }}>Filter by Race:</label>
             <select 
-              className="form-select text-dark fw-bold border"
+              className="form-select fw-bold"
               value={selectedFilterRace}
               onChange={(e) => setSelectedFilterRace(e.target.value)}
-              style={{ backgroundColor: '#ffffff' }}
+              style={{ backgroundColor: '#0c2214', color: '#ffffff', border: '1px solid rgba(212, 175, 55, 0.35)' }}
             >
               <option value="All">All Races</option>
               {races.map(r => (
@@ -134,7 +134,7 @@ export default function Violations() {
           {/* Report Form */}
           <div className="col-12 col-md-4">
             <div className="glass-card">
-              <h4 className="ho-font-epilogue fs-5 fw-bold text-dark mb-4">Report Infraction</h4>
+              <h4 className="ho-font-epilogue fs-5 fw-bold text-white mb-4">Report Infraction</h4>
               <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
                 <div>
                   <label className="ho-input-label ho-font-grotesk">Race Name</label>
@@ -142,7 +142,7 @@ export default function Violations() {
                     name="raceName" 
                     value={formData.raceName} 
                     onChange={handleInputChange} 
-                    className="ho-form-input text-dark fw-bold"
+                    className="ho-form-input fw-bold"
                     required
                   >
                     <option value="">Select a race...</option>
@@ -158,7 +158,7 @@ export default function Violations() {
                     name="horseName" 
                     value={formData.horseName} 
                     onChange={handleInputChange} 
-                    className="ho-form-input text-dark" 
+                    className="ho-form-input" 
                     placeholder="e.g. Desert Wind" 
                     required 
                   />
@@ -170,7 +170,7 @@ export default function Violations() {
                     name="jockeyName" 
                     value={formData.jockeyName} 
                     onChange={handleInputChange} 
-                    className="ho-form-input text-dark" 
+                    className="ho-form-input" 
                     placeholder="e.g. John Doe" 
                     required 
                   />
@@ -181,7 +181,7 @@ export default function Violations() {
                     name="violationType" 
                     value={formData.violationType} 
                     onChange={handleInputChange} 
-                    className="ho-form-input text-dark fw-bold"
+                    className="ho-form-input fw-bold"
                   >
                     <option value="Illegal Blocking">Illegal Blocking</option>
                     <option value="Dangerous Riding">Dangerous Riding</option>
@@ -214,7 +214,7 @@ export default function Violations() {
           {/* History Table */}
           <div className="col-12 col-md-8">
             <div className="glass-card h-100">
-              <h4 className="ho-font-epilogue fs-5 fw-bold text-dark mb-4">Violation History</h4>
+              <h4 className="ho-font-epilogue fs-5 fw-bold text-white mb-4">Violation History</h4>
               {loading ? (
                 <div className="text-secondary">Loading history...</div>
               ) : (

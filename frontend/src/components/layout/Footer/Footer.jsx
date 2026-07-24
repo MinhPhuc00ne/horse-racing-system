@@ -55,7 +55,7 @@ const Footer = () => {
             {/* Col 1: System Info & Brand */}
             <Col xs={12} lg={4}>
               <div className="d-flex align-items-center gap-2 mb-3">
-                <img src={logo} alt="Horse Racing System Logo" style={{ height: '44px', width: 'auto' }} />
+                <img src={logo} alt="Horse Racing System Logo" style={{ height: '36px', width: 'auto' }} />
                 <div className="footer-brand-title">
                   Horse <span className="footer-brand-gold">Racing</span>
                 </div>

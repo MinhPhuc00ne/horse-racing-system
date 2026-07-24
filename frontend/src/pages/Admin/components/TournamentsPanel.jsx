@@ -542,8 +542,8 @@ export default function TournamentsPanel() {
 
       {/* Action Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaTrophy style={{ color: 'var(--ho-accent-gold-text)' }} /> Horse Racing Tournament Management
+        <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <FaTrophy style={{ color: '#d4af37' }} /> Horse Racing Tournament Management
         </h2>
         {!showForm && (
           <button
@@ -1287,31 +1287,31 @@ export default function TournamentsPanel() {
           onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: null })}
         >
           <div
-            className="glass-card"
+            className="admin-modal-card text-center"
             style={{
               width: '100%',
               maxWidth: '450px',
               padding: '24px',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
-              border: '1px solid var(--ho-border-gold, #D4AF37)',
-              background: '#ffffff',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+              border: '1px solid rgba(212, 175, 55, 0.4)',
+              background: '#0c2214',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out'
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '10px' }}>
+              <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: '#ffffff', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '10px' }}>
                 {confirmModal.title}
               </h3>
-              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5', color: '#cbd5e1' }}>
                 {confirmModal.message}
               </p>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
                 <button
                   type="button"
                   onClick={() => setConfirmModal({ show: false, title: '', message: '', onConfirm: null })}
-                  className="btn btn-outline-secondary btn-sm"
+                  className="btn btn-outline-light btn-sm"
                   style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
                 >
                   Cancel
@@ -1343,7 +1343,7 @@ export default function TournamentsPanel() {
             left: 0,
             width: '100vw',
             height: '100vh',
-            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
             backdropFilter: 'blur(3px)',
             display: 'flex',
             justifyContent: 'center',
@@ -1353,14 +1353,14 @@ export default function TournamentsPanel() {
           onClick={() => setFeedbackModal({ show: false, type: 'success', message: '' })}
         >
           <div
-            className="glass-card text-center"
+            className="admin-modal-card text-center"
             style={{
               width: '100%',
               maxWidth: '400px',
               padding: '30px 24px',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.25)',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
               border: `1px solid ${feedbackModal.type === 'success' ? '#10b981' : '#ef4444'}`,
-              background: '#ffffff',
+              background: '#0c2214',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out'
             }}
@@ -1382,11 +1382,11 @@ export default function TournamentsPanel() {
                 {feedbackModal.type === 'success' ? <FaCheckCircle size="36" /> : <FaInfoCircle size="36" />}
               </div>
 
-              <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: 'var(--ho-primary-dark, #003820)' }}>
+              <h3 className="m-0 fw-bold" style={{ fontSize: '20px', color: '#ffffff' }}>
                 {feedbackModal.type === 'success' ? 'Success!' : 'Failed!'}
               </h3>
 
-              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5', color: '#cbd5e1' }}>
                 {feedbackModal.message}
               </p>
 

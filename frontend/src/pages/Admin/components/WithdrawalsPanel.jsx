@@ -164,35 +164,35 @@ export default function WithdrawalsPanel() {
       
       {/* Title */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaWallet style={{ color: 'var(--ho-accent-gold-text)' }} /> Approve Withdrawal Requests (Transactions)
+        <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <FaWallet style={{ color: '#d4af37' }} /> Approve Withdrawal Requests (Transactions)
         </h2>
       </div>
 
       {/* Table list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: 'var(--ho-primary-dark)', margin: 0 }}>
+        <h3 className="ho-font-epilogue fs-5 fw-bold" style={{ color: '#d4af37', margin: 0 }}>
           Pending Requests ({withdrawals.filter(w => w.status === 'PENDING').length})
         </h3>
 
-        <div style={{ overflowX: 'auto', background: '#ffffff', border: '1px solid var(--ho-border-gold)', borderRadius: '12px' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+        <div style={{ overflowX: 'auto', background: 'rgba(12, 34, 20, 0.85)', border: '1px solid var(--ho-border-gold)', borderRadius: '12px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px', color: '#ffffff' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--ho-border-gold)', background: 'rgba(0,56,32,0.04)' }}>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Transaction ID</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Customer</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Receiving Account</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Wallet ID</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Amount</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Request Time</th>
-                <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Status</th>
-                <th style={{ padding: '16px', textAlign: 'center', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Actions</th>
+              <tr style={{ borderBottom: '1px solid var(--ho-border-gold)', background: 'rgba(0,0,0,0.2)' }}>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Transaction ID</th>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Customer</th>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Receiving Account</th>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Wallet ID</th>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Amount</th>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Request Time</th>
+                <th style={{ padding: '16px', color: '#d4af37', fontWeight: '700' }}>Status</th>
+                <th style={{ padding: '16px', textAlign: 'center', color: '#d4af37', fontWeight: '700' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {withdrawals.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ padding: '24px', textAlign: 'center', color: 'var(--ho-text-muted)' }}>
+                  <td colSpan={8} style={{ padding: '24px', textAlign: 'center', color: '#cbd5e1' }}>
                     No withdrawal requests have been made.
                   </td>
                 </tr>
@@ -201,30 +201,30 @@ export default function WithdrawalsPanel() {
                   <tr
                     key={tx.id}
                     style={{
-                      borderBottom: '1px solid var(--ho-border-muted)',
+                      borderBottom: '1px solid rgba(255,255,255,0.08)',
                       transition: 'background 0.2s',
                       opacity: loadingId === tx.id ? 0.7 : 1
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 56, 32, 0.02)'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <td style={{ padding: '16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>#{tx.id}</td>
+                    <td style={{ padding: '16px', fontWeight: '700', color: '#ffffff' }}>#{tx.id}</td>
                     <td style={{ padding: '16px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ color: 'var(--ho-text-dark)', fontWeight: '600' }}>{tx.userFullName}</span>
-                        <span style={{ color: 'var(--ho-text-muted)', fontSize: '12px' }}>{tx.userEmail}</span>
+                        <span style={{ color: '#ffffff', fontWeight: '600' }}>{tx.userFullName}</span>
+                        <span style={{ color: '#cbd5e1', fontSize: '12px' }}>{tx.userEmail}</span>
                       </div>
                     </td>
                     <td style={{ padding: '16px' }}>
-                      <span style={{ color: 'var(--ho-text-dark)', fontWeight: '500', wordBreak: 'break-all' }}>
-                        {tx.bankAccount || <em style={{ color: 'var(--ho-text-muted)', fontStyle: 'italic' }}>No bank linked</em>}
+                      <span style={{ color: '#ffffff', fontWeight: '500', wordBreak: 'break-all' }}>
+                        {tx.bankAccount || <em style={{ color: '#cbd5e1', fontStyle: 'italic' }}>No bank linked</em>}
                       </span>
                     </td>
-                    <td style={{ padding: '16px', color: 'var(--ho-text-dark)', fontWeight: '500' }}>Wallet #{tx.walletId}</td>
-                    <td style={{ padding: '16px', color: 'var(--ho-accent-gold-text)', fontWeight: '700' }}>
+                    <td style={{ padding: '16px', color: '#ffffff', fontWeight: '500' }}>Wallet #{tx.walletId}</td>
+                    <td style={{ padding: '16px', color: '#f59e0b', fontWeight: '700' }}>
                       {tx.amount.toLocaleString()} VND
                     </td>
-                    <td style={{ padding: '16px', color: 'var(--ho-text-muted)' }}>
+                    <td style={{ padding: '16px', color: '#cbd5e1' }}>
                       {tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-US') : ''}
                     </td>
                     <td style={{ padding: '16px' }}>

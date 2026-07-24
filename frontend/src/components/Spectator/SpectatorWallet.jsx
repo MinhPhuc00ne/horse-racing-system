@@ -481,13 +481,13 @@ export default function SpectatorWallet({ hideHeader = false }) {
                       return (
                         <tr key={tx.id}>
                           <td>
-                            <span className="text-secondary small font-monospace">#{tx.id}</span>
+                            <span className="small font-monospace" style={{ color: '#cbd5e1' }}>#{tx.id}</span>
                           </td>
-                          <td style={{ fontSize: '12px', whiteSpace: 'nowrap' }}>{tx.date}</td>
-                          <td>{tx.event}</td>
+                          <td style={{ fontSize: '12px', whiteSpace: 'nowrap', color: '#cbd5e1' }}>{tx.date}</td>
+                          <td style={{ color: '#ffffff', fontWeight: '500' }}>{tx.event}</td>
                           <td
-                            className={`fw-bold ${isDeposit ? 'text-success' : 'text-danger'}`}
-                            style={{ whiteSpace: 'nowrap' }}
+                            className="fw-bold"
+                            style={{ whiteSpace: 'nowrap', color: isDeposit ? '#10b981' : '#ef4444' }}
                           >
                             {isDeposit ? '+' : ''}
                             {tx.amount.toLocaleString('en-US')} VND

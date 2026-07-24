@@ -229,7 +229,7 @@
 
 2) Username: velgrynd
    Email: velgrynd@tempest.com
-   Mật khẩu: SlimeTempest@2026
+   Mật khẩu:
    Họ tên: Velgrynd Dragon
    Giải đấu phân công: Cúp Vô Địch Ma Quốc Jura
    SĐT: 0901000027
@@ -354,4 +354,3 @@
    Trạng thái yêu cầu: REJECTED (Admin từ chối)
    Lý do từ chối: Không đạt yêu cầu: Cân nặng và chiều cao không phù hợp tiêu chuẩn Kỵ Thủ Tempest.
    Số dư ví: 50,000đ
-

@@ -203,8 +203,8 @@ export default function UpgradeUserRoleContent() {
           display: grid;
           grid-template-columns: auto 1fr;
           gap: 8px 16px;
-          background: rgba(0, 56, 32, 0.02);
-          border: 1px solid var(--ho-border-muted);
+          background: rgba(0, 0, 0, 0.25);
+          border: 1px solid rgba(212, 175, 55, 0.25);
           border-radius: 8px;
           padding: 12px 16px;
           margin-top: 10px;
@@ -212,11 +212,11 @@ export default function UpgradeUserRoleContent() {
         }
         .details-label {
           font-weight: 700;
-          color: var(--ho-primary-dark);
+          color: #d4af37;
           text-align: left;
         }
         .details-value {
-          color: var(--ho-text-dark);
+          color: #ffffff;
           text-align: left;
           font-weight: 500;
         }
@@ -224,10 +224,10 @@ export default function UpgradeUserRoleContent() {
 
       {/* Title */}
       <div className="mb-4">
-        <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <FaUserCheck style={{ color: 'var(--ho-accent-gold-text)' }} /> Role Upgrade Requests
+        <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#ffffff', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <FaUserCheck style={{ color: '#d4af37' }} /> Role Upgrade Requests
         </h2>
-        <p className="text-secondary small m-0">
+        <p className="text-secondary small m-0" style={{ color: '#cbd5e1' }}>
           Review personal info, credentials, and approve or reject role upgrade requests.
         </p>
       </div>
@@ -249,10 +249,10 @@ export default function UpgradeUserRoleContent() {
 
         {/* Search */}
         <div style={{ position: 'relative', flex: '1 1 auto', minWidth: '280px' }}>
-          <FaSearch style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--ho-primary-medium)', opacity: 0.7 }} />
+          <FaSearch style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#d4af37', opacity: 0.8 }} />
           <input
             type="text"
-            className="ho-form-input text-dark fw-semibold"
+            className="ho-form-input fw-semibold"
             placeholder="Search by name, email, role..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -262,11 +262,11 @@ export default function UpgradeUserRoleContent() {
 
         {/* Status Filter */}
         <div className="d-flex align-items-center gap-2" style={{ flex: '0 0 auto' }}>
-          <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--ho-primary-dark)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: '13px', fontWeight: '700', color: '#d4af37', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
             <FaFilter className="me-1" /> Status:
           </span>
           <select
-            className="ho-form-input text-dark fw-semibold"
+            className="ho-form-input fw-semibold"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             style={{ fontSize: '14px', minWidth: '180px', height: '42px', paddingRight: '24px' }}
@@ -297,8 +297,8 @@ export default function UpgradeUserRoleContent() {
                 <div>
                   <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                      <h4 className="ho-font-epilogue fs-5 fw-bold text-dark mb-1">{req.fullName || req.userFullName || 'Member'}</h4>
-                      <div className="d-flex align-items-center gap-2 text-secondary small">
+                      <h4 className="ho-font-epilogue fs-5 fw-bold text-white mb-1">{req.fullName || req.userFullName || 'Member'}</h4>
+                      <div className="d-flex align-items-center gap-2 small" style={{ color: '#cbd5e1' }}>
                         <FaEnvelope size="11" /> <span>{req.userEmail}</span>
                       </div>
                     </div>
@@ -504,25 +504,25 @@ export default function UpgradeUserRoleContent() {
           onClick={() => setApproveModal({ show: false, requestId: null })}
         >
           <div
-            className="glass-card text-center"
+            className="admin-modal-card text-center"
             style={{
               width: '100%',
               maxWidth: '450px',
               padding: '24px',
-              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-              border: '1px solid var(--ho-border-gold, #D4AF37)',
-              background: '#ffffff',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
+              border: '1px solid rgba(212, 175, 55, 0.4)',
+              background: '#0c2214',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out'
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
+              <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: '#ffffff', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '12px' }}>
                 Confirm Approval
               </h3>
 
-              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+              <p className="text-secondary small m-0 fw-medium" style={{ fontSize: '14px', lineHeight: '1.5', color: '#cbd5e1' }}>
                 Are you sure you want to approve this role upgrade request? This action will grant a new role to the member.
               </p>
 
@@ -530,7 +530,7 @@ export default function UpgradeUserRoleContent() {
                 <button
                   type="button"
                   onClick={() => setApproveModal({ show: false, requestId: null })}
-                  className="btn btn-outline-secondary btn-sm"
+                  className="btn btn-outline-light btn-sm"
                   style={{ padding: '8px 20px', borderRadius: '8px' }}
                 >
                   Cancel
@@ -559,7 +559,7 @@ export default function UpgradeUserRoleContent() {
             left: 0,
             width: '100vw',
             height: '100vh',
-            backgroundColor: 'transparent',
+            backgroundColor: 'rgba(0,0,0,0.6)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -569,14 +569,14 @@ export default function UpgradeUserRoleContent() {
         >
           <form
             onSubmit={handleRejectSubmit}
-            className="glass-card"
+            className="admin-modal-card"
             style={{
               width: '100%',
               maxWidth: '450px',
               padding: '24px',
-              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-              border: '1px solid var(--ho-border-gold, #D4AF37)',
-              background: '#ffffff',
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
+              border: '1px solid rgba(212, 175, 55, 0.4)',
+              background: '#0c2214',
               borderRadius: '16px',
               animation: 'scaleUp 0.2s ease-out',
               display: 'flex',
@@ -585,14 +585,14 @@ export default function UpgradeUserRoleContent() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)', borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '10px', margin: 0 }}>
+            <h3 className="ho-font-epilogue fs-5 fw-bold mb-1" style={{ color: '#ffffff', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '10px', margin: 0 }}>
               Reject Upgrade Request
             </h3>
 
             <div className="form-group text-start">
-              <label className="ho-input-label">Rejection Reason *</label>
+              <label className="ho-input-label" style={{ color: '#e2e8f0' }}>Rejection Reason *</label>
               <textarea
-                className="ho-form-input text-dark fw-semibold"
+                className="ho-form-input fw-semibold"
                 rows="4"
                 required
                 placeholder="Enter detailed reason to notify the user..."
@@ -605,7 +605,7 @@ export default function UpgradeUserRoleContent() {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button
                 type="button"
-                className="btn btn-outline-secondary btn-sm"
+                className="btn btn-outline-light btn-sm"
                 onClick={() => setRejectionModal({ show: false, requestId: null, reason: '' })}
                 style={{ padding: '8px 20px', borderRadius: '8px' }}
               >

@@ -1,0 +1,235 @@
+/* Admin Theme Overrides - High Contrast Dark Theme */
+
+.admin-layout-container {
+  --ho-primary-dark: #ffffff;
+  --ho-primary-medium: #d4af37;
+  --ho-primary-light: #95d4ac;
+  --ho-accent-gold-text: #f59e0b;
+  --ho-text-dark: #f8fafc;
+  --ho-text-muted: #cbd5e1;
+  --ho-bg-cream: #0c2214;
+  --ho-border-muted: rgba(255, 255, 255, 0.15);
+}
+
+/* Fix Admin Sidebar Background & Styling */
+.admin-sidebar {
+  background-color: #07150c !important;
+  border-right: 1px solid rgba(212, 175, 55, 0.25) !important;
+  color: #ffffff !important;
+}
+
+.admin-sidebar .sidebar-nav-link-inactive {
+  color: #94a3b8 !important;
+}
+
+.admin-sidebar .sidebar-nav-link-inactive:hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.admin-sidebar .sidebar-nav-link-active {
+  background-color: #d4af37 !important;
+  color: #0c2214 !important;
+  font-weight: 700 !important;
+}
+
+.admin-sidebar-logout-btn,
+.admin-sidebar .btn-outline-danger {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+  color: #ef4444 !important;
+}
+
+.admin-sidebar-logout-btn:hover,
+.admin-sidebar .btn-outline-danger:hover {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+}
+
+/* Base Headings & Titles in Admin Main Content */
+.admin-layout-container main h1,
+.admin-layout-container main h2,
+.admin-layout-container main h3,
+.admin-layout-container main h4,
+.admin-layout-container main h5,
+.admin-layout-container main h6 {
+  color: #ffffff !important;
+}
+
+/* Secondary & Muted Text in Main Content */
+.admin-layout-container main p.text-secondary,
+.admin-layout-container main span.text-secondary,
+.admin-layout-container main div.text-secondary,
+.admin-layout-container main .text-secondary,
+.admin-layout-container main .text-muted {
+  color: #cbd5e1 !important;
+}
+
+/* Override text-dark in Admin Main Content */
+.admin-layout-container main .text-dark {
+  color: #ffffff !important;
+}
+
+/* Filter Toolbar & Cards in Admin */
+.admin-layout-container main .glass-card,
+.admin-layout-container main .card,
+.admin-layout-container main .card-body {
+  background: rgba(12, 34, 20, 0.85) !important;
+  background-color: rgba(12, 34, 20, 0.85) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  color: #ffffff !important;
+}
+
+/* Details Grid in Upgrade Request Cards */
+.admin-layout-container main .details-grid {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid rgba(212, 175, 55, 0.25) !important;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.admin-layout-container main .details-label {
+  color: #d4af37 !important;
+  font-weight: 700 !important;
+}
+
+.admin-layout-container main .details-value {
+  color: #f8fafc !important;
+  font-weight: 500 !important;
+}
+
+/* Form Inputs, Selects, Textareas, Input Groups */
+.admin-layout-container main .ho-form-input,
+.admin-layout-container main input.form-control,
+.admin-layout-container main select.form-select,
+.admin-layout-container main textarea.form-control,
+.admin-layout-container main input[type="text"],
+.admin-layout-container main input[type="number"],
+.admin-layout-container main input[type="email"],
+.admin-layout-container main input[type="date"],
+.admin-layout-container main select,
+.admin-layout-container main textarea,
+.admin-layout-container main .input-group-text {
+  background-color: rgba(4, 20, 11, 0.9) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(212, 175, 55, 0.35) !important;
+}
+
+.admin-layout-container main select.ho-form-input option,
+.admin-layout-container main select option,
+.admin-layout-container main .form-select option {
+  background-color: #0c2214 !important;
+  color: #ffffff !important;
+}
+
+.admin-layout-container main input::placeholder,
+.admin-layout-container main textarea::placeholder,
+.admin-layout-container main .ho-form-input::placeholder,
+.admin-layout-container main .form-control::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+.admin-layout-container main .ho-input-label,
+.admin-layout-container main label,
+.admin-layout-container main .form-label {
+  color: #e2e8f0 !important;
+  font-weight: 600;
+}
+
+/* FORCE DARK GLASS STYLING FOR ALL BOOTSTRAP TABLES IN ADMIN */
+.admin-layout-container main table,
+.admin-layout-container main .table,
+.admin-layout-container main .ho-table {
+  --bs-table-bg: transparent !important;
+  --bs-table-accent-bg: transparent !important;
+  --bs-table-striped-bg: transparent !important;
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.05) !important;
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+
+.admin-layout-container main table thead,
+.admin-layout-container main .table thead,
+.admin-layout-container main .ho-table thead,
+.admin-layout-container main .table-light,
+.admin-layout-container main thead.table-light {
+  background-color: rgba(0, 0, 0, 0.35) !important;
+  --bs-table-bg: rgba(0, 0, 0, 0.35) !important;
+}
+
+.admin-layout-container main table th,
+.admin-layout-container main .table th,
+.admin-layout-container main .ho-table th {
+  color: #d4af37 !important;
+  font-weight: 700 !important;
+  background-color: transparent !important;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.3) !important;
+}
+
+.admin-layout-container main table tbody tr,
+.admin-layout-container main .table tbody tr,
+.admin-layout-container main .ho-table tbody tr {
+  background-color: transparent !important;
+  --bs-table-bg: transparent !important;
+}
+
+.admin-layout-container main table tbody tr:hover,
+.admin-layout-container main .table tbody tr:hover,
+.admin-layout-container main .ho-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.05) !important;
+}
+
+.admin-layout-container main table td,
+.admin-layout-container main .table td,
+.admin-layout-container main .ho-table td {
+  color: #ffffff !important;
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.admin-layout-container main table td .text-muted,
+.admin-layout-container main table td .text-secondary,
+.admin-layout-container main table td small,
+.admin-layout-container main table td small.text-muted {
+  color: #cbd5e1 !important;
+}
+
+.admin-layout-container main .table-responsive {
+  background-color: rgba(12, 34, 20, 0.85) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  border-radius: 12px;
+}
+
+/* Modals Scoped Styling */
+.admin-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1060;
+}
+
+.admin-modal-card {
+  background: #0c2214 !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 16px;
+  color: #ffffff !important;
+  padding: 24px;
+}
+
+.admin-modal-card h1,
+.admin-modal-card h2,
+.admin-modal-card h3,
+.admin-modal-card h4 {
+  color: #ffffff !important;
+}

@@ -2760,12 +2760,12 @@ export default function LiveSimulation() {
           <div className="d-flex align-items-center gap-3">
             <div>
               <div className="d-flex align-items-center gap-2 mb-1">
-                <h2 className="ho-font-epilogue fs-3 fw-bold text-dark m-0">Live Simulation</h2>
+                <h2 className="ho-font-epilogue fs-3 fw-bold text-white m-0">Live Simulation</h2>
                 <span className="live-status-badge">
                   <span className="pulse-dot"></span> LIVE
                 </span>
               </div>
-              <p className="text-secondary small m-0">Virtual high-tech perspective tracking and incident flagging tool.</p>
+              <p className="small m-0" style={{ color: '#cbd5e1' }}>Virtual high-tech perspective tracking and incident flagging tool.</p>
             </div>
           </div>
           <div className="d-flex gap-2">
@@ -2789,7 +2789,7 @@ export default function LiveSimulation() {
           {/* Racetrack Visual Container */}
           <div className="glass-sim-card">
             <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
-              <span className="fw-bold text-dark fs-6 d-flex align-items-center gap-2">
+              <span className="fw-bold text-white fs-6 d-flex align-items-center gap-2">
                 <span className="material-symbols-outlined text-success" style={{ fontSize: '18px' }}>analytics</span>
                 {simulatedRaceName}
                 {actualRaceId === 999 && (
@@ -2798,10 +2798,10 @@ export default function LiveSimulation() {
               </span>
               <div className="d-flex flex-wrap align-items-center gap-2">
                 {/* Audio Controls */}
-                <div className="d-flex align-items-center gap-2 px-2 py-1 rounded bg-light border" style={{ fontSize: '11px' }}>
+                <div className="d-flex align-items-center gap-2 px-2 py-1 rounded border" style={{ fontSize: '11px', backgroundColor: 'rgba(0,0,0,0.4)', borderColor: 'rgba(212,175,55,0.3)' }}>
                   <button
                     className="btn btn-sm p-1 d-flex align-items-center justify-content-center border-0 bg-transparent"
-                    style={{ color: isSfxMuted ? '#dc3545' : '#198754' }}
+                    style={{ color: isSfxMuted ? '#dc3545' : '#10b981' }}
                     onClick={toggleSfx}
                     title={isSfxMuted ? "Unmute sound" : "Mute sound"}
                   >
@@ -2811,7 +2811,7 @@ export default function LiveSimulation() {
                   </button>
 
                   <div className="d-flex align-items-center gap-1">
-                    <span className="text-secondary" style={{ fontSize: '10px' }}>Vol:</span>
+                    <span style={{ fontSize: '10px', color: '#cbd5e1' }}>Vol:</span>
                     <input
                       type="range"
                       min="0"
@@ -2821,15 +2821,15 @@ export default function LiveSimulation() {
                       className="form-range"
                       style={{ width: '50px', height: '4px', padding: 0 }}
                     />
-                    <span className="text-dark fw-bold" style={{ width: '22px', textAlign: 'right', fontSize: '9px' }}>{Math.round(volume * 100)}%</span>
+                    <span className="text-white fw-bold" style={{ width: '22px', textAlign: 'right', fontSize: '9px' }}>{Math.round(volume * 100)}%</span>
                   </div>
                 </div>
 
-                <div className="d-flex align-items-center gap-1 small text-secondary me-2">
+                <div className="d-flex align-items-center gap-1 small me-2" style={{ color: '#cbd5e1' }}>
                   <span>Theme:</span>
                   <select
-                    className="form-select form-select-sm bg-white border-secondary text-dark"
-                    style={{ fontSize: '11px', borderRadius: '20px', padding: '2px 24px 2px 8px', width: 'auto', minWidth: '120px' }}
+                    className="form-select form-select-sm border-secondary text-white"
+                    style={{ fontSize: '11px', borderRadius: '20px', padding: '2px 24px 2px 8px', width: 'auto', minWidth: '120px', backgroundColor: '#0c2214' }}
                     value={environment}
                     onChange={(e) => setEnvironment(e.target.value)}
                   >
@@ -2874,14 +2874,14 @@ export default function LiveSimulation() {
                 </div>
               )}
             </div>
-            <div className="text-center mt-3 text-secondary small">
+            <div className="text-center mt-3 small" style={{ color: '#cbd5e1' }}>
               💡 <span className="text-info">Tip:</span> Click directly on a track lane inside the simulator to quickly flag a violation at that specific progress position.
             </div>
           </div>
 
           {/* Right Floating Leaders Panel */}
           <div className="glass-hud-panel">
-            <h4 className="fw-bold text-dark fs-5 mb-3 pb-2 d-flex align-items-center gap-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)' }}>
+            <h4 className="fw-bold text-white fs-5 mb-3 pb-2 d-flex align-items-center gap-2" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
               <span className="material-symbols-outlined text-warning">emoji_events</span>
               Leaderboard
             </h4>
@@ -2956,12 +2956,12 @@ export default function LiveSimulation() {
       {showFlagModal && (
         <div className="modal-overlay" style={{ zIndex: 9999 }} onClick={() => { setShowFlagModal(false); setClickedProgress(null); }}>
           <div className="modal-content-custom animate-scale-up" onClick={(e) => e.stopPropagation()}>
-            <h3 className="fs-5 fw-bold mb-3 text-dark d-flex align-items-center gap-2">
+            <h3 className="fs-5 fw-bold mb-3 text-white d-flex align-items-center gap-2">
               <span className="material-symbols-outlined text-danger">report</span>
               Flag Violation
             </h3>
-            <p className="mb-2 text-secondary">Horse: <strong className="text-dark">{selectedHorseForFlag?.name}</strong></p>
-            <p className="mb-3 text-secondary small">Flag Position: <strong className="text-primary-medium">{clickedProgress}%</strong> along the track</p>
+            <p className="mb-2" style={{ color: '#cbd5e1' }}>Horse: <strong className="text-white">{selectedHorseForFlag?.name}</strong></p>
+            <p className="mb-3 small" style={{ color: '#cbd5e1' }}>Flag Position: <strong className="text-warning">{clickedProgress}%</strong> along the track</p>
             <div className="mb-4">
               <label className="ho-input-label mb-2">Reason for Flagging</label>
               <select
@@ -2989,8 +2989,8 @@ export default function LiveSimulation() {
             <span className="material-symbols-outlined text-warning mb-2" style={{ fontSize: '64px' }}>
               emoji_events
             </span>
-            <h3 className="ho-font-epilogue fs-4 fw-bold text-dark mb-1">Race Completed!</h3>
-            <p className="text-secondary small mb-4">{simulatedRaceName}</p>
+            <h3 className="ho-font-epilogue fs-4 fw-bold text-white mb-1">Race Completed!</h3>
+            <p className="small mb-4" style={{ color: '#cbd5e1' }}>{simulatedRaceName}</p>
 
             {/* Podium List */}
             <div className="d-flex flex-column gap-2 mb-4 text-start">
@@ -2999,8 +2999,8 @@ export default function LiveSimulation() {
                   key={item.rank}
                   className="d-flex align-items-center justify-content-between p-3 rounded"
                   style={{
-                    backgroundColor: item.rank === 1 ? 'rgba(212, 175, 55, 0.08)' : '#f8f9fa',
-                    border: item.rank === 1 ? '1px solid var(--ho-accent-gold)' : '1px solid #e9ecef'
+                    backgroundColor: item.rank === 1 ? 'rgba(212, 175, 55, 0.15)' : 'rgba(0, 0, 0, 0.4)',
+                    border: item.rank === 1 ? '1px solid rgba(212, 175, 55, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)'
                   }}
                 >
                   <div className="d-flex align-items-center gap-3">
@@ -3008,11 +3008,11 @@ export default function LiveSimulation() {
                       {item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : '🥉'}
                     </span>
                     <div>
-                      <h6 className="fw-bold text-dark mb-0">{item.horseName}</h6>
-                      <span className="text-secondary small">{item.jockeyName}</span>
+                      <h6 className="fw-bold text-white mb-0">{item.horseName}</h6>
+                      <span className="small" style={{ color: '#cbd5e1' }}>{item.jockeyName}</span>
                     </div>
                   </div>
-                  <span className="fw-bold text-primary small">{item.time}</span>
+                  <span className="fw-bold text-warning small">{item.time}</span>
                 </div>
               ))}
             </div>
