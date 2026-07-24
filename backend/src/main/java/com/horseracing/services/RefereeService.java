@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -466,10 +467,7 @@ public class RefereeService {
         }
 
         List<RaceSimulation> oldSims = raceSimulationRepository.findByRaceId(raceId);
-        if (!oldSims.isEmpty()) {
-            throw new RuntimeException(
-                    "Simulation has already been started for this race. Restarting is not allowed.");
-        }
+        boolean isReplay = !oldSims.isEmpty() || "FINISHED".equalsIgnoreCase(status);
 
         List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
 
@@ -489,35 +487,37 @@ public class RefereeService {
             throw new RuntimeException("Cannot start race. No approved participants in this race.");
         }
 
-        race.setStatus("RUNNING");
-        raceRepository.save(race);
-
-        Tournament tournament = race.getTournament();
-        if ("Upcoming".equalsIgnoreCase(tournament.getTournamentStatus())) {
-            tournament.setTournamentStatus("Active");
+        if (!isReplay) {
+            race.setStatus("RUNNING");
             raceRepository.save(race);
-        }
 
-        List<RaceRegistration> remainingRegs =
-                raceRegistrationRepository.findByRaceId(raceId).stream()
-                        .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus())
-                                || "PENDING_JOCKEY".equalsIgnoreCase(r.getStatus()))
-                        .collect(java.util.stream.Collectors.toList());
-        BigDecimal entryFee = tournament.getEntryFee();
-        for (RaceRegistration reg : remainingRegs) {
-            reg.setStatus("REJECTED");
-            raceRegistrationRepository.save(reg);
+            Tournament tournament = race.getTournament();
+            if (tournament != null && "Upcoming".equalsIgnoreCase(tournament.getTournamentStatus())) {
+                tournament.setTournamentStatus("Active");
+                raceRepository.save(race);
+            }
 
-            if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
-                Wallet wallet = walletRepository.findByUserId(reg.getOwner().getUser().getId())
-                        .orElseThrow(() -> new RuntimeException("Wallet not found"));
-                wallet.setBalance(wallet.getBalance().add(entryFee));
-                walletRepository.save(wallet);
+            List<RaceRegistration> remainingRegs =
+                    raceRegistrationRepository.findByRaceId(raceId).stream()
+                            .filter(r -> "PENDING".equalsIgnoreCase(r.getStatus())
+                                    || "PENDING_JOCKEY".equalsIgnoreCase(r.getStatus()))
+                            .collect(java.util.stream.Collectors.toList());
+            BigDecimal entryFee = tournament != null ? tournament.getEntryFee() : null;
+            for (RaceRegistration reg : remainingRegs) {
+                reg.setStatus("REJECTED");
+                raceRegistrationRepository.save(reg);
 
-                WalletTransaction transaction = WalletTransaction.builder().wallet(wallet)
-                        .transactionType("REFUND").amount(entryFee).status("SUCCESS")
-                        .referenceType("RACE_REGISTRATION").referenceId(reg.getId()).build();
-                walletTransactionRepository.save(transaction);
+                if (entryFee != null && entryFee.compareTo(BigDecimal.ZERO) > 0) {
+                    Wallet wallet = walletRepository.findByUserId(reg.getOwner().getUser().getId())
+                            .orElseThrow(() -> new RuntimeException("Wallet not found"));
+                    wallet.setBalance(wallet.getBalance().add(entryFee));
+                    walletRepository.save(wallet);
+
+                    WalletTransaction transaction = WalletTransaction.builder().wallet(wallet)
+                            .transactionType("REFUND").amount(entryFee).status("SUCCESS")
+                            .referenceType("RACE_REGISTRATION").referenceId(reg.getId()).build();
+                    walletTransactionRepository.save(transaction);
+                }
             }
         }
 
@@ -533,10 +533,12 @@ public class RefereeService {
             if ("APPROVED".equalsIgnoreCase(p.getStatus())
                     || "FINISHED".equalsIgnoreCase(p.getStatus())
                     || "RACING".equalsIgnoreCase(p.getStatus())) {
-                p.setStatus("RACING");
-                p.setFinishTime(null);
-                p.setFinalRank(null);
-                raceParticipantRepository.save(p);
+                if (!isReplay) {
+                    p.setStatus("RACING");
+                    p.setFinishTime(null);
+                    p.setFinalRank(null);
+                    raceParticipantRepository.save(p);
+                }
 
                 double speedRating =
                         p.getHorse().getSpeedRating() != null ? p.getHorse().getSpeedRating() : 0.0;
@@ -549,11 +551,15 @@ public class RefereeService {
                         : "N/A";
                 Integer jockeyId = p.getJockey() != null ? p.getJockey().getId() : null;
 
+                long flagCount = refereeFlagRepository.countBySimulationIdAndHorseId(
+                        oldSims.isEmpty() ? simulation.getId() : oldSims.get(0).getId(),
+                        p.getHorse().getId());
+
                 HorseStateInMemory horseState = HorseStateInMemory.builder()
                         .horseId(p.getHorse().getId()).horseName(p.getHorse().getName())
                         .jockeyId(jockeyId).jockeyName(jockeyName).speedRating(speedRating)
                         .rankingScore(rankingScore).currentPosition(0.0).speed(0.0).stamina(100.0)
-                        .status("RACING").penaltyFlagsCount(0).build();
+                        .status("RACING").penaltyFlagsCount(flagCount).build();
                 inMemoryHorses.add(horseState);
             }
         }
@@ -563,11 +569,13 @@ public class RefereeService {
                 .currentTick(0).status("RUNNING").horses(inMemoryHorses).build();
 
         inMemoryRaceStore.startRace(race.getId(), liveState);
-        startSimulation(simulation.getId(), race.getId());
+        startSimulation(simulation.getId(), race.getId(), isReplay);
     }
 
     @SuppressWarnings("all")
-    private void startSimulation(Integer simulationId, Integer raceId) {
+    private void startSimulation(Integer simulationId, Integer raceId, boolean isReplay) {
+        final Random seededRng = new Random(raceId.longValue());
+
         ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(() -> {
             try {
                 LiveRaceState liveState = inMemoryRaceStore.getRaceState(raceId);
@@ -580,7 +588,11 @@ public class RefereeService {
                 boolean allFinishedOrDisqualified = true;
                 List<Map<String, Object>> horseStates = new ArrayList<>();
 
-                for (HorseStateInMemory state : liveState.getHorses()) {
+                // Sort horses by horseId to ensure deterministic pseudo-random sequence mapping
+                List<HorseStateInMemory> sortedHorses = new ArrayList<>(liveState.getHorses());
+                sortedHorses.sort(Comparator.comparingInt(HorseStateInMemory::getHorseId));
+
+                for (HorseStateInMemory state : sortedHorses) {
                     if ("FINISHED".equals(state.getStatus())
                             || "DISQUALIFIED".equals(state.getStatus())) {
                         Map<String, Object> hState = new HashMap<>();
@@ -606,7 +618,7 @@ public class RefereeService {
                     state.setStamina(currentStamina);
 
                     double staminaFactor = currentStamina < 30.0 ? 0.8 : 1.0;
-                    double variation = (ThreadLocalRandom.current().nextDouble() - 0.5) * 1.5;
+                    double variation = (seededRng.nextDouble() - 0.5) * 1.5;
 
                     double speed = 0.0;
                     if (liveState.getCurrentTick() > 5) {
@@ -645,7 +657,7 @@ public class RefereeService {
                     liveState.setStatus("FINISHED");
 
                     List<Map<String, Object>> results = transactionTemplate
-                            .execute(status -> finalizeRaceToDb(raceId, liveState));
+                            .execute(status -> finalizeRaceToDb(raceId, liveState, isReplay));
 
                     response.put("status", "FINISHED");
                     response.put("results", results);
@@ -669,7 +681,7 @@ public class RefereeService {
     }
 
     @Transactional
-    public List<Map<String, Object>> finalizeRaceToDb(Integer raceId, LiveRaceState liveState) {
+    public List<Map<String, Object>> finalizeRaceToDb(Integer raceId, LiveRaceState liveState, boolean isReplay) {
         RaceSimulation sim =
                 raceSimulationRepository.findById(liveState.getSimulationId()).orElse(null);
         if (sim != null) {
@@ -689,14 +701,18 @@ public class RefereeService {
 
             if ("DISQUALIFIED".equals(horseState.getStatus())
                     || "DISQUALIFIED".equals(p.getStatus())) {
-                p.setStatus("DISQUALIFIED");
-                raceParticipantRepository.save(p);
+                if (!isReplay) {
+                    p.setStatus("DISQUALIFIED");
+                    raceParticipantRepository.save(p);
+                }
                 continue;
             }
 
             int ft = horseState.getFinishTime() != null ? horseState.getFinishTime() : 9999;
             int finalTime = ft + (int) (horseState.getPenaltyFlagsCount() * 3);
-            p.setFinishTime(finalTime);
+            if (!isReplay) {
+                p.setFinishTime(finalTime);
+            }
 
             rankInfos.add(new ParticipantRankInfo(p, finalTime));
         }
@@ -706,23 +722,27 @@ public class RefereeService {
         List<Map<String, Object>> results = new ArrayList<>();
         for (int rank = 0; rank < rankInfos.size(); rank++) {
             RaceParticipant p = rankInfos.get(rank).participant;
-            p.setFinalRank(rank + 1);
-            p.setStatus("FINISHED");
-            raceParticipantRepository.save(p);
+            if (!isReplay) {
+                p.setFinalRank(rank + 1);
+                p.setStatus("FINISHED");
+                raceParticipantRepository.save(p);
+            }
 
             Map<String, Object> rMap = new HashMap<>();
             rMap.put("rank", rank + 1);
             rMap.put("horseName", p.getHorse().getName());
             rMap.put("jockeyName", p.getJockey().getUser().getFullName());
-            rMap.put("time", p.getFinishTime());
+            rMap.put("time", p.getFinishTime() != null ? p.getFinishTime() : rankInfos.get(rank).finalTime);
             results.add(rMap);
         }
 
         int nextRank = rankInfos.size() + 1;
         for (RaceParticipant p : participants) {
             if ("DISQUALIFIED".equals(p.getStatus())) {
-                p.setFinalRank(nextRank++);
-                raceParticipantRepository.save(p);
+                if (!isReplay) {
+                    p.setFinalRank(nextRank++);
+                    raceParticipantRepository.save(p);
+                }
             }
         }
 
@@ -914,8 +934,8 @@ public class RefereeService {
         Race race = raceRepository.findById(raceId)
                 .orElseThrow(() -> new RuntimeException("Race not found"));
 
-        if (!"RUNNING".equalsIgnoreCase(race.getStatus())) {
-            throw new RuntimeException("Race is not running or already confirmed");
+        if (!"RUNNING".equalsIgnoreCase(race.getStatus()) && !"FINISHED".equalsIgnoreCase(race.getStatus())) {
+            throw new RuntimeException("Race status must be RUNNING or FINISHED to confirm results");
         }
 
         boolean hasFinishedSim = raceSimulationRepository.findByRaceId(raceId).stream()
@@ -923,6 +943,14 @@ public class RefereeService {
         if (!hasFinishedSim) {
             throw new RuntimeException(
                     "Cannot confirm results. The race simulation has not finished yet.");
+        }
+
+        boolean alreadyDistributed = !prizeDistributionRepository.findByParticipantRaceId(raceId).isEmpty();
+        if (alreadyDistributed) {
+            log.info("Prize distribution and payouts already completed for race ID: {}. Skipping money distribution.", raceId);
+            race.setStatus("FINISHED");
+            raceRepository.save(race);
+            return;
         }
 
         race.setStatus("FINISHED");
