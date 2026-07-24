@@ -7,7 +7,7 @@ import DataTable from '../ui/DataTable';
 import RevenueAreaChart from './charts/RevenueAreaChart';
 import RoleDonutChart from './charts/RoleDonutChart';
 import BetVolumeBarChart from './charts/BetVolumeBarChart';
-import BreedPieChart from './charts/BreedPieChart';
+import RevenueBreakdownChart from './charts/RevenueBreakdownChart';
 import RaceStatusBarChart from './charts/RaceStatusBarChart';
 import TransactionTrendChart from './charts/TransactionTrendChart';
 import TournamentPrizeChart from './charts/TournamentPrizeChart';
@@ -64,7 +64,7 @@ export default function AdminDashboardContent() {
   }
 
   const roleDistribution = dashboardData?.roleDistribution || {};
-  const breedDistribution = dashboardData?.breedDistribution || {};
+  const revenueDistribution = dashboardData?.revenueDistribution || {};
   const raceStatusDistribution = dashboardData?.raceStatusDistribution || {};
   const transactionTrendData = dashboardData?.transactionTrendData || [];
   const tournamentPrizesData = dashboardData?.tournamentPrizesData || [];
@@ -268,16 +268,16 @@ export default function AdminDashboardContent() {
               </div>
             </div>
 
-            {/* Chart 2: Horse Breeds Distribution */}
+            {/* Chart 2: Revenue Sources Breakdown */}
             <div className="col-12 col-md-6 col-xl-3">
               <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
                 <div>
-                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Horse Breed Distribution</h3>
-                  <p className="text-secondary small mb-2">Ratio of horse breeds in the system</p>
+                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Revenue Sources Breakdown</h3>
+                  <p className="text-secondary small mb-2">Distribution of platform income sources</p>
                 </div>
 
-                <div className="d-flex align-items-center justify-content-center mt-2" style={{ height: '230px' }}>
-                  <BreedPieChart breedDistribution={breedDistribution} />
+                <div className="position-relative mt-2" style={{ height: '230px' }}>
+                  <RevenueBreakdownChart revenueDistribution={revenueDistribution} />
                 </div>
               </div>
             </div>

@@ -167,6 +167,29 @@ public class AdminDashboardController {
                     t.getTournamentName(), pool));
         }
 
+        // --- Revenue Sources Breakdown ---
+        Map<String, BigDecimal> revenueDistribution = new LinkedHashMap<>();
+        BigDecimal entryFeesTotal = BigDecimal.ZERO;
+        List<WalletTransaction> adminTxs = walletTransactionRepository.findAll();
+        for (WalletTransaction tx : adminTxs) {
+            if (("ADMIN_REVENUE".equalsIgnoreCase(tx.getTransactionType())
+                    || "ENTRY_FEE".equalsIgnoreCase(tx.getTransactionType()))
+                    && "SUCCESS".equalsIgnoreCase(tx.getStatus()) && tx.getAmount() != null) {
+                entryFeesTotal = entryFeesTotal.add(tx.getAmount());
+            }
+        }
+
+        BigDecimal betCommissionTotal = BigDecimal.ZERO;
+        for (Bet bet : allBets) {
+            if (bet.getAmount() != null) {
+                betCommissionTotal =
+                        betCommissionTotal.add(bet.getAmount().multiply(new BigDecimal("0.1")));
+            }
+        }
+
+        revenueDistribution.put("Entry Fees", entryFeesTotal);
+        revenueDistribution.put("Bet Commission (10%)", betCommissionTotal);
+
         // Build Response
         AdminDashboardStatsResponse response = AdminDashboardStatsResponse.builder()
                 .usersCount(usersCount).tournamentsCount(tournamentsCount).racesCount(racesCount)
@@ -175,7 +198,8 @@ public class AdminDashboardController {
                 .revenueData(revenueDataList).betVolumeData(betVolumeList)
                 .breedDistribution(breedDistribution).raceStatusDistribution(raceStatusDistribution)
                 .transactionTrendData(transactionTrendList)
-                .tournamentPrizesData(tournamentPrizesList).build();
+                .tournamentPrizesData(tournamentPrizesList)
+                .revenueDistribution(revenueDistribution).build();
 
         return ResponseEntity.ok(response);
     }

@@ -28,6 +28,7 @@ public class AdminDashboardStatsResponse {
     private Map<String, Long> raceStatusDistribution;
     private List<TransactionTrendDataPoint> transactionTrendData;
     private List<TournamentPrizeDataPoint> tournamentPrizesData;
+    private Map<String, BigDecimal> revenueDistribution;
 
     @Data
     @AllArgsConstructor
