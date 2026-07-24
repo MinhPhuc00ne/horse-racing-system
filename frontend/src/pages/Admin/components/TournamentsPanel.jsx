@@ -103,6 +103,16 @@ export default function TournamentsPanel() {
     ? formData.allowedGenders.split(',').map(g => g.trim().toUpperCase()).includes('FEMALE')
     : false;
 
+  const normalizeStatus = (status) => {
+    if (!status) return 'Upcoming';
+    const s = status.toUpperCase();
+    if (s === 'OPEN_FOR_REGISTER' || s === 'ACTIVE') return 'Active';
+    if (s === 'FINISHED' || s === 'COMPLETED') return 'Finished';
+    if (s === 'UPCOMING') return 'Upcoming';
+    if (s === 'CANCELLED') return 'Cancelled';
+    return status;
+  };
+
   // Fetch Data
   const fetchData = async () => {
     setLoading(true);
@@ -290,13 +300,17 @@ export default function TournamentsPanel() {
     };
 
     // Find and set the track region/venue selection
-    const track = tracks.find(tr => tr.name === t.location);
+    let track = tracks.find(tr => tr.name === t.location);
+    if (!track && t.location) {
+      track = tracks.find(tr => tr.location === t.location);
+    }
+
     if (track) {
       setSelectedRegion(track.location);
       setSelectedTrack(track);
       setTrackShape(track.shape ?? 'STRAIGHT');
     } else {
-      setSelectedRegion('');
+      setSelectedRegion(t.location || '');
       setSelectedTrack(null);
       setTrackShape('STRAIGHT');
     }
@@ -442,7 +456,7 @@ export default function TournamentsPanel() {
   };
 
   const filteredTournaments = tournaments.filter(t => {
-    const displayStatus = t.tournamentStatus === 'OPEN_FOR_REGISTER' ? 'Active' : t.tournamentStatus;
+    const displayStatus = normalizeStatus(t.tournamentStatus);
     const matchesStatus = statusFilter === '' || displayStatus?.toLowerCase() === statusFilter.toLowerCase();
     const matchesName = searchName === '' || t.tournamentName?.toLowerCase().includes(searchName.toLowerCase());
     const matchesLocation = searchLocation === '' || t.location?.toLowerCase().includes(searchLocation.toLowerCase());
@@ -1269,7 +1283,7 @@ export default function TournamentsPanel() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <h4 className="ho-font-epilogue fs-5 fw-bold" style={{ color: 'var(--ho-primary-dark)', margin: 0, lineHeight: '1.3' }}>{t.tournamentName}</h4>
                   {(() => {
-                    const displayStatus = t.tournamentStatus === 'OPEN_FOR_REGISTER' ? 'Active' : t.tournamentStatus;
+                    const displayStatus = normalizeStatus(t.tournamentStatus);
                     return (
                       <span style={{
                         padding: '4px 8px',
@@ -1320,7 +1334,7 @@ export default function TournamentsPanel() {
 
                   {/* Status Dropdown */}
                   <select
-                    value={t.tournamentStatus === 'OPEN_FOR_REGISTER' ? 'Active' : t.tournamentStatus}
+                    value={normalizeStatus(t.tournamentStatus)}
                     onChange={(e) => handleStatusChange(t.id, e.target.value)}
                     style={{
                       padding: '6px 12px',

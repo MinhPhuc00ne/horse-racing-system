@@ -40,10 +40,12 @@ export default function AuthPage({ view }) {
   return (
     <div className={`auth-container ${isLogin ? 'mode-login' : 'mode-signup'}`}>
       
-      {/* Absolute Logo at Top Left */}
-      <Link to="/" style={{ position: 'absolute', top: '24px', left: '32px', zIndex: 100, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-        <img src={logo} alt="Horse Racing Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
-      </Link>
+      {/* Absolute Logo at Top Left - Hidden on login page */}
+      {!isLogin && (
+        <Link to="/" style={{ position: 'absolute', top: '24px', left: '32px', zIndex: 100, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+          <img src={logo} alt="Horse Racing Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+        </Link>
+      )}
 
       {/* Background Forms Container - Forms stay statically in their halves */}
       <div className="auth-forms-container">

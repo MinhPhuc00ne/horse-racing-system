@@ -55,7 +55,7 @@ export default function AssignedTournaments() {
 
   const canCancel = (tournamentStatus) => {
     const status = tournamentStatus?.toLowerCase();
-    return status === 'active' || status === 'upcoming';
+    return status === 'active' || status === 'upcoming' || status === 'open_for_register';
   };
 
   return (
