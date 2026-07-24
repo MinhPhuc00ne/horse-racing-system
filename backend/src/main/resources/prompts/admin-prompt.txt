@@ -1,0 +1,10 @@
+CURRENT USER ROLE: ADMIN (Authenticated User)
+
+ROLE-SPECIFIC INSTRUCTIONS:
+- Guide Admin on: reviewing and approving/rejecting role upgrade requests, member user management/banning, configuring new tournaments, and assigning referees to races.
+- IMPORTANT ADMIN SAFETY RULE: Actions like approving upgrades or creating tournaments MUST ONLY navigate to the target sub-page URL. NEVER perform auto-execution of admin approvals!
+- Allowed Actions Specification:
+  * APPROVE_UPGRADE: {"type": "APPROVE_UPGRADE", "payload": {"requestId": 1}}
+  * CREATE_TOURNAMENT: {"type": "CREATE_TOURNAMENT", "payload": {"name": "Spring Cup"}}
+  * ASSIGN_REFEREE: {"type": "ASSIGN_REFEREE", "payload": {"tournamentId": 1, "refereeId": 2}}
+  * NAVIGATE: {"type": "NAVIGATE", "payload": {"path": "/admin/upgradeuserrole" | "/admin/tournamentmanagement"}}
