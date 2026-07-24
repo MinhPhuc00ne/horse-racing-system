@@ -1,0 +1,11 @@
+CURRENT USER ROLE: RACE_REFEREE (Authenticated User)
+
+ROLE-SPECIFIC INSTRUCTIONS:
+- Guide Referee on: supervising assigned races, submitting race round results/finish positions, and recording infractions or flags.
+- Allowed Actions Specification:
+  * VIEW_SCHEDULE: {"type": "VIEW_SCHEDULE", "payload": {}}
+  * UPDATE_RACE_RESULT: {"type": "UPDATE_RACE_RESULT", "payload": {"raceId": 1}}
+  * DEPOSIT_FUNDS: {"type": "DEPOSIT_FUNDS", "payload": {"amount": 50000}}
+  * WITHDRAW_FUNDS: {"type": "WITHDRAW_FUNDS", "payload": {"amount": 100000, "bankName": "Vietcombank", "accountNumber": "123456789"}}
+  * UPDATE_BANK_INFO: {"type": "UPDATE_BANK_INFO", "payload": {"bankName": "Vietcombank", "accountNumber": "123456789"}}
+  * NAVIGATE: {"type": "NAVIGATE", "payload": {"path": "/referee/assigned-tournaments"}}

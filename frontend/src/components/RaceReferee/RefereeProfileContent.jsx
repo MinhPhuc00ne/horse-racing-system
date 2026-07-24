@@ -150,6 +150,32 @@ export default function RefereeProfileContent() {
     fetchAllData();
   }, []);
 
+  // AI Chatbot Auto-Fill Event Listener for Bank Info
+  useEffect(() => {
+    const handlePrefillBankInfo = (e) => {
+      const detail = e.detail || {};
+      let data = detail;
+      if (!data.bankName && !data.accountNumber) {
+        const storageStr = sessionStorage.getItem('ai_prefill_bank_info');
+        if (storageStr) {
+          try { data = JSON.parse(storageStr); } catch (err) {}
+        }
+      }
+
+      if (data.bankName) setBankName(data.bankName);
+      if (data.accountNumber) setBankAccountNumber(data.accountNumber);
+    };
+
+    window.addEventListener('ai_prefill_bank_info', handlePrefillBankInfo);
+
+    const bankStorage = sessionStorage.getItem('ai_prefill_bank_info');
+    if (bankStorage) handlePrefillBankInfo({ detail: {} });
+
+    return () => {
+      window.removeEventListener('ai_prefill_bank_info', handlePrefillBankInfo);
+    };
+  }, []);
+
   const formatInputWithCommas = (val) => {
     const clean = val.replace(/\D/g, '');
     return clean.replace(/\B(?=(\d{3})+(?!\d))/g, ',');

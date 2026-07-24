@@ -47,6 +47,38 @@ export default function StableContent() {
     fetchBreeds();
   }, []);
 
+  // AI Chatbot Auto-Fill Event Listener for Add Horse
+  useEffect(() => {
+    const handlePrefillAddHorse = (e) => {
+      const detail = e.detail || {};
+      let data = detail;
+      if (!data.name && !data.breed && !data.age) {
+        const storageStr = sessionStorage.getItem('ai_prefill_add_horse');
+        if (storageStr) {
+          try { data = JSON.parse(storageStr); } catch (err) {}
+        }
+      }
+
+      setShowRegisterModal(true);
+      setNewHorseData((prev) => ({
+        ...prev,
+        name: data.name || prev.name,
+        breed: data.breed || prev.breed,
+        age: data.age || prev.age,
+        weight: data.weight || prev.weight || '',
+      }));
+    };
+
+    window.addEventListener('ai_prefill_add_horse', handlePrefillAddHorse);
+
+    const horseStorage = sessionStorage.getItem('ai_prefill_add_horse');
+    if (horseStorage) handlePrefillAddHorse({ detail: {} });
+
+    return () => {
+      window.removeEventListener('ai_prefill_add_horse', handlePrefillAddHorse);
+    };
+  }, []);
+
   const activeHorseId = selectedHorseId || horses[0]?.id;
   const selectedHorse = horses.find((h) => h.id === activeHorseId) || horses[0];
 

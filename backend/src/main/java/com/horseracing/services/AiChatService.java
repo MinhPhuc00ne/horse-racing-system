@@ -49,6 +49,7 @@ public class AiChatService {
     private final ResourceLoader resourceLoader;
     private final AiChatHistoryRepository aiChatHistoryRepository;
     private final WalletRepository walletRepository;
+    private final com.horseracing.services.ai.AiActionSecurityValidator aiActionSecurityValidator;
     private final RestTemplate restTemplate = createRestTemplateWithTimeout();
 
     private static RestTemplate createRestTemplateWithTimeout() {
@@ -61,7 +62,7 @@ public class AiChatService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private String systemPrompt = "";
+    private String baseSystemPrompt = "";
 
     @PostConstruct
     public void init() {
@@ -69,12 +70,32 @@ public class AiChatService {
             Resource resource = resourceLoader.getResource("classpath:prompts/system-prompt.txt");
             try (Reader reader =
                     new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
-                this.systemPrompt = FileCopyUtils.copyToString(reader);
-                log.info("Loaded System Prompt successfully.");
+                this.baseSystemPrompt = FileCopyUtils.copyToString(reader);
+                log.info("Loaded Base System Prompt successfully.");
             }
         } catch (IOException e) {
             log.error("Could not load system prompt file. Using default empty prompt.", e);
-            this.systemPrompt = "You are an AI virtual assistant. Please assist the user.";
+            this.baseSystemPrompt = "You are an AI virtual assistant. Please assist the user.";
+        }
+    }
+
+    private String loadRolePrompt(Role role) {
+        String filename = role == null ? "guest-prompt.txt" : switch (role) {
+            case SPECTATOR -> "spectator-prompt.txt";
+            case HORSE_OWNER -> "owner-prompt.txt";
+            case JOCKEY -> "jockey-prompt.txt";
+            case RACE_REFEREE -> "referee-prompt.txt";
+            case ADMIN -> "admin-prompt.txt";
+        };
+
+        try {
+            Resource resource = resourceLoader.getResource("classpath:prompts/" + filename);
+            try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
+                return FileCopyUtils.copyToString(reader);
+            }
+        } catch (IOException e) {
+            log.warn("Could not load prompt for file {}. Defaulting to empty.", filename);
+            return "";
         }
     }
 
@@ -124,40 +145,19 @@ public class AiChatService {
             ObjectNode rootNode = objectMapper.createObjectNode();
 
             // 2. Customize System Instruction based on user role and data
-            String rolePrompt;
-            if (user == null) {
-                rolePrompt =
-                        """
+            Role role = user == null ? null : user.getRole();
+            String roleSpecificPrompt = loadRolePrompt(role);
 
-                                Current user role: GUEST (Unauthenticated).
-                                Instruction: Advise them to log in or register an account to access full features like detailed tournament view, betting, and profile management.""";
-            } else {
-                Role role = user.getRole();
-                String balanceInfo = "";
-                if (role == Role.SPECTATOR) {
-                    Optional<Wallet> walletOpt = walletRepository.findByUserId(user.getId());
-                    BigDecimal balance = walletOpt.map(w -> w.getBalance()).orElse(BigDecimal.ZERO);
-                    balanceInfo = " (Current wallet balance: " + balance + " VND)";
-                }
-                rolePrompt = "\nCurrent user role: " + role.name() + " (Authenticated).\n"
-                        + "Account info: Name: " + user.getFullName() + ", Email: "
-                        + user.getEmail() + balanceInfo + ".\n";
-
-                rolePrompt += switch (role) {
-                    case SPECTATOR -> "Guide Spectator: Answer and guide them on placing bets, deposit/withdraw via PayOS, viewing betting history and transaction logs directly on their dashboard.";
-                    case HORSE_OWNER -> "Guide Horse Owner: Guide them on managing horses, registering horses for tournaments, and agreeing contracts with Jockeys.";
-                    case JOCKEY -> "Guide Jockey: Guide them on viewing personal race schedule and agreements with horse owners.";
-                    case RACE_REFEREE -> "Guide Referee: Guide them on viewing assigned race schedules and updating race round results.";
-                    case ADMIN -> "Guide Admin: Guide them on approving role upgrade requests, member management, and configuring new tournaments.";
-                    default -> "";
-                };
+            String userAccountDetails = "";
+            if (user != null) {
+                Optional<Wallet> walletOpt = walletRepository.findByUserId(user.getId());
+                BigDecimal balance = walletOpt.map(Wallet::getBalance).orElse(BigDecimal.ZERO);
+                userAccountDetails = "\nUSER CONTEXT:\n- Name: " + user.getFullName()
+                        + "\n- Email: " + user.getEmail()
+                        + "\n- Current Wallet Balance: " + balance + " VND\n";
             }
 
-            String finalSystemInstruction = this.systemPrompt + "\n" + rolePrompt + "\n"
-                    + "IMPORTANT OUTPUT CONSTRAINTS:\n"
-                    + "- Respond in clear English text or standard Markdown format.\n"
-                    + "- DO NOT output raw JSON containing structured action commands unless required.\n"
-                    + "- Assist strictly on Horse Racing Management System features. Politely decline off-topic queries.";
+            String finalSystemInstruction = this.baseSystemPrompt + "\n" + userAccountDetails + "\n" + roleSpecificPrompt;
 
             ObjectNode systemInstruction = objectMapper.createObjectNode();
             ArrayNode sysParts = objectMapper.createArrayNode();
@@ -179,7 +179,7 @@ public class AiChatService {
 
                 for (int i = 0; i < history.size(); i++) {
                     AiChatHistory h = history.get(i);
-                    String role = h.getSender().equalsIgnoreCase("USER") ? "user" : "model";
+                    String msgRole = h.getSender().equalsIgnoreCase("USER") ? "user" : "model";
                     String rawMessage = h.getMessage();
                     String cleanMessage = rawMessage;
                     if (rawMessage != null && rawMessage.trim().startsWith("{")
@@ -193,7 +193,7 @@ public class AiChatService {
                         }
                     }
 
-                    if (role.equals(lastRole)) {
+                    if (msgRole.equals(lastRole)) {
                         // Merge text into the previous content object's parts to ensure strict
                         // alternation
                         if (lastPartsArray != null && lastPartsArray.size() > 0) {
@@ -203,9 +203,9 @@ public class AiChatService {
                         }
                     } else {
                         // Create a new content object
-                        lastRole = role;
+                        lastRole = msgRole;
                         ObjectNode contentObj = objectMapper.createObjectNode();
-                        contentObj.put("role", role);
+                        contentObj.put("role", msgRole);
                         lastPartsArray = objectMapper.createArrayNode();
                         ObjectNode textPart = objectMapper.createObjectNode();
                         textPart.put("text", cleanMessage);
@@ -216,7 +216,7 @@ public class AiChatService {
 
                     // Attach image to the current user's message (which is at the end of the
                     // history list)
-                    if (i == history.size() - 1 && role.equals("user") && image != null
+                    if (i == history.size() - 1 && msgRole.equals("user") && image != null
                             && image.get("data") != null) {
                         if (lastPartsArray != null) {
                             ObjectNode imagePart = objectMapper.createObjectNode();
@@ -285,11 +285,22 @@ public class AiChatService {
                 }
             }
 
-            // 4. Save AI's response to database if authenticated
+            // 4. Sanitize and structure response JSON (RBAC Guardrail Verification)
+            String sanitizedResponseJson = aiActionSecurityValidator.sanitizeAndStructureResponse(role, replyText);
+
+            // 5. Save AI's clean text response to database if authenticated
             if (user != null) {
                 try {
+                    String textToSave = replyText;
+                    try {
+                        JsonNode parsed = objectMapper.readTree(sanitizedResponseJson);
+                        if (parsed.has("text") && !parsed.get("text").isNull()) {
+                            textToSave = parsed.get("text").asText();
+                        }
+                    } catch (Exception ignored) {}
+
                     AiChatHistory aiReply = AiChatHistory.builder().user(user).sender("AI")
-                            .message(replyText).build();
+                            .message(textToSave).build();
                     aiChatHistoryRepository.save(aiReply);
 
                     // Maintain only last 50 messages
@@ -299,10 +310,7 @@ public class AiChatService {
                 }
             }
 
-            // 5. Structure response for the client (JSON Wrapping)
-            ObjectNode wrappedResponse = objectMapper.createObjectNode();
-            wrappedResponse.put("text", replyText);
-            return wrappedResponse.toString();
+            return sanitizedResponseJson;
 
         } catch (org.springframework.web.client.HttpStatusCodeException e) {
             log.error("HTTP error calling Gemini API: {} - {}", e.getStatusCode(),
