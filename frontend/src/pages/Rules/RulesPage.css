@@ -1,0 +1,72 @@
+.rules-page {
+  background-color: #051009;
+  color: #e2e8f0;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+.rules-hero {
+  background: linear-gradient(135deg, rgba(7, 21, 12, 0.95) 0%, rgba(3, 10, 5, 0.98) 100%),
+              url('../../assets/hero_horse_racing.png') center/cover no-repeat;
+  padding: 70px 0 50px 0;
+  border-bottom: 2px solid #d4af37;
+  text-align: center;
+}
+
+.rules-nav-pill {
+  background: rgba(17, 34, 17, 0.8);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  padding: 12px 18px;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rules-nav-pill.active, .rules-nav-pill:hover {
+  background: linear-gradient(135deg, #ffd700 0%, #d4af37 100%);
+  color: #07150c;
+  border-color: #ffd700;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+}
+
+.rule-content-card {
+  background: rgba(12, 34, 20, 0.7);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 14px;
+  padding: 32px;
+  backdrop-filter: blur(10px);
+}
+
+.rule-section-title {
+  color: #ffd700;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  padding-bottom: 10px;
+}
+
+.rule-item {
+  margin-bottom: 20px;
+  padding-left: 16px;
+  border-left: 3px solid #d4af37;
+}
+
+.rule-item-h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.rule-item-p {
+  color: #cbd5e1;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
