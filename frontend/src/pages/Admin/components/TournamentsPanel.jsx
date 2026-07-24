@@ -7,6 +7,7 @@ import {
   createTrackAPI,
   createTournamentAPI,
   updateTournamentAPI,
+  assignRefereeAPI,
   updateTournamentStatusAPI,
   deleteTournamentAPI,
   confirmRaceRegistrationsAPI
@@ -267,8 +268,16 @@ export default function TournamentsPanel() {
 
     try {
       if (isEditing) {
-        await updateTournamentAPI(editId, formattedData);
-        setFeedbackModal({ show: true, type: 'success', message: 'Tournament updated successfully!' });
+        const currentT = tournaments.find(t => t.id === editId);
+        const isUpcoming = currentT && (currentT.tournamentStatus === 'Upcoming' || !currentT.tournamentStatus);
+        
+        if (!isUpcoming) {
+          await assignRefereeAPI(editId, formattedData.refereeId);
+          setFeedbackModal({ show: true, type: 'success', message: 'Referee assigned/updated successfully for Active tournament!' });
+        } else {
+          await updateTournamentAPI(editId, formattedData);
+          setFeedbackModal({ show: true, type: 'success', message: 'Tournament updated successfully!' });
+        }
       } else {
         await createTournamentAPI(formattedData);
         setFeedbackModal({ show: true, type: 'success', message: 'New tournament created successfully!' });
@@ -525,6 +534,11 @@ export default function TournamentsPanel() {
                   &times;
                 </button>
               </div>
+              {isEditing && tournaments.find(t => t.id === editId)?.tournamentStatus !== 'Upcoming' && (
+                <div style={{ padding: '8px 12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px', color: '#2563eb', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
+                  <FaInfoCircle /> <strong>Note:</strong> Tournament is currently Active. Saving will update the assigned referee via the dedicated API.
+                </div>
+              )}
 
               <div style={{ maxHeight: 'calc(80vh - 120px)', overflowY: 'auto', paddingRight: '4px' }} className="no-scrollbar">
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.horseracing.dto.request.AssignRefereeRequest;
 import com.horseracing.dto.request.CreateTournamentRequest;
 import com.horseracing.dto.request.UpdateTournamentRequest;
 import com.horseracing.dto.response.TournamentResponse;
@@ -369,5 +370,37 @@ public class TournamentService {
         }
 
         tournamentRepository.delete(tournament);
+    }
+
+    @Transactional
+    public TournamentResponse assignReferee(Integer tournamentId, Integer refereeId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+
+        if ("Finished".equalsIgnoreCase(tournament.getTournamentStatus())
+                || "Cancelled".equalsIgnoreCase(tournament.getTournamentStatus())) {
+            throw new RuntimeException("Cannot change referee for a finished or cancelled tournament");
+        }
+
+        if (refereeId == null) {
+            throw new RuntimeException("Referee ID is required");
+        }
+
+        User referee = userRepository.findById(refereeId)
+                .orElseThrow(() -> new RuntimeException("Referee not found"));
+        if (referee.getRole() != Role.RACE_REFEREE) {
+            throw new RuntimeException("User must have RACE_REFEREE role");
+        }
+
+        tournament.setReferee(referee);
+        tournament = tournamentRepository.save(tournament);
+
+        List<Race> races = raceRepository.findByTournamentId(tournamentId);
+        for (Race race : races) {
+            race.setReferee(referee);
+            raceRepository.save(race);
+        }
+
+        return TournamentResponse.fromEntity(tournament);
     }
 }

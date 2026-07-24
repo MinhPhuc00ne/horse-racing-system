@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.horseracing.dto.request.AssignRefereeRequest;
 import com.horseracing.dto.request.CreateRaceRequest;
 import com.horseracing.dto.request.CreateTournamentRequest;
 import com.horseracing.dto.request.UpdateTournamentRequest;
@@ -125,6 +126,13 @@ public class AdminRaceController {
     public ResponseEntity<TournamentResponse> updateTournament(@PathVariable Integer id,
             @Valid @RequestBody UpdateTournamentRequest request) {
         TournamentResponse response = tournamentService.updateTournament(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/tournaments/{id}/assign-referee")
+    public ResponseEntity<TournamentResponse> assignReferee(@PathVariable Integer id,
+            @Valid @RequestBody AssignRefereeRequest request) {
+        TournamentResponse response = tournamentService.assignReferee(id, request.getRefereeId());
         return ResponseEntity.ok(response);
     }
 

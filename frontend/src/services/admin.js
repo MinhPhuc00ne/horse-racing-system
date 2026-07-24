@@ -96,6 +96,16 @@ export async function updateTournamentStatusAPI(id, status) {
   }
 }
 
+export async function assignRefereeAPI(id, refereeId) {
+  try {
+    const response = await axiosClient.put(`/admin/tournaments/${id}/assign-referee`, { refereeId: parseInt(refereeId) });
+    return response.data;
+  } catch (error) {
+    const errMsg = error.response?.data?.message || 'Failed to assign referee.';
+    throw new Error(errMsg, { cause: error });
+  }
+}
+
 export async function deleteTournamentAPI(id) {
   try {
     const response = await axiosClient.delete(`/admin/tournaments/${id}`);
