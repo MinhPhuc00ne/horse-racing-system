@@ -223,17 +223,8 @@
 }
 
 @keyframes pulse {
-
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.35;
-    transform: scale(1.35);
-  }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(1.35); }
 }
 
 .svg-track-container {
@@ -764,7 +755,6 @@
 }
 
 @media (max-width: 620px) {
-
   .hero-container-inner,
   .stats-section,
   .tournaments-section,
@@ -787,7 +777,6 @@
 }
 
 @media (max-width: 430px) {
-
   .hero-section,
   .hero-container-inner {
     min-height: 232px;
@@ -847,7 +836,6 @@
 }
 
 @media (max-width: 350px) {
-
   .hero-container-inner,
   .stats-section,
   .tournaments-section,
