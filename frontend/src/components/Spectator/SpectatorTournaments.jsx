@@ -67,7 +67,35 @@ export default function SpectatorTournaments() {
       }
     }
     loadTournaments();
+  }, []);
+
+  useEffect(() => {
     loadWalletAndBets();
+  }, [user]);
+
+  // AI Chatbot Auto-Fill Event Listener for Place Bet
+  useEffect(() => {
+    const handlePrefillPlaceBet = (e) => {
+      const detail = e.detail || {};
+      let data = detail;
+      if (!data.amount && !data.raceId) {
+        const storageStr = sessionStorage.getItem('ai_prefill_place_bet');
+        if (storageStr) {
+          try { data = JSON.parse(storageStr); } catch (err) {}
+        }
+      }
+
+      if (data.amount) setBetAmount(data.amount.toString());
+    };
+
+    window.addEventListener('ai_prefill_place_bet', handlePrefillPlaceBet);
+
+    const betStorage = sessionStorage.getItem('ai_prefill_place_bet');
+    if (betStorage) handlePrefillPlaceBet({ detail: {} });
+
+    return () => {
+      window.removeEventListener('ai_prefill_place_bet', handlePrefillPlaceBet);
+    };
   }, []);
 
   const handleTournamentClick = async (tId) => {

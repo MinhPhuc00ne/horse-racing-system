@@ -34,6 +34,34 @@ export default function ConnectionsContent() {
     }
   }, [location]);
 
+  // AI Chatbot Auto-Fill Event Listener for Search Jockey
+  useEffect(() => {
+    const handlePrefillSearchJockey = (e) => {
+      const detail = e.detail || {};
+      let data = detail;
+      if (!data.query) {
+        const storageStr = sessionStorage.getItem('ai_prefill_search_jockey');
+        if (storageStr) {
+          try { data = JSON.parse(storageStr); } catch (err) {}
+        }
+      }
+
+      setActiveSubTab('find');
+      if (data.query) {
+        setSearchQuery(data.query);
+      }
+    };
+
+    window.addEventListener('ai_prefill_search_jockey', handlePrefillSearchJockey);
+
+    const jockeyStorage = sessionStorage.getItem('ai_prefill_search_jockey');
+    if (jockeyStorage) handlePrefillSearchJockey({ detail: {} });
+
+    return () => {
+      window.removeEventListener('ai_prefill_search_jockey', handlePrefillSearchJockey);
+    };
+  }, []);
+
   const fetchConnections = async () => {
     try {
       setLoading(true);

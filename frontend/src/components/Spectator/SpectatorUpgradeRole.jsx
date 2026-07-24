@@ -59,6 +59,38 @@ export default function SpectatorUpgradeRole() {
     return () => clearInterval(interval);
   }, [user]);
 
+  // AI Chatbot Auto-Fill Event Listener for Upgrade Request
+  useEffect(() => {
+    const handlePrefillUpgrade = (e) => {
+      const detail = e.detail || {};
+      let data = detail;
+      if (!data.role && !data.stableName) {
+        const storageStr = sessionStorage.getItem('ai_prefill_upgrade');
+        if (storageStr) {
+          try { data = JSON.parse(storageStr); } catch (err) {}
+        }
+      }
+
+      if (data.role) setRequestedRole(data.role);
+      if (data.stableName) setStableName(data.stableName);
+      if (data.stableAddress) setStableAddress(data.stableAddress);
+      if (data.weight) setWeight(data.weight);
+      if (data.height) setHeight(data.height);
+      if (data.licenseNumber) setLicenseNumber(data.licenseNumber);
+      if (data.certificationNumber) setCertificationNumber(data.certificationNumber);
+      if (data.experienceYears) setExperienceYears(data.experienceYears);
+    };
+
+    window.addEventListener('ai_prefill_upgrade', handlePrefillUpgrade);
+
+    const upgradeStorage = sessionStorage.getItem('ai_prefill_upgrade');
+    if (upgradeStorage) handlePrefillUpgrade({ detail: {} });
+
+    return () => {
+      window.removeEventListener('ai_prefill_upgrade', handlePrefillUpgrade);
+    };
+  }, []);
+
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;

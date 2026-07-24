@@ -136,6 +136,74 @@ export default function SpectatorWallet({ hideHeader = false }) {
     loadProfileBankDetails();
   }, []);
 
+  // AI Chatbot Auto-Fill Event Listeners
+  useEffect(() => {
+    const handlePrefillBankInfo = (e) => {
+      const detail = e.detail || {};
+      let data = detail;
+      if (!data.bankName && !data.accountNumber) {
+        const storageStr = sessionStorage.getItem('ai_prefill_bank_info');
+        if (storageStr) {
+          try { data = JSON.parse(storageStr); } catch (err) {}
+        }
+      }
+      
+      setActiveTab('bank');
+      if (data.bankName) setSelectedBankName(data.bankName);
+      if (data.accountNumber) setBankAccountNumber(data.accountNumber);
+    };
+
+    const handlePrefillDeposit = (e) => {
+      const detail = e.detail || {};
+      let data = detail;
+      if (!data.amount) {
+        const storageStr = sessionStorage.getItem('ai_prefill_deposit');
+        if (storageStr) {
+          try { data = JSON.parse(storageStr); } catch (err) {}
+        }
+      }
+
+      setActiveTab('deposit');
+      if (data.amount) setDepositAmount(formatNumberWithCommas(data.amount));
+    };
+
+    const handlePrefillWithdraw = (e) => {
+      const detail = e.detail || {};
+      let data = detail;
+      if (!data.amount && !data.bankName && !data.accountNumber) {
+        const storageStr = sessionStorage.getItem('ai_prefill_withdraw');
+        if (storageStr) {
+          try { data = JSON.parse(storageStr); } catch (err) {}
+        }
+      }
+
+      setActiveTab('withdraw');
+      if (data.amount) setWithdrawAmount(formatNumberWithCommas(data.amount));
+      if (data.bankName) setSelectedBankName(data.bankName);
+      if (data.accountNumber) setBankAccountNumber(data.accountNumber);
+    };
+
+    window.addEventListener('ai_prefill_bank_info', handlePrefillBankInfo);
+    window.addEventListener('ai_prefill_deposit', handlePrefillDeposit);
+    window.addEventListener('ai_prefill_withdraw', handlePrefillWithdraw);
+
+    // Initial check from sessionStorage
+    const bankStorage = sessionStorage.getItem('ai_prefill_bank_info');
+    if (bankStorage) handlePrefillBankInfo({ detail: {} });
+
+    const depositStorage = sessionStorage.getItem('ai_prefill_deposit');
+    if (depositStorage) handlePrefillDeposit({ detail: {} });
+
+    const withdrawStorage = sessionStorage.getItem('ai_prefill_withdraw');
+    if (withdrawStorage) handlePrefillWithdraw({ detail: {} });
+
+    return () => {
+      window.removeEventListener('ai_prefill_bank_info', handlePrefillBankInfo);
+      window.removeEventListener('ai_prefill_deposit', handlePrefillDeposit);
+      window.removeEventListener('ai_prefill_withdraw', handlePrefillWithdraw);
+    };
+  }, []);
+
   // Polling for real deposit transaction status
   useEffect(() => {
     if (!showDepositQR || !depositQrData?.orderCode) return;
