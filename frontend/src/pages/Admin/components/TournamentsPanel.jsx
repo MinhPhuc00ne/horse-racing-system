@@ -13,7 +13,7 @@ import {
   confirmRaceRegistrationsAPI
 } from '../../../services/admin';
 import axiosClient from '../../../api/axiosClient';
-import { FaPlus, FaEdit, FaTrash, FaTrophy, FaCalendarAlt, FaMapMarkerAlt, FaDollarSign, FaInfoCircle, FaCheckCircle, FaChevronDown, FaChevronUp, FaFilter } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaTrophy, FaCalendarAlt, FaMapMarkerAlt, FaDollarSign, FaInfoCircle, FaCheckCircle, FaChevronDown, FaChevronUp, FaFilter, FaHorse, FaUserTie, FaImage, FaTimes } from 'react-icons/fa';
 
 export default function TournamentsPanel() {
   const [tournaments, setTournaments] = useState([]);
@@ -558,491 +558,713 @@ export default function TournamentsPanel() {
 
       {/* Form Section */}
       {showForm && createPortal(
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            backgroundColor: 'transparent',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 1050,
-          }}
-          onClick={resetForm}
-        >
-          <div
-            className="glass-card"
-            style={{
-              width: '100%',
-              maxWidth: '850px',
-              padding: '24px',
-              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)',
-              border: '1px solid var(--ho-border-gold, #D4AF37)',
-              background: '#ffffff',
-              borderRadius: '16px',
-              animation: 'scaleUp 0.2s ease-out'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {error && (
-                <div style={{ padding: '10px 14px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', color: '#ef4444', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <FaInfoCircle /> {error}
-                </div>
-              )}
-              <div className="d-flex justify-content-between align-items-center" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)', paddingBottom: '12px' }}>
-                <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: 'var(--ho-primary-dark, #003820)' }}>
-                  {isEditing ? 'Update Tournament' : 'Create New Tournament'}
-                </h3>
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#a0aec0', padding: '0 4px', lineHeight: 1 }}
-                  aria-label="Close"
+        (() => {
+          const currentGendersList = formData.allowedGenders
+            ? formData.allowedGenders.split(',').map(s => s.trim().toUpperCase())
+            : [];
+          const isMaleChecked = currentGendersList.includes('MALE');
+          const isFemaleChecked = currentGendersList.includes('FEMALE');
+
+          const handleGenderCheckboxChange = (gender, checked) => {
+            let updated = [...currentGendersList];
+            if (checked) {
+              if (!updated.includes(gender)) updated.push(gender);
+            } else {
+              updated = updated.filter(g => g !== gender);
+            }
+            setFormData(prev => ({ ...prev, allowedGenders: updated.join(',') }));
+          };
+
+          return (
+            <div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                backgroundColor: 'rgba(15, 23, 42, 0.65)',
+                backdropFilter: 'blur(8px)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1050,
+                padding: '20px'
+              }}
+              onClick={resetForm}
+            >
+              <div
+                style={{
+                  width: '100%',
+                  maxWidth: '980px',
+                  maxHeight: '90vh',
+                  padding: 0,
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+                  border: '1px solid rgba(212, 175, 55, 0.4)',
+                  background: '#ffffff',
+                  borderRadius: '16px',
+                  animation: 'scaleUp 0.2s ease-out',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden'
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div
+                  style={{
+                    padding: '18px 24px',
+                    background: 'linear-gradient(135deg, #003820 0%, #002214 100%)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderBottom: '2px solid var(--ho-border-gold, #D4AF37)'
+                  }}
                 >
-                  &times;
-                </button>
-              </div>
-              {isEditing && tournaments.find(t => t.id === editId)?.tournamentStatus !== 'Upcoming' && (
-                <div style={{ padding: '8px 12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px', color: '#2563eb', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
-                  <FaInfoCircle /> <strong>Note:</strong> Tournament is currently Active. Saving will update the assigned referee via the dedicated API.
-                </div>
-              )}
-
-              <div style={{ maxHeight: 'calc(80vh - 120px)', overflowY: 'auto', paddingRight: '4px' }} className="no-scrollbar">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-
-                  {/* Left Col */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    <div className="form-group">
-                      <label className="ho-input-label">Tournament Name *</label>
-                      <input
-                        type="text"
-                        name="tournamentName"
-                        value={formData.tournamentName}
-                        onChange={handleInputChange}
-                        required
-                        className="ho-form-input text-dark fw-semibold"
-                        placeholder="Enter tournament name (e.g., Spring Championship 2026)"
-                      />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '10px',
+                        background: 'rgba(212, 175, 55, 0.15)',
+                        border: '1px solid rgba(212, 175, 55, 0.4)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <FaTrophy style={{ color: '#D4AF37', fontSize: '20px' }} />
                     </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                      <AutocompleteDropdown
-                        label="Host Region"
-                        value={selectedRegion}
-                        onChange={(val) => {
-                          setSelectedRegion(val);
-                          setSelectedTrack(null);
-                          setFormData(prev => ({ ...prev, location: '' }));
-                        }}
-                        options={[...new Set(tracks.map(t => t.location).filter(Boolean))]}
-                        placeholder="Type or select region..."
-                        onAddNew={handleAddNewRegion}
-                        addNewText="Add new region"
-                        required
-                      />
-
-                      <TrackAutocompleteDropdown
-                        label="Race Track"
-                        value={selectedTrack}
-                        onChange={(trackObj) => {
-                          setSelectedTrack(trackObj);
-                          setFormData(prev => ({ ...prev, location: trackObj ? trackObj.name : '' }));
-                          if (trackObj && trackObj.shape) {
-                            setTrackShape(trackObj.shape);
-                          }
-                        }}
-                        options={tracks.filter(t => t.location === selectedRegion)}
-                        placeholder="Type or select track..."
-                        onAddNew={handleAddNewTrackClick}
-                        addNewText="Create new track"
-                        disabled={!selectedRegion}
-                        required
-                      />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                      <div className="form-group">
-                        <label className="ho-input-label">Track Surface *</label>
-                        <select
-                          name="surfaceType"
-                          value={formData.surfaceType}
-                          onChange={handleInputChange}
-                          required
-                          className="ho-form-input text-dark fw-semibold"
-                        >
-                          <option value="Grass">Grass</option>
-                          <option value="Muddy">Muddy</option>
-                          <option value="Artificial">Artificial</option>
-                        </select>
-                      </div>
-
-                      <div className="form-group">
-                        <label className="ho-input-label">Track Shape *</label>
-                        <select
-                          name="trackShape"
-                          value={trackShape}
-                          onChange={(e) => setTrackShape(e.target.value)}
-                          required
-                          className="ho-form-input text-dark fw-semibold"
-                        >
-                          <option value="STRAIGHT">STRAIGHT (Straight line)</option>
-                          <option value="OVAL">OVAL (Circular/oval)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="ho-input-label">Track Distance (m) *</label>
-                      <input
-                        type="number"
-                        name="distance"
-                        value={formData.distance}
-                        onChange={handleInputChange}
-                        required
-                        min="400"
-                        className="ho-form-input text-dark fw-semibold"
-                        placeholder="e.g., 1200"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="ho-input-label">Tournament Description</label>
-                      <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                        rows="3"
-                        className="ho-form-input text-dark fw-semibold"
-                        style={{ resize: 'vertical' }}
-                        placeholder="Brief description of rules, format, or tournament info..."
-                      />
-                    </div>
-
-
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                      <div className="form-group">
-                        <label className="ho-input-label">Registration Opening Time</label>
-                        <input
-                          type="datetime-local"
-                          name="registrationOpeningTime"
-                          value={formData.registrationOpeningTime}
-                          onChange={handleInputChange}
-                          className="ho-form-input text-dark fw-semibold"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="ho-input-label">Registration Deadline</label>
-                        <input
-                          type="datetime-local"
-                          name="registrationDeadline"
-                          value={formData.registrationDeadline}
-                          onChange={handleInputChange}
-                          required
-                          className="ho-form-input text-dark fw-semibold"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="ho-input-label">Official Race Time</label>
-                      <input
-                        type="datetime-local"
-                        name="officialRaceTime"
-                        value={formData.officialRaceTime}
-                        onChange={handleInputChange}
-                        className="ho-form-input text-dark fw-semibold"
-                      />
+                    <div>
+                      <h3 className="m-0 fw-bold" style={{ fontSize: '18px', color: '#ffffff' }}>
+                        {isEditing ? 'Update Tournament Details' : 'Create New Tournament'}
+                      </h3>
+                      <p className="m-0 text-light opacity-75" style={{ fontSize: '12px' }}>
+                        Fill out the fields below to configure tournament parameters, prizes & rules
+                      </p>
                     </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    style={{
+                      background: 'rgba(255,255,255,0.1)',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      color: '#ffffff',
+                      transition: 'all 0.2s'
+                    }}
+                    aria-label="Close"
+                  >
+                    <FaTimes style={{ fontSize: '16px' }} />
+                  </button>
+                </div>
 
-                  {/* Right Col */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                      <div className="form-group">
-                        <label className="ho-input-label">Min Horses *</label>
-                        <input
-                          type="number"
-                          name="minSlots"
-                          value={formData.minSlots}
-                          onChange={handleInputChange}
-                          required
-                          min="3"
-                          className="ho-form-input text-dark fw-semibold"
-                          placeholder="e.g., 3"
-                        />
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', margin: 0 }}>
+                  
+                  {/* Scrollable Content Body */}
+                  <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }} className="no-scrollbar">
+                    
+                    {error && (
+                      <div style={{ padding: '12px 16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '10px', color: '#ef4444', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <FaInfoCircle style={{ fontSize: '16px', flexShrink: 0 }} />
+                        <span className="fw-semibold">{error}</span>
                       </div>
-                      <div className="form-group">
-                        <label className="ho-input-label">Max Horses *</label>
-                        <input
-                          type="number"
-                          name="maxSlots"
-                          value={formData.maxSlots}
-                          onChange={handleInputChange}
-                          required
-                          min="3"
-                          className="ho-form-input text-dark fw-semibold"
-                          placeholder="e.g., 10"
-                        />
-                      </div>
-                    </div>
+                    )}
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                      <div className="form-group">
-                        <label className="ho-input-label">Entry Fee (VND) *</label>
-                        <input
-                          type="number"
-                          name="entryFee"
-                          value={formData.entryFee}
-                          onChange={handleInputChange}
-                          required
-                          min="0"
-                          className="ho-form-input text-dark fw-semibold"
-                          placeholder="e.g., 500000"
-                        />
+                    {isEditing && tournaments.find(t => t.id === editId)?.tournamentStatus !== 'Upcoming' && (
+                      <div style={{ padding: '10px 14px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '10px', color: '#1d4ed8', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <FaInfoCircle style={{ fontSize: '16px', flexShrink: 0 }} />
+                        <span><strong>Note:</strong> Tournament is currently Active. Saving will update the assigned referee via the dedicated API.</span>
                       </div>
-                      <div className="form-group">
-                        <label className="ho-input-label">Min Bet Amount (VND) *</label>
-                        <input
-                          type="number"
-                          name="minBetAmount"
-                          value={formData.minBetAmount}
-                          onChange={handleInputChange}
-                          required
-                          min="0"
-                          className="ho-form-input text-dark fw-semibold"
-                          placeholder="e.g., 100000"
-                        />
-                      </div>
-                    </div>
+                    )}
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                      <div className="form-group">
-                        <label className="ho-input-label">First Prize *</label>
-                        <input
-                          type="number"
-                          name="prizeFirst"
-                          value={formData.prizeFirst}
-                          onChange={handleInputChange}
-                          required
-                          min="0"
-                          className="ho-form-input text-dark fw-semibold"
-                          placeholder="e.g., 10000000"
-                        />
+                    {/* Section 1: General Info & Location */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px dashed #cbd5e1', paddingBottom: '10px' }}>
+                        <FaTrophy style={{ color: '#D4AF37', fontSize: '15px' }} />
+                        <h4 className="m-0 fw-bold" style={{ fontSize: '14px', color: '#003820', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          General Info & Race Track
+                        </h4>
                       </div>
-                      <div className="form-group">
-                        <label className="ho-input-label">Second Prize *</label>
-                        <input
-                          type="number"
-                          name="prizeSecond"
-                          value={formData.prizeSecond}
-                          onChange={handleInputChange}
-                          required
-                          min="0"
-                          className="ho-form-input text-dark fw-semibold"
-                          placeholder="e.g., 5000000"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="ho-input-label">Third Prize *</label>
-                        <input
-                          type="number"
-                          name="prizeThird"
-                          value={formData.prizeThird}
-                          onChange={handleInputChange}
-                          required
-                          min="0"
-                          className="ho-form-input text-dark fw-semibold"
-                        />
-                      </div>
-                    </div>
 
-                    <div className="form-group">
-                      <label className="ho-input-label">Assigned Referee *</label>
-                      <select
-                        name="refereeId"
-                        value={formData.refereeId}
-                        onChange={handleInputChange}
-                        required
-                        className="ho-form-input text-dark fw-semibold"
-                      >
-                        <option value="">Select referee...</option>
-                        {referees.map(r => (
-                          <option key={r.id} value={r.id}>{r.fullName} ({r.email})</option>
-                        ))}
-                      </select>
-                    </div>
+                      <div className="row g-3">
+                        <div className="col-12">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Tournament Name *</label>
+                            <input
+                              type="text"
+                              name="tournamentName"
+                              value={formData.tournamentName}
+                              onChange={handleInputChange}
+                              required
+                              className="form-control fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                              placeholder="Enter tournament name (e.g., Spring Championship 2026)"
+                            />
+                          </div>
+                        </div>
 
-                    <div className="form-group">
-                      <label className="ho-input-label">Tournament Avatar Image</label>
-                      <div
-                        className="position-relative overflow-hidden"
-                        style={{
-                          border: '2px dashed var(--ho-border-gold)',
-                          borderRadius: '12px',
-                          background: 'rgba(255,255,255,0.5)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minHeight: '160px',
-                          position: 'relative'
-                        }}
-                      >
-                        {formData.imageUrl ? (
-                          <div style={{ width: '100%', height: '160px', position: 'relative' }}>
-                            <img src={formData.imageUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div className="col-md-6">
+                          <AutocompleteDropdown
+                            label="Host Region"
+                            value={selectedRegion}
+                            onChange={(val) => {
+                              setSelectedRegion(val);
+                              setSelectedTrack(null);
+                              setFormData(prev => ({ ...prev, location: '' }));
+                            }}
+                            options={[...new Set(tracks.map(t => t.location).filter(Boolean))]}
+                            placeholder="Type or select region..."
+                            onAddNew={handleAddNewRegion}
+                            addNewText="Add new region"
+                            required
+                          />
+                        </div>
 
-                            {/* Hover overlay with action buttons */}
-                            <div
-                              style={{
-                                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                                background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                gap: '15px', opacity: 0, transition: 'opacity 0.2s', zIndex: 5
-                              }}
-                              className="upload-overlay"
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = 0}
+                        <div className="col-md-6">
+                          <TrackAutocompleteDropdown
+                            label="Race Track"
+                            value={selectedTrack}
+                            onChange={(trackObj) => {
+                              setSelectedTrack(trackObj);
+                              setFormData(prev => ({ ...prev, location: trackObj ? trackObj.name : '' }));
+                              if (trackObj && trackObj.shape) {
+                                setTrackShape(trackObj.shape);
+                              }
+                            }}
+                            options={tracks.filter(t => t.location === selectedRegion)}
+                            placeholder="Type or select track..."
+                            onAddNew={handleAddNewTrackClick}
+                            addNewText="Create new track"
+                            disabled={!selectedRegion}
+                            required
+                          />
+                        </div>
+
+                        <div className="col-md-4">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Track Surface *</label>
+                            <select
+                              name="surfaceType"
+                              value={formData.surfaceType}
+                              onChange={handleInputChange}
+                              required
+                              className="form-select fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
                             >
-                              <button
-                                type="button"
-                                className="btn btn-sm btn-light d-flex align-items-center justify-content-center"
-                                style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0 }}
-                                onClick={() => {
-                                  setLightboxImage(formData.imageUrl);
-                                  setIsZoomedIn(false);
-                                }}
-                                title="Zoom image"
-                              >
-                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>zoom_in</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                className="btn btn-sm btn-light d-flex align-items-center justify-content-center"
-                                style={{ borderRadius: '50%', width: '40px', height: '40px', padding: 0 }}
-                                onClick={() => fileInputRef.current.click()}
-                                title="Change image"
-                              >
-                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>edit</span>
-                              </button>
-                            </div>
+                              <option value="Grass">Grass</option>
+                              <option value="Muddy">Muddy</option>
+                              <option value="Artificial">Artificial</option>
+                            </select>
                           </div>
-                        ) : (
-                          <div
-                            className="text-center p-3"
-                            style={{ cursor: 'pointer', width: '100%', height: '160px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
-                            onClick={() => fileInputRef.current.click()}
-                          >
-                            <span className="material-symbols-outlined mb-2" style={{ fontSize: '32px', color: 'var(--ho-accent-gold-text)' }}>
-                              cloud_upload
-                            </span>
-                            <p className="m-0 fw-bold" style={{ color: 'var(--ho-primary-dark)' }}>Click to upload image</p>
-                            <p className="m-0 small text-secondary">Supports JPG, PNG, WEBP</p>
+                        </div>
+
+                        <div className="col-md-4">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Track Shape *</label>
+                            <select
+                              name="trackShape"
+                              value={trackShape}
+                              onChange={(e) => setTrackShape(e.target.value)}
+                              required
+                              className="form-select fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                            >
+                              <option value="STRAIGHT">STRAIGHT (Straight line)</option>
+                              <option value="OVAL">OVAL (Circular/oval)</option>
+                            </select>
                           </div>
-                        )}
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          style={{ display: 'none' }}
-                        />
-                      </div>
-                    </div>
+                        </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
-                      <BreedMultiSelectDropdown
-                        label="Allowed Horse Breeds"
-                        value={formData.allowedClasses}
-                        onChange={(val) => {
-                          setFormData(prev => ({ ...prev, allowedClasses: val }));
-                        }}
-                        options={breeds.map(b => b.breedName)}
-                        placeholder="Select or type horse breed then press Enter..."
-                        onAddNew={async (newBreed) => {
-                          try {
-                            setLoading(true);
-                            await axiosClient.post('/breeds', { breedName: newBreed });
-                            const res = await axiosClient.get('/breeds/official');
-                            const updatedBreeds = res.data || [];
-                            setBreeds(updatedBreeds);
-                            setFeedbackModal({ show: true, type: 'success', message: `Added horse breed "${newBreed}" successfully!` });
-                          } catch (err) {
-                            alert(err.response?.data?.message || 'Could not create new horse breed.');
-                          } finally {
-                            setLoading(false);
-                          }
-                        }}
-                      />
-                    </div>
+                        <div className="col-md-4">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Track Distance (m) *</label>
+                            <input
+                              type="number"
+                              name="distance"
+                              value={formData.distance}
+                              onChange={handleInputChange}
+                              required
+                              min="400"
+                              className="form-control fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                              placeholder="e.g., 1200"
+                            />
+                          </div>
+                        </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                      <div className="form-group">
-                        <label className="ho-input-label">Allowed Ages</label>
-                        <input
-                          type="text"
-                          name="allowedAges"
-                          value={formData.allowedAges}
-                          onChange={handleInputChange}
-                          className="ho-form-input text-dark fw-semibold"
-                          placeholder="e.g., 3,4,5"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label className="ho-input-label d-block mb-2">Allowed Genders</label>
-                        <div style={{ display: 'flex', gap: '20px', alignItems: 'center', height: '38px' }}>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--ho-primary-dark)', fontWeight: '600' }}>
-                            <input
-                              type="checkbox"
-                              checked={isMaleChecked}
-                              onChange={(e) => handleGenderCheckboxChange('MALE', e.target.checked)}
-                              style={{ width: '16px', height: '16px', accentColor: 'var(--ho-primary-dark)' }}
+                        <div className="col-12">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Tournament Description</label>
+                            <textarea
+                              name="description"
+                              value={formData.description}
+                              onChange={handleInputChange}
+                              rows="2"
+                              className="form-control fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+                              placeholder="Brief description of rules, format, or tournament info..."
                             />
-                            Male (MALE)
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--ho-primary-dark)', fontWeight: '600' }}>
-                            <input
-                              type="checkbox"
-                              checked={isFemaleChecked}
-                              onChange={(e) => handleGenderCheckboxChange('FEMALE', e.target.checked)}
-                              style={{ width: '16px', height: '16px', accentColor: 'var(--ho-primary-dark)' }}
-                            />
-                            Female (FEMALE)
-                          </label>
+                          </div>
                         </div>
                       </div>
                     </div>
+
+                    {/* Section 2: Schedule & Referee */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px dashed #cbd5e1', paddingBottom: '10px' }}>
+                        <FaCalendarAlt style={{ color: '#003820', fontSize: '15px' }} />
+                        <h4 className="m-0 fw-bold" style={{ fontSize: '14px', color: '#003820', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Schedule & Referee Assignment
+                        </h4>
+                      </div>
+
+                      <div className="row g-3">
+                        <div className="col-md-4">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Registration Opening Time</label>
+                            <input
+                              type="datetime-local"
+                              name="registrationOpeningTime"
+                              value={formData.registrationOpeningTime}
+                              onChange={handleInputChange}
+                              className="form-control fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-md-4">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Registration Deadline *</label>
+                            <input
+                              type="datetime-local"
+                              name="registrationDeadline"
+                              value={formData.registrationDeadline}
+                              onChange={handleInputChange}
+                              required
+                              className="form-control fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-md-4">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Official Race Time</label>
+                            <input
+                              type="datetime-local"
+                              name="officialRaceTime"
+                              value={formData.officialRaceTime}
+                              onChange={handleInputChange}
+                              className="form-control fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Assigned Referee *</label>
+                            <select
+                              name="refereeId"
+                              value={formData.refereeId}
+                              onChange={handleInputChange}
+                              required
+                              className="form-select fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                            >
+                              <option value="">Select referee...</option>
+                              {referees.map(r => (
+                                <option key={r.id} value={r.id}>{r.fullName} ({r.email})</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 3: Financials & Prizes */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px dashed #cbd5e1', paddingBottom: '10px' }}>
+                        <FaDollarSign style={{ color: '#10b981', fontSize: '15px' }} />
+                        <h4 className="m-0 fw-bold" style={{ fontSize: '14px', color: '#003820', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Financials & Prize Pool
+                        </h4>
+                      </div>
+
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Entry Fee (VND) *</label>
+                            <input
+                              type="number"
+                              name="entryFee"
+                              value={formData.entryFee}
+                              onChange={handleInputChange}
+                              required
+                              min="0"
+                              className="form-control fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                              placeholder="e.g., 500000"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-md-6">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Min Bet Amount (VND) *</label>
+                            <input
+                              type="number"
+                              name="minBetAmount"
+                              value={formData.minBetAmount}
+                              onChange={handleInputChange}
+                              required
+                              min="0"
+                              className="form-control fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                              placeholder="e.g., 100000"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-md-4">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>First Prize (VND) *</label>
+                            <input
+                              type="number"
+                              name="prizeFirst"
+                              value={formData.prizeFirst}
+                              onChange={handleInputChange}
+                              required
+                              min="0"
+                              className="form-control fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                              placeholder="e.g., 10000000"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-md-4">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Second Prize (VND) *</label>
+                            <input
+                              type="number"
+                              name="prizeSecond"
+                              value={formData.prizeSecond}
+                              onChange={handleInputChange}
+                              required
+                              min="0"
+                              className="form-control fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                              placeholder="e.g., 5000000"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-md-4">
+                          <div className="form-group">
+                            <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Third Prize (VND) *</label>
+                            <input
+                              type="number"
+                              name="prizeThird"
+                              value={formData.prizeThird}
+                              onChange={handleInputChange}
+                              required
+                              min="0"
+                              className="form-control fw-semibold"
+                              style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                              placeholder="e.g., 2000000"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 4: Rules & Media Upload */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px dashed #cbd5e1', paddingBottom: '10px' }}>
+                        <FaHorse style={{ color: '#d97706', fontSize: '15px' }} />
+                        <h4 className="m-0 fw-bold" style={{ fontSize: '14px', color: '#003820', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Rules, Eligibility & Media
+                        </h4>
+                      </div>
+
+                      <div className="row g-3">
+                        {/* Left Column: Eligibility Rules */}
+                        <div className="col-md-7 d-flex flex-column gap-3">
+                          <div>
+                            <BreedMultiSelectDropdown
+                              label="Allowed Horse Breeds"
+                              value={formData.allowedClasses}
+                              onChange={(val) => {
+                                setFormData(prev => ({ ...prev, allowedClasses: val }));
+                              }}
+                              options={breeds.map(b => b.breedName)}
+                              placeholder="Select or type horse breed then press Enter..."
+                              onAddNew={async (newBreed) => {
+                                try {
+                                  setLoading(true);
+                                  await axiosClient.post('/breeds', { breedName: newBreed });
+                                  const res = await axiosClient.get('/breeds/official');
+                                  const updatedBreeds = res.data || [];
+                                  setBreeds(updatedBreeds);
+                                  setFeedbackModal({ show: true, type: 'success', message: `Added horse breed "${newBreed}" successfully!` });
+                                } catch (err) {
+                                  alert(err.response?.data?.message || 'Could not create new horse breed.');
+                                } finally {
+                                  setLoading(false);
+                                }
+                              }}
+                            />
+                          </div>
+
+                          <div className="row g-2">
+                            <div className="col-6">
+                              <div className="form-group">
+                                <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Min Horses *</label>
+                                <input
+                                  type="number"
+                                  name="minSlots"
+                                  value={formData.minSlots}
+                                  onChange={handleInputChange}
+                                  required
+                                  min="3"
+                                  className="form-control fw-semibold"
+                                  style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                                  placeholder="e.g., 3"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="col-6">
+                              <div className="form-group">
+                                <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Max Horses *</label>
+                                <input
+                                  type="number"
+                                  name="maxSlots"
+                                  value={formData.maxSlots}
+                                  onChange={handleInputChange}
+                                  required
+                                  min="3"
+                                  className="form-control fw-semibold"
+                                  style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                                  placeholder="e.g., 10"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="row g-2">
+                            <div className="col-6">
+                              <div className="form-group">
+                                <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Allowed Ages</label>
+                                <input
+                                  type="text"
+                                  name="allowedAges"
+                                  value={formData.allowedAges}
+                                  onChange={handleInputChange}
+                                  className="form-control fw-semibold"
+                                  style={{ borderRadius: '8px', fontSize: '13px', border: '1px solid #cbd5e1' }}
+                                  placeholder="e.g., 3,4,5"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="col-6">
+                              <div className="form-group">
+                                <label className="fw-bold text-dark mb-1 d-block" style={{ fontSize: '12px' }}>Allowed Genders</label>
+                                <div style={{ display: 'flex', gap: '8px', height: '38px', alignItems: 'center' }}>
+                                  <label
+                                    style={{
+                                      flex: 1,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: '6px',
+                                      cursor: 'pointer',
+                                      fontSize: '12px',
+                                      fontWeight: '600',
+                                      padding: '6px 8px',
+                                      borderRadius: '8px',
+                                      border: isMaleChecked ? '1px solid #003820' : '1px solid #cbd5e1',
+                                      background: isMaleChecked ? 'rgba(0, 56, 32, 0.08)' : '#ffffff',
+                                      color: isMaleChecked ? '#003820' : '#64748b',
+                                      transition: 'all 0.2s'
+                                    }}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isMaleChecked}
+                                      onChange={(e) => handleGenderCheckboxChange('MALE', e.target.checked)}
+                                      style={{ width: '14px', height: '14px', accentColor: '#003820' }}
+                                    />
+                                    Male
+                                  </label>
+
+                                  <label
+                                    style={{
+                                      flex: 1,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: '6px',
+                                      cursor: 'pointer',
+                                      fontSize: '12px',
+                                      fontWeight: '600',
+                                      padding: '6px 8px',
+                                      borderRadius: '8px',
+                                      border: isFemaleChecked ? '1px solid #003820' : '1px solid #cbd5e1',
+                                      background: isFemaleChecked ? 'rgba(0, 56, 32, 0.08)' : '#ffffff',
+                                      color: isFemaleChecked ? '#003820' : '#64748b',
+                                      transition: 'all 0.2s'
+                                    }}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isFemaleChecked}
+                                      onChange={(e) => handleGenderCheckboxChange('FEMALE', e.target.checked)}
+                                      style={{ width: '14px', height: '14px', accentColor: '#003820' }}
+                                    />
+                                    Female
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right Column: Avatar Upload Box */}
+                        <div className="col-md-5 d-flex flex-column">
+                          <label className="fw-bold text-dark mb-1" style={{ fontSize: '12px' }}>Tournament Banner / Avatar</label>
+                          <div
+                            className="position-relative overflow-hidden flex-grow-1"
+                            style={{
+                              border: '2px dashed var(--ho-border-gold, #D4AF37)',
+                              borderRadius: '12px',
+                              background: '#ffffff',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              minHeight: '190px',
+                              position: 'relative'
+                            }}
+                          >
+                            {formData.imageUrl ? (
+                              <div style={{ width: '100%', height: '100%', minHeight: '190px', position: 'relative' }}>
+                                <img src={formData.imageUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+
+                                {/* Hover overlay with action buttons */}
+                                <div
+                                  style={{
+                                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                                    background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    gap: '12px', opacity: 0, transition: 'opacity 0.2s', zIndex: 5
+                                  }}
+                                  className="upload-overlay"
+                                  onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
+                                  onMouseLeave={(e) => e.currentTarget.style.opacity = 0}
+                                >
+                                  <button
+                                    type="button"
+                                    className="btn btn-sm btn-light d-flex align-items-center justify-content-center"
+                                    style={{ borderRadius: '50%', width: '36px', height: '36px', padding: 0 }}
+                                    onClick={() => {
+                                      setLightboxImage(formData.imageUrl);
+                                      setIsZoomedIn(false);
+                                    }}
+                                    title="Zoom image"
+                                  >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>zoom_in</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="btn btn-sm btn-light d-flex align-items-center justify-content-center"
+                                    style={{ borderRadius: '50%', width: '36px', height: '36px', padding: 0 }}
+                                    onClick={() => fileInputRef.current.click()}
+                                    title="Change image"
+                                  >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div
+                                className="text-center p-3"
+                                style={{ cursor: 'pointer', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+                                onClick={() => fileInputRef.current.click()}
+                              >
+                                <span className="material-symbols-outlined mb-2" style={{ fontSize: '36px', color: 'var(--ho-border-gold, #D4AF37)' }}>
+                                  cloud_upload
+                                </span>
+                                <p className="m-0 fw-bold" style={{ color: 'var(--ho-primary-dark, #003820)', fontSize: '13px' }}>Click to upload image</p>
+                                <p className="m-0 text-secondary" style={{ fontSize: '11px' }}>Supports JPG, PNG, WEBP</p>
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              ref={fileInputRef}
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              style={{ display: 'none' }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
 
-                </div>
+                  {/* Modal Footer */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      gap: '12px',
+                      borderTop: '1px solid #e2e8f0',
+                      padding: '16px 24px',
+                      background: '#ffffff'
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={resetForm}
+                      className="btn btn-outline-secondary fw-semibold"
+                      style={{ padding: '8px 20px', fontSize: '13px', borderRadius: '8px' }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-success fw-bold d-flex align-items-center gap-2"
+                      style={{
+                        padding: '8px 26px',
+                        fontSize: '13px',
+                        borderRadius: '8px',
+                        background: 'linear-gradient(135deg, #003820 0%, #005a34 100%)',
+                        border: 'none',
+                        boxShadow: '0 4px 12px rgba(0, 56, 32, 0.25)'
+                      }}
+                    >
+                      <FaCheckCircle /> {isEditing ? 'Save Changes' : 'Create Tournament'}
+                    </button>
+                  </div>
+                </form>
               </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid rgba(0, 0, 0, 0.08)', paddingTop: '15px' }}>
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="btn btn-outline-secondary btn-sm"
-                  style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-success btn-sm fw-bold"
-                  style={{ padding: '8px 24px', fontSize: '13px', borderRadius: '8px' }}
-                >
-                  {isEditing ? 'Save Changes' : 'Create Tournament'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>,
+            </div>
+          );
+        })(),
         document.body
       )}
 
