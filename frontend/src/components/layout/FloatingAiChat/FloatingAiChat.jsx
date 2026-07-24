@@ -4,6 +4,8 @@ import { FaRobot, FaTimes, FaTrashAlt, FaPaperPlane, FaPlus, FaHistory, FaCommen
 import { BsChatDotsFill } from 'react-icons/bs';
 import { sendChatMessageAPI, getChatHistoryAPI } from '../../../services/aiChat';
 import { AuthContext } from '../../../contexts/AuthContext';
+import { executeSafeAction, isActionPermitted, ACTION_TYPES } from '../../../services/chatActionHandler';
+import { depositAPI } from '../../../services/wallet';
 import './FloatingAiChat.css';
 import MarkdownRenderer from '../../ui/MarkdownRenderer';
 
@@ -238,12 +240,47 @@ export default function FloatingAiChat() {
     setIsSending(true);
 
     try {
-      const replyStr = await sendChatMessageAPI(userMessage || '[Image attached]', imagePayload);
-      const aiReplyText = typeof replyStr === 'string' 
-        ? replyStr 
-        : (replyStr.text || replyStr.response || replyStr.message || JSON.stringify(replyStr));
+      const replyObj = await sendChatMessageAPI(userMessage || '[Image attached]', imagePayload);
+      let aiReplyText = '';
+      let actionObj = null;
 
-      const newAiMsg = { sender: 'AI', text: aiReplyText };
+      let targetObj = replyObj;
+      if (typeof replyObj === 'string') {
+        let cleanedStr = replyObj.trim();
+        cleanedStr = cleanedStr.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+        const firstBrace = cleanedStr.indexOf('{');
+        const lastBrace = cleanedStr.lastIndexOf('}');
+        if (firstBrace >= 0 && lastBrace > firstBrace) {
+          try {
+            targetObj = JSON.parse(cleanedStr.substring(firstBrace, lastBrace + 1));
+          } catch (e) {
+            targetObj = replyObj;
+          }
+        }
+      }
+
+      if (typeof targetObj === 'object' && targetObj !== null) {
+        aiReplyText = targetObj.text || targetObj.message || '';
+        if (!aiReplyText && targetObj.action) {
+          aiReplyText = 'Tôi đã thực hiện thao tác cho bạn.';
+        }
+        actionObj = targetObj.action || null;
+      } else {
+        aiReplyText = replyObj;
+      }
+
+      // Clean aiReplyText from any code block fences
+      aiReplyText = aiReplyText.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+      const userRole = user?.role || null;
+      if (actionObj && isActionPermitted(actionObj.type, userRole)) {
+        executeSafeAction(actionObj, navigate, userRole);
+      } else {
+        actionObj = null; // Do not display unpermitted action buttons
+      }
+
+      const newAiMsg = { sender: 'AI', text: aiReplyText, action: actionObj };
       const finalMessages = [...updatedMessages, newAiMsg];
 
       const finalThreads = threads.map(t => {
@@ -270,8 +307,55 @@ export default function FloatingAiChat() {
     }
   };
 
+  const handleActionConfirm = async (action) => {
+    if (!action || !action.type) return;
+    const userRole = user?.role || null;
+    if (!isActionPermitted(action.type, userRole)) {
+      alert('Tài khoản của bạn không có quyền thực hiện thao tác này.');
+      return;
+    }
+
+    if (action.type === ACTION_TYPES.DEPOSIT_FUNDS) {
+      const amount = action.payload?.amount || 50000;
+      try {
+        const res = await depositAPI(amount);
+        if (res?.checkoutUrl) {
+          window.location.href = res.checkoutUrl;
+        } else {
+          alert(`Đã khởi tạo đơn nạp ${amount.toLocaleString()} VNĐ qua PayOS thành công!`);
+        }
+      } catch (err) {
+        alert('Lỗi tạo đơn nạp tiền: ' + (err.message || 'Thất bại'));
+      }
+    } else {
+      executeSafeAction(action, navigate, userRole);
+    }
+  };
+
   const activeThread = threads.find(t => t.id === activeThreadId);
   const messages = activeThread ? activeThread.messages : [];
+
+  const cleanDisplayContent = (content) => {
+    if (!content || typeof content !== 'string') return '';
+    let str = content.trim();
+
+    // 1. If text contains embedded markdown JSON code blocks, extract text or strip code block
+    const firstBrace = str.indexOf('{');
+    const lastBrace = str.lastIndexOf('}');
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      try {
+        const candidate = str.substring(firstBrace, lastBrace + 1);
+        const parsed = JSON.parse(candidate);
+        if (parsed && parsed.text) {
+          return parsed.text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        }
+      } catch (e) {}
+    }
+
+    // 2. Strip any residual markdown code block fences
+    str = str.replace(/```json/gi, '').replace(/```/g, '').trim();
+    return str;
+  };
 
   const handleLoginRedirect = () => {
     setIsOpen(false);
@@ -359,7 +443,7 @@ export default function FloatingAiChat() {
                       {msg.sender === 'AI' && <div className="avatar ai-avatar"><FaRobot size={12} /></div>}
                       <div className={`chat-bubble ${msg.sender === 'USER' ? 'user' : 'ai'}`}>
                         {msg.sender === 'AI' ? (
-                          <MarkdownRenderer content={msg.text} />
+                          <MarkdownRenderer content={cleanDisplayContent(msg.text)} />
                         ) : (
                           msg.text && msg.text.split('\n').map((line, lIdx) => (
                             <p key={lIdx} style={{ margin: '0 0 6px 0' }}>{line}</p>
@@ -367,6 +451,48 @@ export default function FloatingAiChat() {
                         )}
                         {msg.image && (
                           <img src={msg.image} alt="Sent attachment" className="chat-bubble-image" />
+                        )}
+                        {msg.action && isActionPermitted(msg.action.type, user?.role) && (
+                          <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                            {msg.action.type === ACTION_TYPES.DEPOSIT_FUNDS && (
+                              <button
+                                type="button"
+                                style={{
+                                  width: '100%',
+                                  padding: '8px 12px',
+                                  backgroundColor: '#10b981',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  fontWeight: 'bold',
+                                  cursor: 'pointer',
+                                  fontSize: '12px'
+                                }}
+                                onClick={() => handleActionConfirm(msg.action)}
+                              >
+                                💳 Xác nhận nạp {(msg.action.payload?.amount || 50000).toLocaleString()} VNĐ qua PayOS
+                              </button>
+                            )}
+                            {msg.action.type !== ACTION_TYPES.DEPOSIT_FUNDS && (
+                              <button
+                                type="button"
+                                style={{
+                                  width: '100%',
+                                  padding: '6px 12px',
+                                  backgroundColor: '#3b82f6',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  fontWeight: '500',
+                                  cursor: 'pointer',
+                                  fontSize: '12px'
+                                }}
+                                onClick={() => handleActionConfirm(msg.action)}
+                              >
+                                🚀 Đi tới trang / thực hiện thao tác
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
