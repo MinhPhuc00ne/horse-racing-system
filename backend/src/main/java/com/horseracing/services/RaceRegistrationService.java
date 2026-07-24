@@ -148,13 +148,15 @@ public class RaceRegistrationService {
 
         // Verify horse or jockey is not already registered in this race
         boolean horseRegistered = raceRegistrationRepository
-                .existsByRaceIdAndHorseIdAndStatusNot(race.getId(), horse.getId(), "REJECTED");
+                .existsByRaceIdAndHorseIdAndStatusNotIn(race.getId(), horse.getId(),
+                        java.util.Arrays.asList("REJECTED", "CANCELLED"));
         if (horseRegistered) {
             throw new RuntimeException("This horse is already registered for this race");
         }
 
         boolean jockeyRegistered = raceRegistrationRepository
-                .existsByRaceIdAndJockeyIdAndStatusNot(race.getId(), jockey.getId(), "REJECTED");
+                .existsByRaceIdAndJockeyIdAndStatusNotIn(race.getId(), jockey.getId(),
+                        java.util.Arrays.asList("REJECTED", "CANCELLED"));
         if (jockeyRegistered) {
             throw new RuntimeException("This jockey is already registered for this race");
         }
@@ -469,8 +471,9 @@ public class RaceRegistrationService {
 
         if (!horse.getId().equals(registration.getHorse().getId())) {
             boolean horseRegistered =
-                    raceRegistrationRepository.existsByRaceIdAndHorseIdAndStatusNot(
-                            registration.getRace().getId(), horse.getId(), "REJECTED");
+                    raceRegistrationRepository.existsByRaceIdAndHorseIdAndStatusNotIn(
+                            registration.getRace().getId(), horse.getId(),
+                            java.util.Arrays.asList("REJECTED", "CANCELLED"));
             if (horseRegistered) {
                 throw new RuntimeException("This horse is already registered for this race");
             }
@@ -516,8 +519,9 @@ public class RaceRegistrationService {
 
         if (!jockey.getId().equals(registration.getJockey().getId())) {
             boolean jockeyRegistered =
-                    raceRegistrationRepository.existsByRaceIdAndJockeyIdAndStatusNot(
-                            registration.getRace().getId(), jockey.getId(), "REJECTED");
+                    raceRegistrationRepository.existsByRaceIdAndJockeyIdAndStatusNotIn(
+                            registration.getRace().getId(), jockey.getId(),
+                            java.util.Arrays.asList("REJECTED", "CANCELLED"));
             if (jockeyRegistered) {
                 throw new RuntimeException("This jockey is already registered for this race");
             }
