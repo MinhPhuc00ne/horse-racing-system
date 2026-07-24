@@ -18,6 +18,7 @@ const MOCK_REGISTRATIONS = [
     horseName: "Shadow Fax",
     horseBreed: "Thoroughbred",
     horseId: 201,
+    ownerName: "Benimaru Commander",
     jockeyName: "Leo Carter",
     jockeyId: 301,
     jockeySharePercent: 30,
@@ -32,6 +33,7 @@ const MOCK_REGISTRATIONS = [
     horseName: "Silver Bullet",
     horseBreed: "Arabian",
     horseId: 202,
+    ownerName: "Souei Shadow",
     jockeyName: "Max Sterling",
     jockeyId: 302,
     jockeySharePercent: 25,
@@ -46,6 +48,7 @@ const MOCK_REGISTRATIONS = [
     horseName: "Thunderbolt",
     horseBreed: "Quarter Horse",
     horseId: 203,
+    ownerName: "Hakuro Swordsman",
     jockeyName: "Marcus Vance",
     jockeyId: 303,
     jockeySharePercent: 40,
@@ -60,6 +63,7 @@ const MOCK_REGISTRATIONS = [
     horseName: "Wind Runner",
     horseBreed: "Appaloosa",
     horseId: 204,
+    ownerName: "Geld Orc King",
     jockeyName: "Ethan Hunt",
     jockeyId: 304,
     jockeySharePercent: 35,
@@ -200,6 +204,7 @@ export default function RacesPanel() {
     const matchesSearch = searchTerm === '' ||
       reg.horseName?.toLowerCase().includes(searchLower) ||
       reg.jockeyName?.toLowerCase().includes(searchLower) ||
+      reg.ownerName?.toLowerCase().includes(searchLower) ||
       reg.tournamentName?.toLowerCase().includes(searchLower) ||
       reg.raceName?.toLowerCase().includes(searchLower) ||
       String(reg.id).includes(searchLower);
@@ -227,7 +232,7 @@ export default function RacesPanel() {
               <input
                 type="text"
                 className="ho-form-input text-dark fw-semibold"
-                placeholder="Search by horse, jockey, tournament, request ID..."
+                placeholder="Search by horse, jockey, owner, tournament, request #..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ fontSize: '13px', height: '38px', paddingLeft: '35px' }}
@@ -286,9 +291,10 @@ export default function RacesPanel() {
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--ho-border-gold)', background: 'rgba(0,56,32,0.04)' }}>
-                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Request ID</th>
+                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Request #</th>
                   <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Tournament (Race)</th>
                   <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Horse</th>
+                  <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Horse Owner</th>
                   <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Jockey</th>
                   <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Revenue Split (Jockey / Owner)</th>
                   <th style={{ padding: '16px', color: 'var(--ho-primary-dark)', fontWeight: '700' }}>Status</th>
@@ -301,15 +307,17 @@ export default function RacesPanel() {
                     <td style={{ padding: '16px', fontWeight: '700', color: 'var(--ho-primary-dark)' }}>#{reg.id}</td>
                     <td style={{ padding: '16px' }}>
                       <span className="fw-bold d-block text-dark">{reg.tournamentName || 'Tournament'}</span>
-                      <span className="text-secondary small">{reg.raceName} (ID: {reg.raceId})</span>
+                      <span className="text-secondary small">{reg.raceName}</span>
                     </td>
                     <td style={{ padding: '16px' }}>
                       <span className="fw-bold d-block text-dark">{reg.horseName}</span>
-                      <span className="text-secondary small">{reg.horseBreed || 'Thoroughbred'} (ID: {reg.horseId})</span>
+                      <span className="text-secondary small">{reg.horseBreed || 'Thoroughbred'}</span>
+                    </td>
+                    <td style={{ padding: '16px' }}>
+                      <span className="fw-bold d-block text-dark">{reg.ownerName || 'Unknown Owner'}</span>
                     </td>
                     <td style={{ padding: '16px' }}>
                       <span className="fw-bold d-block text-dark">{reg.jockeyName}</span>
-                      <span className="text-secondary small">ID: {reg.jockeyId}</span>
                     </td>
                     <td style={{ padding: '16px', color: 'var(--ho-text-muted)' }}>{reg.jockeySharePercent}% / {reg.ownerSharePercent}%</td>
                     <td style={{ padding: '16px' }}>

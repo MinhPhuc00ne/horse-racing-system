@@ -19,6 +19,16 @@ import {
   initialRaceHistory,
 } from '../mocks/ownerMockData';
 
+const normalizeStatus = (status) => {
+  if (!status) return 'Upcoming';
+  const s = status.toUpperCase();
+  if (s === 'OPEN_FOR_REGISTER' || s === 'ACTIVE') return 'Active';
+  if (s === 'FINISHED' || s === 'COMPLETED') return 'Finished';
+  if (s === 'UPCOMING') return 'Upcoming';
+  if (s === 'CANCELLED') return 'Cancelled';
+  return status;
+};
+
 const HorseOwnerContext = createContext();
 
 export function HorseOwnerProvider({ children }) {
@@ -190,7 +200,7 @@ export function HorseOwnerProvider({ children }) {
               ]);
 
               // Determine status: if tournament status is not Active, owner cannot register
-              let displayStatus = t.tournamentStatus || 'Upcoming';
+              let displayStatus = normalizeStatus(t.tournamentStatus);
 
               allRaces.push({
                 id: r.id,
@@ -221,7 +231,7 @@ export function HorseOwnerProvider({ children }) {
               time: t.officialRaceTime ? t.officialRaceTime.substring(11, 16) : '09:00',
               trackType: `${t.surfaceType || 'Grass'} • Dist: 1200m`,
               prizePool: `${t.totalPrize ? t.totalPrize.toLocaleString() : '1,000,000'} VND`,
-              status: t.tournamentStatus || 'Upcoming',
+              status: normalizeStatus(t.tournamentStatus),
               allowedClasses: t.allowedClasses,
               registeredHorses: [],
               entryFee: t.entryFee,

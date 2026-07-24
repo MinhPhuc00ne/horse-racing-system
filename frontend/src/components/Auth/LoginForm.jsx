@@ -407,6 +407,13 @@ export default function LoginForm() {
           Sign up
         </Link>
       </div>
+
+      <div className="login-signup-link-container" style={{ marginTop: '0.5rem' }}>
+        <span>Return to Home Page? </span>
+        <Link to="/" className="signup-link">
+          Go Back
+        </Link>
+      </div>
     </div>
   );
 }

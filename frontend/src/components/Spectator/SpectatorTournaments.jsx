@@ -158,7 +158,7 @@ export default function SpectatorTournaments() {
   const filteredTournaments = tournaments.filter(t => {
     const nameMatch = t.tournamentName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                       t.location?.toLowerCase().includes(searchQuery.toLowerCase());
-    const statusMatch = !statusFilter || t.tournamentStatus === statusFilter;
+    const statusMatch = !statusFilter || t.tournamentStatus?.toUpperCase() === statusFilter.toUpperCase();
     return nameMatch && statusMatch;
   });
 
