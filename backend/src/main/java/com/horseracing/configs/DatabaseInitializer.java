@@ -595,14 +595,22 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     private void ensureTournamentsAndRaces() {
         try {
-            // Sanitize and update existing tournament and race names to English
-            jdbcTemplate.update("UPDATE tournaments SET tournament_name = 'Tempest Royal Tournament', description = 'Official speed tournament on the Tempest straight track - Completed Summer 2026' WHERE id = 1 OR tournament_name LIKE '%Tempest%' OR tournament_name LIKE '%Ho%ng Gia%' OR tournament_name LIKE '%HoÃ%'");
-            jdbcTemplate.update("UPDATE tournaments SET tournament_name = 'Jura Championship Grand Prix', description = 'High-level circular track tournament in the Jura Forest - Completed Season 1' WHERE id = 2 OR tournament_name LIKE '%Jura%' OR tournament_name LIKE '%Ma Qu%c%' OR tournament_name LIKE '%CÃ°p%'");
-            jdbcTemplate.update("UPDATE tournaments SET tournament_name = 'Rimuru Autumn Derby', description = 'Premier autumn speed race open for all qualified stables' WHERE id = 3 OR tournament_name LIKE '%Rimuru%'");
-            jdbcTemplate.update("UPDATE tournaments SET tournament_name = 'Ingrassia Winter Cup', description = 'Grand winter tournament on synthetic turf' WHERE id = 4 OR tournament_name LIKE '%Ingrassia%'");
+            // Sanitize race_tracks locations to English
+            jdbcTemplate.update("UPDATE race_tracks SET name = 'Tempest Straight Track', location = 'Tempest City' WHERE id = 1 OR location LIKE '%SÃ¢n%' OR location LIKE '%Sân%'");
+            jdbcTemplate.update("UPDATE race_tracks SET name = 'Jura Circular Track', location = 'Jura Great Forest' WHERE id = 2 OR location LIKE '%SÃ¢n%' OR location LIKE '%Sân%'");
+
+            // Sanitize and update existing tournament names, locations, and descriptions to English
+            jdbcTemplate.update("UPDATE tournaments SET tournament_name = 'Tempest Royal Tournament', location = 'Tempest Racetrack', description = 'Official speed tournament on the Tempest straight track - Completed Summer 2026' WHERE id = 1 OR tournament_name LIKE '%Tempest%' OR tournament_name LIKE '%Ho%ng Gia%' OR tournament_name LIKE '%HoÃ%'");
+            jdbcTemplate.update("UPDATE tournaments SET tournament_name = 'Jura Championship Grand Prix', location = 'Jura Forest Racetrack', description = 'High-level circular track tournament in the Jura Forest - Completed Season 1' WHERE id = 2 OR tournament_name LIKE '%Jura%' OR tournament_name LIKE '%Ma Qu%c%' OR tournament_name LIKE '%CÃ°p%'");
+            jdbcTemplate.update("UPDATE tournaments SET tournament_name = 'Rimuru Autumn Derby', location = 'Tempest City', description = 'Premier autumn speed race open for all qualified stables' WHERE id = 3 OR tournament_name LIKE '%Rimuru%'");
+            jdbcTemplate.update("UPDATE tournaments SET tournament_name = 'Ingrassia Winter Cup', location = 'Ingrassia Racetrack', description = 'Grand winter tournament on synthetic turf' WHERE id = 4 OR tournament_name LIKE '%Ingrassia%'");
+            jdbcTemplate.update("UPDATE tournaments SET location = 'Tempest Racetrack' WHERE location LIKE '%SÃ¢n%' OR location LIKE '%Sân%' OR location LIKE '%ThÃ³ng%' OR location LIKE '%Thắng%'");
 
             jdbcTemplate.update("UPDATE races SET race_name = 'Tempest Royal Sprint 1000m' WHERE id = 1 OR race_name LIKE '%Tempest%'");
             jdbcTemplate.update("UPDATE races SET race_name = 'Jura Championship 1600m' WHERE id = 2 OR race_name LIKE '%Jura%'");
+
+            // Synchronize child race statuses for any active/open tournaments
+            jdbcTemplate.update("UPDATE races SET status = 'OPEN_FOR_REGISTER' WHERE tournament_id IN (SELECT id FROM tournaments WHERE tournament_status IN ('ACTIVE', 'Active', 'OPEN_FOR_REGISTER')) AND status NOT IN ('FINISHED', 'CANCELLED')");
 
             Integer tCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM tournaments", Integer.class);
             if (tCount != null && tCount >= 4) {

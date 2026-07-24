@@ -338,13 +338,30 @@ public class TournamentService {
 
         // Validate status value
         if (!"Upcoming".equalsIgnoreCase(status) && !"Active".equalsIgnoreCase(status)
-                && !"Finished".equalsIgnoreCase(status) && !"Cancelled".equalsIgnoreCase(status)) {
+                && !"Finished".equalsIgnoreCase(status) && !"Cancelled".equalsIgnoreCase(status)
+                && !"OPEN_FOR_REGISTER".equalsIgnoreCase(status)) {
             throw new RuntimeException(
                     "Invalid tournament status. Must be Upcoming, Active, Finished, or Cancelled");
         }
 
         tournament.setTournamentStatus(status);
         tournament = tournamentRepository.save(tournament);
+
+        // Synchronize status to all child races
+        List<Race> races = raceRepository.findByTournamentId(id);
+        for (Race race : races) {
+            if ("Active".equalsIgnoreCase(status) || "OPEN_FOR_REGISTER".equalsIgnoreCase(status)) {
+                race.setStatus("OPEN_FOR_REGISTER");
+            } else if ("Finished".equalsIgnoreCase(status)) {
+                race.setStatus("FINISHED");
+            } else if ("Cancelled".equalsIgnoreCase(status)) {
+                race.setStatus("CANCELLED");
+            } else if ("Upcoming".equalsIgnoreCase(status)) {
+                race.setStatus("OPEN_FOR_REGISTER");
+            }
+            raceRepository.save(race);
+        }
+
         return TournamentResponse.fromEntity(tournament);
     }
 

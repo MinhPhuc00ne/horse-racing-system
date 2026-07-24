@@ -78,7 +78,8 @@ public class RaceRegistrationService {
         }
 
         // Check race status
-        if (!"OPEN_FOR_REGISTER".equalsIgnoreCase(race.getStatus())) {
+        if (!"OPEN_FOR_REGISTER".equalsIgnoreCase(race.getStatus())
+                && !"ACTIVE".equalsIgnoreCase(race.getStatus())) {
             throw new RuntimeException("Race is not open for registration");
         }
 
@@ -567,7 +568,8 @@ public class RaceRegistrationService {
         }
         Race race = races.get(0);
 
-        if (!"OPEN_FOR_REGISTER".equalsIgnoreCase(race.getStatus())) {
+        if (!"OPEN_FOR_REGISTER".equalsIgnoreCase(race.getStatus())
+                && !"ACTIVE".equalsIgnoreCase(race.getStatus())) {
             throw new RuntimeException("Race is not open for registration");
         }
 
