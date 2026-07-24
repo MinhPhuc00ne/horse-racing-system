@@ -47,6 +47,7 @@ const roleNavConfigs = {
     links: [
       { path: '/referee/pre-race-check', label: 'Pre-Race Check', icon: 'fact_check' },
       { path: '/referee/live-simulation', label: 'Live Simulation', icon: 'sports_score' },
+      { path: '/referee/confirm-results', label: 'Confirm Results', icon: 'verified' },
       { path: '/referee/violations', label: 'Violations & Flags', icon: 'gavel' },
       { path: '/referee/profile', label: 'Referee Profile', icon: 'person' },
     ]
