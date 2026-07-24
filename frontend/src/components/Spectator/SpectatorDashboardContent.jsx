@@ -112,7 +112,7 @@ export default function SpectatorDashboardContent() {
             Follow top-tier races, upgrade your account, and place authorized bets directly in the system.
           </p>
         </div>
-        <button className="ho-btn ho-btn-gold-solid" onClick={() => navigate('/spectator/tournaments')}>
+        <button className="ho-btn ho-btn-gold-solid" onClick={() => navigate('/spectators/tournaments')}>
           View Tournaments
         </button>
       </div>
@@ -229,7 +229,7 @@ export default function SpectatorDashboardContent() {
               {loadingBalance ? 'Loading...' : `${balance.toLocaleString('en-US')} VND`}
             </div>
             <div className="d-flex gap-2 mt-4">
-              <button className="ho-btn ho-btn-gold-solid flex-grow-1" onClick={() => navigate('/spectator/wallet')}>
+              <button className="ho-btn ho-btn-gold-solid flex-grow-1" onClick={() => navigate('/spectators/wallet')}>
                 Deposit / Withdraw
               </button>
             </div>
@@ -275,14 +275,14 @@ export default function SpectatorDashboardContent() {
                   </div>
                 )}
 
-                <button className="ho-btn ho-btn-gold-outline w-100 mt-3" onClick={() => navigate('/spectator/upgrade')}>
+                <button className="ho-btn ho-btn-gold-outline w-100 mt-3" onClick={() => navigate('/spectators/upgrade')}>
                   Application Details
                 </button>
               </div>
             ) : (
               <div className="text-center py-3">
                 <p className="text-secondary small mb-3">You haven't submitted any role upgrade requests.</p>
-                <button className="ho-btn ho-btn-gold-outline w-100" onClick={() => navigate('/spectator/upgrade')}>
+                <button className="ho-btn ho-btn-gold-outline w-100" onClick={() => navigate('/spectators/upgrade')}>
                   Upgrade Account
                 </button>
               </div>

@@ -106,9 +106,9 @@ const Header = () => {
             <Nav.Link onClick={() => {
               if (user) {
                 if (user.role === 'HORSE_OWNER') navigate('/owner/wallet');
-                else navigate('/spectator/wallet');
+                else navigate('/spectators/wallet');
               } else {
-                navigate('/login?redirect=/spectator/wallet');
+                navigate('/login?redirect=/spectators/wallet');
               }
             }} className="text-white-50 cursor-pointer">Wallet & Transactions</Nav.Link>
             <Nav.Link href="#rankings" className="text-white-50 cursor-pointer">Ranking</Nav.Link>

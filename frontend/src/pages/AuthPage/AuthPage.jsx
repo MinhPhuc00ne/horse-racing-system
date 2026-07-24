@@ -22,7 +22,7 @@ export default function AuthPage({ view }) {
         sessionStorage.removeItem('postLoginRedirect');
         // If they are a spectator and the redirect was to public tournaments, redirect them to their dashboard version instead for better UX
         if (user.role === 'SPECTATOR' && redirectUrl === '/tournaments') {
-            redirectUrl = '/spectator/tournaments';
+            redirectUrl = '/spectators/tournaments';
         }
         navigate(redirectUrl);
       } else if (user.role === 'ADMIN') navigate('/admin/dashboard');

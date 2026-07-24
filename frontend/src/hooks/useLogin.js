@@ -35,7 +35,7 @@ export function useLogin() {
     if (redirectUrl) {
       sessionStorage.removeItem('postLoginRedirect');
       if (role === 'SPECTATOR' && redirectUrl === '/tournaments') {
-          redirectUrl = '/spectator/tournaments';
+          redirectUrl = '/spectators/tournaments';
       }
       navigate(redirectUrl);
       return;
