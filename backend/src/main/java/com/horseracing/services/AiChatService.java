@@ -90,7 +90,8 @@ public class AiChatService {
 
         try {
             Resource resource = resourceLoader.getResource("classpath:prompts/" + filename);
-            try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
+            try (Reader reader =
+                    new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
                 return FileCopyUtils.copyToString(reader);
             }
         } catch (IOException e) {
@@ -153,11 +154,12 @@ public class AiChatService {
                 Optional<Wallet> walletOpt = walletRepository.findByUserId(user.getId());
                 BigDecimal balance = walletOpt.map(Wallet::getBalance).orElse(BigDecimal.ZERO);
                 userAccountDetails = "\nUSER CONTEXT:\n- Name: " + user.getFullName()
-                        + "\n- Email: " + user.getEmail()
-                        + "\n- Current Wallet Balance: " + balance + " VND\n";
+                        + "\n- Email: " + user.getEmail() + "\n- Current Wallet Balance: " + balance
+                        + " VND\n";
             }
 
-            String finalSystemInstruction = this.baseSystemPrompt + "\n" + userAccountDetails + "\n" + roleSpecificPrompt;
+            String finalSystemInstruction =
+                    this.baseSystemPrompt + "\n" + userAccountDetails + "\n" + roleSpecificPrompt;
 
             ObjectNode systemInstruction = objectMapper.createObjectNode();
             ArrayNode sysParts = objectMapper.createArrayNode();
@@ -286,7 +288,8 @@ public class AiChatService {
             }
 
             // 4. Sanitize and structure response JSON (RBAC Guardrail Verification)
-            String sanitizedResponseJson = aiActionSecurityValidator.sanitizeAndStructureResponse(role, replyText);
+            String sanitizedResponseJson =
+                    aiActionSecurityValidator.sanitizeAndStructureResponse(role, replyText);
 
             // 5. Save AI's clean text response to database if authenticated
             if (user != null) {
@@ -297,7 +300,8 @@ public class AiChatService {
                         if (parsed.has("text") && !parsed.get("text").isNull()) {
                             textToSave = parsed.get("text").asText();
                         }
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
 
                     AiChatHistory aiReply = AiChatHistory.builder().user(user).sender("AI")
                             .message(textToSave).build();

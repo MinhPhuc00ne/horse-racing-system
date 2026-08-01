@@ -491,7 +491,8 @@ public class RefereeService {
             raceRepository.save(race);
 
             Tournament tournament = race.getTournament();
-            if (tournament != null && "Upcoming".equalsIgnoreCase(tournament.getTournamentStatus())) {
+            if (tournament != null
+                    && "Upcoming".equalsIgnoreCase(tournament.getTournamentStatus())) {
                 tournament.setTournamentStatus("Active");
                 raceRepository.save(race);
             }
@@ -680,7 +681,8 @@ public class RefereeService {
     }
 
     @Transactional
-    public List<Map<String, Object>> finalizeRaceToDb(Integer raceId, LiveRaceState liveState, boolean isReplay) {
+    public List<Map<String, Object>> finalizeRaceToDb(Integer raceId, LiveRaceState liveState,
+            boolean isReplay) {
         RaceSimulation sim =
                 raceSimulationRepository.findById(liveState.getSimulationId()).orElse(null);
         if (sim != null) {
@@ -731,7 +733,8 @@ public class RefereeService {
             rMap.put("rank", rank + 1);
             rMap.put("horseName", p.getHorse().getName());
             rMap.put("jockeyName", p.getJockey().getUser().getFullName());
-            rMap.put("time", p.getFinishTime() != null ? p.getFinishTime() : rankInfos.get(rank).finalTime);
+            rMap.put("time",
+                    p.getFinishTime() != null ? p.getFinishTime() : rankInfos.get(rank).finalTime);
             results.add(rMap);
         }
 
@@ -933,8 +936,10 @@ public class RefereeService {
         Race race = raceRepository.findById(raceId)
                 .orElseThrow(() -> new RuntimeException("Race not found"));
 
-        if (!"RUNNING".equalsIgnoreCase(race.getStatus()) && !"FINISHED".equalsIgnoreCase(race.getStatus())) {
-            throw new RuntimeException("Race status must be RUNNING or FINISHED to confirm results");
+        if (!"RUNNING".equalsIgnoreCase(race.getStatus())
+                && !"FINISHED".equalsIgnoreCase(race.getStatus())) {
+            throw new RuntimeException(
+                    "Race status must be RUNNING or FINISHED to confirm results");
         }
 
         boolean hasFinishedSim = raceSimulationRepository.findByRaceId(raceId).stream()
@@ -944,9 +949,12 @@ public class RefereeService {
                     "Cannot confirm results. The race simulation has not finished yet.");
         }
 
-        boolean alreadyDistributed = !prizeDistributionRepository.findByParticipantRaceId(raceId).isEmpty();
+        boolean alreadyDistributed =
+                !prizeDistributionRepository.findByParticipantRaceId(raceId).isEmpty();
         if (alreadyDistributed) {
-            log.info("Prize distribution and payouts already completed for race ID: {}. Skipping money distribution.", raceId);
+            log.info(
+                    "Prize distribution and payouts already completed for race ID: {}. Skipping money distribution.",
+                    raceId);
             race.setStatus("FINISHED");
             raceRepository.save(race);
             return;

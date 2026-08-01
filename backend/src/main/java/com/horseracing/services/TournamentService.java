@@ -395,7 +395,8 @@ public class TournamentService {
 
         if ("Finished".equalsIgnoreCase(tournament.getTournamentStatus())
                 || "Cancelled".equalsIgnoreCase(tournament.getTournamentStatus())) {
-            throw new RuntimeException("Cannot change referee for a finished or cancelled tournament");
+            throw new RuntimeException(
+                    "Cannot change referee for a finished or cancelled tournament");
         }
 
         if (refereeId == null) {
