@@ -111,7 +111,7 @@ public class PredictionPayoutService {
         // Calculate WIN odds (Floor limit: 1.00)
         BigDecimal oddsWin = BigDecimal.valueOf(1.00);
         if (totalWinOnWinner.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal computed = netWinPool.divide(totalWinOnWinner, 2, RoundingMode.HALF_UP);
+            BigDecimal computed = netWinPool.divide(totalWinOnWinner, 2, RoundingMode.DOWN);
             if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0) {
                 oddsWin = computed;
             }
