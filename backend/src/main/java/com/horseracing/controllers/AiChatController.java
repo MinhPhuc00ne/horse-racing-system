@@ -28,15 +28,10 @@ public class AiChatController {
     private final AiChatHistoryRepository aiChatHistoryRepository;
 
     @PostMapping
-    public ResponseEntity<?> chat(@RequestBody Map<String, Object> payload,
+    public ResponseEntity<?> chat(@jakarta.validation.Valid @RequestBody com.horseracing.dto.request.AiChatRequest payload,
             Authentication authentication) {
-        String message = (String) payload.get("message");
-        if (message == null || message.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Message cannot be empty"));
-        }
-
-        @SuppressWarnings("unchecked")
-        Map<String, String> image = (Map<String, String>) payload.get("image");
+        String message = payload.getMessage();
+        Map<String, String> image = payload.getImage();
 
         User user = null;
         if (authentication != null && authentication.isAuthenticated()

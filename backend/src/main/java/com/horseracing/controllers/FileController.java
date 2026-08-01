@@ -23,13 +23,23 @@ public class FileController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFiles(@RequestParam("files") MultipartFile[] files) {
         try {
+            if (files == null || files.length == 0) {
+                return ResponseEntity.badRequest().body(new ErrorResponse(400, "Please select at least one file to upload."));
+            }
+            if (files.length > 5) {
+                return ResponseEntity.badRequest().body(new ErrorResponse(400, "You can upload a maximum of 5 files at a time."));
+            }
+
             List<String> fileUrls = new ArrayList<>();
             for (MultipartFile file : files) {
-                if (file.isEmpty()) {
+                if (file == null || file.isEmpty()) {
                     continue;
                 }
                 String fileUrl = fileStorageService.storeFile(file);
                 fileUrls.add(fileUrl);
+            }
+            if (fileUrls.isEmpty()) {
+                return ResponseEntity.badRequest().body(new ErrorResponse(400, "No valid files were uploaded."));
             }
             return ResponseEntity.ok(fileUrls);
         } catch (Exception e) {

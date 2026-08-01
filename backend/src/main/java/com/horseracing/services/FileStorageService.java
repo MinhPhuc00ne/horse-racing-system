@@ -40,6 +40,11 @@ public class FileStorageService {
             throw new BusinessException("Uploaded file cannot be empty.", HttpStatus.BAD_REQUEST);
         }
 
+        // Limit file size to 10MB (10 * 1024 * 1024 bytes)
+        if (file.getSize() > 10 * 1024 * 1024) {
+            throw new BusinessException("File size exceeds maximum allowed limit of 10MB.", HttpStatus.BAD_REQUEST);
+        }
+
         // Validate MIME Content-Type
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {

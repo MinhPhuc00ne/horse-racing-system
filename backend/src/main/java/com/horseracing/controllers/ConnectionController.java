@@ -64,9 +64,12 @@ public class ConnectionController {
     public ResponseEntity<?> respondToRequest(@PathVariable Integer id, @RequestParam String action,
             Authentication authentication) {
         try {
+            if (action == null || (!"ACCEPT".equalsIgnoreCase(action) && !"REJECT".equalsIgnoreCase(action))) {
+                return ResponseEntity.badRequest().body(new ErrorResponse(400, "Action must be either ACCEPT or REJECT."));
+            }
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             ConnectionUserResponse response =
-                    userConnectionService.respondToRequest(userDetails.getUsername(), id, action);
+                    userConnectionService.respondToRequest(userDetails.getUsername(), id, action.toUpperCase());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(400, e.getMessage()));
