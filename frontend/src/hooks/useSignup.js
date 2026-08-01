@@ -50,12 +50,18 @@ export function useSignup() {
     if (e) e.preventDefault();
     
     // Validations
-    if (!username.trim()) {
+    const usernameClean = username.trim();
+    if (!usernameClean) {
       setError('Please enter a username.');
       return;
     }
-    if (username.trim().length < 3) {
-      setError('Username must be at least 3 characters long.');
+    if (usernameClean.length < 3 || usernameClean.length > 50) {
+      setError('Username must be between 3 and 50 characters long.');
+      return;
+    }
+    const usernamePattern = /^[a-zA-Z0-9_.]+$/;
+    if (!usernamePattern.test(usernameClean)) {
+      setError('Username can only contain letters, numbers, underscores, and dots.');
       return;
     }
     if (!name.trim()) {
@@ -66,17 +72,23 @@ export function useSignup() {
       setError('Please enter your email address.');
       return;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email.trim())) {
-      setError('Please enter a valid email address.');
+      setError('Please enter a valid email address (e.g. user@domain.com).');
       return;
     }
     if (!password) {
       setError('Please enter your password.');
       return;
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    if (password.length < 8 || password.length > 100) {
+      setError('Password must be between 8 and 100 characters long.');
+      return;
+    }
+    // ASCII-only check (no Vietnamese accented chars)
+    const asciiPattern = /^[\x20-\x7E]+$/;
+    if (!asciiPattern.test(password)) {
+      setError('Password must contain only standard ASCII characters (no Vietnamese accent letters).');
       return;
     }
     // BE password pattern validation: at least 1 uppercase and 1 special char
