@@ -85,7 +85,7 @@ public class RefereeController {
 
     @PutMapping("/races/{raceId}/conditions")
     public ResponseEntity<RefereeRaceResponse> updateConditions(@PathVariable Integer raceId,
-            @RequestBody UpdateConditionsRequest request) {
+            @jakarta.validation.Valid @RequestBody UpdateConditionsRequest request) {
         RefereeRaceResponse response = refereeService.updateConditions(raceId, request);
         return ResponseEntity.ok(response);
     }

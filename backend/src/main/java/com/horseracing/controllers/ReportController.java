@@ -20,7 +20,7 @@ public class ReportController {
     private final ReportService reportService;
 
     @PostMapping
-    public ResponseEntity<?> createReport(@RequestBody ReportRequest request,
+    public ResponseEntity<?> createReport(@jakarta.validation.Valid @RequestBody ReportRequest request,
             Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();

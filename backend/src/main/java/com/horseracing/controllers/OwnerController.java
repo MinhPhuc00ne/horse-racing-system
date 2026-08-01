@@ -137,7 +137,7 @@ public class OwnerController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestBody UpdateOwnerProfileRequest request,
+    public ResponseEntity<?> updateProfile(@jakarta.validation.Valid @RequestBody UpdateOwnerProfileRequest request,
             Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();

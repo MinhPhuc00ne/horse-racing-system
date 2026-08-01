@@ -77,7 +77,7 @@ public class NotificationController {
     }
 
     @PostMapping
-    public ResponseEntity<?> sendManualNotification(@RequestBody SendNotificationRequest request) {
+    public ResponseEntity<?> sendManualNotification(@jakarta.validation.Valid @RequestBody SendNotificationRequest request) {
         try {
             Notification notification =
                     notificationService.sendNotification(request.getRecipientId(),

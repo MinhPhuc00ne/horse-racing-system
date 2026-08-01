@@ -32,7 +32,7 @@ public class JockeyController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestBody UpdateJockeyProfileRequest request,
+    public ResponseEntity<?> updateProfile(@jakarta.validation.Valid @RequestBody UpdateJockeyProfileRequest request,
             Authentication authentication) {
         try {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();

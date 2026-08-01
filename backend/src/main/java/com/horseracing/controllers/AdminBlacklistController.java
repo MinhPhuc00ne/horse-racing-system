@@ -45,7 +45,7 @@ public class AdminBlacklistController {
 
     @PutMapping("/{id}/unban")
     public ResponseEntity<?> unbanBlacklist(@PathVariable Integer id,
-            @RequestBody(required = false) UnbanRequest unbanRequest,
+            @jakarta.validation.Valid @RequestBody(required = false) UnbanRequest unbanRequest,
             @AuthenticationPrincipal UserDetails userDetails) {
         try {
             BlacklistResponse response = adminBlacklistService.unbanBlacklist(id,

@@ -16,7 +16,10 @@ public class UpgradeRequestSubmit {
 
     private String fullName;
     private LocalDate dateOfBirth;
+    @jakarta.validation.constraints.Pattern(regexp = "^(0|\\+84)[0-9]{9}$", message = "Invalid Vietnamese phone number format")
     private String phoneNumber;
+
+    @jakarta.validation.constraints.Pattern(regexp = "^[0-9]{12}$", message = "Identity number must be exactly 12 digits")
     private String identityNumber;
 
     // Jockey fields
