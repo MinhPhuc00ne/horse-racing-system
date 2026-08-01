@@ -47,6 +47,10 @@ public class WalletService {
     @Transactional
     public WalletTransaction requestWithdrawal(User user, BigDecimal amount, String bankName,
             String bankBin, String bankAccountNumber, String bankAccountHolderName) {
+        if (amount == null || amount.compareTo(new BigDecimal("10000")) < 0) {
+            throw new RuntimeException("Withdrawal amount must be at least 10,000 VND");
+        }
+
         Wallet wallet = walletRepository.findByUserIdWithLock(user.getId()).orElseGet(() -> {
             Wallet newWallet = Wallet.builder().user(user).balance(BigDecimal.ZERO).build();
             return walletRepository.save(newWallet);

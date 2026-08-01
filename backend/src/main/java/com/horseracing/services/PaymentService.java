@@ -38,6 +38,10 @@ public class PaymentService {
 
     public ObjectNode createPaymentLink(User user, BigDecimal amount, String returnUrl,
             String cancelUrl) throws Exception {
+        if (amount == null || amount.compareTo(new BigDecimal("10000")) < 0) {
+            throw new IllegalArgumentException("Deposit amount must be at least 10,000 VND");
+        }
+
         // Generate a unique order code (up to 53-bit integer). Unix timestamp is fine.
         long orderCode = System.currentTimeMillis();
 

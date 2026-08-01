@@ -40,14 +40,14 @@ public class WalletController {
     }
 
     @PostMapping("/deposit")
-    public ResponseEntity<ObjectNode> deposit(@RequestBody Map<String, Object> request,
+    public ResponseEntity<ObjectNode> deposit(@jakarta.validation.Valid @RequestBody com.horseracing.dto.request.DepositRequest request,
             Authentication authentication) throws Exception {
         User user = getAuthenticatedUser(authentication);
-        BigDecimal amount = new BigDecimal(request.get("amount").toString());
-        String returnUrl = request
-                .getOrDefault("returnUrl", "http://localhost:5173/payment-success").toString();
-        String cancelUrl = request.getOrDefault("cancelUrl", "http://localhost:5173/payment-cancel")
-                .toString();
+        BigDecimal amount = request.getAmount();
+        String returnUrl = request.getReturnUrl() != null && !request.getReturnUrl().isBlank()
+                ? request.getReturnUrl() : "http://localhost:5173/payment-success";
+        String cancelUrl = request.getCancelUrl() != null && !request.getCancelUrl().isBlank()
+                ? request.getCancelUrl() : "http://localhost:5173/payment-cancel";
 
         ObjectNode res = paymentService.createPaymentLink(user, amount, returnUrl, cancelUrl);
         return ResponseEntity.ok(res);
@@ -60,15 +60,15 @@ public class WalletController {
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<WalletTransaction> withdraw(@RequestBody Map<String, Object> request,
+    public ResponseEntity<WalletTransaction> withdraw(@jakarta.validation.Valid @RequestBody com.horseracing.dto.request.WithdrawRequest request,
             Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        BigDecimal amount = new BigDecimal(request.get("amount").toString());
+        BigDecimal amount = request.getAmount();
 
-        String bankName = (String) request.get("bankName");
-        String bankBin = (String) request.get("bankBin");
-        String bankAccountNumber = (String) request.get("bankAccountNumber");
-        String bankAccountHolderName = (String) request.get("bankAccountHolderName");
+        String bankName = request.getBankName();
+        String bankBin = request.getBankBin();
+        String bankAccountNumber = request.getBankAccountNumber();
+        String bankAccountHolderName = request.getBankAccountHolderName();
 
         // 1. Fallback to new User profile fields if missing in request
         if (bankName == null || bankName.isBlank())
@@ -111,24 +111,19 @@ public class WalletController {
     }
 
     @PutMapping("/bank-account")
-    public ResponseEntity<UserResponse> updateBankAccount(@RequestBody Map<String, String> request,
+    public ResponseEntity<UserResponse> updateBankAccount(@jakarta.validation.Valid @RequestBody com.horseracing.dto.request.UpdateBankAccountRequest request,
             Authentication authentication) {
         User user = getAuthenticatedUser(authentication);
-        String bankName = request.get("bankName");
-        String bankBin = request.get("bankBin");
-        String bankAccountNumber = request.get("bankAccountNumber");
-        String bankAccountHolderName = request.get("bankAccountHolderName");
+        String bankName = request.getBankName();
+        String bankBin = request.getBankBin();
+        String bankAccountNumber = request.getBankAccountNumber();
+        String bankAccountHolderName = request.getBankAccountHolderName();
 
         if (bankBin == null || bankBin.isBlank()) {
             bankBin = "000000";
         }
         if (bankAccountHolderName == null || bankAccountHolderName.isBlank()) {
             bankAccountHolderName = user.getFullName();
-        }
-
-        if (bankName == null || bankName.isBlank() || bankAccountNumber == null
-                || bankAccountNumber.isBlank()) {
-            throw new RuntimeException("Bank name and account number cannot be empty");
         }
 
         user.setBankName(bankName);
