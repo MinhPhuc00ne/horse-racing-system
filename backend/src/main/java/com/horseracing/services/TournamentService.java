@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.horseracing.dto.request.AssignRefereeRequest;
 import com.horseracing.dto.request.CreateTournamentRequest;
 import com.horseracing.dto.request.UpdateTournamentRequest;
 import com.horseracing.dto.response.TournamentResponse;
