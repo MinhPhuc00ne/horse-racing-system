@@ -73,7 +73,7 @@ export default function AdminDashboardContent() {
     {
       key: 'fullName',
       label: 'Full Name',
-      render: (item) => <span className="fw-semibold text-white">{item.fullName}</span>
+      render: (item) => <span className="fw-semibold text-white">{item.fullName || item.userFullName || 'Member'}</span>
     },
     {
       key: 'requestedRole',
@@ -134,7 +134,7 @@ export default function AdminDashboardContent() {
                 <h3 className="ho-font-grotesk text-uppercase fw-bold text-secondary mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
                   Total Users
                 </h3>
-                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#ffffff' }}>
+                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#143422' }}>
                   {stats.usersCount}
                 </p>
                 <div className="mt-2 small text-secondary">
@@ -152,7 +152,7 @@ export default function AdminDashboardContent() {
                 <h3 className="ho-font-grotesk text-uppercase fw-bold text-secondary mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
                   Active Tournaments
                 </h3>
-                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#ffffff' }}>
+                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#143422' }}>
                   {stats.tournamentsCount}
                 </p>
                 <div className="mt-2 small text-secondary">
@@ -170,7 +170,7 @@ export default function AdminDashboardContent() {
                 <h3 className="ho-font-grotesk text-uppercase fw-bold text-secondary mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
                   Entry Registrations
                 </h3>
-                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#ffffff' }}>
+                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#143422' }}>
                   {stats.racesCount}
                 </p>
                 <div className="mt-2 small text-secondary">
@@ -188,7 +188,7 @@ export default function AdminDashboardContent() {
                 <h3 className="ho-font-grotesk text-uppercase fw-bold text-secondary mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
                   Upgrade Requests
                 </h3>
-                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#ffffff' }}>
+                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#143422' }}>
                   {stats.pendingUpgradesCount}
                 </p>
                 <div className="mt-2 small text-warning fw-semibold">
@@ -206,7 +206,7 @@ export default function AdminDashboardContent() {
                 <h3 className="ho-font-grotesk text-uppercase fw-bold text-secondary mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em' }}>
                   Withdrawal Transactions
                 </h3>
-                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#ffffff' }}>
+                <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#143422' }}>
                   {stats.pendingWithdrawalsCount}
                 </p>
                 <div className="mt-2 small text-warning fw-semibold">
@@ -291,7 +291,7 @@ export default function AdminDashboardContent() {
             <div className="col-12 col-lg-6">
               <div className="glass-card h-100">
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h3 className="ho-font-epilogue fs-5 fw-bold m-0" style={{ color: '#ffffff' }}>
+                  <h3 className="ho-font-epilogue fs-5 fw-bold m-0" style={{ color: '#143422' }}>
                     Recent Role Upgrade Requests
                   </h3>
                   <button
@@ -311,10 +311,10 @@ export default function AdminDashboardContent() {
             <div className="col-12 col-lg-6">
               <div className="glass-card h-100 d-flex flex-column justify-content-between">
                 <div>
-                  <h3 className="ho-font-epilogue fs-5 fw-bold mb-3" style={{ color: '#ffffff' }}>
+                  <h3 className="ho-font-epilogue fs-5 fw-bold mb-3" style={{ color: '#143422' }}>
                     Admin Quick Actions
                   </h3>
-                  <p className="text-secondary small mb-4" style={{ color: '#cbd5e1' }}>
+                  <p className="text-secondary small mb-4" style={{ color: '#4b5563' }}>
                     Administrators have privileges to manage tournaments, financials, and system permissions.
                   </p>
                   

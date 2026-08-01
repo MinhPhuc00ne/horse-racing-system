@@ -147,7 +147,7 @@ export default function CareersPage() {
       {/* Hero Banner */}
       <section className="careers-hero text-center">
         <Container>
-          <div className="job-badge d-inline-block mb-3">World-Class Careers</div>
+          <div className="badge bg-warning bg-opacity-25 border border-warning text-warning fw-bold px-3 py-1.5 mb-3" style={{ fontSize: '0.8rem', letterSpacing: '0.05em' }}>WORLD-CLASS CAREERS</div>
           <h1 className="careers-hero-title">
             Join the Premier <span className="careers-hero-gold">Horse Racing Team</span>
           </h1>
@@ -160,8 +160,8 @@ export default function CareersPage() {
       {/* Main Content */}
       <Container className="my-5">
         <div className="text-center mb-5">
-          <h2 className="fw-bold text-white mb-2">Open Career Positions</h2>
-          <p className="text-white-50">Global working environment, competitive rewards, and clear career advancement pathways.</p>
+          <h2 className="fw-bold mb-2" style={{ color: '#143422', fontSize: '2.2rem' }}>Open Career Positions</h2>
+          <p style={{ color: '#4b5563', fontSize: '1rem' }}>Global working environment, competitive rewards, and clear career advancement pathways.</p>
         </div>
 
         <Row className="g-4">
@@ -170,14 +170,14 @@ export default function CareersPage() {
               <div className="job-card d-flex flex-column">
                 <div className="d-flex justify-content-between align-items-center mb-2">
                   <span className="job-badge">{job.type}</span>
-                  <span className="text-white-50" style={{ fontSize: '0.78rem' }}>{job.department}</span>
+                  <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>{job.department}</span>
                 </div>
                 <h3 className="job-title">{job.title}</h3>
                 <div className="job-salary">{job.salary}</div>
                 <p className="job-desc flex-grow-1">{job.description}</p>
                 <div className="mb-3">
-                  <strong className="text-white d-block mb-1" style={{ fontSize: '0.82rem' }}>Key Requirements:</strong>
-                  <ul className="text-white-50 ps-3 m-0" style={{ fontSize: '0.8rem' }}>
+                  <strong className="d-block mb-1" style={{ fontSize: '0.82rem', color: '#143422' }}>Key Requirements:</strong>
+                  <ul className="ps-3 m-0" style={{ fontSize: '0.8rem', color: '#4b5563' }}>
                     {job.requirements.slice(0, 2).map((req, idx) => (
                       <li key={idx}>{req}</li>
                     ))}

@@ -14,9 +14,8 @@ import ConfirmResults from '../../components/RaceReferee/ConfirmResults';
 import RefereeProfileContent from '../../components/RaceReferee/RefereeProfileContent';
 
 const refereeNavLinks = [
-  { path: '/referee/home', label: 'Home', icon: 'home' },
-  { path: '/referee/assigned-tournaments', label: 'My Tournaments', icon: 'assignment' },
   { path: '/referee/pre-race-check', label: 'Pre-Race Check', icon: 'fact_check' },
+  { path: '/referee/assigned-tournaments', label: 'My Tournaments', icon: 'assignment' },
   { path: '/referee/live-simulation', label: 'Live Simulation', icon: 'sports_score' },
   { path: '/referee/confirm-results', label: 'Confirm Results', icon: 'verified' },
   { path: '/referee/violations', label: 'Infractions & Violations', icon: 'gavel' }

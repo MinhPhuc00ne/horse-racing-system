@@ -13,7 +13,7 @@ import JockeyFinancialsContent from '../../components/Jockey/JockeyFinancialsCon
 import SpectatorLiveSimulationPage from '../../components/Spectator/SpectatorLiveSimulationPage';
 
 const jockeyNavLinks = [
-  { path: '/jockey/dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { path: '/jockey/dashboard', label: 'Home', icon: 'home' },
   { path: '/jockey/races', label: 'Races', icon: 'sports_score' },
   { path: '/jockey/invitations', label: 'Connections', icon: 'group' },
   { path: '/jockey/financials', label: 'Financials', icon: 'account_balance_wallet' },

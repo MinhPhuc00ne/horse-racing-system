@@ -78,7 +78,7 @@
   background: #ffffff !important;
   background-color: #ffffff !important;
   border: 1px solid rgba(20, 52, 34, 0.15) !important;
-  color: #212121 !important;
+  color: #212121;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
 }
 
@@ -189,6 +189,17 @@
   color: #ffffff !important;
   background-color: transparent !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.admin-layout-container main table td span,
+.admin-layout-container main .table td span,
+.admin-layout-container main .ho-table td span {
+  color: #ffffff !important;
+}
+
+.admin-layout-container main table td .badge.text-dark,
+.admin-layout-container main .table td .badge.text-dark {
+  color: #111111 !important;
 }
 
 .admin-layout-container main table td .text-muted,

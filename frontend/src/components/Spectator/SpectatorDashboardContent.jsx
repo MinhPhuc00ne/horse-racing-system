@@ -131,10 +131,10 @@ export default function SpectatorDashboardContent() {
           <span className="badge bg-warning text-dark text-uppercase mb-2" style={{ letterSpacing: '0.1em', fontWeight: 'bold' }}>
             Spectator Member
           </span>
-          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1">
+          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#ffffff' }}>
             Welcome back, {user?.fullName || 'Spectator'}!
           </h2>
-          <p className="m-0 text-white-50 small">
+          <p className="m-0 small" style={{ color: '#e2e8f0' }}>
             Follow top-tier races, upgrade your account, and place authorized bets directly in the system.
           </p>
         </div>
@@ -156,53 +156,53 @@ export default function SpectatorDashboardContent() {
 
             <div className="row g-4 mt-2">
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
-                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>Username</span>
-                  <span className="fw-bold text-white fs-5">{user?.username || 'N/A'}</span>
+                <div className="p-3 rounded border" style={{ backgroundColor: '#f8fafc', borderColor: 'rgba(20, 52, 34, 0.15)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#4b5563' }}>Username</span>
+                  <span className="fw-bold fs-5" style={{ color: '#143422' }}>{user?.username || 'N/A'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
-                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>Full Name</span>
-                  <span className="fw-bold text-white fs-5">{user?.fullName || 'N/A'}</span>
+                <div className="p-3 rounded border" style={{ backgroundColor: '#f8fafc', borderColor: 'rgba(20, 52, 34, 0.15)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#4b5563' }}>Full Name</span>
+                  <span className="fw-bold fs-5" style={{ color: '#143422' }}>{user?.fullName || 'N/A'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
-                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>Email Address</span>
-                  <span className="fw-bold text-white fs-5 text-truncate d-block">{user?.email || 'N/A'}</span>
+                <div className="p-3 rounded border" style={{ backgroundColor: '#f8fafc', borderColor: 'rgba(20, 52, 34, 0.15)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#4b5563' }}>Email Address</span>
+                  <span className="fw-bold fs-5 text-truncate d-block" style={{ color: '#143422' }}>{user?.email || 'N/A'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
-                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>Phone Number</span>
-                  <span className="fw-bold text-white fs-5">{user?.phone || 'Not provided'}</span>
+                <div className="p-3 rounded border" style={{ backgroundColor: '#f8fafc', borderColor: 'rgba(20, 52, 34, 0.15)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#4b5563' }}>Phone Number</span>
+                  <span className="fw-bold fs-5" style={{ color: '#143422' }}>{user?.phone || 'Not provided'}</span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
-                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>System Role</span>
-                  <span className="badge text-uppercase font-weight-bold d-inline-block" style={{ backgroundColor: 'rgba(212, 175, 55, 0.15)', color: '#d4af37' }}>
+                <div className="p-3 rounded border" style={{ backgroundColor: '#f8fafc', borderColor: 'rgba(20, 52, 34, 0.15)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#4b5563' }}>System Role</span>
+                  <span className="badge text-uppercase font-weight-bold d-inline-block" style={{ backgroundColor: 'rgba(20, 52, 34, 0.12)', color: '#143422' }}>
                     {user?.role || 'SPECTATOR'}
                   </span>
                 </div>
               </div>
 
               <div className="col-12 col-md-6">
-                <div className="p-3 rounded border" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', borderColor: 'rgba(212, 175, 55, 0.3)' }}>
-                  <span className="small d-block mb-1" style={{ color: '#cbd5e1' }}>Join Date</span>
-                  <span className="fw-bold text-white fs-5">{formatDate(user?.createdAt)}</span>
+                <div className="p-3 rounded border" style={{ backgroundColor: '#f8fafc', borderColor: 'rgba(20, 52, 34, 0.15)' }}>
+                  <span className="small d-block mb-1" style={{ color: '#4b5563' }}>Join Date</span>
+                  <span className="fw-bold fs-5" style={{ color: '#143422' }}>{formatDate(user?.createdAt)}</span>
                 </div>
               </div>
             </div>
 
-            <hr className="my-4" style={{ borderColor: 'rgba(212, 175, 55, 0.3)' }} />
+            <hr className="my-4" style={{ borderColor: 'rgba(20, 52, 34, 0.15)' }} />
             
-            <h4 className="ho-font-epilogue fs-6 fw-bold text-white mb-3">
+            <h4 className="ho-font-epilogue fs-6 fw-bold mb-3" style={{ color: '#143422' }}>
               <span className="material-symbols-outlined align-middle me-1 text-success" style={{ fontSize: '20px' }}>account_balance</span>
               Beneficiary Bank Information
             </h4>

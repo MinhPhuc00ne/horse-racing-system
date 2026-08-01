@@ -11,7 +11,7 @@ const roleNavConfigs = {
     label: 'Spectator Hub',
     badgeBg: '#3b82f6',
     links: [
-      { path: '/spectators/profile', label: 'My Profile', icon: 'person' },
+      { path: '/spectators/profile', label: 'Home', icon: 'home' },
       { path: '/spectators/wallet', label: 'Wallet & Cash', icon: 'account_balance_wallet' },
       { path: '/spectators/upgrade', label: 'Upgrade Role', icon: 'manage_accounts' },
     ]
@@ -21,23 +21,21 @@ const roleNavConfigs = {
     badgeBg: '#ffd700',
     badgeColor: '#07150c',
     links: [
-      { path: '/owner/dashboard', label: 'Dashboard', icon: 'dashboard' },
+      { path: '/owner/dashboard', label: 'Home', icon: 'home' },
       { path: '/owner/stable', label: 'My Stable', icon: 'bedroom_child' },
       { path: '/owner/entries', label: 'Race Entries', icon: 'emoji_events' },
       { path: '/owner/friends', label: 'Connections', icon: 'group' },
-      { path: '/owner/financials', label: 'Financials', icon: 'payments' },
-      { path: '/owner/analytics', label: 'Analytics', icon: 'analytics' },
-      { path: '/spectators/wallet', label: 'Wallet & Cash', icon: 'account_balance_wallet' },
+      { path: '/owner/financials', label: 'Financials & Wallet', icon: 'account_balance_wallet' },
     ]
   },
   JOCKEY: {
     label: 'Jockey Suite',
     badgeBg: '#10b981',
     links: [
-      { path: '/jockey/dashboard', label: 'Dashboard', icon: 'dashboard' },
+      { path: '/jockey/dashboard', label: 'Home', icon: 'home' },
       { path: '/jockey/races', label: 'My Rides', icon: 'sports_score' },
       { path: '/jockey/invitations', label: 'Invitations', icon: 'mail' },
-      { path: '/jockey/profile', label: 'Profile & Wallet', icon: 'person' },
+      { path: '/jockey/profile', label: 'Profile', icon: 'person' },
       { path: '/spectators/wallet', label: 'Wallet & Cash', icon: 'account_balance_wallet' },
     ]
   },
@@ -63,8 +61,9 @@ const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileHover, setProfileHover] = useState(false);
   const [logoutHover, setLogoutHover] = useState(false);
+  const [navSlide, setNavSlide] = useState('main'); // 'main' or 'role'
+  const [isSliding, setIsSliding] = useState(false);
   const dropdownRef = useRef(null);
-  const roleNavScrollRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -76,11 +75,22 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleScrollRoleNav = (direction) => {
-    if (roleNavScrollRef.current) {
-      const scrollAmount = direction === 'left' ? -200 : 200;
-      roleNavScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  const currentRoleConfig = user?.role ? roleNavConfigs[user.role] : null;
+
+  useEffect(() => {
+    if (user && currentRoleConfig?.links?.some(link => location.pathname === link.path || location.pathname.startsWith(link.path))) {
+      setNavSlide('role');
+    } else {
+      setNavSlide('main');
     }
+  }, [location.pathname, user?.role]);
+
+  const handleToggleNavSlide = (targetMode) => {
+    setIsSliding(true);
+    setTimeout(() => {
+      setNavSlide(targetMode);
+      setIsSliding(false);
+    }, 180);
   };
 
   const getNotificationIcon = (type) => {
@@ -121,8 +131,6 @@ const Header = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  const currentRoleConfig = user?.role ? roleNavConfigs[user.role] : null;
-
   return (
     <header className="sticky-top" style={{ zIndex: 1050 }}>
       {/* 1. TOP PRIMARY NAVIGATION BAR */}
@@ -139,45 +147,99 @@ const Header = () => {
           <Navbar.Toggle aria-controls="header-nav" />
 
           <Navbar.Collapse id="header-nav" className="justify-content-between">
-            {/* MAIN SYSTEM NAVIGATION LINKS */}
-            <Nav className="mx-auto gap-lg-3 text-uppercase fw-semibold" style={{ fontSize: '0.82rem' }}>
-              <Nav.Link 
-                onClick={() => navigate('/')} 
-                className={`cursor-pointer px-2 ${isActive('/') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}
+            {/* MIDDLE NAVIGATION WITH SMOOTH SLIDE TRANSITION */}
+            <div className="mx-auto overflow-hidden position-relative py-1" style={{ maxWidth: '840px', minHeight: '38px', display: 'flex', alignItems: 'center' }}>
+              <div 
+                className="d-flex align-items-center gap-2 gap-xl-3 flex-nowrap"
+                style={{
+                  whiteSpace: 'nowrap',
+                  transition: 'opacity 0.18s ease, transform 0.18s ease',
+                  opacity: isSliding ? 0 : 1,
+                  transform: isSliding ? (navSlide === 'main' ? 'translateX(15px)' : 'translateX(-15px)') : 'translateX(0)',
+                  fontSize: '0.82rem',
+                  fontWeight: '600'
+                }}
               >
-                Home
-              </Nav.Link>
-              <Nav.Link 
-                onClick={() => navigate('/tournaments')} 
-                className={`cursor-pointer px-2 ${isActive('/tournaments') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}
-              >
-                Tournaments & Races
-              </Nav.Link>
-              <Nav.Link 
-                onClick={() => navigate('/live')} 
-                className={`cursor-pointer px-2 ${isActive('/live') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}
-              >
-                Live Simulation
-              </Nav.Link>
-              <Nav.Link 
-                onClick={() => navigate('/rules')} 
-                className={`cursor-pointer px-2 ${isActive('/rules') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}
-              >
-                Racing Rules
-              </Nav.Link>
-              <Nav.Link 
-                onClick={() => navigate('/careers')} 
-                className={`cursor-pointer px-2 ${isActive('/careers') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}
-              >
-                Careers
-              </Nav.Link>
-              <Nav.Link 
-                onClick={() => navigate('/news')} 
-                className={`cursor-pointer px-2 ${isActive('/news') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}
-              >
-                News & About
-              </Nav.Link>
-            </Nav>
+                {navSlide === 'main' || !user || !currentRoleConfig ? (
+                  <>
+                    {/* MAIN SYSTEM NAVIGATION LINKS */}
+                    <Nav.Link onClick={() => navigate('/')} className={`cursor-pointer px-2 text-uppercase ${isActive('/') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}>
+                      Homepage
+                    </Nav.Link>
+                    <Nav.Link onClick={() => navigate('/tournaments')} className={`cursor-pointer px-2 text-uppercase ${isActive('/tournaments') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}>
+                      Tournaments & Races
+                    </Nav.Link>
+                    <Nav.Link onClick={() => navigate('/live')} className={`cursor-pointer px-2 text-uppercase ${isActive('/live') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}>
+                      Live Simulation
+                    </Nav.Link>
+                    <Nav.Link onClick={() => navigate('/rules')} className={`cursor-pointer px-2 text-uppercase ${isActive('/rules') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}>
+                      Racing Rules
+                    </Nav.Link>
+                    <Nav.Link onClick={() => navigate('/careers')} className={`cursor-pointer px-2 text-uppercase ${isActive('/careers') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}>
+                      Careers
+                    </Nav.Link>
+                    <Nav.Link onClick={() => navigate('/news')} className={`cursor-pointer px-2 text-uppercase ${isActive('/news') ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'}`}>
+                      News & About
+                    </Nav.Link>
+
+                    {/* SLIDE TO ROLE MENU BUTTON */}
+                    {user && currentRoleConfig && (
+                      <button
+                        onClick={() => handleToggleNavSlide('role')}
+                        className="btn btn-sm d-inline-flex align-items-center justify-content-center fw-bold text-warning ms-1 shadow-sm transition-all flex-shrink-0"
+                        style={{
+                          backgroundColor: 'rgba(255, 215, 0, 0.15)',
+                          border: '1px solid rgba(212, 175, 55, 0.5)',
+                          borderRadius: '50%',
+                          width: '28px',
+                          height: '28px',
+                          padding: '0'
+                        }}
+                        title={`Go to ${currentRoleConfig.label}`}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>chevron_right</span>
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {/* BACK TO MAIN MENU BUTTON */}
+                    <button
+                      onClick={() => handleToggleNavSlide('main')}
+                      className="btn btn-sm d-inline-flex align-items-center justify-content-center fw-bold text-white me-1 shadow-sm transition-all flex-shrink-0"
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                        border: '1px solid rgba(255, 255, 255, 0.25)',
+                        borderRadius: '50%',
+                        width: '28px',
+                        height: '28px',
+                        padding: '0'
+                      }}
+                      title="Back to Main Navigation"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>chevron_left</span>
+                    </button>
+
+                    {/* ROLE SPECIFIC NAVIGATION LINKS */}
+                    {currentRoleConfig.links.map((link) => {
+                      const active = isActive(link.path);
+                      return (
+                        <Nav.Link
+                          key={link.path}
+                          onClick={() => navigate(link.path)}
+                          className={`cursor-pointer px-2 d-inline-flex align-items-center gap-1.5 ${
+                            active ? 'text-warning fw-bold border-bottom border-warning' : 'text-white-50'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>{link.icon}</span>
+                          <span>{link.label}</span>
+                        </Nav.Link>
+                      );
+                    })}
+                  </>
+                )}
+              </div>
+            </div>
 
             {/* RIGHT SIDE USER CONTROLS */}
             <div className="d-flex align-items-center gap-3 mt-3 mt-lg-0">
@@ -390,73 +452,6 @@ const Header = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-
-      {/* 2. LOGGED-IN USER ROLE SUB-NAVBAR CENTERED & BALANCED */}
-      {user && currentRoleConfig && (
-        <div style={{ backgroundColor: '#1b4f32', borderBottom: '1px solid rgba(212, 175, 55, 0.3)', padding: '7px 0' }}>
-          <Container fluid="lg" className="d-flex align-items-center justify-content-center gap-2 flex-wrap">
-            
-            {/* ROLE BADGE */}
-            <div className="d-flex align-items-center gap-2 flex-shrink-0">
-              <span className="badge px-3 py-2 fw-bold text-uppercase d-flex align-items-center gap-1 shadow-sm" style={{ backgroundColor: currentRoleConfig.badgeBg, color: currentRoleConfig.badgeColor || '#ffffff', fontSize: '0.76rem', borderRadius: '20px' }}>
-                <span className="material-symbols-outlined fs-6">workspace_premium</span>
-                <span>{currentRoleConfig.label}</span>
-              </span>
-            </div>
-
-            {/* LEFT ARROW SCROLL BUTTON */}
-            <button 
-              onClick={() => handleScrollRoleNav('left')}
-              className="btn btn-sm text-warning p-1 border-0 d-flex align-items-center justify-content-center flex-shrink-0"
-              style={{ backgroundColor: 'rgba(212,175,55,0.15)', borderRadius: '50%', width: '28px', height: '28px' }}
-              title="Scroll Left"
-            >
-              <FiChevronLeft size={18} />
-            </button>
-
-            {/* SCROLLABLE ROLE LINKS CONTAINER */}
-            <div 
-              ref={roleNavScrollRef} 
-              className="d-flex align-items-center justify-content-center gap-2 overflow-x-auto no-scrollbar py-1"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', whiteSpace: 'nowrap', maxWidth: '850px' }}
-            >
-              {currentRoleConfig.links.map((link) => {
-                const active = isActive(link.path);
-                return (
-                  <button
-                    key={link.path}
-                    onClick={() => navigate(link.path)}
-                    className="btn btn-sm d-inline-flex align-items-center gap-1.5 fw-bold text-nowrap transition-all"
-                    style={{
-                      backgroundColor: active ? '#ffd700' : 'rgba(255, 255, 255, 0.08)',
-                      color: active ? '#07150c' : '#ffffff',
-                      border: active ? '1px solid #ffd700' : '1px solid rgba(212, 175, 55, 0.3)',
-                      borderRadius: '20px',
-                      padding: '5px 16px',
-                      fontSize: '0.82rem',
-                      boxShadow: active ? '0 0 12px rgba(255, 215, 0, 0.4)' : 'none'
-                    }}
-                  >
-                    <span className="material-symbols-outlined" style={{ fontSize: '17px' }}>{link.icon}</span>
-                    <span>{link.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* RIGHT ARROW SCROLL BUTTON */}
-            <button 
-              onClick={() => handleScrollRoleNav('right')}
-              className="btn btn-sm text-warning p-1 border-0 d-flex align-items-center justify-content-center flex-shrink-0"
-              style={{ backgroundColor: 'rgba(212,175,55,0.15)', borderRadius: '50%', width: '28px', height: '28px' }}
-              title="Scroll Right"
-            >
-              <FiChevronRight size={18} />
-            </button>
-
-          </Container>
-        </div>
-      )}
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }

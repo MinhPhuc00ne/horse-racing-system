@@ -17,7 +17,7 @@ import {
   initialTournaments,
   initialTransactions,
   initialRaceHistory,
-} from '../mocks/ownerMockData';
+} from '../pages/mocks/ownerMockData';
 
 const normalizeStatus = (status) => {
   if (!status) return 'Upcoming';

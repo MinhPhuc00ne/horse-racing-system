@@ -111,10 +111,10 @@ export default function JockeyDashboardContent() {
       {/* Title & Actions */}
       <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-end gap-3 mb-4">
         <div>
-          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1 text-white">
-            Jockey Dashboard
+          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#143422' }}>
+            Jockey Overview
           </h2>
-          <p className="small m-0" style={{ color: '#cbd5e1' }}>
+          <p className="small m-0" style={{ color: '#4b5563' }}>
             Overview of your race results, reward balance, and personal achievements.
           </p>
         </div>
@@ -126,12 +126,12 @@ export default function JockeyDashboardContent() {
         <div className="col-12 col-md-3">
           <div className="glass-card glass-card-interactive position-relative overflow-hidden h-100">
             <div className="position-absolute end-0 top-0 p-3 opacity-25">
-              <span className="material-symbols-outlined" style={{ fontSize: '50px', color: '#d4af37' }}>payments</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '50px', color: '#143422' }}>payments</span>
             </div>
-            <h3 className="ho-font-grotesk text-uppercase fw-bold mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em', color: '#cbd5e1' }}>
+            <h3 className="ho-font-grotesk text-uppercase fw-bold mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em', color: '#4b5563' }}>
               Reward Balance
             </h3>
-            <p className="ho-font-epilogue fs-3 fw-extrabold m-0 text-truncate text-white">
+            <p className="ho-font-epilogue fs-3 fw-extrabold m-0 text-truncate" style={{ color: '#143422' }}>
               {formatVND(profile.walletBalance)}
             </p>
             <div className="mt-3 small text-success fw-semibold">
@@ -144,15 +144,15 @@ export default function JockeyDashboardContent() {
         <div className="col-12 col-md-3">
           <div className="glass-card glass-card-interactive position-relative overflow-hidden h-100">
             <div className="position-absolute end-0 top-0 p-3 opacity-25">
-              <span className="material-symbols-outlined" style={{ fontSize: '50px', color: '#d4af37' }}>military_tech</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '50px', color: '#143422' }}>military_tech</span>
             </div>
-            <h3 className="ho-font-grotesk text-uppercase fw-bold mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em', color: '#cbd5e1' }}>
+            <h3 className="ho-font-grotesk text-uppercase fw-bold mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em', color: '#4b5563' }}>
               Win Rate
             </h3>
-            <p className="ho-font-epilogue fs-3 fw-extrabold m-0 text-white">
+            <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#143422' }}>
               {profile.winRate}%
             </p>
-            <div className="mt-3 small" style={{ color: '#cbd5e1' }}>
+            <div className="mt-3 small" style={{ color: '#4b5563' }}>
               Based on {profile.matchesPlayed} matches played
             </div>
           </div>
@@ -162,15 +162,15 @@ export default function JockeyDashboardContent() {
         <div className="col-12 col-md-3">
           <div className="glass-card glass-card-interactive position-relative overflow-hidden h-100">
             <div className="position-absolute end-0 top-0 p-3 opacity-25">
-              <span className="material-symbols-outlined" style={{ fontSize: '50px', color: '#d4af37' }}>leaderboard</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '50px', color: '#143422' }}>leaderboard</span>
             </div>
-            <h3 className="ho-font-grotesk text-uppercase fw-bold mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em', color: '#cbd5e1' }}>
+            <h3 className="ho-font-grotesk text-uppercase fw-bold mb-2" style={{ fontSize: '10px', letterSpacing: '0.05em', color: '#4b5563' }}>
               Ranking Points
             </h3>
-            <p className="ho-font-epilogue fs-3 fw-extrabold m-0 text-white">
+            <p className="ho-font-epilogue fs-3 fw-extrabold m-0" style={{ color: '#143422' }}>
               {profile.rankingScore} pts
             </p>
-            <div className="mt-3 small text-warning fw-semibold">
+            <div className="mt-3 small text-warning fw-bold">
               Rank #1 among jockeys
             </div>
           </div>
@@ -179,20 +179,20 @@ export default function JockeyDashboardContent() {
         {/* Invitations redirect card */}
         <div className="col-12 col-md-3">
           <div className="glass-card glass-card-interactive h-100 d-flex flex-column justify-content-between position-relative overflow-hidden"
-               style={{ cursor: 'pointer', border: '1px solid rgba(212, 175, 55, 0.4)' }}
+               style={{ cursor: 'pointer', border: '1px solid rgba(20, 52, 34, 0.25)' }}
                onClick={() => navigate('/jockey/invitations')}>
             <div className="position-absolute end-0 top-0 p-3 opacity-25">
-              <span className="material-symbols-outlined" style={{ fontSize: '50px', color: '#d4af37' }}>mail</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '50px', color: '#143422' }}>mail</span>
             </div>
             <div>
-              <h3 className="ho-font-grotesk text-uppercase fw-bold mb-2 d-flex align-items-center" style={{ fontSize: '10px', color: '#d4af37', letterSpacing: '0.05em' }}>
+              <h3 className="ho-font-grotesk text-uppercase fw-bold mb-2 d-flex align-items-center" style={{ fontSize: '10px', color: '#143422', letterSpacing: '0.05em' }}>
                 Race Invitations
               </h3>
-              <p className="small m-0 mb-3" style={{ lineHeight: '1.4', color: '#cbd5e1' }}>
+              <p className="small m-0 mb-3" style={{ lineHeight: '1.4', color: '#4b5563' }}>
                 View and respond to horse owner invitations and race proposals.
               </p>
             </div>
-            <button className="ho-btn ho-btn-gold-solid w-100 py-2 d-flex align-items-center justify-content-center gap-2" style={{ fontSize: '11px' }}>
+            <button className="ho-btn ho-btn-gold-solid w-100 py-2 d-flex align-items-center justify-content-center gap-2 fw-bold" style={{ fontSize: '11px', color: '#07150c' }}>
               Check Invitations
             </button>
           </div>
@@ -204,7 +204,7 @@ export default function JockeyDashboardContent() {
         {/* Jockey Leaderboard */}
         <div className="col-12 col-lg-5">
           <div className="glass-card h-100">
-            <h3 className="ho-font-epilogue fs-5 fw-bold mb-4 text-white">
+            <h3 className="ho-font-epilogue fs-5 fw-bold mb-4" style={{ color: '#143422' }}>
               Jockey Leaderboard
             </h3>
             <DataTable columns={leaderboardColumns} data={leaderboard} emptyMessage="No leaderboard data available." />
@@ -215,13 +215,13 @@ export default function JockeyDashboardContent() {
         <div className="col-12 col-lg-7">
           <div className="glass-card h-100">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h3 className="ho-font-epilogue fs-5 fw-bold m-0 text-white">
+              <h3 className="ho-font-epilogue fs-5 fw-bold m-0" style={{ color: '#143422' }}>
                 Recent Performance
               </h3>
               <button
                 onClick={() => navigate('/jockey/races')}
-                className="ho-btn-link text-uppercase tracking-wider small d-flex align-items-center"
-                style={{ fontSize: '12px' }}
+                className="ho-btn-link text-uppercase tracking-wider small d-flex align-items-center fw-bold"
+                style={{ fontSize: '12px', color: '#143422' }}
               >
                 Schedule
                 <span className="material-symbols-outlined ms-1" style={{ fontSize: '16px' }}>arrow_forward</span>

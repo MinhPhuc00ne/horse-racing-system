@@ -21,7 +21,7 @@ import {
   initialJockeyTransactions,
   initialJockeyRaceHistory,
   initialJockeysLeaderboard
-} from '../mocks/jockeyMockData';
+} from '../pages/mocks/jockeyMockData';
 
 const JockeyContext = createContext();
 

@@ -2760,12 +2760,12 @@ export default function LiveSimulation() {
           <div className="d-flex align-items-center gap-3">
             <div>
               <div className="d-flex align-items-center gap-2 mb-1">
-                <h2 className="ho-font-epilogue fs-3 fw-bold text-white m-0">Live Simulation</h2>
+                <h2 className="ho-font-epilogue fs-3 fw-bold m-0" style={{ color: '#143422' }}>Live Simulation</h2>
                 <span className="live-status-badge">
                   <span className="pulse-dot"></span> LIVE
                 </span>
               </div>
-              <p className="small m-0" style={{ color: '#cbd5e1' }}>Virtual high-tech perspective tracking and incident flagging tool.</p>
+              <p className="small m-0" style={{ color: '#4b5563' }}>Virtual high-tech perspective tracking and incident flagging tool.</p>
             </div>
           </div>
           <div className="d-flex gap-2">
@@ -2825,19 +2825,28 @@ export default function LiveSimulation() {
                   </div>
                 </div>
 
-                <div className="d-flex align-items-center gap-1 small me-2" style={{ color: '#cbd5e1' }}>
-                  <span>Theme:</span>
+                <div className="d-flex align-items-center gap-1.5 small me-2">
+                  <span className="fw-bold" style={{ color: '#ffffff' }}>Theme:</span>
                   <select
-                    className="form-select form-select-sm border-secondary text-white"
-                    style={{ fontSize: '11px', borderRadius: '20px', padding: '2px 24px 2px 8px', width: 'auto', minWidth: '120px', backgroundColor: '#0c2214' }}
+                    className="form-select form-select-sm border-warning fw-bold"
+                    style={{
+                      fontSize: '11px',
+                      borderRadius: '20px',
+                      padding: '3px 24px 3px 10px',
+                      width: 'auto',
+                      minWidth: '135px',
+                      backgroundColor: '#0c2214',
+                      color: '#ffd700',
+                      border: '1px solid #d4af37'
+                    }}
                     value={environment}
                     onChange={(e) => setEnvironment(e.target.value)}
                   >
-                    <option value="sunset">🌇 Sunset Twilight</option>
-                    <option value="cyber">🛸 Cyber Neon</option>
-                    <option value="sunny">☀️ Sunny Turf</option>
-                    <option value="snow">❄️ Snowy Winter</option>
-                    <option value="rain">🌧️ Rainy Storm</option>
+                    <option value="sunset" style={{ backgroundColor: '#0c2214', color: '#ffd700' }}>🌇 Sunset Twilight</option>
+                    <option value="cyber" style={{ backgroundColor: '#0c2214', color: '#ffd700' }}>🛸 Cyber Neon</option>
+                    <option value="sunny" style={{ backgroundColor: '#0c2214', color: '#ffd700' }}>☀️ Sunny Turf</option>
+                    <option value="snow" style={{ backgroundColor: '#0c2214', color: '#ffd700' }}>❄️ Snowy Winter</option>
+                    <option value="rain" style={{ backgroundColor: '#0c2214', color: '#ffd700' }}>🌧️ Rainy Storm</option>
                   </select>
                 </div>
                 <span className="stat-pill">Dist: <strong>{raceDistance}m</strong></span>

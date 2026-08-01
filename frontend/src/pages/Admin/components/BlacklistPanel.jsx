@@ -168,10 +168,10 @@ export default function BlacklistPanel() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', padding: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h3 className="fw-bold mb-1 d-flex align-items-center gap-2 text-white">
+          <h3 className="fw-bold mb-1 d-flex align-items-center gap-2" style={{ color: '#143422' }}>
             <FaShieldAlt className="text-danger" /> Blacklist & Ban Management
           </h3>
-          <p className="small mb-0" style={{ color: '#cbd5e1' }}>
+          <p className="small mb-0" style={{ color: '#4b5563' }}>
             Monitor and manage account suspensions and horse bans across the system.
           </p>
         </div>
@@ -202,10 +202,10 @@ export default function BlacklistPanel() {
         <div className="col-12 col-md-6 col-lg-3">
           <div className="glass-card p-3">
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div className="p-3 rounded-circle text-warning fs-4" style={{ background: 'rgba(255, 255, 255, 0.1)' }}><FaBan /></div>
+              <div className="p-3 rounded-circle text-warning fs-4" style={{ background: 'rgba(212, 175, 55, 0.15)' }}><FaBan /></div>
               <div>
-                <span className="small text-uppercase fw-bold" style={{ color: '#cbd5e1' }}>Total Records</span>
-                <h3 className="fw-bold text-white mt-1 mb-0">{totalCount}</h3>
+                <span className="small text-uppercase fw-bold" style={{ color: '#4b5563' }}>Total Records</span>
+                <h3 className="fw-bold mt-1 mb-0" style={{ color: '#143422' }}>{totalCount}</h3>
               </div>
             </div>
           </div>
@@ -213,10 +213,10 @@ export default function BlacklistPanel() {
         <div className="col-12 col-md-6 col-lg-3">
           <div className="glass-card p-3" style={{ border: '1px solid rgba(239, 68, 68, 0.4)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div className="bg-danger bg-opacity-25 p-3 rounded-circle text-danger fs-4"><FaBan /></div>
+              <div className="bg-danger bg-opacity-10 p-3 rounded-circle text-danger fs-4"><FaBan /></div>
               <div>
-                <span className="text-white small text-uppercase fw-bold">Active Bans</span>
-                <h3 className="fw-bold text-white mt-1 mb-0">{activeCount}</h3>
+                <span className="small text-uppercase fw-bold" style={{ color: '#dc2626' }}>Active Bans</span>
+                <h3 className="fw-bold text-danger mt-1 mb-0">{activeCount}</h3>
               </div>
             </div>
           </div>
@@ -226,8 +226,8 @@ export default function BlacklistPanel() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <div className="bg-warning bg-opacity-10 p-3 rounded-circle text-warning fs-4"><FaUserSlash /></div>
               <div>
-                <span className="small text-uppercase fw-bold" style={{ color: '#cbd5e1' }}>Banned Accounts</span>
-                <h3 className="fw-bold text-warning mt-1 mb-0">{userBanCount}</h3>
+                <span className="small text-uppercase fw-bold" style={{ color: '#d97706' }}>Banned Accounts</span>
+                <h3 className="fw-bold mt-1 mb-0" style={{ color: '#d97706' }}>{userBanCount}</h3>
               </div>
             </div>
           </div>
@@ -237,7 +237,7 @@ export default function BlacklistPanel() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <div className="bg-info bg-opacity-10 p-3 rounded-circle text-info fs-4"><FaHorseHead /></div>
               <div>
-                <span className="small text-uppercase fw-bold" style={{ color: '#cbd5e1' }}>Banned Horses</span>
+                <span className="small text-uppercase fw-bold" style={{ color: '#0284c7' }}>Banned Horses</span>
                 <h3 className="fw-bold text-info mt-1 mb-0">{horseBanCount}</h3>
               </div>
             </div>
@@ -305,8 +305,10 @@ export default function BlacklistPanel() {
                         </span>
                       </td>
                       <td>
-                        <div className="fw-bold text-white">{item.targetName}</div>
-                        <small style={{ color: '#cbd5e1' }}>{item.targetDetail}</small>
+                        <div className="fw-bold text-white">{item.targetName || item.targetDetail || ('Target #' + item.targetId)}</div>
+                        {item.targetName && item.targetDetail && (
+                          <small style={{ color: '#cbd5e1' }}>{item.targetDetail}</small>
+                        )}
                       </td>
                       <td style={{ color: '#cbd5e1' }}>{item.reason}</td>
                       <td style={{ color: '#cbd5e1' }}>

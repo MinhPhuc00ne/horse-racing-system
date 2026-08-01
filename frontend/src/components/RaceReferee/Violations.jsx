@@ -111,11 +111,11 @@ export default function Violations() {
       <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
           <div>
-            <h2 className="ho-font-epilogue fs-3 fw-bold text-white mb-1">Violations & Flags</h2>
-            <p className="small m-0" style={{ color: '#cbd5e1' }}>Report and manage race infractions.</p>
+            <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#143422' }}>Violations & Flags</h2>
+            <p className="small m-0" style={{ color: '#4b5563' }}>Report and manage race infractions.</p>
           </div>
           <div className="d-flex align-items-center gap-2" style={{ minWidth: '280px' }}>
-            <label className="small mb-0 fw-bold" style={{ whiteSpace: 'nowrap', color: '#cbd5e1' }}>Filter by Race:</label>
+            <label className="small mb-0 fw-bold" style={{ whiteSpace: 'nowrap', color: '#143422' }}>Filter by Race:</label>
             <select 
               className="form-select fw-bold"
               value={selectedFilterRace}

@@ -2004,8 +2004,6 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
     if (a.finishedTime && b.finishedTime) {
       return a.finishedTime - b.finishedTime;
     }
-    if (a.finishedTime) return -1;
-    if (b.finishedTime) return 1;
     return b.progress - a.progress;
   });
 
@@ -2019,17 +2017,17 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
               <span className="material-symbols-outlined">arrow_back</span> Back
             </button>
             <div>
-              <div className="d-flex align-items-center gap-2">
-                <h2 className="ho-font-epilogue fs-4 fw-bold text-dark m-0">Live Simulation</h2>
+              <div className="d-flex align-items-center gap-2 mb-1">
+                <h2 className="ho-font-epilogue fs-4 fw-bold m-0" style={{ color: '#143422' }}>Live Simulation</h2>
                 <span className="live-status-badge">
                   <span className="pulse-dot"></span> LIVE VIEW
                 </span>
               </div>
-              <p className="text-secondary small m-0">Visual simulation monitor for spectators.</p>
+              <p className="small m-0" style={{ color: '#4b5563' }}>Visual simulation monitor for spectators.</p>
             </div>
           </div>
-          <div className="stat-pill">
-            Race Status: <strong className="text-success text-uppercase">{racePhase === 'FINISHED' ? 'Finished' : racePhase === 'RUNNING' ? 'Running' : 'Preparing'}</strong>
+          <div className="d-flex align-items-center gap-2 px-3 py-1.5 rounded-pill" style={{ backgroundColor: 'rgba(20, 52, 34, 0.06)', border: '1px solid rgba(20, 52, 34, 0.15)', fontSize: '12px', fontWeight: 600, color: '#143422' }}>
+            Race Status: <strong className="text-success text-uppercase fw-bold ms-1">{racePhase === 'FINISHED' ? 'Finished' : racePhase === 'RUNNING' ? 'Running' : 'Preparing'}</strong>
           </div>
         </div>
 
@@ -2037,16 +2035,16 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
           {/* Visual Canvas Panel */}
           <div className="glass-sim-card">
             <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
-              <span className="fw-bold text-dark fs-6 d-flex align-items-center gap-2">
+              <span className="fw-bold text-white fs-6 d-flex align-items-center gap-2">
                 <span className="material-symbols-outlined text-success" style={{ fontSize: '18px' }}>emoji_events</span>
                 {race.raceName}
               </span>
               <div className="d-flex flex-wrap align-items-center gap-2">
                 {/* Audio controls */}
-                <div className="d-flex align-items-center gap-2 px-2 py-1 rounded bg-light border" style={{ fontSize: '11px' }}>
+                <div className="d-flex align-items-center gap-2 px-2 py-1 rounded border" style={{ fontSize: '11px', backgroundColor: 'rgba(0,0,0,0.4)', borderColor: 'rgba(212,175,55,0.3)' }}>
                   <button
                     className="btn btn-sm p-1 d-flex align-items-center justify-content-center border-0 bg-transparent"
-                    style={{ color: isSfxMuted ? '#dc3545' : '#198754' }}
+                    style={{ color: isSfxMuted ? '#dc3545' : '#10b981' }}
                     onClick={toggleSfx}
                     title={isSfxMuted ? "Unmute sound" : "Mute sound"}
                   >
@@ -2056,7 +2054,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                   </button>
 
                   <div className="d-flex align-items-center gap-1">
-                    <span className="text-secondary" style={{ fontSize: '10px' }}>Vol:</span>
+                    <span style={{ fontSize: '10px', color: '#cbd5e1' }}>Vol:</span>
                     <input
                       type="range"
                       min="0"
@@ -2064,26 +2062,35 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                       value={Math.round(volume * 100)}
                       onChange={handleVolumeChange}
                       className="form-range"
-                      style={{ width: '55px', height: '4px', padding: 0 }}
+                      style={{ width: '50px', height: '4px', padding: 0 }}
                     />
-                    <span className="text-dark fw-bold" style={{ width: '22px', textAlign: 'right', fontSize: '9px' }}>{Math.round(volume * 100)}%</span>
+                    <span className="text-white fw-bold" style={{ width: '22px', textAlign: 'right', fontSize: '9px' }}>{Math.round(volume * 100)}%</span>
                   </div>
                 </div>
 
                 {/* Weather select */}
-                <div className="d-flex align-items-center gap-1 small text-secondary me-2">
-                  <span>Environment:</span>
+                <div className="d-flex align-items-center gap-1.5 small me-2">
+                  <span className="fw-bold" style={{ color: '#ffffff' }}>Environment:</span>
                   <select
-                    className="form-select form-select-sm bg-white border-secondary text-dark"
-                    style={{ fontSize: '11px', borderRadius: '20px', padding: '2px 24px 2px 8px', width: 'auto', minWidth: '120px' }}
+                    className="form-select form-select-sm border-warning fw-bold"
+                    style={{
+                      fontSize: '11px',
+                      borderRadius: '20px',
+                      padding: '3px 24px 3px 10px',
+                      width: 'auto',
+                      minWidth: '135px',
+                      backgroundColor: '#0c2214',
+                      color: '#ffd700',
+                      border: '1px solid #d4af37'
+                    }}
                     value={environment}
                     onChange={(e) => setEnvironment(e.target.value)}
                   >
-                    <option value="sunset">🌇 Sunset Twilight</option>
-                    <option value="cyber">🛸 Cyber Neon</option>
-                    <option value="sunny">☀️ Sunny Turf</option>
-                    <option value="snow">❄️ Snowy Winter</option>
-                    <option value="rain">🌧️ Rainy Storm</option>
+                    <option value="sunset" style={{ backgroundColor: '#0c2214', color: '#ffd700' }}>🌇 Sunset Twilight</option>
+                    <option value="cyber" style={{ backgroundColor: '#0c2214', color: '#ffd700' }}>🛸 Cyber Neon</option>
+                    <option value="sunny" style={{ backgroundColor: '#0c2214', color: '#ffd700' }}>☀️ Sunny Turf</option>
+                    <option value="snow" style={{ backgroundColor: '#0c2214', color: '#ffd700' }}>❄️ Snowy Winter</option>
+                    <option value="rain" style={{ backgroundColor: '#0c2214', color: '#ffd700' }}>🌧️ Rainy Storm</option>
                   </select>
                 </div>
                 <span className="stat-pill">Distance: <strong>{race.distance}m</strong></span>
@@ -2115,8 +2122,8 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                 />
               )}
             </div>
-            <div className="text-center mt-3 text-secondary small">
-              💡 The simulation screen is for visual real-time ranking tracking only.
+            <div className="text-center mt-3 small" style={{ color: '#cbd5e1' }}>
+              💡 <span className="text-info">Tip:</span> The simulation screen is for visual real-time ranking tracking only.
             </div>
           </div>
 
@@ -2124,7 +2131,7 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
           <div className="d-flex flex-column gap-3">
             {/* Leaderboard */}
             <div className="glass-hud-panel" style={{ minHeight: '340px' }}>
-              <h4 className="fw-bold text-dark fs-6 mb-3 pb-2 d-flex align-items-center gap-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)' }}>
+              <h4 className="fw-bold text-white fs-5 mb-3 pb-2 d-flex align-items-center gap-2" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
                 <span className="material-symbols-outlined text-warning">emoji_events</span>
                 Leaderboard
               </h4>
@@ -2166,25 +2173,25 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
             </div>
 
             {/* Spectator Bets for this Race */}
-            <div className="glass-card p-3">
-              <h4 className="fw-bold text-dark fs-6 mb-3 pb-2 d-flex align-items-center gap-2" style={{ borderBottom: '1px solid rgba(0, 0, 0, 0.08)' }}>
+            <div className="glass-hud-panel p-3" style={{ minHeight: 'auto' }}>
+              <h4 className="fw-bold text-white fs-6 mb-3 pb-2 d-flex align-items-center gap-2" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
                 <span className="material-symbols-outlined text-success">local_atm</span>
                 My Bets in This Race
               </h4>
 
               {loadingBets ? (
-                <div className="text-center py-3 text-secondary small">Loading bets...</div>
+                <div className="text-center py-3 small" style={{ color: '#94a3b8' }}>Loading bets...</div>
               ) : myBets.length === 0 ? (
-                <div className="text-center py-4 text-muted small">
+                <div className="text-center py-4 small" style={{ color: '#94a3b8' }}>
                   You have not placed any bets for this race.
                 </div>
               ) : (
                 <div className="d-flex flex-column gap-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                   {myBets.map(bet => (
-                    <div key={bet.id} className="p-2 rounded border bg-light d-flex justify-content-between align-items-center">
+                    <div key={bet.id} className="p-2 rounded d-flex justify-content-between align-items-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
                       <div>
-                        <strong className="text-dark small block">{bet.horseName}</strong>
-                        <span className="text-secondary block" style={{ fontSize: '10px' }}>
+                        <strong className="text-white small block">{bet.horseName}</strong>
+                        <span className="block" style={{ fontSize: '10px', color: '#94a3b8' }}>
                           Option: <strong className="text-success">{bet.betType}</strong> | Bet: {bet.amount?.toLocaleString('en-US')} VND
                         </span>
                       </div>
@@ -2218,8 +2225,8 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
             <span className="material-symbols-outlined text-warning mb-2" style={{ fontSize: '64px' }}>
               emoji_events
             </span>
-            <h3 className="ho-font-epilogue fs-4 fw-bold text-dark mb-1">Race Completed!</h3>
-            <p className="text-secondary small mb-4">{race.raceName}</p>
+            <h3 className="ho-font-epilogue fs-4 fw-bold text-white mb-1">Race Completed!</h3>
+            <p className="small mb-4" style={{ color: '#cbd5e1' }}>{race.raceName}</p>
 
             <div className="d-flex flex-column gap-2 mb-4 text-start">
               {finalPodium.slice(0, 3).map((item) => (
@@ -2227,8 +2234,8 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                   key={item.rank}
                   className="d-flex align-items-center justify-content-between p-3 rounded"
                   style={{
-                    backgroundColor: item.rank === 1 ? 'rgba(212, 175, 55, 0.08)' : '#f8f9fa',
-                    border: item.rank === 1 ? '1px solid var(--ho-accent-gold)' : '1px solid #e9ecef'
+                    backgroundColor: item.rank === 1 ? 'rgba(212, 175, 55, 0.15)' : 'rgba(0, 0, 0, 0.4)',
+                    border: item.rank === 1 ? '1px solid rgba(212, 175, 55, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)'
                   }}
                 >
                   <div className="d-flex align-items-center gap-3">
@@ -2236,11 +2243,11 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                       {item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : '🥉'}
                     </span>
                     <div>
-                      <h6 className="fw-bold text-dark mb-0">{item.horseName}</h6>
-                      <span className="text-secondary small">{item.jockeyName}</span>
+                      <h6 className="fw-bold text-white mb-0">{item.horseName}</h6>
+                      <span className="small" style={{ color: '#cbd5e1' }}>{item.jockeyName}</span>
                     </div>
                   </div>
-                  <span className="fw-bold text-primary small">{item.time}</span>
+                  <span className="fw-bold text-warning small">{item.time}</span>
                 </div>
               ))}
             </div>
@@ -2256,7 +2263,6 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
           </div>
         </div>
       )}
-
     </>
   );
 }

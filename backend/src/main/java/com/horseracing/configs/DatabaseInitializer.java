@@ -293,14 +293,17 @@ public class DatabaseInitializer implements CommandLineRunner {
             // 7. User Connections (Owner <-> Jockey)
             ensureUserConnections();
 
-            // 8. Ensure Wallets for all users
+            // 8. Ensure Wallets for all users with 300,000 VND initial balance
             jdbcTemplate.update(
                     "INSERT INTO wallets (user_id, balance, created_at) " +
-                            "SELECT u.id, 50000.00, GETDATE() FROM users u " +
+                            "SELECT u.id, 300000.00, GETDATE() FROM users u " +
                             "LEFT JOIN wallets w ON u.id = w.user_id WHERE w.id IS NULL"
             );
 
-            log.info("Successfully validated Tensura test dataset for local DB environment.");
+            // Update all existing user wallets across all roles to 300,000 VND
+            jdbcTemplate.update("UPDATE wallets SET balance = 300000.00");
+
+            log.info("Successfully validated Tensura test dataset and updated 300,000 VND wallet balance for all roles.");
         } catch (org.springframework.dao.DataAccessException e) {
             log.error("Failed to seed Tensura test dataset: {}", e.getMessage(), e);
         }
@@ -313,111 +316,124 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             String[] ownerUsernames = {"benimaru", "souei", "hakuro", "geld", "gabil", "rigurd", "gobta", "kaijin"};
 
-            // 10 Jujutsu Kaisen English named horses per owner with distinct Performance Metrics
+            String[] horseImageUrls = {
+                    "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1598974357801-cbca100e65d3?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1508873696983-2df515122519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1566251037378-5e04e3bec343?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1547841243-eacb14453cd9?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=800&q=80"
+            };
+
+            // 10 Jujutsu Kaisen English named horses per owner with distinct Performance Metrics and Image URLs
             String[][][] ownerHorseTemplates = {
                     // benimaru (Owner 1)
                     {
-                            {"Gojo Satoru", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "98.5", "95", "92", "Bay"},
-                            {"Limitless Void", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "96.0", "92", "90", "Black"},
-                            {"Hollow Purple", "3", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "94.2", "89", "88", "Chestnut"},
-                            {"Six Eyes", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "92.0", "90", "86", "White"},
-                            {"Infinity Shield", "4", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "89.5", "86", "84", "Gray"},
-                            {"Blue Sphere", "3", "MALE", "NOT_STARTED", "FAIR", "RESTING", "87.0", "84", "82", "Palomino"},
-                            {"Red Attraction", "5", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "85.5", "82", "80", "Roan"},
-                            {"Unbound Void", "4", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "83.0", "80", "78", "Brown"},
-                            {"Falling Snow", "7", "FEMALE", "COMPLETED", "INJURED", "INJURED", "79.5", "76", "74", "White"},
-                            {"Limitless Flash", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "91.0", "88", "85", "Dark Bay"}
+                            {"Gojo Satoru", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "98.5", "95", "92", "Bay", horseImageUrls[0]},
+                            {"Limitless Void", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "96.0", "92", "90", "Black", horseImageUrls[1]},
+                            {"Hollow Purple", "3", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "94.2", "89", "88", "Chestnut", horseImageUrls[2]},
+                            {"Six Eyes", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "92.0", "90", "86", "White", horseImageUrls[3]},
+                            {"Infinity Shield", "4", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "89.5", "86", "84", "Gray", horseImageUrls[4]},
+                            {"Blue Sphere", "3", "MALE", "NOT_STARTED", "FAIR", "RESTING", "87.0", "84", "82", "Palomino", horseImageUrls[5]},
+                            {"Red Attraction", "5", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "85.5", "82", "80", "Roan", horseImageUrls[6]},
+                            {"Unbound Void", "4", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "83.0", "80", "78", "Brown", horseImageUrls[7]},
+                            {"Falling Snow", "7", "FEMALE", "COMPLETED", "INJURED", "INJURED", "79.5", "76", "74", "White", horseImageUrls[8]},
+                            {"Limitless Flash", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "91.0", "88", "85", "Dark Bay", horseImageUrls[9]}
                     },
                     // souei (Owner 2)
                     {
-                            {"Ryomen Sukuna", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "99.0", "96", "94", "Dark Chestnut"},
-                            {"Malevolent Shrine", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "97.5", "94", "91", "Black"},
-                            {"Dismantle", "4", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "93.0", "88", "87", "Bay"},
-                            {"Cleave", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "91.5", "87", "89", "Gray"},
-                            {"Divine Flame", "5", "MALE", "COMPLETED", "GOOD", "ACTIVE", "90.0", "85", "83", "Chestnut"},
-                            {"King of Curses", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "88.5", "83", "81", "Roan"},
-                            {"Furnace Open", "4", "FEMALE", "NOT_STARTED", "FAIR", "RESTING", "86.0", "81", "79", "Palomino"},
-                            {"Spiderweb Slash", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "84.0", "79", "77", "Brown"},
-                            {"Binding Vow", "7", "MALE", "COMPLETED", "INJURED", "INJURED", "81.0", "78", "75", "Black"},
-                            {"Slicing Demon", "4", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "92.5", "89", "86", "Dun"}
+                            {"Ryomen Sukuna", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "99.0", "96", "94", "Dark Chestnut", horseImageUrls[1]},
+                            {"Malevolent Shrine", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "97.5", "94", "91", "Black", horseImageUrls[4]},
+                            {"Dismantle", "4", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "93.0", "88", "87", "Bay", horseImageUrls[0]},
+                            {"Cleave", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "91.5", "87", "89", "Gray", horseImageUrls[7]},
+                            {"Divine Flame", "5", "MALE", "COMPLETED", "GOOD", "ACTIVE", "90.0", "85", "83", "Chestnut", horseImageUrls[2]},
+                            {"King of Curses", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "88.5", "83", "81", "Roan", horseImageUrls[6]},
+                            {"Furnace Open", "4", "FEMALE", "NOT_STARTED", "FAIR", "RESTING", "86.0", "81", "79", "Palomino", horseImageUrls[5]},
+                            {"Spiderweb Slash", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "84.0", "79", "77", "Brown", horseImageUrls[3]},
+                            {"Binding Vow", "7", "MALE", "COMPLETED", "INJURED", "INJURED", "81.0", "78", "75", "Black", horseImageUrls[8]},
+                            {"Slicing Demon", "4", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "92.5", "89", "86", "Dun", horseImageUrls[9]}
                     },
                     // hakuro (Owner 3)
                     {
-                            {"Yuji Itadori", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "93.5", "94", "88", "Chestnut"},
-                            {"Black Flash", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "95.0", "91", "90", "Black"},
-                            {"Divergent Fist", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "88.0", "86", "84", "Bay"},
-                            {"Tiger of West", "5", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "86.5", "85", "82", "Palomino"},
-                            {"Soul Striker", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "84.5", "83", "80", "Gray"},
-                            {"Vessel Spirit", "6", "MALE", "COMPLETED", "FAIR", "RESTING", "82.0", "81", "78", "Brown"},
-                            {"Spatial Impact", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "80.5", "79", "76", "Roan"},
-                            {"Unbreakable Will", "4", "MALE", "NOT_STARTED", "FAIR", "ACTIVE", "78.0", "77", "74", "Dark Bay"},
-                            {"Iron Fortress", "7", "MALE", "COMPLETED", "INJURED", "INJURED", "76.5", "74", "71", "White"},
-                            {"Cursed Spark", "3", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "90.0", "88", "86", "Chestnut"}
+                            {"Yuji Itadori", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "93.5", "94", "88", "Chestnut", horseImageUrls[2]},
+                            {"Black Flash", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "95.0", "91", "90", "Black", horseImageUrls[1]},
+                            {"Divergent Fist", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "88.0", "86", "84", "Bay", horseImageUrls[0]},
+                            {"Tiger of West", "5", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "86.5", "85", "82", "Palomino", horseImageUrls[5]},
+                            {"Soul Striker", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "84.5", "83", "80", "Gray", horseImageUrls[7]},
+                            {"Vessel Spirit", "6", "MALE", "COMPLETED", "FAIR", "RESTING", "82.0", "81", "78", "Brown", horseImageUrls[4]},
+                            {"Spatial Impact", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "80.5", "79", "76", "Roan", horseImageUrls[6]},
+                            {"Unbreakable Will", "4", "MALE", "NOT_STARTED", "FAIR", "ACTIVE", "78.0", "77", "74", "Dark Bay", horseImageUrls[8]},
+                            {"Iron Fortress", "7", "MALE", "COMPLETED", "INJURED", "INJURED", "76.5", "74", "71", "White", horseImageUrls[3]},
+                            {"Cursed Spark", "3", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "90.0", "88", "86", "Chestnut", horseImageUrls[9]}
                     },
                     // geld (Owner 4)
                     {
-                            {"Megumi Fushiguro", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "94.0", "90", "91", "Black"},
-                            {"Divine Mahoraga", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "98.0", "97", "93", "White"},
-                            {"Ten Shadows", "5", "MALE", "COMPLETED", "GOOD", "ACTIVE", "92.0", "89", "87", "Dark Bay"},
-                            {"Chimera Garden", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "89.0", "87", "85", "Gray"},
-                            {"Divine Dog", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "87.5", "84", "83", "Black"},
-                            {"Nue Lightning", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "85.0", "82", "81", "Palomino"},
-                            {"Great Serpent", "5", "MALE", "COMPLETED", "FAIR", "RESTING", "83.5", "80", "79", "Roan"},
-                            {"Max Elephant", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "81.5", "86", "76", "Gray"},
-                            {"Rabbit Escape", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "79.0", "75", "77", "White"},
-                            {"Shadow Step", "4", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "88.5", "86", "84", "Chestnut"}
+                            {"Megumi Fushiguro", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "94.0", "90", "91", "Black", horseImageUrls[1]},
+                            {"Divine Mahoraga", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "98.0", "97", "93", "White", horseImageUrls[3]},
+                            {"Ten Shadows", "5", "MALE", "COMPLETED", "GOOD", "ACTIVE", "92.0", "89", "87", "Dark Bay", horseImageUrls[0]},
+                            {"Chimera Garden", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "89.0", "87", "85", "Gray", horseImageUrls[7]},
+                            {"Divine Dog", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "87.5", "84", "83", "Black", horseImageUrls[8]},
+                            {"Nue Lightning", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "85.0", "82", "81", "Palomino", horseImageUrls[5]},
+                            {"Great Serpent", "5", "MALE", "COMPLETED", "FAIR", "RESTING", "83.5", "80", "79", "Roan", horseImageUrls[6]},
+                            {"Max Elephant", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "81.5", "86", "76", "Gray", horseImageUrls[4]},
+                            {"Rabbit Escape", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "79.0", "75", "77", "White", horseImageUrls[2]},
+                            {"Shadow Step", "4", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "88.5", "86", "84", "Chestnut", horseImageUrls[9]}
                     },
                     // gabil (Owner 5)
                     {
-                            {"Nobara Kugisaki", "3", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "91.0", "87", "89", "Chestnut"},
-                            {"Straw Doll", "4", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "89.5", "85", "86", "Bay"},
-                            {"Resonance", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "93.0", "89", "88", "Black"},
-                            {"Hairpin Strike", "3", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "87.0", "83", "84", "Roan"},
-                            {"Nail Barrage", "4", "MALE", "IN_PROGRESS", "FAIR", "RESTING", "85.5", "81", "82", "Gray"},
-                            {"Steel Hammer", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "83.0", "80", "78", "Dark Bay"},
-                            {"Voodoo Charm", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "81.0", "78", "76", "Palomino"},
-                            {"Curse Needle", "5", "FEMALE", "COMPLETED", "INJURED", "INJURED", "79.5", "76", "75", "Brown"},
-                            {"Iron Rose", "4", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "84.0", "82", "80", "Chestnut"},
-                            {"Soul Piercer", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "88.0", "86", "85", "Black"}
+                            {"Nobara Kugisaki", "3", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "91.0", "87", "89", "Chestnut", horseImageUrls[2]},
+                            {"Straw Doll", "4", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "89.5", "85", "86", "Bay", horseImageUrls[0]},
+                            {"Resonance", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "93.0", "89", "88", "Black", horseImageUrls[1]},
+                            {"Hairpin Strike", "3", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "87.0", "83", "84", "Roan", horseImageUrls[6]},
+                            {"Nail Barrage", "4", "MALE", "IN_PROGRESS", "FAIR", "RESTING", "85.5", "81", "82", "Gray", horseImageUrls[7]},
+                            {"Steel Hammer", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "83.0", "80", "78", "Dark Bay", horseImageUrls[8]},
+                            {"Voodoo Charm", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "81.0", "78", "76", "Palomino", horseImageUrls[5]},
+                            {"Curse Needle", "5", "FEMALE", "COMPLETED", "INJURED", "INJURED", "79.5", "76", "75", "Brown", horseImageUrls[4]},
+                            {"Iron Rose", "4", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "84.0", "82", "80", "Chestnut", horseImageUrls[3]},
+                            {"Soul Piercer", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "88.0", "86", "85", "Black", horseImageUrls[9]}
                     },
                     // rigurd (Owner 6)
                     {
-                            {"Yuta Okkotsu", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "97.0", "95", "92", "Dark Bay"},
-                            {"Queen of Curses", "5", "FEMALE", "COMPLETED", "EXCELLENT", "ACTIVE", "96.0", "93", "91", "Black"},
-                            {"Rika Orimoto", "4", "FEMALE", "COMPLETED", "EXCELLENT", "ACTIVE", "94.5", "91", "89", "White"},
-                            {"Pure Love", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "92.5", "88", "87", "Chestnut"},
-                            {"Copy Technique", "5", "MALE", "COMPLETED", "GOOD", "ACTIVE", "90.5", "87", "85", "Bay"},
-                            {"Mutual Love", "6", "FEMALE", "COMPLETED", "FAIR", "RESTING", "88.0", "85", "83", "Gray"},
-                            {"Ring of Vow", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "86.0", "83", "81", "Palomino"},
-                            {"Katana Slash", "4", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "84.0", "81", "79", "Roan"},
-                            {"Special Grade", "7", "MALE", "COMPLETED", "INJURED", "INJURED", "82.5", "80", "77", "Dark Chestnut"},
-                            {"Boundless Energy", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "93.5", "92", "88", "Black"}
+                            {"Yuta Okkotsu", "4", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "97.0", "95", "92", "Dark Bay", horseImageUrls[8]},
+                            {"Queen of Curses", "5", "FEMALE", "COMPLETED", "EXCELLENT", "ACTIVE", "96.0", "93", "91", "Black", horseImageUrls[1]},
+                            {"Rika Orimoto", "4", "FEMALE", "COMPLETED", "EXCELLENT", "ACTIVE", "94.5", "91", "89", "White", horseImageUrls[3]},
+                            {"Pure Love", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "92.5", "88", "87", "Chestnut", horseImageUrls[2]},
+                            {"Copy Technique", "5", "MALE", "COMPLETED", "GOOD", "ACTIVE", "90.5", "87", "85", "Bay", horseImageUrls[0]},
+                            {"Mutual Love", "6", "FEMALE", "COMPLETED", "FAIR", "RESTING", "88.0", "85", "83", "Gray", horseImageUrls[7]},
+                            {"Ring of Vow", "3", "FEMALE", "NOT_STARTED", "GOOD", "ACTIVE", "86.0", "83", "81", "Palomino", horseImageUrls[5]},
+                            {"Katana Slash", "4", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "84.0", "81", "79", "Roan", horseImageUrls[6]},
+                            {"Special Grade", "7", "MALE", "COMPLETED", "INJURED", "INJURED", "82.5", "80", "77", "Dark Chestnut", horseImageUrls[4]},
+                            {"Boundless Energy", "3", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "93.5", "92", "88", "Black", horseImageUrls[9]}
                     },
                     // gobta (Owner 7)
                     {
-                            {"Toji Fushiguro", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "98.0", "94", "95", "Black"},
-                            {"Sorcerer Killer", "7", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "96.5", "92", "93", "Dark Bay"},
-                            {"Heavenly Restriction", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "95.0", "93", "91", "Gray"},
-                            {"Inverted Spear", "4", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "93.0", "89", "88", "Bay"},
-                            {"Playful Cloud", "5", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "91.0", "87", "86", "Chestnut"},
-                            {"Split Soul Katana", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "89.0", "85", "84", "Palomino"},
-                            {"Chain of Thousand", "3", "MALE", "NOT_STARTED", "FAIR", "RESTING", "87.0", "83", "82", "Roan"},
-                            {"Inventory Curse", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "85.0", "81", "80", "Black"},
-                            {"Apex Predator", "3", "MALE", "NOT_STARTED", "GOOD", "ACTIVE", "83.5", "79", "78", "Brown"},
-                            {"Zero Cursed Power", "4", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "90.0", "88", "87", "Dark Chestnut"}
+                            {"Toji Fushiguro", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "98.0", "94", "95", "Black", horseImageUrls[1]},
+                            {"Sorcerer Killer", "7", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "96.5", "92", "93", "Dark Bay", horseImageUrls[8]},
+                            {"Heavenly Restriction", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "95.0", "93", "91", "Gray", horseImageUrls[7]},
+                            {"Inverted Spear", "4", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "93.0", "89", "88", "Bay", horseImageUrls[0]},
+                            {"Playful Cloud", "5", "FEMALE", "COMPLETED", "GOOD", "ACTIVE", "91.0", "87", "86", "Chestnut", horseImageUrls[2]},
+                            {"Split Soul Katana", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "89.0", "85", "84", "Palomino", horseImageUrls[5]},
+                            {"Chain of Thousand", "3", "MALE", "NOT_STARTED", "FAIR", "RESTING", "87.0", "83", "82", "Roan", horseImageUrls[6]},
+                            {"Inventory Curse", "6", "MALE", "COMPLETED", "GOOD", "ACTIVE", "85.0", "81", "80", "Black", horseImageUrls[4]},
+                            {"Apex Predator", "3", "MALE", "NOT_STARTED", "GOOD", "ACTIVE", "83.5", "79", "78", "Brown", horseImageUrls[3]},
+                            {"Zero Cursed Power", "4", "FEMALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "90.0", "88", "87", "Dark Chestnut", horseImageUrls[9]}
                     },
                     // kaijin (Owner 8)
                     {
-                            {"Kento Nanami", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "92.5", "91", "90", "Chestnut"},
-                            {"Ratio Technique", "4", "MALE", "COMPLETED", "GOOD", "ACTIVE", "90.5", "88", "88", "Bay"},
-                            {"Seven Three", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "88.5", "86", "86", "Dark Bay"},
-                            {"Overtime Unleashed", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "94.0", "93", "89", "Gray"},
-                            {"Blunt Blade", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "86.5", "84", "83", "Black"},
-                            {"Suguru Geto", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "95.5", "92", "91", "Dark Chestnut"},
-                            {"Cursed Manipulation", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "93.5", "90", "89", "Black"},
-                            {"Uzumaki Spiral", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "91.5", "88", "87", "Gray"},
-                            {"Night Parade", "3", "FEMALE", "NOT_STARTED", "FAIR", "RESTING", "87.5", "85", "83", "Palomino"},
-                            {"Aoi Todo", "4", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "89.5", "90", "85", "Bay"}
+                            {"Kento Nanami", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "92.5", "91", "90", "Chestnut", horseImageUrls[2]},
+                            {"Ratio Technique", "4", "MALE", "COMPLETED", "GOOD", "ACTIVE", "90.5", "88", "88", "Bay", horseImageUrls[0]},
+                            {"Seven Three", "3", "MALE", "IN_PROGRESS", "GOOD", "ACTIVE", "88.5", "86", "86", "Dark Bay", horseImageUrls[8]},
+                            {"Overtime Unleashed", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "94.0", "93", "89", "Gray", horseImageUrls[7]},
+                            {"Blunt Blade", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "86.5", "84", "83", "Black", horseImageUrls[1]},
+                            {"Suguru Geto", "6", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "95.5", "92", "91", "Dark Chestnut", horseImageUrls[4]},
+                            {"Cursed Manipulation", "5", "MALE", "COMPLETED", "EXCELLENT", "ACTIVE", "93.5", "90", "89", "Black", horseImageUrls[6]},
+                            {"Uzumaki Spiral", "4", "FEMALE", "IN_PROGRESS", "GOOD", "ACTIVE", "91.5", "88", "87", "Gray", horseImageUrls[3]},
+                            {"Night Parade", "3", "FEMALE", "NOT_STARTED", "FAIR", "RESTING", "87.5", "85", "83", "Palomino", horseImageUrls[5]},
+                            {"Aoi Todo", "4", "MALE", "IN_PROGRESS", "EXCELLENT", "ACTIVE", "89.5", "90", "85", "Bay", horseImageUrls[9]}
                     }
             };
 
@@ -439,17 +455,27 @@ public class DatabaseInitializer implements CommandLineRunner {
                 }
 
                 String[][] horseTemplates = ownerHorseTemplates[oIdx];
-                for (String[] ht : horseTemplates) {
+                for (int hIdx = 0; hIdx < horseTemplates.length; hIdx++) {
+                    String[] ht = horseTemplates[hIdx];
                     Double spd = ht[6] != null ? Double.valueOf(ht[6]) : null;
                     Integer stm = ht[7] != null ? Integer.valueOf(ht[7]) : null;
                     Integer gate = ht[8] != null ? Integer.valueOf(ht[8]) : null;
+                    String imgUrl = (ht.length > 10 && ht[10] != null) ? ht[10] : horseImageUrls[hIdx % horseImageUrls.length];
 
                     jdbcTemplate.update(
-                            "INSERT INTO horses (owner_id, breed_id, name, age, gender, training_status, health_status, status, speed_rating, stamina_rating, gate_performance_rating, color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                            ownerId, breedId, ht[0], Integer.parseInt(ht[1]), ht[2], ht[3], ht[4], ht[5], spd, stm, gate, ht[9]
+                            "INSERT INTO horses (owner_id, breed_id, name, age, gender, training_status, health_status, status, speed_rating, stamina_rating, gate_performance_rating, color, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            ownerId, breedId, ht[0], Integer.parseInt(ht[1]), ht[2], ht[3], ht[4], ht[5], spd, stm, gate, ht[9], imgUrl
                     );
                 }
             }
+
+            // Fallback: Populate horse images for any existing horses missing image_url
+            for (int i = 0; i < horseImageUrls.length; i++) {
+                jdbcTemplate.update("UPDATE horses SET image_url = ? WHERE (image_url IS NULL OR image_url = '') AND (id % 10 = ?)", horseImageUrls[i], i);
+            }
+            jdbcTemplate.update("UPDATE horses SET image_url = 'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&w=800&q=80' WHERE image_url IS NULL OR image_url = ''");
+
+            log.info("Successfully seeded and assigned high quality horse images for all owner stables.");
         } catch (org.springframework.dao.DataAccessException e) {
             log.warn("Seed horses check warning: {}", e.getMessage());
         }

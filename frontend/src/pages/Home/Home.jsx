@@ -201,29 +201,6 @@ const Home = () => {
 
   return (
     <div className="home-page-wrapper">
-      {/* 0. AUTHENTICATED USER WELCOME BAR */}
-      {isAuthenticated && user && (
-        <div className="user-welcome-bar">
-          <Container fluid="lg">
-            <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
-              <div className="d-flex align-items-center gap-2">
-                <span className="material-symbols-outlined text-warning fs-5">account_circle</span>
-                <span className="fw-bold" style={{ fontSize: '0.9rem' }}>
-                  Welcome back, <span style={{ color: '#ffd700' }}>{user.fullName || user.username}</span>! Logged in as: <strong className="text-uppercase" style={{ color: '#95d4ac' }}>{getRoleNameVN()}</strong>
-                </span>
-              </div>
-              <button
-                onClick={() => navigate(getRoleDashboardPath())}
-                className="btn btn-sm btn-warning fw-bold d-flex align-items-center gap-1 shadow-sm"
-                style={{ fontSize: '0.82rem', borderRadius: '6px', color: '#07150c' }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>dashboard</span>
-                <span>Go to {user.role?.replace('_', ' ')} Dashboard</span>
-              </button>
-            </div>
-          </Container>
-        </div>
-      )}
 
       <main className="home-canvas">
         {/* 1. HERO SECTION */}

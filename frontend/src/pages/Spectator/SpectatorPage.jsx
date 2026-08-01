@@ -48,7 +48,6 @@ export default function SpectatorPage() {
         { path: '/owner/entries', label: 'Race Entries', icon: 'emoji_events' },
         { path: '/owner/friends', label: 'Connections', icon: 'group' },
         { path: '/owner/financials', label: 'Financials', icon: 'payments' },
-        { path: '/owner/analytics', label: 'Analytics', icon: 'analytics' },
         { path: '/spectators/tournaments', label: 'Betting', icon: 'local_atm' },
         { path: '/spectators/live', label: 'Live Simulation', icon: 'live_tv' },
         { path: '/spectators/wallet', label: 'Wallet & Transactions', icon: 'account_balance_wallet' }

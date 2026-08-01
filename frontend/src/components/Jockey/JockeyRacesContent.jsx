@@ -21,10 +21,10 @@ export default function JockeyRacesContent() {
       {/* Title */}
       <div className="d-flex justify-content-between align-items-end border-bottom pb-3 mb-4" style={{ borderColor: 'rgba(212, 175, 55, 0.25)' }}>
         <div>
-          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1 text-white">
+          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#143422' }}>
             Schedule & Tournaments
           </h2>
-          <p className="small m-0" style={{ color: '#cbd5e1' }}>
+          <p className="small m-0" style={{ color: '#4b5563' }}>
             Track the races you are about to participate in and view all tournament details.
           </p>
         </div>

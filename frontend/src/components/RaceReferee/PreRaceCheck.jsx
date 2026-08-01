@@ -87,8 +87,8 @@ export default function PreRaceCheck() {
     <>
       <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
         <div className="mb-4">
-          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#ffffff' }}>Pre-Race Check</h2>
-          <p className="small" style={{ color: '#cbd5e1' }}>Verify the health and technical condition of horses and jockeys before allowing them to race.</p>
+          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#143422' }}>Pre-Race Check</h2>
+          <p className="small" style={{ color: '#4b5563' }}>Verify the health and technical condition of horses and jockeys before allowing them to race.</p>
         </div>
 
         <div className="glass-card">

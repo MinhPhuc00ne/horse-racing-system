@@ -122,10 +122,10 @@ export default function JockeyProfileContent() {
       {/* Title */}
       <div className="d-flex justify-content-between align-items-end border-bottom pb-3 mb-4" style={{ borderColor: 'rgba(212, 175, 55, 0.25)' }}>
         <div>
-          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1 text-white">
+          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#143422' }}>
             Jockey Profile
           </h2>
-          <p className="small m-0" style={{ color: '#cbd5e1' }}>
+          <p className="small m-0" style={{ color: '#4b5563' }}>
             Manage your technical specs, skills, and contact details.
           </p>
         </div>
@@ -139,32 +139,32 @@ export default function JockeyProfileContent() {
             <div className="rounded-circle overflow-hidden border shadow-sm mb-3" style={{ width: '120px', height: '120px', borderColor: 'var(--ho-accent-gold)', flexShrink: 0 }}>
               <img src={profile.avatar} alt={profile.fullName} className="w-100 h-100 object-fit-cover" />
             </div>
-            <h3 className="fw-bold fs-5 mb-1 text-white">
+            <h3 className="fw-bold fs-5 mb-1" style={{ color: '#143422' }}>
               {profile.fullName}
             </h3>
-            <span className="ho-font-grotesk fw-bold text-uppercase small mb-3" style={{ letterSpacing: '0.05em', color: '#cbd5e1' }}>
+            <span className="ho-font-grotesk fw-bold text-uppercase small mb-3" style={{ letterSpacing: '0.05em', color: '#d4af37' }}>
               JOCKEY ROLE
             </span>
-            <p className="small px-3 mb-4" style={{ fontStyle: 'italic', lineHeight: '1.4', color: '#cbd5e1' }}>
+            <p className="small px-3 mb-4" style={{ fontStyle: 'italic', lineHeight: '1.4', color: '#4b5563' }}>
               "{profile.description}"
             </p>
 
-            <div className="w-100 rounded p-3 text-start mb-0" style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)', border: '1px solid rgba(212, 175, 55, 0.25)' }}>
-              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-                <span className="fw-bold text-white small">Experience:</span>
-                <span className="fw-semibold small" style={{ color: '#cbd5e1' }}>{profile.experienceYears} years</span>
+            <div className="w-100 rounded p-3 text-start mb-0" style={{ backgroundColor: '#f8fafc', border: '1px solid rgba(20, 52, 34, 0.15)' }}>
+              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
+                <span className="fw-bold small" style={{ color: '#143422' }}>Experience:</span>
+                <span className="fw-semibold small" style={{ color: '#4b5563' }}>{profile.experienceYears} years</span>
               </div>
-              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-                <span className="fw-bold text-white small">Matches Played:</span>
-                <span className="fw-semibold small" style={{ color: '#cbd5e1' }}>{profile.matchesPlayed || 0} matches</span>
+              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
+                <span className="fw-bold small" style={{ color: '#143422' }}>Matches Played:</span>
+                <span className="fw-semibold small" style={{ color: '#4b5563' }}>{profile.matchesPlayed || 0} matches</span>
               </div>
-              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-                <span className="fw-bold text-white small">Email:</span>
-                <span className="fw-semibold small text-truncate ms-2" style={{ maxWidth: '180px', color: '#cbd5e1' }} title={profile.email}>{profile.email}</span>
+              <div className="d-flex justify-content-between py-1 border-bottom" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
+                <span className="fw-bold small" style={{ color: '#143422' }}>Email:</span>
+                <span className="fw-semibold small text-truncate ms-2" style={{ maxWidth: '180px', color: '#4b5563' }} title={profile.email}>{profile.email}</span>
               </div>
               <div className="d-flex justify-content-between py-1">
-                <span className="fw-bold text-white small">Phone Number:</span>
-                <span className="fw-semibold small" style={{ color: '#cbd5e1' }}>{profile.phoneNumber || 'N/A'}</span>
+                <span className="fw-bold small" style={{ color: '#143422' }}>Phone Number:</span>
+                <span className="fw-semibold small" style={{ color: '#4b5563' }}>{profile.phoneNumber || 'N/A'}</span>
               </div>
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function JockeyProfileContent() {
         {/* Right column - Main view details */}
         <div className="col-12 col-lg-8">
             <div className="glass-card h-100">
-              <h3 className="ho-font-epilogue fs-5 fw-bold mb-4 text-white">
+              <h3 className="ho-font-epilogue fs-5 fw-bold mb-4" style={{ color: '#143422' }}>
                 Update Detailed Information
               </h3>
 
@@ -193,7 +193,7 @@ export default function JockeyProfileContent() {
                     <input
                       type="email"
                       className="ho-form-input"
-                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)', color: '#cbd5e1' }}
+                      style={{ backgroundColor: '#e2e8f0', color: '#4b5563' }}
                       value={profile.email}
                       disabled
                     />

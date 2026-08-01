@@ -76,7 +76,7 @@ export default function DashboardContent() {
       <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-end gap-3 mb-4">
         <div>
           <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: 'var(--ho-primary-dark)' }}>
-            Stable Dashboard
+            Stable Overview
           </h2>
           <p className="text-secondary small m-0">
             Overview of your elite assets and upcoming events.

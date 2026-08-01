@@ -1,6 +1,6 @@
 import axiosClient from '../api/axiosClient';
-import { initialJockeyTransactions } from '../mocks/jockeyMockData';
-import { initialTransactions } from '../mocks/ownerMockData';
+import { initialJockeyTransactions } from '../pages/mocks/jockeyMockData';
+import { initialTransactions } from '../pages/mocks/ownerMockData';
 
 const isMockMode = () => {
   return false;

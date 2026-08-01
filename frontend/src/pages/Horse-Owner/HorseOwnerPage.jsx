@@ -18,7 +18,7 @@ import SpectatorLiveSimulationPage from '../../components/Spectator/SpectatorLiv
 import SpectatorWallet from '../../components/Spectator/SpectatorWallet';
 
 const ownerNavLinks = [
-  { path: '/owner/dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { path: '/owner/dashboard', label: 'Home', icon: 'home' },
   { path: '/owner/stable', label: 'Horses', icon: 'fence' },
   { path: '/owner/entries', label: 'Race Entries', icon: 'emoji_events' },
   { path: '/owner/friends', label: 'Connections', icon: 'group' },

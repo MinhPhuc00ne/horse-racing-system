@@ -442,27 +442,27 @@ div[style*="position: fixed"] .glass-card .btn-outline-light:hover, div[style*="
 /* ========================================================================= */
 /* GLOBAL TEXT & HEADING LIGHT THEME OVERRIDES FOR NON-ADMIN ROLES           */
 /* ========================================================================= */
-.dashboard-layout-container main h1,
-.dashboard-layout-container main h2,
-.dashboard-layout-container main h3,
-.dashboard-layout-container main h4,
-.dashboard-layout-container main h5,
-.dashboard-layout-container main h6,
-.dashboard-layout-container main .ho-font-epilogue,
-.dashboard-layout-container main .dashboard-title {
-  color: #143422 !important;
+.dashboard-layout-container main h1:not(.text-white):not(.text-warning),
+.dashboard-layout-container main h2:not(.text-white):not(.text-warning),
+.dashboard-layout-container main h3:not(.text-white):not(.text-warning),
+.dashboard-layout-container main h4:not(.text-white):not(.text-warning),
+.dashboard-layout-container main h5:not(.text-white):not(.text-warning),
+.dashboard-layout-container main h6:not(.text-white):not(.text-warning),
+.dashboard-layout-container main .ho-font-epilogue:not(.text-white):not(.text-warning),
+.dashboard-layout-container main .dashboard-title:not(.text-white) {
+  color: #143422;
 }
 
-.dashboard-layout-container main p:not(.table p):not(table p),
-.dashboard-layout-container main span:not(.badge):not(.status-badge):not(.material-symbols-outlined):not(.btn):not(.ho-btn):not(.table span):not(table span):not(.wallet-premium-input-suffix),
-.dashboard-layout-container main .small:not(table *):not(.table *),
-.dashboard-layout-container main small:not(table *):not(.table *),
+.dashboard-layout-container main p:not(.text-white):not(.text-white-50):not(.text-warning):not(.table p):not(table p),
+.dashboard-layout-container main span:not(.text-white):not(.text-white-50):not(.text-warning):not(.badge):not(.status-badge):not(.material-symbols-outlined):not(.btn):not(.ho-btn):not(.table span):not(table span):not(.wallet-premium-input-suffix):not(.card-brand):not(.balance-label):not(.balance-amount),
+.dashboard-layout-container main .small:not(.text-white):not(.text-white-50):not(table *):not(.table *),
+.dashboard-layout-container main small:not(.text-white):not(.text-white-50):not(table *):not(.table *),
 .dashboard-layout-container main .panel-description,
 .dashboard-layout-container main .upload-text,
 .dashboard-layout-container main .upload-subtext,
 .dashboard-layout-container main .details-label,
 .dashboard-layout-container main .profile-label {
-  color: #4b5563 !important;
+  color: #4b5563;
 }
 
 /* Ensure table cells and their child contents remain white inside spruce green tables */
@@ -480,19 +480,53 @@ div[style*="position: fixed"] .glass-card .btn-outline-light:hover, div[style*="
   color: #d4af37 !important;
 }
 
-/* Ensure text inside welcome banners or cards with dark gradients remains white/gold */
-.dashboard-layout-container main div[style*="background: 'linear-gradient"] h2,
-.dashboard-layout-container main div[style*="background: 'linear-gradient"] p,
-.dashboard-layout-container main div[style*="background: 'linear-gradient"] span,
-.dashboard-layout-container main div[style*="background: linear-gradient"] h2,
-.dashboard-layout-container main div[style*="background: linear-gradient"] p,
-.dashboard-layout-container main div[style*="background: linear-gradient"] span {
+/* HIGH CONTRAST OVERRIDES FOR DARK CARDS & BANNERS */
+.text-white:not(.glass-card *):not(.glass-card) {
   color: #ffffff !important;
 }
 
-.dashboard-layout-container main div[style*="background: 'linear-gradient"] p.text-white-50,
-.dashboard-layout-container main div[style*="background: linear-gradient"] p.text-white-50,
-.dashboard-layout-container main div[style*="background: 'linear-gradient"] .text-white-50,
-.dashboard-layout-container main div[style*="background: linear-gradient"] .text-white-50 {
+.text-white-50:not(.glass-card *):not(.glass-card) {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.text-warning:not(.glass-card *) {
+  color: #ffd700 !important;
+}
+
+.wallet-premium-card,
+.wallet-premium-card * {
+  color: #ffffff;
+}
+
+.wallet-premium-card .card-brand {
+  color: #ffd700 !important;
+}
+
+.wallet-premium-card .balance-label {
+  color: #e2e8f0 !important;
+}
+
+.wallet-premium-card .balance-amount {
+  color: #ffffff !important;
+}
+
+.dashboard-layout-container main div[style*="backgroundColor: '#0"] h1,
+.dashboard-layout-container main div[style*="backgroundColor: '#0"] h2,
+.dashboard-layout-container main div[style*="backgroundColor: '#0"] h3,
+.dashboard-layout-container main div[style*="backgroundColor: '#0"] h4,
+.dashboard-layout-container main div[style*="background-color: #0"] h1,
+.dashboard-layout-container main div[style*="background-color: #0"] h2,
+.dashboard-layout-container main div[style*="background-color: #0"] h3,
+.dashboard-layout-container main div[style*="background-color: #0"] h4,
+.dashboard-layout-container main div[style*="background: #0"] h1,
+.dashboard-layout-container main div[style*="background: #0"] h2,
+.dashboard-layout-container main div[style*="background: #0"] h3,
+.dashboard-layout-container main div[style*="background: #0"] h4 {
+  color: #ffffff !important;
+}
+
+.dashboard-layout-container main div[style*="backgroundColor: '#0"] p,
+.dashboard-layout-container main div[style*="background-color: #0"] p,
+.dashboard-layout-container main div[style*="background: #0"] p {
   color: rgba(255, 255, 255, 0.75) !important;
 }

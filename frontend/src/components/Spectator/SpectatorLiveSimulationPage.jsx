@@ -131,7 +131,7 @@ export default function SpectatorLiveSimulationPage() {
 
   // Live Broadcast Hub Screen (Offline Standby)
   return (
-    <div className="py-4" style={{ backgroundColor: '#EEEEEE', color: '#e2e8f0', minHeight: '100vh' }}>
+    <div className="py-4" style={{ backgroundColor: '#EEEEEE', color: '#111111', minHeight: '100vh' }}>
       <Container fluid="lg">
 
         {/* 1. HERO BROADCAST BANNER */}

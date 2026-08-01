@@ -95,8 +95,8 @@ export default function ConfirmResults() {
     <>
       <div className="container-fluid p-0 animate-fade-in" style={{ maxWidth: '1440px' }}>
         <div className="mb-4">
-          <h2 className="ho-font-epilogue fs-3 fw-bold text-white mb-1">Confirm Results</h2>
-          <p className="small" style={{ color: '#cbd5e1' }}>Review race outcomes and authorize prize distribution.</p>
+          <h2 className="ho-font-epilogue fs-3 fw-bold mb-1" style={{ color: '#143422' }}>Confirm Results</h2>
+          <p className="small" style={{ color: '#4b5563' }}>Review race outcomes and authorize prize distribution.</p>
         </div>
 
         <div className="row g-4">
