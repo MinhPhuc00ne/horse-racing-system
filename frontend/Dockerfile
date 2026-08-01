@@ -17,6 +17,6 @@ COPY --from=builder --chown=appuser:appuser /app/dist ./dist
 COPY --from=builder --chown=appuser:appuser /app/package*.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci && chown -R appuser:appuser /app
 USER appuser
-EXPOSE 3000
-# Serve the production build via Vite preview, bound to all interfaces
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "3000"]
+EXPOSE 5173
+# Use production node server instead of dev server
+CMD ["npm", "run", "dev"]
