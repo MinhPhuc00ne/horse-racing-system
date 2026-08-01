@@ -138,13 +138,12 @@ public class PredictionPayoutServiceTest {
         predictionPayoutService.processPayouts(101,
                 List.of(participant1, participant2, participant3), race);
 
-        // Net PLACE pool = 200 * 0.9 = 180. Shared half-pool = 90 each.
-        // Odds for H1 (bet1) = 90 / 100 = 0.90 -> Floor limit is 1.05.
-        // Odds for H2 (bet2) = 90 / 100 = 0.90 -> Floor limit is 1.05.
+        // Net PLACE pool = 200 * 0.9 = 180. Profit = 180 - 200 = -20 (Negative profit).
+        // Since profit is negative, floor limit of 1.00 applies.
         assertEquals("WON", bet1.getStatus());
         assertEquals("WON", bet2.getStatus());
-        assertEquals(0, BigDecimal.valueOf(1.05).compareTo(bet1.getOdds()));
-        assertEquals(0, BigDecimal.valueOf(1.05).compareTo(bet2.getOdds()));
+        assertEquals(0, BigDecimal.valueOf(1.00).compareTo(bet1.getOdds()));
+        assertEquals(0, BigDecimal.valueOf(1.00).compareTo(bet2.getOdds()));
     }
 
     @Test
