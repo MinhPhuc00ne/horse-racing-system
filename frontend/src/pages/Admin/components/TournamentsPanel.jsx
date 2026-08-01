@@ -594,6 +594,7 @@ export default function TournamentsPanel() {
               onClick={resetForm}
             >
               <div
+                className="admin-modal-card"
                 style={{
                   width: '100%',
                   maxWidth: '980px',

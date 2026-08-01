@@ -21,32 +21,28 @@ public class AiActionSecurityValidator {
         ROLE_ALLOWED_ACTIONS.put(null, Set.of("NAVIGATE"));
 
         // SPECTATOR
-        ROLE_ALLOWED_ACTIONS.put(Role.SPECTATOR, Set.of(
-            "NAVIGATE", "DEPOSIT_FUNDS", "WITHDRAW_FUNDS", "UPDATE_BANK_INFO", "PLACE_BET", "REQUEST_UPGRADE"
-        ));
+        ROLE_ALLOWED_ACTIONS.put(Role.SPECTATOR, Set.of("NAVIGATE", "DEPOSIT_FUNDS",
+                "WITHDRAW_FUNDS", "UPDATE_BANK_INFO", "PLACE_BET", "REQUEST_UPGRADE"));
 
         // HORSE_OWNER
-        ROLE_ALLOWED_ACTIONS.put(Role.HORSE_OWNER, Set.of(
-            "NAVIGATE", "DEPOSIT_FUNDS", "WITHDRAW_FUNDS", "UPDATE_BANK_INFO", "PLACE_BET", 
-            "ADD_HORSE", "REGISTER_HORSE_RACE", "SEARCH_JOCKEY"
-        ));
+        ROLE_ALLOWED_ACTIONS.put(Role.HORSE_OWNER,
+                Set.of("NAVIGATE", "DEPOSIT_FUNDS", "WITHDRAW_FUNDS", "UPDATE_BANK_INFO",
+                        "PLACE_BET", "ADD_HORSE", "REGISTER_HORSE_RACE", "SEARCH_JOCKEY"));
 
         // JOCKEY
-        ROLE_ALLOWED_ACTIONS.put(Role.JOCKEY, Set.of(
-            "NAVIGATE", "DEPOSIT_FUNDS", "WITHDRAW_FUNDS", "UPDATE_BANK_INFO", "PLACE_BET", "VIEW_SCHEDULE"
-        ));
+        ROLE_ALLOWED_ACTIONS.put(Role.JOCKEY, Set.of("NAVIGATE", "DEPOSIT_FUNDS", "WITHDRAW_FUNDS",
+                "UPDATE_BANK_INFO", "PLACE_BET", "VIEW_SCHEDULE"));
 
         // RACE_REFEREE
-        ROLE_ALLOWED_ACTIONS.put(Role.RACE_REFEREE, Set.of(
-            "NAVIGATE", "DEPOSIT_FUNDS", "WITHDRAW_FUNDS", "UPDATE_BANK_INFO", "PLACE_BET", 
-            "VIEW_SCHEDULE", "UPDATE_RACE_RESULT", "RECORD_VIOLATION"
-        ));
+        ROLE_ALLOWED_ACTIONS.put(Role.RACE_REFEREE,
+                Set.of("NAVIGATE", "DEPOSIT_FUNDS", "WITHDRAW_FUNDS", "UPDATE_BANK_INFO",
+                        "PLACE_BET", "VIEW_SCHEDULE", "UPDATE_RACE_RESULT", "RECORD_VIOLATION"));
 
         // ADMIN
-        ROLE_ALLOWED_ACTIONS.put(Role.ADMIN, Set.of(
-            "NAVIGATE", "DEPOSIT_FUNDS", "WITHDRAW_FUNDS", "UPDATE_BANK_INFO", "PLACE_BET",
-            "APPROVE_UPGRADE", "CREATE_TOURNAMENT", "ASSIGN_REFEREE", "MANAGE_TRANSACTIONS", "MANAGE_BLACKLIST"
-        ));
+        ROLE_ALLOWED_ACTIONS.put(Role.ADMIN,
+                Set.of("NAVIGATE", "DEPOSIT_FUNDS", "WITHDRAW_FUNDS", "UPDATE_BANK_INFO",
+                        "PLACE_BET", "APPROVE_UPGRADE", "CREATE_TOURNAMENT", "ASSIGN_REFEREE",
+                        "MANAGE_TRANSACTIONS", "MANAGE_BLACKLIST"));
     }
 
     public boolean isActionAllowed(Role userRole, String actionType) {
@@ -58,8 +54,8 @@ public class AiActionSecurityValidator {
     }
 
     /**
-     * Sanitizes raw AI response string, strips markdown code blocks if present,
-     * checks action permissions against userRole, and returns a clean JSON string with "text" and "action".
+     * Sanitizes raw AI response string, strips markdown code blocks if present, checks action
+     * permissions against userRole, and returns a clean JSON string with "text" and "action".
      */
     public String sanitizeAndStructureResponse(Role userRole, String rawResponseStr) {
         if (rawResponseStr == null || rawResponseStr.isBlank()) {
@@ -84,17 +80,22 @@ public class AiActionSecurityValidator {
                     String text = root.has("text") ? root.get("text").asText() : "";
                     text = text.replaceAll("```json", "").replaceAll("```", "").trim();
 
-                    JsonNode actionNode = root.has("action") && !root.get("action").isNull() ? root.get("action") : null;
+                    JsonNode actionNode =
+                            root.has("action") && !root.get("action").isNull() ? root.get("action")
+                                    : null;
 
                     ObjectNode result = objectMapper.createObjectNode();
                     result.put("text", text);
 
                     if (actionNode != null && actionNode.isObject()) {
-                        String actionType = actionNode.has("type") ? actionNode.get("type").asText() : null;
+                        String actionType =
+                                actionNode.has("type") ? actionNode.get("type").asText() : null;
                         if (isActionAllowed(userRole, actionType)) {
                             result.set("action", actionNode);
                         } else {
-                            log.warn("SECURITY ALERT: Intercepted unauthorized AI action '{}' for user role '{}'. Action removed.", actionType, userRole);
+                            log.warn(
+                                    "SECURITY ALERT: Intercepted unauthorized AI action '{}' for user role '{}'. Action removed.",
+                                    actionType, userRole);
                             result.putNull("action");
                         }
                     } else {

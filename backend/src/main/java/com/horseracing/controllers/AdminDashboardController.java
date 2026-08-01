@@ -198,8 +198,8 @@ public class AdminDashboardController {
                 .revenueData(revenueDataList).betVolumeData(betVolumeList)
                 .breedDistribution(breedDistribution).raceStatusDistribution(raceStatusDistribution)
                 .transactionTrendData(transactionTrendList)
-                .tournamentPrizesData(tournamentPrizesList)
-                .revenueDistribution(revenueDistribution).build();
+                .tournamentPrizesData(tournamentPrizesList).revenueDistribution(revenueDistribution)
+                .build();
 
         return ResponseEntity.ok(response);
     }

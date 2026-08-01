@@ -87,7 +87,7 @@ export default function SpectatorLiveSimulationPage() {
 
   if (loading) {
     return (
-      <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '70vh', backgroundColor: '#051009', color: '#fff' }}>
+      <div className="d-flex flex-column align-items-center justify-content-center" style={{ minHeight: '70vh', backgroundColor: '#EEEEEE', color: '#fff' }}>
         <div className="spinner-border text-warning mb-3" role="status" style={{ width: '3rem', height: '3rem' }}></div>
         <p className="text-warning fw-bold small">Scanning Live TV Signal & Telemetry Stream...</p>
       </div>
@@ -97,7 +97,7 @@ export default function SpectatorLiveSimulationPage() {
   // Active Broadcast Canvas View (Real race or Demo race)
   if (activeSimulationRace) {
     return (
-      <div className="py-3 px-2" style={{ backgroundColor: '#051009', minHeight: '100vh' }}>
+      <div className="py-3 px-2" style={{ backgroundColor: '#EEEEEE', minHeight: '100vh' }}>
         <Container fluid="lg">
           <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 p-3 rounded-3" style={{ backgroundColor: '#07150c', border: '1px solid rgba(212, 175, 55, 0.3)' }}>
             <div className="d-flex align-items-center gap-3">
@@ -131,7 +131,7 @@ export default function SpectatorLiveSimulationPage() {
 
   // Live Broadcast Hub Screen (Offline Standby)
   return (
-    <div className="py-4" style={{ backgroundColor: '#051009', color: '#e2e8f0', minHeight: '100vh' }}>
+    <div className="py-4" style={{ backgroundColor: '#EEEEEE', color: '#e2e8f0', minHeight: '100vh' }}>
       <Container fluid="lg">
 
         {/* 1. HERO BROADCAST BANNER */}
@@ -188,7 +188,7 @@ export default function SpectatorLiveSimulationPage() {
         </div>
 
         {/* 2. TELEMETRY & TRACK CONDITIONS PANEL */}
-        <h3 className="fw-bold text-white mb-3 d-flex align-items-center gap-2" style={{ fontSize: '1.25rem' }}>
+        <h3 className="fw-bold mb-3 d-flex align-items-center gap-2" style={{ fontSize: '1.25rem', color: '#143422' }}>
           <span className="material-symbols-outlined text-warning fs-5">sensors</span>
           Racecourse Telemetry & Track Metrics
         </h3>
@@ -246,7 +246,7 @@ export default function SpectatorLiveSimulationPage() {
         {/* 3. UPCOMING RACE SCHEDULE & RECORD HIGHLIGHTS */}
         <Row className="g-4">
           <Col xs={12} lg={7}>
-            <h3 className="fw-bold text-white mb-3 d-flex align-items-center gap-2" style={{ fontSize: '1.25rem' }}>
+            <h3 className="fw-bold mb-3 d-flex align-items-center gap-2" style={{ fontSize: '1.25rem', color: '#143422' }}>
               <span className="material-symbols-outlined text-warning fs-5">event_upcoming</span>
               Upcoming Championship Races
             </h3>
@@ -295,7 +295,7 @@ export default function SpectatorLiveSimulationPage() {
 
           {/* 4. TRACK RECORD & CHAMPION HIGHLIGHT */}
           <Col xs={12} lg={5}>
-            <h3 className="fw-bold text-white mb-3 d-flex align-items-center gap-2" style={{ fontSize: '1.25rem' }}>
+            <h3 className="fw-bold mb-3 d-flex align-items-center gap-2" style={{ fontSize: '1.25rem', color: '#143422' }}>
               <span className="material-symbols-outlined text-warning fs-5">stars</span>
               Track Record Highlight
             </h3>

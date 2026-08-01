@@ -10,9 +10,11 @@ public interface RaceRegistrationRepository extends JpaRepository<RaceRegistrati
 
     List<RaceRegistration> findByOwnerUserEmail(String email);
 
-    boolean existsByRaceIdAndHorseIdAndStatusNotIn(Integer raceId, Integer horseId, java.util.Collection<String> statuses);
+    boolean existsByRaceIdAndHorseIdAndStatusNotIn(Integer raceId, Integer horseId,
+            java.util.Collection<String> statuses);
 
-    boolean existsByRaceIdAndJockeyIdAndStatusNotIn(Integer raceId, Integer jockeyId, java.util.Collection<String> statuses);
+    boolean existsByRaceIdAndJockeyIdAndStatusNotIn(Integer raceId, Integer jockeyId,
+            java.util.Collection<String> statuses);
 
     java.util.Optional<RaceRegistration> findFirstByRaceIdAndHorseId(Integer raceId,
             Integer horseId);

@@ -17,7 +17,7 @@
 }
 
 .home-canvas {
-  background: #051009;
+  background: #EEEEEE;
 }
 
 .hero-section {
@@ -852,4 +852,47 @@
     max-width: 180px;
     transform: none;
   }
+}
+
+/* ========================================================================= */
+/* LEADERBOARD LIGHT THEME OVERRIDES (SPRUCE GREEN & GOLD)                   */
+/* ========================================================================= */
+.leaderboard-block {
+  background: #ffffff !important;
+  border: 1px solid rgba(20, 52, 34, 0.15) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+  color: #212121 !important;
+}
+
+.leaderboard-heading {
+  color: #143422 !important;
+}
+
+.leaderboard-item {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #212121 !important;
+}
+
+.leaderboard-item.highlighted {
+  background: rgba(212, 175, 55, 0.12) !important;
+  border-left: 3px solid #d4af37 !important;
+  color: #143422 !important;
+}
+
+.item-main-name {
+  color: #143422 !important;
+}
+
+.item-sub-name {
+  color: #4b5563 !important;
+}
+
+.rating-value {
+  color: #d4af37 !important;
+}
+
+.initials-avatar {
+  background: #143422 !important;
+  color: #ffd700 !important;
 }

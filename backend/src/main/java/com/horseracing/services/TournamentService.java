@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.horseracing.dto.request.AssignRefereeRequest;
 import com.horseracing.dto.request.CreateTournamentRequest;
 import com.horseracing.dto.request.UpdateTournamentRequest;
 import com.horseracing.dto.response.TournamentResponse;
@@ -396,7 +395,8 @@ public class TournamentService {
 
         if ("Finished".equalsIgnoreCase(tournament.getTournamentStatus())
                 || "Cancelled".equalsIgnoreCase(tournament.getTournamentStatus())) {
-            throw new RuntimeException("Cannot change referee for a finished or cancelled tournament");
+            throw new RuntimeException(
+                    "Cannot change referee for a finished or cancelled tournament");
         }
 
         if (refereeId == null) {

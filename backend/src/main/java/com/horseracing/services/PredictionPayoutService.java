@@ -125,34 +125,22 @@ public class PredictionPayoutService {
         boolean hasPlaceH2 = totalPlaceOnH2.compareTo(BigDecimal.ZERO) > 0;
 
         if (hasPlaceH1 && hasPlaceH2) {
-            BigDecimal totalWinningPlaceStakes = totalPlaceOnH1.add(totalPlaceOnH2);
-            BigDecimal placeProfit = netPlacePool.subtract(totalWinningPlaceStakes);
-            
-            if (placeProfit.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal halfProfit = placeProfit.divide(BigDecimal.valueOf(2), 4, RoundingMode.DOWN);
-                
-                BigDecimal payoutH1 = totalPlaceOnH1.add(halfProfit);
-                BigDecimal computedH1 = payoutH1.divide(totalPlaceOnH1, 2, RoundingMode.DOWN);
-                if (computedH1.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsPlaceH1 = computedH1;
-                
-                BigDecimal payoutH2 = totalPlaceOnH2.add(halfProfit);
-                BigDecimal computedH2 = payoutH2.divide(totalPlaceOnH2, 2, RoundingMode.DOWN);
-                if (computedH2.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsPlaceH2 = computedH2;
-            }
+            BigDecimal halfPool =
+                    netPlacePool.divide(BigDecimal.valueOf(2), 4, RoundingMode.HALF_UP);
+            BigDecimal computedH1 = halfPool.divide(totalPlaceOnH1, 2, RoundingMode.HALF_UP);
+            BigDecimal computedH2 = halfPool.divide(totalPlaceOnH2, 2, RoundingMode.HALF_UP);
+            if (computedH1.compareTo(BigDecimal.valueOf(1.00)) > 0)
+                oddsPlaceH1 = computedH1;
+            if (computedH2.compareTo(BigDecimal.valueOf(1.00)) > 0)
+                oddsPlaceH2 = computedH2;
         } else if (hasPlaceH1) {
-            BigDecimal placeProfit = netPlacePool.subtract(totalPlaceOnH1);
-            if (placeProfit.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal payoutH1 = totalPlaceOnH1.add(placeProfit);
-                BigDecimal computedH1 = payoutH1.divide(totalPlaceOnH1, 2, RoundingMode.DOWN);
-                if (computedH1.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsPlaceH1 = computedH1;
-            }
+            BigDecimal computedH1 = netPlacePool.divide(totalPlaceOnH1, 2, RoundingMode.HALF_UP);
+            if (computedH1.compareTo(BigDecimal.valueOf(1.00)) > 0)
+                oddsPlaceH1 = computedH1;
         } else if (hasPlaceH2) {
-            BigDecimal placeProfit = netPlacePool.subtract(totalPlaceOnH2);
-            if (placeProfit.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal payoutH2 = totalPlaceOnH2.add(placeProfit);
-                BigDecimal computedH2 = payoutH2.divide(totalPlaceOnH2, 2, RoundingMode.DOWN);
-                if (computedH2.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsPlaceH2 = computedH2;
-            }
+            BigDecimal computedH2 = netPlacePool.divide(totalPlaceOnH2, 2, RoundingMode.HALF_UP);
+            if (computedH2.compareTo(BigDecimal.valueOf(1.00)) > 0)
+                oddsPlaceH2 = computedH2;
         }
 
         // Calculate SHOW odds
@@ -169,27 +157,22 @@ public class PredictionPayoutService {
             activeShowCount++;
 
         if (activeShowCount > 0) {
-            BigDecimal totalWinningShowStakes = totalShowOnH1.add(totalShowOnH2).add(totalShowOnH3);
-            BigDecimal showProfit = netShowPool.subtract(totalWinningShowStakes);
-            
-            if (showProfit.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal shareProfit = showProfit.divide(BigDecimal.valueOf(activeShowCount), 4, RoundingMode.DOWN);
-                
-                if (totalShowOnH1.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal payout = totalShowOnH1.add(shareProfit);
-                    BigDecimal computed = payout.divide(totalShowOnH1, 2, RoundingMode.DOWN);
-                    if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsShowH1 = computed;
-                }
-                if (totalShowOnH2.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal payout = totalShowOnH2.add(shareProfit);
-                    BigDecimal computed = payout.divide(totalShowOnH2, 2, RoundingMode.DOWN);
-                    if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsShowH2 = computed;
-                }
-                if (totalShowOnH3.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal payout = totalShowOnH3.add(shareProfit);
-                    BigDecimal computed = payout.divide(totalShowOnH3, 2, RoundingMode.DOWN);
-                    if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0) oddsShowH3 = computed;
-                }
+            BigDecimal sharePool = netShowPool.divide(BigDecimal.valueOf(activeShowCount), 4,
+                    RoundingMode.HALF_UP);
+            if (totalShowOnH1.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal computed = sharePool.divide(totalShowOnH1, 2, RoundingMode.HALF_UP);
+                if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0)
+                    oddsShowH1 = computed;
+            }
+            if (totalShowOnH2.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal computed = sharePool.divide(totalShowOnH2, 2, RoundingMode.HALF_UP);
+                if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0)
+                    oddsShowH2 = computed;
+            }
+            if (totalShowOnH3.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal computed = sharePool.divide(totalShowOnH3, 2, RoundingMode.HALF_UP);
+                if (computed.compareTo(BigDecimal.valueOf(1.00)) > 0)
+                    oddsShowH3 = computed;
             }
         }
 

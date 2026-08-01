@@ -3019,10 +3019,20 @@ export default function LiveSimulation() {
 
             <div className="d-flex gap-2">
               <button
-                className="ho-btn ho-btn-gold-solid flex-grow-1 py-2"
+                className="ho-btn ho-btn-outline-secondary flex-grow-1 py-2"
                 onClick={() => setShowResultsSummary(false)}
               >
                 Close
+              </button>
+              <button
+                className="ho-btn ho-btn-gold-solid flex-grow-1 py-2 d-flex align-items-center justify-content-center gap-1"
+                onClick={() => {
+                  setShowResultsSummary(false);
+                  navigate('/referee/confirm-results');
+                }}
+              >
+                <span className="material-symbols-outlined fs-6">verified</span>
+                Confirm Results
               </button>
             </div>
           </div>
