@@ -40,7 +40,7 @@ export default function DashboardLayout({ navLinks, profile, children }) {
 
   if (isAdmin) {
     return (
-      <div className="admin-layout-container d-flex flex-column min-vh-100 w-100" style={{ backgroundColor: '#051009', color: '#fff' }}>
+      <div className="admin-layout-container d-flex flex-column min-vh-100 w-100" style={{ backgroundColor: '#EEEEEE', color: '#111' }}>
         {/* Admin Header (Mobile only) */}
         <div className="d-xl-none">
           <AdminHeader
@@ -61,7 +61,7 @@ export default function DashboardLayout({ navLinks, profile, children }) {
               position: 'sticky',
               top: 0,
               transition: 'width 0.3s ease',
-              backgroundColor: '#07150c',
+              backgroundColor: '#143422',
               borderRight: '1px solid rgba(212, 175, 55, 0.25)'
             }}
           >
@@ -171,7 +171,7 @@ export default function DashboardLayout({ navLinks, profile, children }) {
 
   // Non-admin roles (Wrapped in MainLayout, so Header & Footer are rendered cleanly by MainLayout)
   return (
-    <div className="dashboard-layout-container flex-grow-1 w-100" style={{ backgroundColor: '#051009', color: '#fff' }}>
+    <div className="dashboard-layout-container flex-grow-1 w-100" style={{ backgroundColor: '#EEEEEE', color: '#111' }}>
       <main className={`flex-grow-1 ${isHomePage ? 'p-0' : 'p-4 p-md-5'}`} style={{ minHeight: 'calc(100vh - 120px)', overflowX: 'hidden' }}>
         {children || <Outlet />}
       </main>

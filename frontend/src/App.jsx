@@ -29,7 +29,7 @@ const NewsPage = lazy(() => import('./pages/News/NewsPage'));
 
 const MainLayout = () => {
   return (
-    <div className="app-layout" style={{ backgroundColor: '#051009', color: '#fff', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="app-layout" style={{ backgroundColor: '#EEEEEE', color: '#111', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Header />
       <main className="app-main" style={{ flexGrow: 1 }}>
         <Outlet />

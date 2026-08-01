@@ -253,13 +253,13 @@ export default function AdminDashboardContent() {
             </div>
           </div>
 
-          {/* Secondary Extended Charts Section (Row 2 - 4 New Charts) */}
+          {/* Secondary Extended Charts Section (Row 2 - 2 Charts) */}
           <div className="row g-4 mb-4">
             {/* Chart 1: Deposit vs Withdraw Financial Trend */}
-            <div className="col-12 col-md-6 col-xl-3">
+            <div className="col-12 col-md-6">
               <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
                 <div>
-                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Wallet Deposits & Withdrawals</h3>
+                  <h3 className="ho-font-epilogue fs-5 fw-bold m-0 text-dark">Wallet Deposits & Withdrawals</h3>
                   <p className="text-secondary small mb-2">Compare Deposit vs Withdrawal cash flows</p>
                 </div>
 
@@ -270,43 +270,15 @@ export default function AdminDashboardContent() {
             </div>
 
             {/* Chart 2: Revenue Sources Breakdown */}
-            <div className="col-12 col-md-6 col-xl-3">
+            <div className="col-12 col-md-6">
               <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
                 <div>
-                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Revenue Sources Breakdown</h3>
+                  <h3 className="ho-font-epilogue fs-5 fw-bold m-0 text-dark">Revenue Sources Breakdown</h3>
                   <p className="text-secondary small mb-2">Distribution of platform income sources</p>
                 </div>
 
                 <div className="position-relative mt-2" style={{ height: '230px' }}>
                   <RevenueBreakdownChart revenueDistribution={revenueDistribution} />
-                </div>
-              </div>
-            </div>
-
-            {/* Chart 3: Race Status Breakdown */}
-            <div className="col-12 col-md-6 col-xl-3">
-              <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
-                <div>
-                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Race Status Breakdown</h3>
-                  <p className="text-secondary small mb-2">Distribution of race round statuses</p>
-                </div>
-
-                <div className="position-relative mt-2" style={{ height: '230px' }}>
-                  <RaceStatusBarChart raceStatusDistribution={raceStatusDistribution} />
-                </div>
-              </div>
-            </div>
-
-            {/* Chart 4: Top Tournaments by Prize Pool */}
-            <div className="col-12 col-md-6 col-xl-3">
-              <div className="glass-card position-relative h-100" style={{ minHeight: '320px' }}>
-                <div>
-                  <h3 className="ho-font-epilogue fs-6 fw-bold m-0 text-dark">Top Prize Pools</h3>
-                  <p className="text-secondary small mb-2">Tournaments with the largest prize pools</p>
-                </div>
-
-                <div className="position-relative mt-2" style={{ height: '230px' }}>
-                  <TournamentPrizeChart data={tournamentPrizesData} />
                 </div>
               </div>
             </div>
