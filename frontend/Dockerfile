@@ -2,7 +2,7 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN --mount=type=cache,target=/root/.npm npm install
 COPY . .
 # Build for production (removes dev dependencies, optimizes bundle)
 RUN npm run build
@@ -15,7 +15,7 @@ RUN addgroup -g 1001 appuser && adduser -D -u 1001 -G appuser appuser
 # Copy built assets and production dependencies only
 COPY --from=builder --chown=appuser:appuser /app/dist ./dist
 COPY --from=builder --chown=appuser:appuser /app/package*.json ./
-RUN npm ci && chown -R appuser:appuser /app
+RUN --mount=type=cache,target=/root/.npm npm ci && chown -R appuser:appuser /app
 USER appuser
 EXPOSE 3000
 # Serve the production build via Vite preview, bound to all interfaces
