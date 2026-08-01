@@ -52,7 +52,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         // 0. Initialize Roles in DB
         ensureRoles();
 
-        // 1. Initialize Horse Breeds
+        // 1. Initialize Horse breeds
         ensureHorseBreeds();
 
         // 2. Initialize Race Tracks
@@ -329,20 +329,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             String[] ownerUsernames =
                     {"benimaru", "souei", "hakuro", "geld", "gabil", "rigurd", "gobta", "kaijin"};
 
-            String[] horseImageUrls = {
-                    "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&w=800&q=80",
-                    "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80",
-                    "https://images.unsplash.com/photo-1598974357801-cbca100e65d3?auto=format&fit=crop&w=800&q=80",
-                    "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=80",
-                    "https://images.unsplash.com/photo-1508873696983-2df515122519?auto=format&fit=crop&w=800&q=80",
-                    "https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?auto=format&fit=crop&w=800&q=80",
-                    "https://images.unsplash.com/photo-1566251037378-5e04e3bec343?auto=format&fit=crop&w=800&q=80",
-                    "https://images.unsplash.com/photo-1547841243-eacb14453cd9?auto=format&fit=crop&w=800&q=80",
-                    "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=800&q=80",
-                    "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=800&q=80"
-            };
-
-            // 10 Jujutsu Kaisen English named horses per owner with distinct Performance Metrics and Image URLs
+            // 10 Jujutsu Kaisen English named horses per owner with distinct Performance Metrics
             String[][][] ownerHorseTemplates = {
                     // benimaru (Owner 1)
                     {
@@ -484,7 +471,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                     Double spd = ht[6] != null ? Double.valueOf(ht[6]) : null;
                     Integer stm = ht[7] != null ? Integer.valueOf(ht[7]) : null;
                     Integer gate = ht[8] != null ? Integer.valueOf(ht[8]) : null;
-                    String imgUrl = (ht.length > 10 && ht[10] != null) ? ht[10] : horseImageUrls[hIdx % horseImageUrls.length];
+                    String imgUrl = (ht.length > 10 && ht[10] != null) ? ht[10] : null;
 
                     jdbcTemplate.update(
                             "INSERT INTO horses (owner_id, breed_id, name, age, gender, training_status, health_status, status, speed_rating, stamina_rating, gate_performance_rating, color, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -493,13 +480,10 @@ public class DatabaseInitializer implements CommandLineRunner {
                 }
             }
 
-            // Fallback: Populate horse images for any existing horses missing image_url
-            for (int i = 0; i < horseImageUrls.length; i++) {
-                jdbcTemplate.update("UPDATE horses SET image_url = ? WHERE (image_url IS NULL OR image_url = '') AND (id % 10 = ?)", horseImageUrls[i], i);
-            }
-            jdbcTemplate.update("UPDATE horses SET image_url = 'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?auto=format&fit=crop&w=800&q=80' WHERE image_url IS NULL OR image_url = ''");
+            // Clear image_url for all horses
+            jdbcTemplate.update("UPDATE horses SET image_url = NULL");
 
-            log.info("Successfully seeded and assigned high quality horse images for all owner stables.");
+            log.info("Successfully cleared all horse image URLs from seed data and DB.");
         } catch (org.springframework.dao.DataAccessException e) {
             log.warn("Seed horses check warning: {}", e.getMessage());
         }
