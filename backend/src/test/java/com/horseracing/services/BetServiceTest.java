@@ -6,6 +6,7 @@ import com.horseracing.entities.*;
 import com.horseracing.entities.enums.Role;
 import com.horseracing.exceptions.BusinessException;
 import com.horseracing.repositories.*;
+import com.horseracing.store.InMemoryRaceStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +40,8 @@ public class BetServiceTest {
     private BettingTransactionRepository bettingTransactionRepository;
     @Mock
     private RaceSimulationRepository raceSimulationRepository;
+    @Mock
+    private InMemoryRaceStore inMemoryRaceStore;
 
     @InjectMocks
     private BetService betService;

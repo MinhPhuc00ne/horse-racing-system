@@ -1,5 +1,7 @@
 package com.horseracing.dto.request;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -38,7 +40,9 @@ public class CreateRaceRequest {
     private Integer raceRound;
 
     @NotNull(message = "Max horses is required")
-    private Integer maxHorses; // Validated in service to be 7, 8, 12
+    @Min(value = 3, message = "Max horses must be at least 3")
+    @Max(value = 12, message = "Max horses cannot exceed 12")
+    private Integer maxHorses;
 
     @NotNull(message = "Distance is required")
     @Positive(message = "Distance must be positive")

@@ -47,6 +47,10 @@ public class TournamentService {
                 || request.getPrizeThird().compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Prize money must be positive or zero");
         }
+        if (request.getPrizeFirst().compareTo(request.getPrizeSecond()) < 0
+                || request.getPrizeSecond().compareTo(request.getPrizeThird()) < 0) {
+            throw new RuntimeException("First prize must be >= Second prize, and Second prize must be >= Third prize");
+        }
         if (request.getMinBetAmount().compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Minimum bet amount must be positive or zero");
         }

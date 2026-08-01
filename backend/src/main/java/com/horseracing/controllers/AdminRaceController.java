@@ -138,11 +138,8 @@ public class AdminRaceController {
 
     @PutMapping("/tournaments/{id}/status")
     public ResponseEntity<TournamentResponse> updateTournamentStatus(@PathVariable Integer id,
-            @RequestBody java.util.Map<String, String> body) {
-        String status = body.get("status");
-        if (status == null) {
-            throw new RuntimeException("Status field is required");
-        }
+            @jakarta.validation.Valid @RequestBody com.horseracing.dto.request.UpdateStatusRequest body) {
+        String status = body.getStatus();
         TournamentResponse response = tournamentService.updateTournamentStatus(id, status);
         return ResponseEntity.ok(response);
     }
@@ -162,11 +159,8 @@ public class AdminRaceController {
 
     @PutMapping("/races/{id}/status")
     public ResponseEntity<MessageResponse> updateRaceStatus(@PathVariable Integer id,
-            @RequestBody java.util.Map<String, String> body) {
-        String status = body.get("status");
-        if (status == null) {
-            throw new RuntimeException("Status field is required");
-        }
+            @jakarta.validation.Valid @RequestBody com.horseracing.dto.request.UpdateStatusRequest body) {
+        String status = body.getStatus();
         if ("FINISHED".equalsIgnoreCase(status)) {
             refereeService.confirmResults(id);
             return ResponseEntity.ok().body(new MessageResponse(
