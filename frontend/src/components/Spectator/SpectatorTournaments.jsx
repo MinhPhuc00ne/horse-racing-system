@@ -229,7 +229,7 @@ export default function SpectatorTournaments() {
   }
 
   return (
-    <div className="py-4" style={{ backgroundColor: '#051009', color: '#e2e8f0', minHeight: '100vh' }}>
+    <div className="py-4" style={{ backgroundColor: '#EEEEEE', color: '#e2e8f0', minHeight: '100vh' }}>
       <div className="container-fluid px-3 px-md-4" style={{ maxWidth: '1440px' }}>
         
         {/* Top Header Banner */}

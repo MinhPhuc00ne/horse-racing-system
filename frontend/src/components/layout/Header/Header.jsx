@@ -126,7 +126,7 @@ const Header = () => {
   return (
     <header className="sticky-top" style={{ zIndex: 1050 }}>
       {/* 1. TOP PRIMARY NAVIGATION BAR */}
-      <Navbar expand="lg" variant="dark" className="py-2 shadow-sm" style={{ backgroundColor: '#07150c', borderBottom: '1px solid rgba(212, 175, 55, 0.25)' }}>
+      <Navbar expand="lg" variant="dark" className="py-2 shadow-sm" style={{ backgroundColor: '#143422', borderBottom: '1px solid rgba(212, 175, 55, 0.25)' }}>
         <Container fluid="lg">
           {/* LOGO BRAND */}
           <Navbar.Brand href="/" className="fw-bold d-flex align-items-center gap-2">
@@ -212,14 +212,14 @@ const Header = () => {
                       className="p-0 shadow-lg border-0" 
                       style={{ 
                         width: '340px', 
-                        backgroundColor: '#0c2214', 
+                        backgroundColor: '#143422', 
                         color: '#fff',
                         borderRadius: '8px',
                         overflow: 'hidden',
                         zIndex: 1060
                       }}
                     >
-                      <div className="d-flex justify-content-between align-items-center p-3 border-bottom border-secondary" style={{ backgroundColor: '#07150c' }}>
+                      <div className="d-flex justify-content-between align-items-center p-3 border-bottom border-secondary" style={{ backgroundColor: '#1b4f32' }}>
                         <h6 className="m-0 fw-bold text-white">Notifications</h6>
                         {unreadCount > 0 && (
                           <button 
@@ -300,7 +300,7 @@ const Header = () => {
                           top: 'calc(100% + 10px)',
                           right: 0,
                           width: '230px',
-                          backgroundColor: '#0c2214',
+                          backgroundColor: '#143422',
                           borderRadius: '12px',
                           boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
                           border: '1px solid rgba(212, 175, 55, 0.4)',
@@ -393,7 +393,7 @@ const Header = () => {
 
       {/* 2. LOGGED-IN USER ROLE SUB-NAVBAR CENTERED & BALANCED */}
       {user && currentRoleConfig && (
-        <div style={{ backgroundColor: '#030a05', borderBottom: '1px solid rgba(212, 175, 55, 0.3)', padding: '7px 0' }}>
+        <div style={{ backgroundColor: '#1b4f32', borderBottom: '1px solid rgba(212, 175, 55, 0.3)', padding: '7px 0' }}>
           <Container fluid="lg" className="d-flex align-items-center justify-content-center gap-2 flex-wrap">
             
             {/* ROLE BADGE */}

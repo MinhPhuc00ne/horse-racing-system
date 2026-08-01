@@ -1,26 +1,26 @@
-/* Spectator dashboard custom premium styling */
+/* Spectator dashboard custom premium styling (Light Theme Overrides) */
 @import '../Horse-Owner/HorseOwner.css';
 
 /* Dark Theme Overrides for High Text Contrast & Centered Layout */
 body {
-  background-color: #051009 !important;
-  color: #f1f5f9 !important;
+  background-color: #EEEEEE !important;
+  color: #111111 !important;
 }
 
 .text-dark {
-  color: #ffffff !important;
+  color: #111111 !important;
 }
 
 .text-secondary {
-  color: #94a3b8 !important;
+  color: #4b5563 !important;
 }
 
-/* Glass Card & Dashboard Panels */
+/* Glass Card & Dashboard Panels - Unified Light Theme Cards */
 .glass-card {
-  background: #0c2214 !important;
-  border: 1px solid rgba(212, 175, 55, 0.3) !important;
-  color: #ffffff !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(20, 52, 34, 0.15) !important;
+  color: #212121 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
 }
 
 .glass-card table {
@@ -30,17 +30,17 @@ body {
 
 .glass-card table th {
   color: #ffd700 !important;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.3) !important;
-  background-color: #07150c !important;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.3) !important;
+  background-color: #1b4f32 !important;
 }
 
 .glass-card table td {
-  color: #f1f5f9 !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .glass-card table tr:hover td {
-  background-color: rgba(212, 175, 55, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 /* Chatbot styles */
@@ -48,18 +48,17 @@ body {
   display: flex;
   flex-direction: column;
   height: 550px;
-  background: rgba(12, 34, 20, 0.95);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(212, 175, 55, 0.4);
+  background: #ffffff !important;
+  border: 1px solid rgba(20, 52, 34, 0.25) !important;
   border-radius: 0.75rem;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+  color: #212121;
 }
 
 .chat-header {
-  background: #07150c;
-  color: #ffd700;
+  background: #143422 !important;
+  color: #ffd700 !important;
   padding: 1rem 1.5rem;
   display: flex;
   align-items: center;
@@ -89,18 +88,18 @@ body {
 
 .chat-bubble.user {
   align-self: flex-end;
-  background: #ffd700;
-  color: #07150c;
+  background: #ffd700 !important;
+  color: #143422 !important;
   font-weight: 700;
   border-bottom-right-radius: 0.25rem;
 }
 
 .chat-bubble.ai {
   align-self: flex-start;
-  background: #07150c;
-  color: #ffffff;
+  background: #e8f5e9 !important;
+  color: #000000 !important;
   border-bottom-left-radius: 0.25rem;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(20, 52, 34, 0.15) !important;
 }
 
 .chat-bubble-meta {
@@ -115,14 +114,14 @@ body {
   flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0.5rem 1.5rem;
-  background: rgba(5, 16, 9, 0.8);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: #f4f6f5;
+  border-top: 1px solid rgba(20, 52, 34, 0.1);
 }
 
 .chat-suggestion-btn {
-  background: #09190e;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  color: #ffd700;
+  background: #ffffff;
+  border: 1px solid rgba(20, 52, 34, 0.25);
+  color: #143422;
   padding: 0.35rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.8rem;
@@ -132,16 +131,16 @@ body {
 }
 
 .chat-suggestion-btn:hover {
-  background: #ffd700;
-  color: #07150c;
-  border-color: #ffd700;
+  background: #143422;
+  color: #ffd700;
+  border-color: #143422;
   transform: translateY(-1px);
 }
 
 .chat-input-container {
   padding: 1rem 1.5rem;
-  background: #07150c;
-  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  background: #ffffff;
+  border-top: 1px solid rgba(20, 52, 34, 0.15);
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -149,25 +148,25 @@ body {
 
 .chat-input {
   flex-grow: 1;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(20, 52, 34, 0.25);
   border-radius: 9999px;
   padding: 0.75rem 1.25rem;
   font-size: 0.9rem;
   outline: none;
-  background: #051009;
-  color: #ffffff;
+  background: #E8F5E9;
+  color: #000000;
   transition: all 0.2s ease;
 }
 
 .chat-input:focus {
-  border-color: #ffd700;
-  background: #09190e;
-  box-shadow: 0 0 0 1px #ffd700;
+  border-color: #143422;
+  background: #E8F5E9;
+  box-shadow: 0 0 0 1px #143422;
 }
 
 .chat-send-btn {
-  background: linear-gradient(135deg, #ffd700 0%, #d4af37 100%);
-  color: #07150c;
+  background: #143422 !important;
+  color: #ffffff !important;
   border: none;
   width: 42px;
   height: 42px;
@@ -182,18 +181,19 @@ body {
 
 .chat-send-btn:hover {
   transform: scale(1.05);
+  background: #2c5e43 !important;
 }
 
-/* Wallet Card Theme */
+/* Wallet Card Theme - spruce green gradient */
 .wallet-premium-card {
-  background: linear-gradient(135deg, #07150c 0%, #0c2214 100%);
-  color: #ffffff;
-  border: 1px solid rgba(212, 175, 55, 0.4);
+  background: linear-gradient(135deg, #143422 0%, #1b4f32 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
   border-radius: 1rem;
   padding: 2rem;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(20, 52, 34, 0.15) !important;
 }
 
 .wallet-premium-card .card-brand {
@@ -225,36 +225,36 @@ body {
 .form-section-title {
   font-size: 1rem;
   font-weight: 700;
-  color: #ffd700;
+  color: #143422;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  border-bottom: 1px solid rgba(20, 52, 34, 0.2);
   padding-bottom: 0.5rem;
 }
 
 .role-badge {
   display: inline-block;
-  background: rgba(255, 215, 0, 0.15);
-  color: #ffd700;
+  background: rgba(20, 52, 34, 0.1);
+  color: #143422;
   font-size: 0.75rem;
   font-weight: 800;
   padding: 4px 12px;
   border-radius: 20px;
   text-transform: uppercase;
   margin-bottom: 8px;
-  border: 1px solid rgba(255, 215, 0, 0.3);
+  border: 1px solid rgba(20, 52, 34, 0.15);
 }
 
-/* Quick Select Buttons in Wallet */
+/* Tab Container in Wallet */
 .wallet-tab-container {
-  background: #051009;
+  background: #e8f5e9 !important;
   border-radius: 9999px;
   padding: 4px;
   display: flex;
   position: relative;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(20, 52, 34, 0.15) !important;
 }
 
 .wallet-tab-btn {
@@ -264,7 +264,7 @@ body {
   padding: 10px 16px;
   font-size: 13px;
   font-weight: 700;
-  color: #94a3b8;
+  color: #4b5563 !important;
   border-radius: 9999px;
   cursor: pointer;
   z-index: 2;
@@ -274,7 +274,7 @@ body {
 }
 
 .wallet-tab-btn.active {
-  color: #07150c !important;
+  color: #ffd700 !important;
 }
 
 .wallet-tab-slider {
@@ -282,36 +282,36 @@ body {
   top: 4px;
   bottom: 4px;
   width: calc(50% - 4px);
-  background: linear-gradient(135deg, #ffd700 0%, #d4af37 100%);
+  background: #143422 !important;
   border-radius: 9999px;
   z-index: 1;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .wallet-quick-select-card {
-  background: #07150c;
-  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: #ffffff !important;
+  border: 1px solid rgba(20, 52, 34, 0.25) !important;
   border-radius: 12px;
   padding: 12px 6px;
   text-align: center;
   font-size: 12px;
   font-weight: 700;
-  color: #ffffff;
+  color: #212121 !important;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .wallet-quick-select-card.active {
-  background: rgba(212, 175, 55, 0.2);
-  border-color: #ffd700 !important;
+  background: #143422 !important;
+  border-color: #143422 !important;
   color: #ffd700 !important;
 }
 
 .wallet-premium-input-group {
   display: flex;
   align-items: center;
-  background: rgba(4, 20, 11, 0.9);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: #E8F5E9 !important;
+  border: 1px solid rgba(20, 52, 34, 0.25) !important;
   border-radius: 12px;
   padding: 8px 16px;
 }
@@ -320,7 +320,7 @@ body {
   background: transparent !important;
   border: none !important;
   outline: none !important;
-  color: #ffffff !important;
+  color: #000000 !important;
   flex: 1;
   font-size: 15px;
   font-weight: 600;
@@ -328,19 +328,19 @@ body {
 }
 
 .wallet-premium-input::placeholder {
-  color: #94a3b8 !important;
+  color: #6b7280 !important;
 }
 
 .wallet-premium-input-suffix {
-  color: #d4af37;
+  color: #143422 !important;
   font-weight: 700;
   font-size: 13px;
   margin-left: 8px;
 }
 
 .wallet-submit-btn {
-  background: linear-gradient(135deg, #ffd700 0%, #d4af37 100%) !important;
-  color: #07150c !important;
+  background: #143422 !important;
+  color: #ffffff !important;
   font-weight: 800 !important;
   border: none !important;
   border-radius: 12px;
@@ -348,7 +348,7 @@ body {
 }
 
 .wallet-submit-btn:hover {
-  background: linear-gradient(135deg, #ffe033 0%, #e5bd3c 100%) !important;
+  background: #2c5e43 !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 4px 15px rgba(20, 52, 34, 0.2) !important;
 }

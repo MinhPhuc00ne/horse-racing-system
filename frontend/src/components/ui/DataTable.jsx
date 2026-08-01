@@ -9,7 +9,7 @@ import React from 'react';
 export default function DataTable({ columns, data, emptyMessage = 'No data available' }) {
   if (!data || data.length === 0) {
     return (
-      <div className="text-center py-4 fst-italic rounded" style={{ background: 'rgba(0,0,0,0.2)', color: '#cbd5e1', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
+      <div className="text-center py-4 fst-italic rounded" style={{ background: 'rgba(0,0,0,0.03)', color: '#111111', border: '1px solid rgba(20, 52, 34, 0.15)' }}>
         {emptyMessage}
       </div>
     );
