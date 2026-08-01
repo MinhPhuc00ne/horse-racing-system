@@ -37,28 +37,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractTokenFromRequest(request);
 
         if (token != null && jwtUtils.validateToken(token)) {
-            String email = jwtUtils.getUserEmailFromToken(token);
+            try {
+                String email = jwtUtils.getUserEmailFromToken(token);
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            if (userDetails.isEnabled()) {
-                Optional<User> userOpt = userRepository.findByEmail(email);
-                if (userOpt.isPresent()) {
-                    User user = userOpt.get();
-                    boolean isBlacklisted = blacklistRepository
-                            .findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE")
-                            .isPresent();
+                if (userDetails != null && userDetails.isEnabled()) {
+                    Optional<User> userOpt = userRepository.findByEmail(email);
+                    if (userOpt.isPresent()) {
+                        User user = userOpt.get();
+                        boolean isBlacklisted = blacklistRepository
+                                .findByTargetTypeAndTargetIdAndStatus("USER", user.getId(), "ACTIVE")
+                                .isPresent();
 
-                    if (!isBlacklisted) {
-                        UsernamePasswordAuthenticationToken authToken =
-                                new UsernamePasswordAuthenticationToken(userDetails, null,
-                                        userDetails.getAuthorities());
-                        authToken.setDetails(
-                                new WebAuthenticationDetailsSource().buildDetails(request));
+                        if (!isBlacklisted) {
+                            UsernamePasswordAuthenticationToken authToken =
+                                    new UsernamePasswordAuthenticationToken(userDetails, null,
+                                            userDetails.getAuthorities());
+                            authToken.setDetails(
+                                    new WebAuthenticationDetailsSource().buildDetails(request));
 
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                            SecurityContextHolder.getContext().setAuthentication(authToken);
+                        }
                     }
                 }
+            } catch (Exception e) {
+                logger.error("Cannot set user authentication from JWT: {}", e);
             }
         }
 
