@@ -7,12 +7,6 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    allowedHosts: true,
     open: process.env.DOCKER_ENV === 'true' ? false : true
-  },
-  preview: {
-    host: '0.0.0.0',
-    port: 3000,
-    allowedHosts: true
   }
 })
