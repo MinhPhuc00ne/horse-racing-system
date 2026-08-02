@@ -1,4 +1,4 @@
-# 🏇 Horse Racing Management System (Hệ Thống Quản Lý Giải Đua Ngựa)
+# 🏇 Horse Racing Management System
 
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3-brightgreen?logo=springboot)
 ![React](https://img.shields.io/badge/React-19.0-blue?logo=react)
@@ -9,47 +9,47 @@
 
 ---
 
-## 📌 Giới Thiệu (About)
+## 📌 About
 
-**Horse Racing Management System** là một hệ thống quản lý và tổ chức các giải đua ngựa hiện đại, hỗ trợ người dùng theo dõi lịch trình trận đấu, thông tin chiến mã & nài ngựa, thực hiện đặt cược/mua vé, quản lý ví điện tử tích hợp cổng thanh toán trực tuyến PayOS, hỗ trợ trợ lý AI tư vấn và bảng điều khiển quản trị (Admin Dashboard) toàn diện.
+**Horse Racing Management System** is a modern management and event organization system for horse racing. It enables users to track race schedules, view racehorse and jockey information, place bets / purchase tickets, manage digital wallets with integrated online PayOS payment gateway, access an AI assistant for advice, and utilize a comprehensive Admin Dashboard.
 
-Dự án được xây dựng theo kiến trúc Micro-service ready với Backend Spring Boot RESTful API và Frontend React + Vite SPA tối ưu trải nghiệm người dùng.
-
----
-
-## 🌟 Tính Năng Nổi Bật (Key Features)
-
-### 🔐 1. Xác Thực & Bảo Mật (Authentication & Security)
-- Đăng ký, đăng nhập hệ thống với phân quyền đa vai trò (Admin, Referee, Horse Owner, User).
-- Hỗ trợ đăng nhập nhanh qua **Google OAuth2**.
-- Xác thực tài khoản qua Email (Email Activation Token).
-- Bảo mật API với **JWT (JSON Web Token)**, Mã hóa mật khẩu BCrypt.
-- Giới hạn tần suất truy cập (Rate Limiting) chống Brute-force/DDoS bằng **Bucket4j & Caffeine**.
-
-### 🏁 2. Quản Lý Giải Đua & Lịch Trình (Race Management)
-- Xem thông tin danh sách giải đua, đường đua, danh sách ngựa tham gia và nài ngựa (Jockey).
-- Cập nhật kết quả đua trực tiếp bởi Trọng tài (Referee) với cơ chế đối soát kết quả.
-- Thống kê lịch sử đấu, xếp hạng chiến mã và phong độ nài ngựa.
-
-### 💰 3. Ví Điện Tử & Nạp/Rút Tiền (Wallet & Payment Integration)
-- Quản lý tài khoản ví cá nhân, xem chi tiết lịch sử giao dịch.
-- Tích hợp cổng thanh toán trực tuyến **PayOS** (chuyển khoản ngân hàng QR Code tự động).
-- Đặt cược / Mua vé trực tuyến an toàn và tự động cập nhật số dư.
-
-### 🤖 4. Trợ Lý AI Tư Vấn (AI Chat Assistant)
-- Tích hợp AI Chatbot hỗ trợ giải đáp thắc mắc, phân tích phong độ ngựa đua và gợi ý cho người dùng.
-
-### 📊 5. Bảng Điều Khiển Quản Trị (Admin Dashboard)
-- Quản lý danh sách người dùng, phân quyền và khóa tài khoản (Blacklist management).
-- Phê duyệt yêu cầu nâng cấp tài khoản (Chủ ngựa, Trọng tài).
-- Thống kê doanh thu, số lượng cược, báo cáo tài chính qua biểu đồ **Recharts**.
-- Quản lý phản hồi (Feedback) và báo cáo lỗi (Report) từ người dùng.
+The project is built with a microservices-ready architecture featuring a Backend Spring Boot RESTful API and a Frontend React + Vite SPA for an optimal user experience.
 
 ---
 
-## 🛠️ Công Nghệ Sử Dụng (Tech Stack)
+## 🌟 Key Features
 
-| Phân Mục | Công Nghệ |
+### 🔐 1. Authentication & Security
+- Registration and login system with multi-role access control (Admin, Referee, Horse Owner, User).
+- Quick login support via **Google OAuth2**.
+- Account verification via Email (Email Activation Token).
+- Secure API endpoints using **JWT (JSON Web Token)** and BCrypt password hashing.
+- Access rate limiting to protect against Brute-force/DDoS attacks using **Bucket4j & Caffeine**.
+
+### 🏁 2. Race Management & Scheduling
+- View information about race lists, racetracks, participating racehorses, and jockeys.
+- Real-time race results updates by Referees with a result verification mechanism.
+- Race history statistics, horse rankings, and jockey performance tracking.
+
+### 💰 3. Digital Wallet & Payment Integration
+- Personal wallet management and detailed transaction history logs.
+- Integrated **PayOS** online payment gateway (automated bank transfer QR Code).
+- Secure online betting / ticket purchasing with automated balance updates.
+
+### 🤖 4. AI Advisory Assistant
+- Integrated AI Chatbot to answer inquiries, analyze horse performance, and provide personalized suggestions to users.
+
+### 📊 5. Admin Dashboard
+- User management, role assignment, and account status controls (Blacklist management).
+- Account upgrade request approvals (Horse Owners, Referees).
+- Revenue statistics, betting volume metrics, and financial reporting powered by **Recharts**.
+- User feedback and bug report management.
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technologies |
 | :--- | :--- |
 | **Backend** | Java 17, Spring Boot 3.3.13, Spring Security, Spring Data JPA, JWT, OAuth2 Client |
 | **Frontend** | React 19, Vite 8, React Router DOM v7, TanStack React Query, React-Bootstrap, Recharts |
@@ -60,13 +60,13 @@ Dự án được xây dựng theo kiến trúc Micro-service ready với Backen
 
 ---
 
-## 📂 Cấu Trúc Thư Mục (Project Structure)
+## 📂 Project Structure
 
 ```text
 horse-racing-system/
 ├── backend/                   # Spring Boot Source Code
 │   ├── src/main/java/com/horseracing/
-│   │   ├── configs/           # Cấu hình CORS, Security, Swagger, PayOS, Mail
+│   │   ├── configs/           # CORS, Security, Swagger, PayOS, Mail configurations
 │   │   ├── controllers/       # REST API Endpoints (Admin, User, Race, Wallet...)
 │   │   ├── dto/               # Data Transfer Objects
 │   │   ├── entities/          # JPA Entities (Database Mapping)
@@ -83,93 +83,93 @@ horse-racing-system/
 │   └── Dockerfile             # Docker container definition for Frontend
 ├── database/
 │   └── init/
-│       └── HorseRacingDB.sql  # Script khởi tạo cơ sở dữ liệu MSSQL
-├── docker-compose.yml         # Orchestration file cho full-stack local runner
-├── CONTRIBUTING.md            # Quy chuẩn đặt tên branch & Conventional Commit
-├── LICENSE                    # Giấy phép nguồn mở MIT
-└── README.md                  # Tài liệu hướng dẫn dự án
+│       └── HorseRacingDB.sql  # Database initialization script for MSSQL
+├── docker-compose.yml         # Orchestration file for full-stack local runner
+├── CONTRIBUTING.md            # Branch naming & Conventional Commit guidelines
+├── LICENSE                    # MIT Open Source License
+└── README.md                  # Project documentation guide
 ```
 
 ---
 
-## 🚀 Hướng Dẫn Cài Đặt & Khởi Chạy (Quick Start Guide)
+## 🚀 Quick Start Guide
 
-### Yêu Cầu Tiền Đề (Prerequisites)
+### Prerequisites
 - [Git](https://git-scm.com/)
-- [Docker](https://www.docker.com/) & Docker Compose (Khuyên dùng)
-- *Nếu chạy thủ công không dùng Docker:*
+- [Docker](https://www.docker.com/) & Docker Compose (Recommended)
+- *If running manually without Docker:*
   - Java JDK 17+
   - Node.js v18+ & npm
   - Microsoft SQL Server 2022
 
 ---
 
-### Cách 1: Khởi chạy nhanh bằng Docker Compose (Khuyên Dùng) 🐳
+### Option 1: Quick Run with Docker Compose (Recommended) 🐳
 
-1. **Clone repository về máy**:
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/MinhPhuc00ne/horse-racing-system.git
    cd horse-racing-system
    ```
 
-2. **Cấu hình file môi trường**:
-   Tạo file `.env` ở thư mục gốc (copy từ `.env.example` nếu có):
+2. **Configure Environment Variables**:
+   Create a `.env` file in the root directory (copy from `.env.example` if available):
    ```bash
    cp .env.example .env
    ```
 
-3. **Khởi chạy toàn bộ hệ thống (Database, Backend, Frontend)**:
+3. **Start the Entire System (Database, Backend, Frontend)**:
    ```bash
    docker-compose up --build -d
    ```
 
-4. **Truy cập ứng dụng**:
+4. **Access the Applications**:
    - **Frontend App**: [http://localhost:5173](http://localhost:5173)
    - **Backend API**: [http://localhost:8080](http://localhost:8080)
    - **Database (MSSQL)**: Port `1433` (User: `sa`, Pass: `HorseRacing@123`)
 
 ---
 
-### Cách 2: Khởi chạy thủ công (Manual Setup) 💻
+### Option 2: Manual Setup 💻
 
-#### 1. Cơ sở dữ liệu (MSSQL)
-- Tạo cơ sở dữ liệu tên `HorseRacingDB` trên MSSQL Server.
-- Chạy script SQL tại `database/init/HorseRacingDB.sql` để tạo bảng và dữ liệu mẫu.
+#### 1. Database (MSSQL)
+- Create a database named `HorseRacingDB` in MSSQL Server.
+- Run the SQL script located at `database/init/HorseRacingDB.sql` to initialize tables and sample data.
 
-#### 2. Khởi chạy Backend (Spring Boot)
+#### 2. Run Backend (Spring Boot)
 ```bash
 cd backend
-# Cấu hình kết nối DB trong application.yml hoặc biến môi trường
+# Configure DB connection in application.yml or environment variables
 ./mvnw spring-boot:run
 ```
-Backend sẽ lắng nghe tại cổng `http://localhost:8080`.
+The Backend will listen on `http://localhost:8080`.
 
-#### 3. Khởi chạy Frontend (React + Vite)
+#### 3. Run Frontend (React + Vite)
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Frontend sẽ chạy tại cổng `http://localhost:5173`.
+The Frontend will run on `http://localhost:5173`.
 
 ---
 
-## 🤝 Đóng Góp (Contributing)
+## 🤝 Contributing
 
-Dự án hoan nghênh mọi đóng góp! Vui lòng đọc kỹ tài liệu [CONTRIBUTING.md](file:///c:/Users/MSI%20VN/Documents/Raphael/SWP391-SU26/project/horse-racing-system/CONTRIBUTING.md) để biết chi tiết về:
-- Quy tắc đặt tên Branch (`feature/`, `fix/`, `docs/`...)
-- Quy chuẩn viết Commit Message ([Conventional Commits](https://www.conventionalcommits.org/))
-- Quy trình gửi Pull Request.
-
----
-
-## 📄 Giấy Phép (License)
-
-Dự án được phân phối dưới giấy phép **MIT License**. Xem chi tiết tại file [LICENSE](file:///c:/Users/MSI%20VN/Documents/Raphael/SWP391-SU26/project/horse-racing-system/LICENSE).
+Contributions are welcome! Please read the [CONTRIBUTING.md](file:///c:/Users/MSI%20VN/Documents/Raphael/SWP391-SU26/project/horse-racing-system/CONTRIBUTING.md) document for details on:
+- Branch naming rules (`feature/`, `fix/`, `docs/`...)
+- Commit message standards ([Conventional Commits](https://www.conventionalcommits.org/))
+- Pull Request submission process.
 
 ---
 
-## 📞 Liên Hệ & Hỗ Trợ
+## 📄 License
+
+This project is distributed under the **MIT License**. See the [LICENSE](file:///c:/Users/MSI%20VN/Documents/Raphael/SWP391-SU26/project/horse-racing-system/LICENSE) file for details.
+
+---
+
+## 📞 Contact & Support
 
 - **Author**: MinhPhuc00ne
 - **Project Repo**: [MinhPhuc00ne/horse-racing-system](https://github.com/MinhPhuc00ne/horse-racing-system)

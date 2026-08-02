@@ -1,46 +1,46 @@
-# Hướng Dẫn Đóng Góp (Contributing Guidelines)
+# Contributing Guidelines
 
-Cảm ơn bạn đã quan tâm và muốn đóng góp cho dự án **Horse Racing Management System**! Để đảm bảo quy trình phát triển chuyên nghiệp, nhất quán và dễ quản lý, vui lòng tuân thủ các quy tắc đặt tên branch, viết commit message và quy trình làm việc bên dưới.
-
----
-
-## 📋 Mục Lục
-
-1. [Quy Tắc Đặt Tên Branch](#1-quy-tắc-đặt-tên-branch)
-2. [Quy Chuẩn Commit Message (Conventional Commits)](#2-quy-chuẩn-commit-message-conventional-commits)
-3. [Quy Trình Phát Triển & Pull Request (PR)](#3-quy-trình-phát-triển--pull-request-pr)
-4. [Chuẩn Code & Best Practices](#4-chuẩn-code--best-practices)
+Thank you for your interest in contributing to the **Horse Racing Management System**! To ensure a professional, consistent, and easy-to-manage development process, please adhere to the branch naming rules, commit message standards, and workflow outlined below.
 
 ---
 
-## 1. 🌿 Quy Tắc Đặt Tên Branch
+## 📋 Table of Contents
 
-Tên branch cần phản ánh chính xác nội dung công việc đang được thực hiện. Sử dụng chữ thường (lowercase) và phân tách bằng dấu gạch ngang (`-`).
+1. [Branch Naming Rules](#1-branch-naming-rules)
+2. [Commit Message Convention (Conventional Commits)](#2-commit-message-convention-conventional-commits)
+3. [Development Workflow & Pull Request (PR)](#3-development-workflow--pull-request-pr)
+4. [Code Standards & Best Practices](#4-code-standards--best-practices)
 
-### Cấu trúc tên branch:
+---
+
+## 1. 🌿 Branch Naming Rules
+
+Branch names should accurately reflect the work being performed. Use lowercase letters and separate words with hyphens (`-`).
+
+### Branch Name Structure:
 ```text
-<prefix>/<tên-tính-năng-hoặc-mã-task>
+<prefix>/<feature-name-or-task-id>
 ```
 
-### Các Prefix hợp lệ:
+### Valid Prefixes:
 
-| Prefix | Mô tả | Ví dụ |
+| Prefix | Description | Example |
 | :--- | :--- | :--- |
-| `feature/` | Phát triển tính năng mới | `feature/jwt-authentication`, `feature/payos-payment` |
-| `fix/` | Sửa lỗi (bug fix) thông thường | `fix/login-validation-error`, `fix/wallet-balance-calc` |
-| `hotfix/` | Sửa lỗi khẩn cấp trên môi trường Production | `hotfix/security-patch-cors` |
-| `docs/` | Cập nhật tài liệu (README, API doc, swagger...) | `docs/update-contributing-guide` |
-| `refactor/` | Tối ưu hóa code mà không làm thay đổi tính năng | `refactor/race-service-logic` |
-| `test/` | Viết bổ sung unit test, integration test | `test/auth-controller-test` |
-| `chore/` | Cập nhật cấu hình, dependency, docker compose | `chore/update-pom-dependencies` |
+| `feature/` | New feature development | `feature/jwt-authentication`, `feature/payos-payment` |
+| `fix/` | Standard bug fixes | `fix/login-validation-error`, `fix/wallet-balance-calc` |
+| `hotfix/` | Urgent fixes for production environment | `hotfix/security-patch-cors` |
+| `docs/` | Documentation updates (README, API docs, Swagger...) | `docs/update-contributing-guide` |
+| `refactor/` | Code optimization without changing functionality | `refactor/race-service-logic` |
+| `test/` | Adding or updating unit tests, integration tests | `test/auth-controller-test` |
+| `chore/` | Updating configuration, dependencies, docker compose | `chore/update-pom-dependencies` |
 
 ---
 
-## 2. 📝 Quy Chuẩn Commit Message (Conventional Commits)
+## 2. 📝 Commit Message Convention (Conventional Commits)
 
-Dự án áp dụng chuẩn **Conventional Commits** để giúp lịch sử commit sạch đẹp, tự động hóa release note và hỗ trợ CI/CD.
+The project adheres to the **Conventional Commits** specification to keep commit history clean, automate release notes, and support CI/CD pipelines.
 
-### Cấu trúc Commit Message:
+### Commit Message Structure:
 ```text
 <type>(<scope>): <description>
 
@@ -49,72 +49,72 @@ Dự án áp dụng chuẩn **Conventional Commits** để giúp lịch sử com
 [optional footer(s)]
 ```
 
-### Các Type tiêu chuẩn:
+### Standard Types:
 
-- **`feat`**: Tính năng mới (new feature for the user/system).
-- **`fix`**: Sửa lỗi (bug fix).
-- **`docs`**: Thay đổi tài liệu (documentation only).
-- **`style`**: Định dạng code (whitespace, formatting, missing semi-colons...) không thay đổi logic.
-- **`refactor`**: Cấu trúc lại code mà không sửa bug cũng không thêm feat.
-- **`perf`**: Thay đổi code nhằm tăng hiệu năng (performance improvement).
-- **`test`**: Thêm testcase hoặc sửa các testcase hiện có.
-- **`chore`**: Cập nhật tác vụ xây dựng (build system, dependencies, tool setup).
-- **`ci`**: Thay đổi cấu hình CI/CD (GitHub Actions, Docker setup...).
+- **`feat`**: A new feature for the user or system.
+- **`fix`**: A bug fix.
+- **`docs`**: Documentation changes only.
+- **`style`**: Code formatting changes (whitespace, missing semi-colons...) with no logic changes.
+- **`refactor`**: Refactoring code without fixing bugs or adding features.
+- **`perf`**: Code changes that improve performance.
+- **`test`**: Adding missing tests or correcting existing tests.
+- **`chore`**: Build process or auxiliary tool changes (build system, dependencies, tool setup).
+- **`ci`**: CI/CD configuration changes (GitHub Actions, Docker setup...).
 
-### Ví dụ về Scope:
-Scope có thể là tên module hoặc component liên quan, ví dụ: `auth`, `race`, `wallet`, `payment`, `ui`, `docker`, `db`.
+### Scope Examples:
+Scope can be the name of the relevant module or component, such as: `auth`, `race`, `wallet`, `payment`, `ui`, `docker`, `db`.
 
-### Ví dụ Commit hợp lệ:
+### Valid Commit Examples:
 
 ```bash
-# Thêm tính năng đăng nhập Google OAuth2
+# Add Google OAuth2 login integration
 feat(auth): add Google OAuth2 login integration
 
-# Sửa lỗi tính toán số dư ví sau khi đặt cược
+# Fix wallet balance calculation after placing a bet
 fix(wallet): resolve race condition in balance deduction
 
-# Cập nhật tài liệu Hướng dẫn đóng góp
+# Update Contributing Guidelines
 docs(readme): add contributing guidelines and commit specs
 
-# Re-structure service xử lý giải đua
+# Re-structure race processing service
 refactor(race): simplify RaceScheduleService method calls
 
-# Thêm unit test cho PaymentController
+# Add unit tests for PaymentController
 test(payment): add unit tests for PayOS webhook handling
 ```
 
 ---
 
-## 3. 🔄 Quy Trình Phát Triển & Pull Request (PR)
+## 3. 🔄 Development Workflow & Pull Request (PR)
 
-1. **Fork / Checkout branch mới** từ branch `main` (hoặc `develop`):
+1. **Fork / Checkout a new branch** from `main` (or `develop`):
    ```bash
    git checkout main
    git pull origin main
    git checkout -b feature/user-profile-avatar
    ```
-2. **Thực hiện thay đổi và commit** tuân thủ quy chuẩn Conventional Commits.
-3. **Kiểm tra code & Test** trước khi push:
-   - Đảm bảo ứng dụng chạy không lỗi compile.
-   - Chạy linter / format code.
-4. **Push branch lên GitHub**:
+2. **Make changes and commit** adhering to the Conventional Commits specification.
+3. **Inspect code & Test** before pushing:
+   - Ensure the application compiles without errors.
+   - Run code linter/formatter.
+4. **Push branch to GitHub**:
    ```bash
    git push origin feature/user-profile-avatar
    ```
-5. **Tạo Pull Request (PR)**:
-   - Đặt tiêu đề PR rõ ràng theo định dạng commit: `feat(user): add user profile avatar upload`.
-   - Mô tả chi tiết những gì đã thay đổi và cách test.
-   - Gắn tag cho reviewers (thành viên nhóm hoặc Maintainer).
+5. **Create a Pull Request (PR)**:
+   - Provide a clear PR title following the commit format: `feat(user): add user profile avatar upload`.
+   - Describe in detail what was changed and how to test it.
+   - Tag reviewers (team members or Maintainers).
 
 ---
 
-## 4. 🛠️ Chuẩn Code & Best Practices
+## 4. 🛠️ Code Standards & Best Practices
 
 - **Backend (Spring Boot)**:
-  - Tuân thủ chuẩn Naming Convention của Java (CamelCase cho variable/method, PascalCase cho Class).
-  - Không hardcode các thông tin nhạy cảm (API Keys, Passwords, Secrets) vào source code. Sử dụng môi trường `.env` hoặc `application.yml`.
-  - Viết code có xử lý Exception đầy đủ (sử dụng `@RestControllerAdvice` nếu cần).
+  - Follow Java Naming Conventions (CamelCase for variables/methods, PascalCase for classes).
+  - Do not hardcode sensitive information (API Keys, Passwords, Secrets) in the source code. Use `.env` files or `application.yml`.
+  - Write code with proper Exception Handling (using `@RestControllerAdvice` when appropriate).
 - **Frontend (React + Vite)**:
-  - Đặt tên Component theo chuẩn PascalCase (vd: `RaceCard.jsx`).
-  - Giữ cho Component gọn gàng, tái sử dụng Hook và Service module (Axios).
-  - Tuân thủ cấu hình ESLint và Prettier có sẵn trong project (`npm run lint`).
+  - Name components using PascalCase (e.g., `RaceCard.jsx`).
+  - Keep components modular and reusable, leveraging custom Hooks and Service modules (Axios).
+  - Follow ESLint and Prettier configurations set up in the project (`npm run lint`).
