@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview --host 0.0.0.0 --allowed-hosts all"
+    "preview": "vite preview --host 0.0.0.0 --allowed-hosts horse-racing-frontend-production.up.railway.app --allowed-hosts .up.railway.app --allowed-hosts .railway.app"
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.5",
