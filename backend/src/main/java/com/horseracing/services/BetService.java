@@ -38,6 +38,7 @@ public class BetService {
     private final BetRepository betRepository;
     private final RaceRepository raceRepository;
     private final RaceParticipantRepository raceParticipantRepository;
+    private final com.horseracing.repositories.RaceRegistrationRepository raceRegistrationRepository;
     private final WalletRepository walletRepository;
     private final WalletTransactionRepository walletTransactionRepository;
     private final BettingTransactionRepository bettingTransactionRepository;
@@ -104,8 +105,23 @@ public class BetService {
 
         // 3. Retrieve and validate RaceParticipant
         RaceParticipant participant = raceParticipantRepository.findById(request.getParticipantId())
-                .orElseThrow(() -> new BusinessException("Race participant not found.",
-                        HttpStatus.NOT_FOUND));
+                .orElseGet(() -> {
+                    com.horseracing.entities.RaceRegistration reg = raceRegistrationRepository.findById(request.getParticipantId()).orElse(null);
+                    if (reg != null) {
+                        return raceParticipantRepository.findByRaceIdAndHorseId(reg.getRace().getId(), reg.getHorse().getId()).orElseGet(() -> {
+                            long count = raceParticipantRepository.countByRaceId(reg.getRace().getId());
+                            RaceParticipant newPart = RaceParticipant.builder()
+                                    .race(reg.getRace())
+                                    .horse(reg.getHorse())
+                                    .jockey(reg.getJockey())
+                                    .gateNumber((int) count + 1)
+                                    .status("PENDING_INSPECTION")
+                                    .build();
+                            return raceParticipantRepository.save(newPart);
+                        });
+                    }
+                    throw new BusinessException("Race participant not found.", HttpStatus.NOT_FOUND);
+                });
 
         if (!participant.getRace().getId().equals(race.getId())) {
             throw new BusinessException("Selected horse is not participating in this race.",

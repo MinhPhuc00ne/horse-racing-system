@@ -3,6 +3,7 @@ package com.horseracing.controllers;
 import com.horseracing.dto.response.*;
 import com.horseracing.entities.User;
 import com.horseracing.repositories.RaceParticipantRepository;
+import com.horseracing.repositories.RaceRegistrationRepository;
 import com.horseracing.repositories.UserRepository;
 import com.horseracing.services.LiveRaceService;
 import com.horseracing.services.RaceService;
@@ -27,6 +28,8 @@ public class PublicRaceController {
     private final RaceParticipantRepository raceParticipantRepository;
     private final LiveRaceService liveRaceService;
     private final UserRepository userRepository;
+
+    private final RaceRegistrationRepository raceRegistrationRepository;
 
     @GetMapping("/tournaments")
     public ResponseEntity<List<TournamentResponse>> getAllTournaments(
@@ -68,6 +71,25 @@ public class PublicRaceController {
     public ResponseEntity<List<ParticipantResponse>> getRaceParticipants(@PathVariable Integer id) {
         List<ParticipantResponse> participants = raceParticipantRepository.findByRaceId(id).stream()
                 .map(ParticipantResponse::fromEntity).collect(Collectors.toList());
+        if (participants.isEmpty()) {
+            List<com.horseracing.entities.RaceRegistration> regs = raceRegistrationRepository.findByRaceId(id);
+            int gate = 1;
+            for (com.horseracing.entities.RaceRegistration reg : regs) {
+                if (!"REJECTED".equalsIgnoreCase(reg.getStatus()) && !"CANCELLED".equalsIgnoreCase(reg.getStatus())) {
+                    participants.add(ParticipantResponse.builder()
+                            .id(reg.getId())
+                            .raceId(reg.getRace().getId())
+                            .horseId(reg.getHorse().getId())
+                            .horseName(reg.getHorse().getName())
+                            .jockeyId(reg.getJockey() != null ? reg.getJockey().getId() : null)
+                            .jockeyName(reg.getJockey() != null && reg.getJockey().getUser() != null ? reg.getJockey().getUser().getFullName() : "Pending Jockey")
+                            .gateNumber(gate++)
+                            .status(reg.getStatus())
+                            .horseImageUrl(reg.getHorse() != null ? reg.getHorse().getImageUrl() : null)
+                            .build());
+                }
+            }
+        }
         return ResponseEntity.ok(participants);
     }
 
