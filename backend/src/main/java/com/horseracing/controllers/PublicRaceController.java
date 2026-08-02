@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PublicRaceController {
 
     private final TournamentService tournamentService;
@@ -70,6 +72,7 @@ public class PublicRaceController {
     @GetMapping("/races/{id}/participants")
     public ResponseEntity<List<ParticipantResponse>> getRaceParticipants(@PathVariable Integer id) {
         List<ParticipantResponse> participants = raceParticipantRepository.findByRaceId(id).stream()
+                .filter(p -> !"REJECTED".equalsIgnoreCase(p.getStatus()) && !"DISQUALIFIED".equalsIgnoreCase(p.getStatus()))
                 .map(ParticipantResponse::fromEntity).collect(Collectors.toList());
         if (participants.isEmpty()) {
             List<com.horseracing.entities.RaceRegistration> regs = raceRegistrationRepository.findByRaceId(id);

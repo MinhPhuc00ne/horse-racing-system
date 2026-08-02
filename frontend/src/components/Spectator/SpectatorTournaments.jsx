@@ -59,6 +59,14 @@ export default function SpectatorTournaments() {
       try {
         const data = await getTournamentsAPI();
         setTournaments(data || []);
+        if (data && data.length > 0) {
+          const firstActive = data.find(t => 
+            ['ACTIVE', 'OPEN_FOR_REGISTER'].includes(t.tournamentStatus?.toUpperCase())
+          ) || data[0];
+          if (firstActive) {
+            handleTournamentClick(firstActive.id);
+          }
+        }
       } catch (err) {
         console.error("Failed to load tournaments", err);
       } finally {
@@ -213,7 +221,7 @@ export default function SpectatorTournaments() {
     ? myBets.filter(b => b.raceId === selectedRace.id || b.raceId === parseInt(selectedRace.id))
     : [];
 
-  const isBettingClosed = !selectedRace || !['OPEN_FOR_REGISTER', 'CLOSED_FOR_REGISTER', 'LOCKED_LIST'].includes(selectedRace.status?.toUpperCase());
+  const isBettingClosed = !selectedRace || !['OPEN_FOR_REGISTER', 'CLOSED_FOR_REGISTER', 'LOCKED_LIST', 'ACTIVE'].includes(selectedRace.status?.toUpperCase());
 
   // Render Live Simulator if active
   if (activeSimulationRace) {
