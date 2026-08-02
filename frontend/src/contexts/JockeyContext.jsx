@@ -163,7 +163,12 @@ export function JockeyProvider({ children }) {
           status: inv.status === 'PENDING_JOCKEY' ? 'PENDING' : inv.status,
           notes: `Invited to ride horse ${inv.horseName} in race round ${inv.raceName}.`
         }));
-        setInvitations(mappedInvs);
+        setInvitations(prev => {
+          const processed = prev.filter(inv => inv.status !== 'PENDING');
+          const processedIds = new Set(processed.map(p => p.id));
+          const newInvs = mappedInvs.filter(m => !processedIds.has(m.id));
+          return [...newInvs, ...processed];
+        });
       } catch (err) {
         console.error('Failed to load invitations:', err);
       }
@@ -262,15 +267,17 @@ export function JockeyProvider({ children }) {
     try {
       await respondToJockeyInvitationAPI(invitationId, response);
       
-      const updatedInvs = invitations.map(inv => 
-        inv.id === invitationId ? { ...inv, status: response } : inv
+      setInvitations(prev => 
+        prev.map(inv => 
+          inv.id === invitationId ? { ...inv, status: response } : inv
+        )
       );
-      setInvitations(updatedInvs);
       
       // Reload schedule and other data
       await fetchJockeyData();
     } catch (err) {
       console.error('Failed to respond to invitation:', err);
+      throw err;
     }
   };
 
