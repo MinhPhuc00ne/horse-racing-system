@@ -2158,11 +2158,6 @@ export default function SpectatorLiveSimulation({ race, onClose }) {
                       </div>
 
                       <div className="leaderboard-metrics">
-                        {racePhase === 'RUNNING' && horse.speed > 0 && (
-                          <span className="badge bg-dark text-warning border border-warning-subtle me-2" style={{ fontSize: '9px', borderRadius: '4px', padding: '2px 5px' }}>
-                            ⚡ {horse.speed} km/h
-                          </span>
-                        )}
                         <div className="leaderboard-progress">{Math.round(horse.progress)}%</div>
                         {/* POV is referee-only, spectators cannot change POV */}
                       </div>
