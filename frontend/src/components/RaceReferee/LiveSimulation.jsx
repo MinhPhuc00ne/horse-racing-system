@@ -2959,17 +2959,17 @@ export default function LiveSimulation() {
 
       {showFlagModal && (
         <div className="modal-overlay" style={{ zIndex: 9999 }} onClick={() => { setShowFlagModal(false); setClickedProgress(null); }}>
-          <div className="modal-content-custom animate-scale-up" onClick={(e) => e.stopPropagation()}>
-            <h3 className="fs-5 fw-bold mb-3 text-white d-flex align-items-center gap-2">
+          <div className="modal-content-custom animate-scale-up p-4" style={{ backgroundColor: '#ffffff', border: '1px solid rgba(20,52,34,0.25)', borderRadius: '16px', maxWidth: '480px' }} onClick={(e) => e.stopPropagation()}>
+            <h3 className="fs-5 fw-bold mb-3 text-dark d-flex align-items-center gap-2">
               <span className="material-symbols-outlined text-danger">report</span>
               Flag Violation
             </h3>
-            <p className="mb-2" style={{ color: '#cbd5e1' }}>Horse: <strong className="text-white">{selectedHorseForFlag?.name}</strong></p>
-            <p className="mb-3 small" style={{ color: '#cbd5e1' }}>Flag Position: <strong className="text-warning">{clickedProgress}%</strong> along the track</p>
+            <p className="mb-2 text-dark">Horse: <strong className="text-dark fw-bold">{selectedHorseForFlag?.name}</strong></p>
+            <p className="mb-3 small text-secondary">Flag Position: <strong className="text-warning fw-bold">{clickedProgress}%</strong> along the track</p>
             <div className="mb-4">
-              <label className="ho-input-label mb-2">Reason for Flagging</label>
+              <label className="ho-input-label ho-font-grotesk fw-bold mb-2">Reason for Flagging</label>
               <select
-                className="ho-form-input"
+                className="ho-form-input text-dark fw-bold"
                 value={flagReason}
                 onChange={(e) => setFlagReason(e.target.value)}
               >
@@ -2980,8 +2980,8 @@ export default function LiveSimulation() {
               </select>
             </div>
             <div className="d-flex justify-content-end gap-2">
-              <button className="ho-btn ho-btn-outline-secondary" onClick={() => { setShowFlagModal(false); setClickedProgress(null); }}>Cancel</button>
-              <button className="ho-btn ho-btn-outline-danger" onClick={submitFlag} disabled={!flagReason}>Submit Flag</button>
+              <button className="btn btn-outline-secondary px-4 fw-bold" onClick={() => { setShowFlagModal(false); setClickedProgress(null); }}>Cancel</button>
+              <button className="btn btn-danger px-4 fw-bold text-white" onClick={submitFlag} disabled={!flagReason}>Submit Flag</button>
             </div>
           </div>
         </div>
@@ -2989,12 +2989,12 @@ export default function LiveSimulation() {
 
       {showResultsSummary && (
         <div className="modal-overlay" style={{ zIndex: 9999 }} onClick={() => setShowResultsSummary(false)}>
-          <div className="modal-content-custom animate-scale-up text-center p-4" style={{ maxWidth: '500px' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content-custom animate-scale-up text-center p-4" style={{ backgroundColor: '#ffffff', border: '1px solid rgba(20,52,34,0.25)', borderRadius: '16px', maxWidth: '500px' }} onClick={(e) => e.stopPropagation()}>
             <span className="material-symbols-outlined text-warning mb-2" style={{ fontSize: '64px' }}>
               emoji_events
             </span>
-            <h3 className="ho-font-epilogue fs-4 fw-bold text-white mb-1">Race Completed!</h3>
-            <p className="small mb-4" style={{ color: '#cbd5e1' }}>{simulatedRaceName}</p>
+            <h3 className="ho-font-epilogue fs-4 fw-bold text-dark mb-1">Race Completed!</h3>
+            <p className="small text-secondary mb-4">{simulatedRaceName}</p>
 
             {/* Podium List */}
             <div className="d-flex flex-column gap-2 mb-4 text-start">
@@ -3003,8 +3003,8 @@ export default function LiveSimulation() {
                   key={item.rank}
                   className="d-flex align-items-center justify-content-between p-3 rounded"
                   style={{
-                    backgroundColor: item.rank === 1 ? 'rgba(212, 175, 55, 0.15)' : 'rgba(0, 0, 0, 0.4)',
-                    border: item.rank === 1 ? '1px solid rgba(212, 175, 55, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)'
+                    backgroundColor: item.rank === 1 ? '#e8f5e9' : '#f8fafc',
+                    border: item.rank === 1 ? '1px solid #143422' : '1px solid #e2e8f0'
                   }}
                 >
                   <div className="d-flex align-items-center gap-3">
@@ -3012,8 +3012,8 @@ export default function LiveSimulation() {
                       {item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : '🥉'}
                     </span>
                     <div>
-                      <h6 className="fw-bold text-white mb-0">{item.horseName}</h6>
-                      <span className="small" style={{ color: '#cbd5e1' }}>{item.jockeyName}</span>
+                      <h6 className="fw-bold text-dark mb-0">{item.horseName}</h6>
+                      <span className="small text-secondary">{item.jockeyName}</span>
                     </div>
                   </div>
                   <span className="fw-bold text-warning small">{item.time}</span>
@@ -3023,13 +3023,13 @@ export default function LiveSimulation() {
 
             <div className="d-flex gap-2">
               <button
-                className="ho-btn ho-btn-outline-secondary flex-grow-1 py-2"
+                className="btn btn-outline-secondary flex-grow-1 py-2 fw-bold"
                 onClick={() => setShowResultsSummary(false)}
               >
                 Close
               </button>
               <button
-                className="ho-btn ho-btn-gold-solid flex-grow-1 py-2 d-flex align-items-center justify-content-center gap-1"
+                className="btn btn-warning flex-grow-1 py-2 fw-bold text-dark d-flex align-items-center justify-content-center gap-1"
                 onClick={() => {
                   setShowResultsSummary(false);
                   navigate('/referee/confirm-results');

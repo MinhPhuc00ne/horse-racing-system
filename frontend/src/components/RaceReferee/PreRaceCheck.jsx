@@ -112,10 +112,10 @@ export default function PreRaceCheck() {
             >
               {notification.type === 'success' ? 'verified' : 'error'}
             </span>
-            <h3 className="ho-font-epilogue fs-5 fw-bold text-white mb-2">
+            <h3 className="ho-font-epilogue fs-5 fw-bold text-dark mb-2">
               {notification.type === 'success' ? 'Success' : 'Action Failed'}
             </h3>
-            <p className="small mb-4" style={{ color: '#cbd5e1' }}>{notification.message}</p>
+            <p className="text-secondary small mb-4">{notification.message}</p>
             <button 
               className={`ho-btn ${notification.type === 'success' ? 'ho-btn-gold-solid' : 'ho-btn-outline-danger'} w-100 py-2`} 
               onClick={() => setNotification(null)}
