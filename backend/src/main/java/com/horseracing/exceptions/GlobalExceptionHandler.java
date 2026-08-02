@@ -58,14 +58,17 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
-            String field = ((FieldError) error).getField();
+            String field = error instanceof FieldError ? ((FieldError) error).getField() : error.getObjectName();
             String message = error.getDefaultMessage();
             errors.put(field, message);
         });
 
+        String firstErrorMessage = errors.values().stream().findFirst()
+                .orElse("Invalid request data. Please check your inputs.");
+
         Map<String, Object> response = new HashMap<>();
         response.put("status", 400);
-        response.put("message", "Invalid request data. Please check your inputs.");
+        response.put("message", firstErrorMessage);
         response.put("errors", errors);
         return ResponseEntity.badRequest().body(response);
     }
