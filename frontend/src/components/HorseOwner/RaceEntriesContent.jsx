@@ -306,27 +306,26 @@ export default function RaceEntriesContent() {
       {showModal && selectedRace && createPortal(
         <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 9999 }}>
           <div className="modal-dialog modal-lg modal-dialog-centered">
-            <div className="modal-content text-white" style={{ backgroundColor: '#0c2214', border: '1px solid #d4af37' }}>
-              <div className="modal-header border-secondary" style={{ backgroundColor: '#07150c' }}>
+            <div className="modal-content" style={{ backgroundColor: '#ffffff', border: '1px solid rgba(20,52,34,0.25)', borderRadius: '16px' }}>
+              <div className="modal-header" style={{ backgroundColor: '#143422', borderBottom: '1px solid rgba(212,175,55,0.3)', borderTopLeftRadius: '15px', borderTopRightRadius: '15px' }}>
                 <h5 className="modal-title fw-bold text-warning">
                   {isUpdating ? 'Update Race Registration' : 'Register Horse for Race'}
                 </h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <div className="modal-body p-4">
-                <div className="mb-3 p-3 rounded" style={{ backgroundColor: '#051009', border: '1px solid rgba(212,175,55,0.2)' }}>
+                <div className="mb-3 p-3 rounded" style={{ backgroundColor: '#143422', border: '1px solid rgba(212,175,55,0.3)' }}>
                   <h6 className="fw-bold text-white m-0">{selectedRace.tournamentName}</h6>
-                  <span className="text-white-50 small">{selectedRace.location} • Prize: {selectedRace.prizePool}</span>
+                  <span className="text-warning small">{selectedRace.location} • Prize: {selectedRace.prizePool}</span>
                 </div>
 
                 <div className="row g-3 mb-4">
                   <div className="col-12 col-md-6">
-                    <label className="text-white-50 small mb-1 fw-bold">Select Horse</label>
+                    <label className="ho-input-label ho-font-grotesk fw-bold">Select Horse</label>
                     <select
-                      className="form-select text-white"
+                      className="ho-form-input text-dark fw-bold"
                       value={formData.horseId}
                       onChange={(e) => setFormData({ ...formData, horseId: e.target.value })}
-                      style={{ backgroundColor: '#051009', border: '1px solid rgba(212,175,55,0.3)' }}
                     >
                       <option value="" disabled>-- Select a ready horse --</option>
                       {readyHorses.map(h => (
@@ -336,12 +335,11 @@ export default function RaceEntriesContent() {
                   </div>
 
                   <div className="col-12 col-md-6">
-                    <label className="text-white-50 small mb-1 fw-bold">Select Jockey (From Friends)</label>
+                    <label className="ho-input-label ho-font-grotesk fw-bold">Select Jockey (From Friends)</label>
                     <select
-                      className="form-select text-white"
+                      className="ho-form-input text-dark fw-bold"
                       value={formData.jockeyId}
                       onChange={(e) => setFormData({ ...formData, jockeyId: e.target.value })}
-                      style={{ backgroundColor: '#051009', border: '1px solid rgba(212,175,55,0.3)' }}
                     >
                       <option value="" disabled>-- Select a jockey --</option>
                       {friendJockeys.map(j => (
@@ -351,37 +349,35 @@ export default function RaceEntriesContent() {
                   </div>
 
                   <div className="col-6">
-                    <label className="text-white-50 small mb-1">Owner Prize Share (%)</label>
+                    <label className="ho-input-label ho-font-grotesk fw-bold">Owner Prize Share (%)</label>
                     <input
                       type="number"
-                      className="form-control text-white"
+                      className="ho-form-input text-dark fw-bold"
                       value={formData.ownerShare}
                       onChange={(e) => {
                         const val = parseFloat(e.target.value) || 0;
                         setFormData({ ...formData, ownerShare: val, jockeyShare: 100 - val });
                       }}
-                      style={{ backgroundColor: '#051009', border: '1px solid rgba(212,175,55,0.3)' }}
                     />
                   </div>
 
                   <div className="col-6">
-                    <label className="text-white-50 small mb-1">Jockey Prize Share (%)</label>
+                    <label className="ho-input-label ho-font-grotesk fw-bold">Jockey Prize Share (%)</label>
                     <input
                       type="number"
-                      className="form-control text-white"
+                      className="ho-form-input text-dark fw-bold"
                       value={formData.jockeyShare}
                       onChange={(e) => {
                         const val = parseFloat(e.target.value) || 0;
                         setFormData({ ...formData, jockeyShare: val, ownerShare: 100 - val });
                       }}
-                      style={{ backgroundColor: '#051009', border: '1px solid rgba(212,175,55,0.3)' }}
                     />
                   </div>
                 </div>
 
                 <div className="d-flex justify-content-end gap-2">
-                  <button className="btn btn-outline-secondary text-white" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button className="btn btn-warning fw-bold text-dark" onClick={handleConfirm} disabled={loading}>
+                  <button className="btn btn-outline-secondary px-4 fw-bold" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button className="btn btn-warning fw-bold text-dark px-4" onClick={handleConfirm} disabled={loading}>
                     {loading ? 'Submitting...' : 'Confirm Registration'}
                   </button>
                 </div>
@@ -396,10 +392,10 @@ export default function RaceEntriesContent() {
       {showSuccessModal && createPortal(
         <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 9999 }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content text-white text-center p-4" style={{ backgroundColor: '#0c2214', border: '1px solid #d4af37' }}>
-              <span className="material-symbols-outlined text-warning display-4 mb-2">check_circle</span>
-              <h4 className="fw-bold text-white mb-2">Success!</h4>
-              <p className="text-white-50 mb-4">{successMsg}</p>
+            <div className="modal-content text-center p-4" style={{ backgroundColor: '#ffffff', border: '1px solid #143422', borderRadius: '16px' }}>
+              <span className="material-symbols-outlined text-success display-4 mb-2">check_circle</span>
+              <h4 className="fw-bold text-dark mb-2">Success!</h4>
+              <p className="text-secondary mb-4">{successMsg}</p>
               <button className="btn btn-warning fw-bold px-4 text-dark mx-auto" onClick={() => setShowSuccessModal(false)}>OK</button>
             </div>
           </div>

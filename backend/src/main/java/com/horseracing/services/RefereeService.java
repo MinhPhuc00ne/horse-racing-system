@@ -343,19 +343,33 @@ public class RefereeService {
         List<RaceParticipant> participants = raceParticipantRepository.findByRaceId(raceId);
         List<PreCheckResponse.ParticipantPreCheck> list = new ArrayList<>();
 
-        for (RaceParticipant p : participants) {
-            JockeyProfile jockey = p.getJockey();
-            list.add(PreCheckResponse.ParticipantPreCheck.builder().participantId(p.getId())
-                    .horseId(p.getHorse().getId()).horseName(p.getHorse().getName())
-                    .jockeyId(jockey.getId()).jockeyName(jockey.getUser().getFullName())
-                    .registeredWeight(jockey.getWeight()).actualWeight(jockey.getWeight()) // actualWeight
-                                                                                           // can be
-                                                                                           // updated
-                                                                                           // via
-                                                                                           // the
-                                                                                           // weight
-                                                                                           // endpoint
-                    .status(p.getStatus()).horseImageUrl(p.getHorse().getImageUrl()).build());
+        if (participants.isEmpty()) {
+            List<RaceRegistration> regs = raceRegistrationRepository.findByRaceId(raceId);
+            for (RaceRegistration reg : regs) {
+                if (!"REJECTED".equalsIgnoreCase(reg.getStatus()) && !"CANCELLED".equalsIgnoreCase(reg.getStatus())) {
+                    JockeyProfile jockey = reg.getJockey();
+                    list.add(PreCheckResponse.ParticipantPreCheck.builder()
+                            .participantId(reg.getId())
+                            .horseId(reg.getHorse().getId())
+                            .horseName(reg.getHorse().getName())
+                            .jockeyId(jockey != null ? jockey.getId() : null)
+                            .jockeyName(jockey != null && jockey.getUser() != null ? jockey.getUser().getFullName() : "Pending Jockey")
+                            .registeredWeight(jockey != null ? jockey.getWeight() : 50.0)
+                            .actualWeight(jockey != null ? jockey.getWeight() : 50.0)
+                            .status(reg.getStatus())
+                            .horseImageUrl(reg.getHorse() != null ? reg.getHorse().getImageUrl() : null)
+                            .build());
+                }
+            }
+        } else {
+            for (RaceParticipant p : participants) {
+                JockeyProfile jockey = p.getJockey();
+                list.add(PreCheckResponse.ParticipantPreCheck.builder().participantId(p.getId())
+                        .horseId(p.getHorse().getId()).horseName(p.getHorse().getName())
+                        .jockeyId(jockey.getId()).jockeyName(jockey.getUser().getFullName())
+                        .registeredWeight(jockey.getWeight()).actualWeight(jockey.getWeight())
+                        .status(p.getStatus()).horseImageUrl(p.getHorse().getImageUrl()).build());
+            }
         }
 
         return PreCheckResponse.builder().raceId(race.getId()).raceName(race.getRaceName())

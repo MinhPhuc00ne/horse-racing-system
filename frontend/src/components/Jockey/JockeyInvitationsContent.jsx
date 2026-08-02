@@ -40,6 +40,7 @@ export default function JockeyInvitationsContent() {
   const [showFriendModal, setShowFriendModal] = useState(false);
   
   const [loading, setLoading] = useState(false);
+  const [respondingId, setRespondingId] = useState(null);
   const { invitations, respondToInvitation, refreshData } = useJockey();
 
   // Load friends on mount / tab change
@@ -134,14 +135,28 @@ export default function JockeyInvitationsContent() {
 
   const incomingRequests = directoryList.filter(user => user.friendStatus === 'PENDING_RECEIVED');
 
-  const handleAcceptRide = (id) => {
-    respondToInvitation(id, 'ACCEPTED');
-    alert('Successfully accepted race invitation! The race has been added to your personal schedule.');
+  const handleAcceptRide = async (id) => {
+    try {
+      setRespondingId(id);
+      await respondToInvitation(id, 'ACCEPTED');
+      alert('Successfully accepted race invitation! The registration has been submitted for Admin approval.');
+    } catch (err) {
+      alert('Failed to accept race invitation: ' + (err.response?.data?.message || err.message || 'Error occurred'));
+    } finally {
+      setRespondingId(null);
+    }
   };
 
-  const handleRejectRide = (id) => {
-    respondToInvitation(id, 'REJECTED');
-    alert('Successfully rejected race invitation.');
+  const handleRejectRide = async (id) => {
+    try {
+      setRespondingId(id);
+      await respondToInvitation(id, 'REJECTED');
+      alert('Successfully rejected race invitation.');
+    } catch (err) {
+      alert('Failed to reject race invitation: ' + (err.response?.data?.message || err.message || 'Error occurred'));
+    } finally {
+      setRespondingId(null);
+    }
   };
 
   return (
@@ -229,15 +244,17 @@ export default function JockeyInvitationsContent() {
                     <div className="d-flex gap-3">
                       <button
                         onClick={() => handleRejectRide(inv.id)}
+                        disabled={respondingId === inv.id}
                         className="ho-btn ho-btn-outline-danger flex-grow-1 py-2 fw-bold"
                       >
-                        Reject
+                        {respondingId === inv.id ? 'Processing...' : 'Reject'}
                       </button>
                       <button
                         onClick={() => handleAcceptRide(inv.id)}
+                        disabled={respondingId === inv.id}
                         className="ho-btn ho-btn-gold-solid flex-grow-1 py-2 fw-bold"
                       >
-                        Accept
+                        {respondingId === inv.id ? 'Processing...' : 'Accept'}
                       </button>
                     </div>
                   </DataCard>

@@ -46,7 +46,7 @@ public class LiveRaceService {
         try {
             emitter.send(
                     SseEmitter.event().name("CONNECT").data("Subscribed to live race " + raceId));
-        } catch (IOException | IllegalStateException e) {
+        } catch (Throwable e) {
             emitters.remove(emitter);
         }
 
@@ -68,7 +68,7 @@ public class LiveRaceService {
         for (SseEmitter emitter : emitters) {
             try {
                 emitter.send(SseEmitter.event().name("RACE_TICK").data(payload));
-            } catch (IOException | IllegalStateException e) {
+            } catch (Throwable e) {
                 deadEmitters.add(emitter);
             }
         }
@@ -96,7 +96,7 @@ public class LiveRaceService {
             try {
                 emitter.send(SseEmitter.event().name("RACE_FINISHED").data(payload));
                 emitter.complete();
-            } catch (IOException | IllegalStateException e) {
+            } catch (Throwable e) {
                 // ignore, complete already handles cleanup if possible
             }
         }
