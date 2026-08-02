@@ -33,6 +33,8 @@ public class BetServiceTest {
     @Mock
     private RaceParticipantRepository raceParticipantRepository;
     @Mock
+    private RaceRegistrationRepository raceRegistrationRepository;
+    @Mock
     private WalletRepository walletRepository;
     @Mock
     private WalletTransactionRepository walletTransactionRepository;
@@ -249,6 +251,7 @@ public class BetServiceTest {
 
         when(raceRepository.findById(10)).thenReturn(Optional.of(race));
         when(raceParticipantRepository.findById(999)).thenReturn(Optional.empty());
+        when(raceRegistrationRepository.findById(999)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(BusinessException.class,
                 () -> betService.placeBet(spectatorUser, request));
